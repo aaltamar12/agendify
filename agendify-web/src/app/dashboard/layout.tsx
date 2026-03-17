@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { EyeOff, ShieldX } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Topbar } from '@/components/layout/topbar';
 import { MobileNav } from '@/components/layout/mobile-nav';
@@ -13,6 +14,11 @@ import { useImpersonationStore } from '@/lib/stores/impersonation-store';
 import { useCurrentBusiness } from '@/lib/hooks/use-business';
 import { useRealtime } from '@/lib/hooks/use-realtime';
 import { requestNotificationPermission } from '@/lib/utils/browser-notification';
+import { isDemoMode } from '@/lib/demo/is-demo';
+
+const DemoBanner = dynamic(() => import('@/components/shared/demo-banner'), {
+  ssr: false,
+});
 
 export default function DashboardLayout({
   children,
@@ -26,6 +32,7 @@ export default function DashboardLayout({
   const isBusinessSuspended = business?.status === 'suspended';
   const isBusinessInactive = business?.status === 'inactive';
   const isBusinessHidden = isBusinessSuspended;
+  const isDemo = isDemoMode();
 
   // Real-time updates via NATS WebSocket
   useRealtime();
@@ -64,21 +71,39 @@ export default function DashboardLayout({
     );
   }
 
+  // Calculate pixel offset for fixed elements based on active banners
+  // Each banner is 40px tall (h-10 = 2.5rem)
+  const BANNER_HEIGHT = 40;
+  const bannerCount = [isDemo, isImpersonating, isBusinessHidden].filter(Boolean).length;
+  const bannerOffset = bannerCount * BANNER_HEIGHT;
+
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Impersonation banner (fixed at very top) */}
-      <ImpersonationBanner />
+      {/* Banners stack at the top, each one fixed and offset by the ones above */}
+      {isDemo && (
+        <div className="fixed left-0 right-0 z-[60]" style={{ top: 0 }}>
+          <DemoBanner />
+        </div>
+      )}
 
-      {/* Suspended business banner */}
+      {isImpersonating && (
+        <div className="fixed left-0 right-0 z-[59]" style={{ top: isDemo ? BANNER_HEIGHT : 0 }}>
+          <ImpersonationBanner />
+        </div>
+      )}
+
       {isBusinessHidden && (
-        <div className={`fixed left-0 right-0 z-50 flex items-center justify-center gap-2 bg-yellow-400 px-4 py-2 text-sm font-medium text-yellow-900 ${isImpersonating ? 'top-10' : 'top-0'}`}>
+        <div
+          className="fixed left-0 right-0 z-[58] flex items-center justify-center gap-2 bg-yellow-400 px-4 py-2 text-sm font-medium text-yellow-900"
+          style={{ top: [isDemo, isImpersonating].filter(Boolean).length * BANNER_HEIGHT }}
+        >
           <EyeOff className="h-4 w-4" />
           Tu negocio está oculto y no aparece para usuarios. El dashboard funciona normal.
         </div>
       )}
 
       {/* Desktop sidebar */}
-      <Sidebar />
+      <Sidebar topOffset={bannerOffset} />
 
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
@@ -87,21 +112,18 @@ export default function DashboardLayout({
             className="fixed inset-0 z-40 cursor-pointer bg-black/50 md:hidden"
             onClick={() => setSidebarOpen(false)}
           />
-          <Sidebar className="!flex z-50" />
+          <Sidebar className="!flex z-50" topOffset={bannerOffset} />
         </>
       )}
 
       {/* Topbar */}
-      <div className={`${isImpersonating ? 'mt-10' : ''} ${isBusinessHidden ? 'mt-10' : ''}`}>
-        <Topbar />
-      </div>
+      <Topbar topOffset={bannerOffset} />
 
       {/* Main content */}
-      <main className={`ml-0 pb-16 md:ml-64 md:pb-0 ${
-        isImpersonating && isBusinessHidden ? 'pt-[9rem]' :
-        isImpersonating || isBusinessHidden ? 'pt-[6.5rem]' :
-        'pt-16'
-      }`}>
+      <main
+        className="ml-0 pb-16 md:ml-64 md:pb-0"
+        style={{ paddingTop: bannerOffset + 64 /* 64px = h-16 topbar */ }}
+      >
         <div className="px-4 py-6 md:px-6">{children}</div>
       </main>
 

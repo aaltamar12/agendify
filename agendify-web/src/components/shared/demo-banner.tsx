@@ -18,7 +18,7 @@ export default function DemoBanner() {
   }, [queryClient]);
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-[9999] flex items-center justify-center gap-3 bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow-md">
+    <div className="flex items-center justify-center gap-3 bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow-md">
       <span className="flex items-center gap-1.5">
         <svg
           xmlns="http://www.w3.org/2000/svg"

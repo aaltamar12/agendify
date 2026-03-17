@@ -11,7 +11,11 @@ import { NotificationBell } from '@/components/layout/notification-bell';
 import { HelpButton } from '@/components/layout/help-button';
 import { AdminImpersonateDropdown } from '@/components/layout/admin-impersonate-dropdown';
 
-export function Topbar() {
+interface TopbarProps {
+  topOffset?: number;
+}
+
+export function Topbar({ topOffset = 0 }: TopbarProps) {
   const { user } = useAuthStore();
   const { toggleSidebar } = useUIStore();
   const { planSlug } = useCurrentSubscription();
@@ -21,7 +25,10 @@ export function Topbar() {
   const isHidden = business?.status === 'suspended';
 
   return (
-    <header className="fixed left-0 right-0 top-0 z-20 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 md:left-64">
+    <header
+      className="fixed left-0 right-0 z-20 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 md:left-64"
+      style={{ top: topOffset }}
+    >
       {/* Left: hamburger (mobile) */}
       <div className="flex items-center gap-3">
         <button

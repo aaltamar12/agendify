@@ -47,9 +47,10 @@ const navItems: NavItem[] = [
 
 interface SidebarProps {
   className?: string;
+  topOffset?: number;
 }
 
-export function Sidebar({ className }: SidebarProps) {
+export function Sidebar({ className, topOffset = 0 }: SidebarProps) {
   const pathname = usePathname();
   const { user, clearAuth } = useAuthStore();
   const { planSlug } = useCurrentSubscription();
@@ -61,7 +62,10 @@ export function Sidebar({ className }: SidebarProps) {
   };
 
   return (
-    <aside className={cn("fixed left-0 top-0 z-30 hidden h-screen w-64 flex-col border-r border-gray-200 bg-white md:flex", className)}>
+    <aside
+      className={cn("fixed left-0 z-30 hidden w-64 flex-col border-r border-gray-200 bg-white md:flex", className)}
+      style={{ top: topOffset, height: `calc(100vh - ${topOffset}px)` }}
+    >
       {/* Logo */}
       <div className="flex h-16 items-center px-6">
         <Link href="/dashboard/agenda" className="flex items-center gap-2">
