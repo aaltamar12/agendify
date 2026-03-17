@@ -24,7 +24,13 @@ export function useCities() {
     queryKey: ['cities'],
     queryFn: () =>
       get<{ data: CityOption[] }>('/api/v1/public/cities'),
-    select: (res) => res.data,
+    select: (res) => {
+      // Defensive: ensure we always return an array regardless of
+      // response shape (demo adapter vs real backend)
+      if (Array.isArray(res)) return res;
+      if (res && Array.isArray(res.data)) return res.data;
+      return [];
+    },
     staleTime: 5 * 60 * 1000, // Cache 5 min
   });
 }
