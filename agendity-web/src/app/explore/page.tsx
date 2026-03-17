@@ -62,7 +62,7 @@ export default function ExplorePage() {
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
   const { data: citiesData } = useCities();
-  const cities = Array.isArray(citiesData) ? citiesData : [];
+  const cities = citiesData ?? [];
 
   const { data, isLoading } = useExploreBusinesses({
     search: debouncedSearch || undefined,

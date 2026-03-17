@@ -27,13 +27,16 @@ export default function AppProviders({ children }: AppProvidersProps) {
       }),
   );
 
-  const [demoReady, setDemoReady] = useState(false);
+  // In demo mode, block rendering until the adapter is installed.
+  // On server, isDemoMode() returns false but NEXT_PUBLIC_DEMO_MODE is still 'true',
+  // so we check the env var directly to avoid hydration mismatch where queries fire
+  // before the demo adapter is ready.
+  const envDemo = process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
+  const isDemo = isDemoMode();
+  const [demoReady, setDemoReady] = useState(!envDemo);
 
   useEffect(() => {
-    if (!isDemoMode()) {
-      setDemoReady(true);
-      return;
-    }
+    if (!isDemo) return;
 
     // Dynamic import — demo code only loads when NEXT_PUBLIC_DEMO_MODE=true
     Promise.all([
@@ -42,9 +45,9 @@ export default function AppProviders({ children }: AppProvidersProps) {
     ]).then(() => {
       setDemoReady(true);
     });
-  }, []);
+  }, [isDemo]);
 
-  // Wait for demo setup before rendering to avoid flicker / auth redirects
+  // Only block rendering when demo mode needs async setup
   if (!demoReady) {
     return null;
   }
