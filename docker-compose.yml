@@ -7,9 +7,9 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      POSTGRES_USER: agendify
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-agendify_dev}
-      POSTGRES_DB: agendify_production
+      POSTGRES_USER: agendity
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-agendity_dev}
+      POSTGRES_DB: agendity_production
     ports:
       - "5432:5432"
     restart: unless-stopped
@@ -37,7 +37,7 @@ services:
   # Rails API
   api:
     build:
-      context: ./agendify-api
+      context: ./agendity-api
       dockerfile: Dockerfile
     depends_on:
       - postgres
@@ -45,12 +45,12 @@ services:
       - nats
     environment:
       RAILS_ENV: production
-      DATABASE_URL: postgres://agendify:${POSTGRES_PASSWORD:-agendify_dev}@postgres:5432/agendify_production
+      DATABASE_URL: postgres://agendity:${POSTGRES_PASSWORD:-agendity_dev}@postgres:5432/agendity_production
       REDIS_URL: redis://redis:6379/0
       NATS_URL: nats://nats:4222
       DEVISE_JWT_SECRET_KEY: ${DEVISE_JWT_SECRET_KEY}
       SECRET_KEY_BASE: ${SECRET_KEY_BASE}
-      AGENDIFY_WEB_URL: ${AGENDIFY_WEB_URL:-http://localhost:3000}
+      AGENDITY_WEB_URL: ${AGENDITY_WEB_URL:-http://localhost:3000}
       API_HOST: ${API_HOST:-http://localhost:3001}
       RAILS_SERVE_STATIC_FILES: "true"
     ports:
@@ -61,7 +61,7 @@ services:
   # Sidekiq (background jobs)
   sidekiq:
     build:
-      context: ./agendify-api
+      context: ./agendity-api
       dockerfile: Dockerfile
     depends_on:
       - postgres
@@ -69,7 +69,7 @@ services:
       - nats
     environment:
       RAILS_ENV: production
-      DATABASE_URL: postgres://agendify:${POSTGRES_PASSWORD:-agendify_dev}@postgres:5432/agendify_production
+      DATABASE_URL: postgres://agendity:${POSTGRES_PASSWORD:-agendity_dev}@postgres:5432/agendity_production
       REDIS_URL: redis://redis:6379/0
       NATS_URL: nats://nats:4222
       DEVISE_JWT_SECRET_KEY: ${DEVISE_JWT_SECRET_KEY}
@@ -80,7 +80,7 @@ services:
   # Next.js frontend
   web:
     build:
-      context: ./agendify-web
+      context: ./agendity-web
       dockerfile: Dockerfile
     depends_on:
       - api

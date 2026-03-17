@@ -1,4 +1,4 @@
-# Variables de Entorno — Agendify
+# Variables de Entorno — Agendity
 
 > **Ultima actualización:** 2026-03-17
 >
@@ -6,7 +6,7 @@
 
 ---
 
-## Frontend (agendify-web)
+## Frontend (agendity-web)
 
 El frontend usa **3 variables custom** + `NODE_ENV`. Todas las `NEXT_PUBLIC_*` se embeben en el bundle de JavaScript en **build time** (no en runtime).
 
@@ -15,7 +15,7 @@ El frontend usa **3 variables custom** + `NODE_ENV`. Todas las `NEXT_PUBLIC_*` s
 | Variable | Requerida | Default | Archivo donde se usa | Descripcion |
 |----------|:---------:|---------|----------------------|-------------|
 | `NEXT_PUBLIC_API_URL` | Si | — | `src/lib/api/client.ts` | Base URL para todas las llamadas a la API via axios |
-| `NEXT_PUBLIC_APP_URL` | Si | `https://agendify.com` | `src/app/dashboard/qr/page.tsx` | URL base para paginas publicas de reserva y generacion de QR |
+| `NEXT_PUBLIC_APP_URL` | Si | `https://agendity.com` | `src/app/dashboard/qr/page.tsx` | URL base para paginas publicas de reserva y generacion de QR |
 | `NEXT_PUBLIC_NATS_WS_URL` | No | `ws://localhost:8222` | `src/lib/hooks/use-realtime.ts` | WebSocket de NATS para eventos real-time |
 | `NODE_ENV` | No | Auto (Next.js) | `next.config.ts` | Condicional para deshabilitar PWA en desarrollo |
 
@@ -33,15 +33,15 @@ En el `Dockerfile` del frontend se declaran como `ARG` y deben pasarse en build 
 
 ```bash
 docker build \
-  --build-arg NEXT_PUBLIC_API_URL=https://api.agendify.co/api/v1 \
-  --build-arg NEXT_PUBLIC_APP_URL=https://agendify.co \
-  --build-arg NEXT_PUBLIC_NATS_WS_URL=wss://nats.agendify.co:8222 \
+  --build-arg NEXT_PUBLIC_API_URL=https://api.agendity.co/api/v1 \
+  --build-arg NEXT_PUBLIC_APP_URL=https://agendity.co \
+  --build-arg NEXT_PUBLIC_NATS_WS_URL=wss://nats.agendity.co:8222 \
   .
 ```
 
 ---
 
-## Backend (agendify-api)
+## Backend (agendity-api)
 
 ### Variables criticas (obligatorias en produccion)
 
@@ -52,9 +52,9 @@ docker build \
 | `ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY` | `dev-deterministic-key-change-32ch` | `.env`, `config/application.rb` | Clave deterministica para busquedas en campos encriptados |
 | `ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT` | `dev-salt-change-in-production-32c` | `.env`, `config/application.rb` | Salt para derivacion de claves de encriptacion |
 | `REDIS_URL` | `redis://localhost:6379/0` | `.env`, `config/initializers/sidekiq.rb`, `app/services/bookings/slot_lock_service.rb` | Redis para Sidekiq, bloqueo temporal de slots y cache |
-| `AGENDIFY_WEB_URL` | `http://localhost:3000` | `.env`, `config/initializers/cors.rb` | URL del frontend — se usa para configurar CORS |
+| `AGENDITY_WEB_URL` | `http://localhost:3000` | `.env`, `config/initializers/cors.rb` | URL del frontend — se usa para configurar CORS |
 | `NATS_URL` | `nats://localhost:4222` | `.env`, `app/services/realtime/nats_publisher.rb` | Conexion a NATS para publicar eventos real-time. Tiene **graceful degradation**: si NATS no esta disponible, el sistema sigue funcionando con polling |
-| `AGENDIFY_API_DATABASE_PASSWORD` | — | `config/database.yml` | Contrasena de PostgreSQL. **Solo produccion** |
+| `AGENDITY_API_DATABASE_PASSWORD` | — | `config/database.yml` | Contrasena de PostgreSQL. **Solo produccion** |
 | `RAILS_MASTER_KEY` | — | `config/deploy.yml`, `Dockerfile` | Clave maestra para desencriptar `credentials.yml.enc`. **Solo produccion** |
 
 ### Variables opcionales (con defaults razonables)
@@ -62,7 +62,7 @@ docker build \
 | Variable | Default | Archivo(s) | Descripcion |
 |----------|---------|------------|-------------|
 | `API_HOST` | `http://localhost:3001` | `app/serializers/business_serializer.rb`, `app/serializers/payment_serializer.rb` | Host para generar URLs absolutas de ActiveStorage (logos, comprobantes de pago) |
-| `FRONTEND_URL` | `https://agendify.co` | `app/controllers/api/v1/qr_controller.rb` | URL del frontend para links de reserva en QR. Tambien se busca en `Rails.application.config.x.frontend_url` |
+| `FRONTEND_URL` | `https://agendity.co` | `app/controllers/api/v1/qr_controller.rb` | URL del frontend para links de reserva en QR. Tambien se busca en `Rails.application.config.x.frontend_url` |
 | `RAILS_MAX_THREADS` | `3` (Puma) / `5` (DB pool) | `config/puma.rb`, `config/database.yml` | Threads del servidor y pool de conexiones a la base de datos |
 | `PORT` | `3000` | `config/puma.rb` | Puerto donde escucha Puma |
 | `WEB_CONCURRENCY` | — | `config/puma.rb`, `config/deploy.yml` | Numero de workers de Puma |
@@ -89,7 +89,7 @@ Estas variables las establece el framework, Docker o CI. **No se configuran manu
 
 ```bash
 DEVISE_JWT_SECRET_KEY=dev-jwt-secret-key-change-in-production
-AGENDIFY_WEB_URL=http://localhost:3000
+AGENDITY_WEB_URL=http://localhost:3000
 REDIS_URL=redis://localhost:6379/0
 NATS_URL=nats://localhost:4222
 ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY=dev-primary-key-change-in-prod-32ch
@@ -117,6 +117,6 @@ ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT=dev-salt-change-in-production-32c
 
 | Repo | Criticas | Opcionales | Internas | Total |
 |------|:--------:|:----------:|:--------:|:-----:|
-| **agendify-web** | 2 | 2 | 0 | 4 |
-| **agendify-api** | 9 | 10 | 6 | 25 |
+| **agendity-web** | 2 | 2 | 0 | 4 |
+| **agendity-api** | 9 | 10 | 6 | 25 |
 | **Total** | **11** | **12** | **6** | **29** |

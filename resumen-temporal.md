@@ -16,12 +16,12 @@
 
 ## Terminología
 
-- **Cliente** = el negocio que paga la suscripción (barbería, salón, spa). Es el cliente de Agendify.
+- **Cliente** = el negocio que paga la suscripción (barbería, salón, spa). Es el cliente de Agendity.
 - **Usuario final** = la persona que reserva citas en un negocio. No paga suscripción, no necesita cuenta.
 
 ---
 
-## Lo que es Agendify
+## Lo que es Agendity
 
 Una plataforma SaaS **premium** de gestión de citas para negocios de servicios en LATAM. No es una agenda — es la **infraestructura tecnológica** que profesionaliza negocios informales con datos e IA. Arranca con barberías y salones en **Barranquilla**, escala a Colombia y luego LATAM.
 
@@ -50,7 +50,7 @@ Una plataforma SaaS **premium** de gestión de citas para negocios de servicios 
 - **DB:** PostgreSQL + Redis
 - **WhatsApp:** WhatsApp Business API de Meta (directo, sin intermediarios)
 - **Deploy:** VPS único con Docker Compose (Nginx + Next + Rails + PG + Redis + Sidekiq)
-- **Repos:** Separados → `agendify-api` (Rails) + `agendify-web` (Next.js)
+- **Repos:** Separados → `agendity-api` (Rails) + `agendity-web` (Next.js)
 - **Testing:** RSpec (backend) + Vitest + React Testing Library (frontend)
 - **CI/CD:** GitHub Actions → tests → build Docker → deploy al VPS vía SSH
 
@@ -85,7 +85,7 @@ Una plataforma SaaS **premium** de gestión de citas para negocios de servicios 
 ## Modelo de negocio
 
 - SaaS por suscripción mensual (**30 días gratis** con acceso Profesional)
-- **La suscripción la paga el cliente de Agendify (el negocio: barbería, salón, etc.)**. El usuario final (quien reserva citas) nunca paga a Agendify
+- **La suscripción la paga el cliente de Agendity (el negocio: barbería, salón, etc.)**. El usuario final (quien reserva citas) nunca paga a Agendity
 - Pagos P2P en fase 1 (sin pasarela)
 - Meta: 500 negocios → 15M COP/mes, 5000 → 150M COP/mes
 
@@ -130,7 +130,7 @@ Una plataforma SaaS **premium** de gestión de citas para negocios de servicios 
 | # | Tema | Prioridad |
 |---|---|---|
 | 1 | **Precios de planes Profesional e Inteligente** — y límites exactos por plan (servicios, empleados, reservas, clientes, WhatsApp) | Alta |
-| 2 | **Cobro de suscripción del negocio (cliente de Agendify)** — cómo paga su plan sin pasarela de pago | Alta |
+| 2 | **Cobro de suscripción del negocio (cliente de Agendity)** — cómo paga su plan sin pasarela de pago | Alta |
 | 3 | **Refinar esquema de BD** — v1 con sugerencias aplicadas, falta revisión final | Alta |
 | 4 | **Identidad visual final** — paleta exacta, tipografía, logo | Media |
 | 5 | **Landing page** — diseño y copys finales | Media |

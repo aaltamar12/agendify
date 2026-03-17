@@ -174,7 +174,7 @@ El texto del cuerpo varía según quién canceló:
 
 ## Archivos relevantes
 
-### Backend (agendify-api)
+### Backend (agendity-api)
 
 | Archivo | Responsabilidad |
 |---|---|
@@ -185,7 +185,7 @@ El texto del cuerpo varía según quién canceló:
 | `app/models/customer.rb` | Campo `pending_penalty` |
 | `app/models/business.rb` | Campos `cancellation_policy_pct` y `cancellation_deadline_hours` |
 
-### Frontend (agendify-web)
+### Frontend (agendity-web)
 
 | Archivo | Responsabilidad |
 |---|---|

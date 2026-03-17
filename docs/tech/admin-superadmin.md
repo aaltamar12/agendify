@@ -1,4 +1,4 @@
-# Flujos de Admin y Superadmin — Agendify
+# Flujos de Admin y Superadmin — Agendity
 
 > Ultima actualizacion: 2026-03-16
 > **Fase del proyecto:** Pre-lanzamiento
@@ -384,7 +384,7 @@ El sidebar implementa un sistema de `PLAN_FEATURE_LOCKS` donde ciertas secciones
 - Restringido por plan (solo ciertos planes ven resenas completas)
 
 #### Codigo QR (`/dashboard/qr`)
-- Generador de QR con la URL publica del negocio (`agendify.com/slug`)
+- Generador de QR con la URL publica del negocio (`agendity.com/slug`)
 - Descarga como imagen PNG
 - Para colocar en el local fisico, redes sociales, publicidad
 
@@ -806,7 +806,7 @@ Actualmente el dropdown de impersonacion muestra una lista plana de negocios. La
 
 ## Resumen de archivos clave
 
-### Backend (agendify-api)
+### Backend (agendity-api)
 
 | Archivo | Descripcion |
 |---|---|
@@ -823,7 +823,7 @@ Actualmente el dropdown de impersonacion muestra una lista plana de negocios. La
 | `app/jobs/*.rb` | 7 background jobs de Sidekiq |
 | `config/recurring.yml` | 3 jobs programados (reminders, cleanup, SolidQueue) |
 
-### Frontend (agendify-web)
+### Frontend (agendity-web)
 
 | Archivo | Descripcion |
 |---|---|

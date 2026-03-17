@@ -1,8 +1,8 @@
-# Arquitectura Frontend — Agendify Web
+# Arquitectura Frontend — Agendity Web
 
-Documentacion tecnica de la aplicacion frontend de Agendify, construida con Next.js 16 como PWA.
+Documentacion tecnica de la aplicacion frontend de Agendity, construida con Next.js 16 como PWA.
 
-**Repositorio:** `agendify-web`
+**Repositorio:** `agendity-web`
 **Ultima actualizacion:** Marzo 2026
 **Archivos TS/TSX:** 109
 
@@ -273,7 +273,7 @@ Tres stores, cada uno con una responsabilidad clara:
 - `user` — datos del usuario autenticado
 - Acciones: `setAuth`, `setUser`, `clearAuth`
 - Computed: `isAuthenticated()`
-- Persistencia via `zustand/middleware/persist` con nombre `agendify-auth`
+- Persistencia via `zustand/middleware/persist` con nombre `agendity-auth`
 
 **2. `ui-store.ts`** (en memoria, no persistido):
 - `sidebarOpen` — estado del sidebar en mobile
@@ -296,7 +296,7 @@ Tres stores, cada uno con una responsabilidad clara:
 ```
 1. Login/Register → POST /api/v1/auth/login
 2. Backend responde: { token, refresh_token, user }
-3. Frontend guarda en auth-store (Zustand persist → cookie "agendify-auth")
+3. Frontend guarda en auth-store (Zustand persist → cookie "agendity-auth")
 4. Axios interceptor adjunta Bearer token a cada request
 5. Si el API responde 401 → interceptor intenta refresh
 6. Si refresh falla → clearAuth() + redirect a /login
@@ -304,7 +304,7 @@ Tres stores, cada uno con una responsabilidad clara:
 
 ### Almacenamiento de tokens
 
-El `auth-store` usa `zustand/middleware/persist` que serializa el estado como JSON en una cookie llamada `agendify-auth`. El middleware de Next.js lee esta cookie en el edge para proteger rutas sin necesidad de JavaScript del lado del cliente.
+El `auth-store` usa `zustand/middleware/persist` que serializa el estado como JSON en una cookie llamada `agendity-auth`. El middleware de Next.js lee esta cookie en el edge para proteger rutas sin necesidad de JavaScript del lado del cliente.
 
 El store usa `partialize` para persistir solo lo necesario:
 
@@ -356,7 +356,7 @@ El middleware (`middleware.ts`) se ejecuta en el edge de Next.js para cada reque
 
 2. **Deteccion de slug**: Un segmento que no sea `dashboard`, `onboarding`, `login`, `register` o `explore` se considera slug de negocio.
 
-3. **Rutas protegidas** — requieren token en cookie `agendify-auth`:
+3. **Rutas protegidas** — requieren token en cookie `agendity-auth`:
    - Si no hay token → redirect a `/login?redirect=<path>`
    - Si hay token pero onboarding no completado y va a `/dashboard/*` → redirect a `/onboarding`
    - Si hay token y onboarding completado y va a `/onboarding` → redirect a `/dashboard`
@@ -476,7 +476,7 @@ export default withPWA({
 ### Imagen remota
 
 Next.js Image esta configurado para aceptar imagenes de:
-- `https://api.agendify.com` (produccion)
+- `https://api.agendity.com` (produccion)
 - `http://localhost:3000` (desarrollo)
 
 ---
@@ -620,7 +620,7 @@ Genera un chime de dos tonos con Web Audio API pura (D5 + A5, onda sinusoidal co
 
 La pagina `/dashboard/settings` incluye una seccion `NotificationSection`:
 - Estado de permisos del navegador (Activadas / Bloqueadas / No disponible)
-- Toggle de sonido on/off (persistido en `ui-store` → localStorage `agendify-ui`)
+- Toggle de sonido on/off (persistido en `ui-store` → localStorage `agendity-ui`)
 
 ---
 
@@ -815,7 +815,7 @@ Interfaces que reflejan exactamente el esquema de la base de datos del backend R
 
 | Variable | Descripcion |
 |---|---|
-| `NEXT_PUBLIC_API_URL` | URL base del API Rails (e.g., `http://localhost:3001` en dev, `https://api.agendify.com` en prod) |
+| `NEXT_PUBLIC_API_URL` | URL base del API Rails (e.g., `http://localhost:3001` en dev, `https://api.agendity.com` en prod) |
 | `NEXT_PUBLIC_APP_URL` | URL base del frontend (e.g., `http://localhost:3000`) |
 | `NEXT_PUBLIC_NATS_WS_URL` | URL WebSocket de NATS para tiempo real (default: `ws://localhost:8222`) |
 | `NODE_ENV` | Entorno (`development` deshabilita PWA service worker) |

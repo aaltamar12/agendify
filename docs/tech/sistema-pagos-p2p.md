@@ -1,10 +1,10 @@
-# Sistema de Pagos P2P — Agendify
+# Sistema de Pagos P2P — Agendity
 
 > Última actualización: 2026-03-16
 
 ## Resumen
 
-Agendify NO usa pasarela de pago. Los pagos son **peer-to-peer**: el usuario final paga directamente al negocio (transferencia bancaria, Nequi, Daviplata, o efectivo) y sube un comprobante. El negocio aprueba o rechaza desde su dashboard.
+Agendity NO usa pasarela de pago. Los pagos son **peer-to-peer**: el usuario final paga directamente al negocio (transferencia bancaria, Nequi, Daviplata, o efectivo) y sube un comprobante. El negocio aprueba o rechaza desde su dashboard.
 
 ---
 

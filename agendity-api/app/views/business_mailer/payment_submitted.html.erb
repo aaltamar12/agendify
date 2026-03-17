@@ -1,0 +1,32 @@
+<h2>Comprobante de pago recibido</h2>
+
+<p>Un cliente ha subido un comprobante de pago para una reserva en <strong><%= @business.name %></strong>.</p>
+
+<table class="detail-table">
+  <tr>
+    <td>Cliente</td>
+    <td><%= @customer.name %></td>
+  </tr>
+  <tr>
+    <td>Servicio</td>
+    <td><%= @service.name %></td>
+  </tr>
+  <tr>
+    <td>Fecha de cita</td>
+    <td><%= I18n.l(@appointment.appointment_date, format: :long, locale: :es) rescue @appointment.appointment_date.strftime("%d/%m/%Y") %></td>
+  </tr>
+  <tr>
+    <td>Hora</td>
+    <td><%= @appointment.start_time.strftime("%I:%M %p") %></td>
+  </tr>
+  <tr>
+    <td>Monto</td>
+    <td>$<%= number_with_delimiter(@payment.amount.to_i) %> COP</td>
+  </tr>
+  <tr>
+    <td>Método de pago</td>
+    <td><%= @payment.cash? ? "Efectivo" : "Transferencia" %></td>
+  </tr>
+</table>
+
+<p>Revisa el comprobante en tu panel de Agendity y aprueba o rechaza el pago.</p>

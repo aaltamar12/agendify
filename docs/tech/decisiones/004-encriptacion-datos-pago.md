@@ -112,8 +112,8 @@ La task lee cada Business, y al guardar, Rails automaticamente encripta los camp
 
 ## Archivos modificados
 
-- `agendify-api/app/models/business.rb` — `encrypts` en 3 campos
-- `agendify-api/config/initializers/filter_parameter_logging.rb` — Filtrado de parametros
-- `agendify-api/app/serializers/business_serializer.rb` — 3 views (public, with_payment, default)
-- `agendify-api/lib/tasks/data.rake` — Task `data:encrypt_payment_data`
-- `agendify-api/.env` — 3 nuevas variables de encriptacion
+- `agendity-api/app/models/business.rb` — `encrypts` en 3 campos
+- `agendity-api/config/initializers/filter_parameter_logging.rb` — Filtrado de parametros
+- `agendity-api/app/serializers/business_serializer.rb` — 3 views (public, with_payment, default)
+- `agendity-api/lib/tasks/data.rake` — Task `data:encrypt_payment_data`
+- `agendity-api/.env` — 3 nuevas variables de encriptacion

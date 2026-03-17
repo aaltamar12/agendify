@@ -1,9 +1,9 @@
-# Flujos Completos — Agendify
+# Flujos Completos — Agendity
 
 > Ultima actualizacion: 2026-03-16
 > **Fase del proyecto:** Pre-lanzamiento
 
-Este documento contiene diagramas Mermaid detallados de todos los flujos del sistema Agendify, incluyendo todos los actores, estados, jobs en background, y comunicacion en tiempo real.
+Este documento contiene diagramas Mermaid detallados de todos los flujos del sistema Agendity, incluyendo todos los actores, estados, jobs en background, y comunicacion en tiempo real.
 
 ---
 

@@ -3,9 +3,9 @@
 > **Estado:** Pre-lanzamiento
 > **Ultima actualizacion:** 2026-03-16
 
-Documentacion de todos los endpoints de la API REST de Agendify.
+Documentacion de todos los endpoints de la API REST de Agendity.
 
-> **Terminologia:** **Cliente** = el negocio (barberia/salon) que paga suscripcion a Agendify. **Usuario final** = la persona que reserva citas.
+> **Terminologia:** **Cliente** = el negocio (barberia/salon) que paga suscripcion a Agendity. **Usuario final** = la persona que reserva citas.
 
 ---
 
@@ -277,8 +277,8 @@ Obtener datos del negocio actual del usuario autenticado.
     "country": "CO",
     "latitude": 10.9878,
     "longitude": -74.7889,
-    "logo_url": "https://storage.agendify.com/logos/barberia-elite.png",
-    "cover_url": "https://storage.agendify.com/covers/barberia-elite.jpg",
+    "logo_url": "https://storage.agendity.com/logos/barberia-elite.png",
+    "cover_url": "https://storage.agendity.com/covers/barberia-elite.jpg",
     "primary_color": "#1E3A5F",
     "secondary_color": "#F5A623",
     "currency": "COP",
@@ -337,8 +337,8 @@ Actualizar datos del negocio actual.
     "country": "CO",
     "latitude": 10.9878,
     "longitude": -74.7889,
-    "logo_url": "https://storage.agendify.com/logos/barberia-elite.png",
-    "cover_url": "https://storage.agendify.com/covers/barberia-elite.jpg",
+    "logo_url": "https://storage.agendity.com/logos/barberia-elite.png",
+    "cover_url": "https://storage.agendity.com/covers/barberia-elite.jpg",
     "primary_color": "#2C3E50",
     "secondary_color": "#F5A623",
     "currency": "COP",
@@ -855,7 +855,7 @@ Listar citas del negocio. Soporta filtros por query params.
         "amount": 25000,
         "status": "approved",
         "payment_method": "transfer",
-        "proof_url": "https://storage.agendify.com/proofs/proof-001.jpg"
+        "proof_url": "https://storage.agendity.com/proofs/proof-001.jpg"
       }
     }
   ],
@@ -973,7 +973,7 @@ Obtener detalle de una cita con relaciones expandidas.
       "status": "approved",
       "payment_method": "transfer",
       "reference": null,
-      "proof_url": "https://storage.agendify.com/proofs/proof-001.jpg",
+      "proof_url": "https://storage.agendity.com/proofs/proof-001.jpg",
       "submitted_at": "2026-03-15T20:15:00Z",
       "approved_at": "2026-03-15T21:00:00Z",
       "rejected_at": null,
@@ -1251,7 +1251,7 @@ Enviar comprobante de pago para una cita. Cambia estado del pago a `submitted` y
     "status": "submitted",
     "payment_method": "transfer",
     "reference": "REF-123456",
-    "proof_url": "https://storage.agendify.com/proofs/proof-001.jpg",
+    "proof_url": "https://storage.agendity.com/proofs/proof-001.jpg",
     "submitted_at": "2026-03-16T15:00:00Z",
     "approved_at": null,
     "rejected_at": null,
@@ -1283,7 +1283,7 @@ Aprobar un pago. Cambia estado del pago a `approved` y de la cita a `confirmed`.
     "status": "approved",
     "payment_method": "transfer",
     "reference": "REF-123456",
-    "proof_url": "https://storage.agendify.com/proofs/proof-001.jpg",
+    "proof_url": "https://storage.agendity.com/proofs/proof-001.jpg",
     "submitted_at": "2026-03-16T15:00:00Z",
     "approved_at": "2026-03-16T15:30:00Z",
     "rejected_at": null,
@@ -1321,7 +1321,7 @@ Rechazar un pago. Cambia estado del pago a `rejected` y de la cita de vuelta a `
     "status": "rejected",
     "payment_method": "transfer",
     "reference": "REF-123456",
-    "proof_url": "https://storage.agendify.com/proofs/proof-001.jpg",
+    "proof_url": "https://storage.agendity.com/proofs/proof-001.jpg",
     "submitted_at": "2026-03-16T15:00:00Z",
     "approved_at": null,
     "rejected_at": "2026-03-16T15:30:00Z",
@@ -1840,8 +1840,8 @@ Generar o regenerar el codigo QR del negocio. El QR apunta a la pagina publica d
   "data": {
     "id": 1,
     "business_id": 1,
-    "qr_url": "https://storage.agendify.com/qr/barberia-elite.png",
-    "short_url": "https://agendify.com/barberia-elite",
+    "qr_url": "https://storage.agendity.com/qr/barberia-elite.png",
+    "short_url": "https://agendity.com/barberia-elite",
     "scan_count": 0,
     "created_at": "2026-03-16T17:00:00Z",
     "updated_at": "2026-03-16T17:00:00Z"
@@ -1993,8 +1993,8 @@ Obtener informacion publica de un negocio por su slug.
     "country": "CO",
     "latitude": 10.9878,
     "longitude": -74.7889,
-    "logo_url": "https://storage.agendify.com/logos/barberia-elite.png",
-    "cover_url": "https://storage.agendify.com/covers/barberia-elite.jpg",
+    "logo_url": "https://storage.agendity.com/logos/barberia-elite.png",
+    "cover_url": "https://storage.agendity.com/covers/barberia-elite.jpg",
     "primary_color": "#1E3A5F",
     "secondary_color": "#F5A623",
     "currency": "COP",
@@ -2172,7 +2172,7 @@ Obtener informacion de un ticket digital por su codigo. Usado para verificar cit
       "name": "Barberia Elite",
       "address": "Calle 84 #53-120, Local 2",
       "phone": "+573001234567",
-      "logo_url": "https://storage.agendify.com/logos/barberia-elite.png"
+      "logo_url": "https://storage.agendity.com/logos/barberia-elite.png"
     },
     "service": {
       "name": "Corte clasico",
@@ -2226,8 +2226,8 @@ Listar negocios activos para la pagina de exploracion. Soporta busqueda y filtro
       "city": "Barranquilla",
       "latitude": 10.9878,
       "longitude": -74.7889,
-      "logo_url": "https://storage.agendify.com/logos/barberia-elite.png",
-      "cover_url": "https://storage.agendify.com/covers/barberia-elite.jpg",
+      "logo_url": "https://storage.agendity.com/logos/barberia-elite.png",
+      "cover_url": "https://storage.agendity.com/covers/barberia-elite.jpg",
       "primary_color": "#1E3A5F"
     },
     {
@@ -2240,7 +2240,7 @@ Listar negocios activos para la pagina de exploracion. Soporta busqueda y filtro
       "city": "Barranquilla",
       "latitude": 10.9932,
       "longitude": -74.7920,
-      "logo_url": "https://storage.agendify.com/logos/salon-glamour.png",
+      "logo_url": "https://storage.agendity.com/logos/salon-glamour.png",
       "cover_url": null,
       "primary_color": "#8E44AD"
     }

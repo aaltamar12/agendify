@@ -1,4 +1,4 @@
-# Sistema de Notificaciones — Agendify
+# Sistema de Notificaciones — Agendity
 
 > Última actualización: 2026-03-16
 
@@ -89,7 +89,7 @@ POST /api/v1/notifications/mark_all_read
 | `payment_submitted` | Negocio | Comprobante subido |
 
 ### Diseño de emails
-- Layout HTML con header violeta + branding Agendify
+- Layout HTML con header violeta + branding Agendity
 - Versión texto plano para cada email
 - Todos los textos en español
 

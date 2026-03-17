@@ -2,7 +2,7 @@
 
 > **Fecha:** 2026-03-16
 > **Estado:** Aceptada
-> **Contexto:** Dashboard del negocio en Agendify necesita actualizaciones en tiempo real
+> **Contexto:** Dashboard del negocio en Agendity necesita actualizaciones en tiempo real
 
 ## Problema
 
@@ -61,7 +61,7 @@ Rails API → Sidekiq Job → NatsPublisher → NATS Server ← WebSocket ← Ne
 
 ### Servicios de terceros (Pusher, Ably, Firebase)
 
-- **Rechazada:** Dependencia externa, costos recurrentes por mensaje, y latencia adicional. Agendify corre en un solo VPS — un servidor NATS local agrega ~20MB de RAM y latencia sub-milisegundo.
+- **Rechazada:** Dependencia externa, costos recurrentes por mensaje, y latencia adicional. Agendity corre en un solo VPS — un servidor NATS local agrega ~20MB de RAM y latencia sub-milisegundo.
 
 ## Por qué NATS
 

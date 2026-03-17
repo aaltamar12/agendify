@@ -1,4 +1,4 @@
-# Documentación Técnica — Agendify
+# Documentación Técnica — Agendity
 
 > Última actualización: 2026-03-17
 > Documentación final pre-lanzamiento
@@ -41,7 +41,7 @@
 
 ```mermaid
 graph TB
-    subgraph Frontend["agendify-web (Next.js 16 PWA)"]
+    subgraph Frontend["agendity-web (Next.js 16 PWA)"]
         LP[Landing Page]
         AUTH[Login / Register]
         DASH[Dashboard]
@@ -49,7 +49,7 @@ graph TB
         BOOK[Flujo de Reserva]
     end
 
-    subgraph Backend["agendify-api (Rails 8 API)"]
+    subgraph Backend["agendity-api (Rails 8 API)"]
         API[API REST /api/v1]
         SVC[Service Objects]
         MOD[Models + Validations]

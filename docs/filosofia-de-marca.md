@@ -1,22 +1,22 @@
-# Filosofía de Marca — Agendify
+# Filosofía de Marca — Agendity
 
 > **Última actualización:** 2026-03-16
 > **Estado:** Base fundacional — definida con el equipo fundador
 
 ---
 
-## Qué es Agendify
+## Qué es Agendity
 
 No somos solo una agenda. Somos la infraestructura premium de agendamiento inteligente que escala negocios de servicios.
 
 **Elevator pitch:**
-> Creamos Agendify, una plataforma premium diseñada para que tus clientes agenden en segundos sin que tú muevas un dedo. Somos el asistente digital que profesionaliza tu marca, elimina las inasistencias y te devuelve el control de tu tiempo para que te enfoques en lo que mejor haces: crear estilo.
+> Creamos Agendity, una plataforma premium diseñada para que tus clientes agenden en segundos sin que tú muevas un dedo. Somos el asistente digital que profesionaliza tu marca, elimina las inasistencias y te devuelve el control de tu tiempo para que te enfoques en lo que mejor haces: crear estilo.
 
 **Pitch para inversores:**
-> El mercado de servicios personales está fragmentado y atrapado en procesos manuales. Agendify es una S.A.S. de agendamiento inteligente que elimina la fricción entre el profesional y el cliente. Empezamos con el sector de belleza y bienestar por su alta recurrencia, pero nuestra arquitectura es totalmente agnóstica: estamos construyendo la infraestructura de reservas para cualquier industria de servicios que valore la exclusividad y la eficiencia.
+> El mercado de servicios personales está fragmentado y atrapado en procesos manuales. Agendity es una S.A.S. de agendamiento inteligente que elimina la fricción entre el profesional y el cliente. Empezamos con el sector de belleza y bienestar por su alta recurrencia, pero nuestra arquitectura es totalmente agnóstica: estamos construyendo la infraestructura de reservas para cualquier industria de servicios que valore la exclusividad y la eficiencia.
 
 **Tagline:**
-> Agendify: La infraestructura premium para agendar citas que escala tu negocio de servicios.
+> Agendity: La infraestructura premium para agendar citas que escala tu negocio de servicios.
 
 ---
 
@@ -26,14 +26,14 @@ Un barbero o esteticista promedio pierde hasta 5 horas a la semana solo gestiona
 
 ---
 
-## Los 3 pilares de Agendify
+## Los 3 pilares de Agendity
 
 ### Pilar 1: Prestigio de Marca (Brand Authority)
 
 **"Tu link de reserva es tu carta de presentación digital."**
 
 - La mayoría de las apps de citas llenan la pantalla de publicidad, logos de terceros o diseños genéricos que abaratan la imagen del barbero o el spa.
-- **Promesa:** Ofrecemos una interfaz limpia, minimalista y de alta gama. Cuando un cliente hace clic en tu enlace de Agendify, siente que está entrando a un establecimiento de lujo antes de cruzar la puerta física. Elevamos la percepción de valor de tu negocio para que puedas cobrar lo que realmente vales.
+- **Promesa:** Ofrecemos una interfaz limpia, minimalista y de alta gama. Cuando un cliente hace clic en tu enlace de Agendity, siente que está entrando a un establecimiento de lujo antes de cruzar la puerta física. Elevamos la percepción de valor de tu negocio para que puedas cobrar lo que realmente vales.
 
 ### Pilar 2: Eficiencia Silenciosa (Silent Operations)
 
@@ -55,7 +55,7 @@ Un barbero o esteticista promedio pierde hasta 5 horas a la semana solo gestiona
 
 **Directo y Premium.**
 
-> "Tu tiempo es un activo de lujo. Reserva tu próxima sesión de forma rápida y privada. Agendify: Gestión de citas para quienes no aceptan menos que la perfección."
+> "Tu tiempo es un activo de lujo. Reserva tu próxima sesión de forma rápida y privada. Agendity: Gestión de citas para quienes no aceptan menos que la perfección."
 
 ### 3 atributos clave del producto
 
@@ -73,9 +73,9 @@ Un barbero o esteticista promedio pierde hasta 5 horas a la semana solo gestiona
 
 ---
 
-## Cómo se posiciona Agendify frente a la competencia
+## Cómo se posiciona Agendity frente a la competencia
 
-| Competencia | Agendify |
+| Competencia | Agendity |
 |---|---|
 | Diseños genéricos con publicidad | Interfaz limpia, sin ads, premium |
 | El negocio sigue pegado al celular | Eficiencia silenciosa, todo automatizado |

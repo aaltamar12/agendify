@@ -1,4 +1,4 @@
-# Agendify — Instrucciones del proyecto
+# Agendity — Instrucciones del proyecto
 
 ## Archivos obligatorios
 SIEMPRE lee estos archivos al inicio de cada conversación antes de responder:
@@ -6,7 +6,7 @@ SIEMPRE lee estos archivos al inicio de cada conversación antes de responder:
 - `desarrollo.md` — arquitectura técnica, features, stack
 
 ## Terminología obligatoria
-- **Cliente** = el negocio (barbería, salón) que paga suscripción a Agendify
+- **Cliente** = el negocio (barbería, salón) que paga suscripción a Agendity
 - **Usuario final** = la persona que reserva citas. No paga suscripción, no necesita cuenta
 - Nunca confundir estos términos en código, documentación ni copys
 
@@ -16,7 +16,7 @@ SIEMPRE lee estos archivos al inicio de cada conversación antes de responder:
 - **DB:** PostgreSQL + Redis
 - **WhatsApp:** WhatsApp Business API de Meta (directo, sin intermediarios)
 - **Deploy:** VPS con Docker Compose (Nginx + Next.js + Rails + PostgreSQL + Redis + Sidekiq)
-- **Repos:** `agendify-api` (Rails) + `agendify-web` (Next.js) — repos separados
+- **Repos:** `agendity-api` (Rails) + `agendity-web` (Next.js) — repos separados
 
 ## Idioma
 - Responde siempre en español
@@ -26,7 +26,7 @@ SIEMPRE lee estos archivos al inicio de cada conversación antes de responder:
 ## Skills disponibles — Úsalas proactivamente
 Cuando la conversación toque estos temas, sugiere o usa la skill correspondiente:
 
-- `/marca` — Cualquier tema sobre: identidad, branding, tono de voz, nombre de features, tagline, misión, visión, valores, paleta de colores, personalidad de marca, cómo se ve Agendify, cómo se comunica
+- `/marca` — Cualquier tema sobre: identidad, branding, tono de voz, nombre de features, tagline, misión, visión, valores, paleta de colores, personalidad de marca, cómo se ve Agendity, cómo se comunica
 - `/docs` — Cualquier tema sobre: documentar decisiones, flujos de usuario, reglas de negocio, pricing, planes, roadmap, procesos, estrategia, modelo de negocio, competencia, métricas, KPIs
 - `/tech` — Cualquier tema sobre: documentar arquitectura, API, endpoints, base de datos, modelos, migraciones, setup, deploy, decisiones técnicas, diagramas, ERD, convenciones de código
 - `/copys` — Cualquier tema sobre: textos de la app, landing page, emails, mensajes de WhatsApp, notificaciones, onboarding, botones, CTAs, marketing, redes sociales, SEO, descripciones

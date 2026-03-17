@@ -1,4 +1,4 @@
-# Protección de Slots Concurrentes — Agendify
+# Protección de Slots Concurrentes — Agendity
 
 > Última actualización: 2026-03-16
 

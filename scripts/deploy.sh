@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "Deploying Agendify..."
+echo "Deploying Agendity..."
 
 # Pull latest code
 git pull origin main

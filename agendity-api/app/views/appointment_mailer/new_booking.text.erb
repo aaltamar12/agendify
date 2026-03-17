@@ -1,0 +1,14 @@
+NUEVA RESERVA RECIBIDA
+=====================
+
+Se ha recibido una nueva reserva en <%= @business.name %>.
+
+Cliente: <%= @customer.name %>
+Servicio: <%= @service.name %>
+Profesional: <%= @employee.name %>
+Fecha: <%= @appointment.appointment_date.strftime("%d/%m/%Y") %>
+Hora: <%= @appointment.start_time.strftime("%I:%M %p") %>
+Precio: $<%= @appointment.price.to_i %> COP
+Estado: Pendiente de pago
+
+Revisa tu panel de Agendity para gestionar esta reserva.

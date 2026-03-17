@@ -5,7 +5,7 @@
 
 ## Resumen
 
-Agendify usa un servidor NATS self-hosted para entregar eventos en tiempo real al dashboard del negocio. Cuando ocurre una acción (nueva reserva, pago enviado, cancelación), el backend publica un evento a NATS y el frontend lo recibe vía WebSocket. Al recibir el evento, se ejecutan 3 acciones:
+Agendity usa un servidor NATS self-hosted para entregar eventos en tiempo real al dashboard del negocio. Cuando ocurre una acción (nueva reserva, pago enviado, cancelación), el backend publica un evento a NATS y el frontend lo recibe vía WebSocket. Al recibir el evento, se ejecutan 3 acciones:
 
 1. **Invalidación de cache** — TanStack Query refresca la data relevante (calendario, pagos, notificaciones)
 2. **Notificación del navegador** — Notification API nativa con título y resumen del evento
@@ -163,7 +163,7 @@ Genera un chime de dos tonos usando Web Audio API pura (sin archivo de audio ext
 
 **Toggle on/off:**
 
-El estado `notificationSoundEnabled` se almacena en `ui-store` (Zustand) y se persiste en localStorage (`agendify-ui`). Se puede activar/desactivar desde `/dashboard/settings` → sección "Notificaciones".
+El estado `notificationSoundEnabled` se almacena en `ui-store` (Zustand) y se persiste en localStorage (`agendity-ui`). Se puede activar/desactivar desde `/dashboard/settings` → sección "Notificaciones".
 
 ---
 
@@ -176,7 +176,7 @@ El estado `notificationSoundEnabled` se almacena en `ui-store` (Zustand) y se pe
 ### Opción 1: Con archivo de configuración (recomendada)
 
 ```bash
-docker run -d --name agendify-nats \
+docker run -d --name agendity-nats \
   -p 4222:4222 \
   -p 8222:8222 \
   -v $(pwd)/docker/nats.conf:/etc/nats/nats.conf \
@@ -197,7 +197,7 @@ websocket {
 ### Opción 2: Rápido sin config
 
 ```bash
-docker run -d --name agendify-nats \
+docker run -d --name agendity-nats \
   -p 4222:4222 \
   -p 8222:8222 \
   nats:latest \
@@ -215,7 +215,7 @@ docker run -d --name agendify-nats \
 
 ```bash
 # Ver logs
-docker logs agendify-nats
+docker logs agendity-nats
 
 # Health check
 curl http://localhost:8222/healthz
@@ -268,15 +268,15 @@ NATS es una **mejora progresiva**. El sistema funciona completamente sin NATS:
 
 | Archivo | Repositorio | Descripción |
 |---|---|---|
-| `app/services/realtime/nats_publisher.rb` | agendify-api | Publisher de eventos a NATS |
-| `config/initializers/nats.rb` | agendify-api | Pre-carga de conexión |
-| `app/jobs/send_new_booking_notification_job.rb` | agendify-api | Job que publica `new_booking` |
-| `app/jobs/send_booking_confirmed_job.rb` | agendify-api | Job que publica `booking_confirmed` |
-| `app/jobs/send_booking_cancelled_job.rb` | agendify-api | Job que publica `booking_cancelled` |
-| `app/jobs/send_payment_submitted_job.rb` | agendify-api | Job que publica `payment_submitted` |
+| `app/services/realtime/nats_publisher.rb` | agendity-api | Publisher de eventos a NATS |
+| `config/initializers/nats.rb` | agendity-api | Pre-carga de conexión |
+| `app/jobs/send_new_booking_notification_job.rb` | agendity-api | Job que publica `new_booking` |
+| `app/jobs/send_booking_confirmed_job.rb` | agendity-api | Job que publica `booking_confirmed` |
+| `app/jobs/send_booking_cancelled_job.rb` | agendity-api | Job que publica `booking_cancelled` |
+| `app/jobs/send_payment_submitted_job.rb` | agendity-api | Job que publica `payment_submitted` |
 | `docker/nats.conf` | raíz del proyecto | Configuración del servidor NATS |
-| `src/lib/hooks/use-realtime.ts` | agendify-web | Hook de conexión NATS WebSocket |
-| `src/lib/hooks/use-event-notifications.ts` | agendify-web | Procesador de eventos → invalidación + notificaciones |
-| `src/lib/utils/browser-notification.ts` | agendify-web | Wrapper de Notification API |
-| `src/lib/utils/notification-sound.ts` | agendify-web | Generador de sonido con Web Audio API |
-| `src/app/dashboard/layout.tsx` | agendify-web | Donde se activa `useRealtime()` |
+| `src/lib/hooks/use-realtime.ts` | agendity-web | Hook de conexión NATS WebSocket |
+| `src/lib/hooks/use-event-notifications.ts` | agendity-web | Procesador de eventos → invalidación + notificaciones |
+| `src/lib/utils/browser-notification.ts` | agendity-web | Wrapper de Notification API |
+| `src/lib/utils/notification-sound.ts` | agendity-web | Generador de sonido con Web Audio API |
+| `src/app/dashboard/layout.tsx` | agendity-web | Donde se activa `useRealtime()` |

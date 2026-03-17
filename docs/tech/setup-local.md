@@ -1,4 +1,4 @@
-# Setup Local — Agendify
+# Setup Local — Agendity
 
 > Última actualización: 2026-03-16
 
@@ -24,7 +24,7 @@ NATS es el servidor de mensajería para actualizaciones en tiempo real. Es **opc
 cd /path/to/agendity
 
 # Iniciar NATS con Docker
-docker run -d --name agendify-nats \
+docker run -d --name agendity-nats \
   -p 4222:4222 \
   -p 8222:8222 \
   -v $(pwd)/docker/nats.conf:/etc/nats/nats.conf \
@@ -32,7 +32,7 @@ docker run -d --name agendify-nats \
   -c /etc/nats/nats.conf
 
 # Verificar que está corriendo
-docker logs agendify-nats
+docker logs agendity-nats
 # → Listening for websocket clients on ws://0.0.0.0:8222
 ```
 
@@ -45,10 +45,10 @@ docker logs agendify-nats
 
 ---
 
-## 2. Backend (agendify-api)
+## 2. Backend (agendity-api)
 
 ```bash
-cd agendify-api
+cd agendity-api
 
 # Instalar dependencias
 bundle install
@@ -56,7 +56,7 @@ bundle install
 # Crear archivo .env (ya existe, verificar)
 cat .env
 # DEVISE_JWT_SECRET_KEY=dev-jwt-secret-key-change-in-production
-# AGENDIFY_WEB_URL=http://localhost:3000
+# AGENDITY_WEB_URL=http://localhost:3000
 # REDIS_URL=redis://localhost:6379/0
 # NATS_URL=nats://localhost:4222
 # ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY=...
@@ -94,7 +94,7 @@ bundle exec sidekiq
 | `carlos@barberia-elite.com` | `password123` | Owner | Barbería Elite (Plan Profesional) |
 | `ana@salon-bella.com` | `password123` | Owner | Salón Bella (Plan Básico) |
 | `miguel@freshcuts.com` | `password123` | Owner | Fresh Cuts (sin onboarding) |
-| `admin@agendify.com` | `password123` | Admin | Panel ActiveAdmin |
+| `admin@agendity.com` | `password123` | Admin | Panel ActiveAdmin |
 
 ### URLs del backend
 
@@ -106,10 +106,10 @@ bundle exec sidekiq
 
 ---
 
-## 3. Frontend (agendify-web)
+## 3. Frontend (agendity-web)
 
 ```bash
-cd agendify-web
+cd agendity-web
 
 # Instalar dependencias
 npm install
@@ -171,10 +171,10 @@ curl -X POST http://localhost:3001/api/v1/auth/login \
   -d '{"email":"carlos@barberia-elite.com","password":"password123"}'
 
 # 4. Frontend compila?
-cd agendify-web && npm run build
+cd agendity-web && npm run build
 
 # 5. NATS funcionando? (opcional)
-docker logs agendify-nats | tail -5
+docker logs agendity-nats | tail -5
 ```
 
 ---
@@ -186,7 +186,7 @@ docker logs agendify-nats | tail -5
 | Variable | Descripción | Default |
 |---|---|---|
 | `DEVISE_JWT_SECRET_KEY` | Secret para firmar JWT | `dev-secret-key` |
-| `AGENDIFY_WEB_URL` | URL del frontend (para CORS) | `http://localhost:3000` |
+| `AGENDITY_WEB_URL` | URL del frontend (para CORS) | `http://localhost:3000` |
 | `REDIS_URL` | URL de Redis (Sidekiq + slot locking) | `redis://localhost:6379/0` |
 | `NATS_URL` | URL del servidor NATS (tiempo real) | `nats://localhost:4222` |
 | `DATABASE_URL` | URL de PostgreSQL (prod) | — |
@@ -194,7 +194,7 @@ docker logs agendify-nats | tail -5
 | `SMTP_PORT` | Puerto SMTP | `587` |
 | `SMTP_USERNAME` | Usuario SMTP | — |
 | `SMTP_PASSWORD` | Contraseña SMTP | — |
-| `SMTP_FROM_EMAIL` | Remitente de emails | `noreply@agendify.com` |
+| `SMTP_FROM_EMAIL` | Remitente de emails | `noreply@agendity.com` |
 | `ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY` | Clave primaria para encriptacion de datos sensibles (Rails `encrypts`) | — (requerido) |
 | `ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY` | Clave determinista para encriptacion (permite queries por columna) | — (requerido) |
 | `ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT` | Salt para derivacion de claves de encriptacion | — (requerido) |
@@ -220,7 +220,7 @@ Para tener el sistema 100% funcional, necesitas estos procesos corriendo:
 | Rails API | `rails server -p 3001` | Sí |
 | Next.js | `npm run dev` | Sí |
 | Sidekiq | `bundle exec sidekiq` | Sí (notificaciones, reminders) |
-| NATS | `docker start agendify-nats` | No (polling como fallback) |
+| NATS | `docker start agendity-nats` | No (polling como fallback) |
 
 ---
 
@@ -247,8 +247,8 @@ npm run test:watch              # Tests en watch mode
 npx tsc --noEmit                # Type check
 
 # NATS
-docker start agendify-nats      # Iniciar NATS (si ya fue creado)
-docker stop agendify-nats       # Detener NATS
-docker logs agendify-nats       # Ver logs de NATS
-docker rm agendify-nats         # Eliminar contenedor (para recrear)
+docker start agendity-nats      # Iniciar NATS (si ya fue creado)
+docker stop agendity-nats       # Detener NATS
+docker logs agendity-nats       # Ver logs de NATS
+docker rm agendity-nats         # Eliminar contenedor (para recrear)
 ```

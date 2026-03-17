@@ -3,9 +3,9 @@
 > **Estado:** Borrador inicial — NO es el diseño final
 > **Última actualización:** 2026-03-16
 
-Este documento describe la primera iteración del esquema de base de datos de Agendify. Sirve como base de discusión para refinar antes de implementar.
+Este documento describe la primera iteración del esquema de base de datos de Agendity. Sirve como base de discusión para refinar antes de implementar.
 
-> **Terminología:** En Agendify, **cliente** = el negocio (barbería/salón) que paga suscripción. **Usuario final** = la persona que reserva citas. En la BD, la tabla `customers` almacena usuarios finales (quienes reservan), no clientes de Agendify.
+> **Terminología:** En Agendity, **cliente** = el negocio (barbería/salón) que paga suscripción. **Usuario final** = la persona que reserva citas. En la BD, la tabla `customers` almacena usuarios finales (quienes reservan), no clientes de Agendity.
 
 ---
 
@@ -70,7 +70,7 @@ Negocios registrados en la plataforma.
 | id | bigint (PK) | |
 | owner_id | bigint (FK → users) | |
 | name | string | not null |
-| slug | string | unique, para URL pública (`agendify.com/barberia-elite`) |
+| slug | string | unique, para URL pública (`agendity.com/barberia-elite`) |
 | business_type | enum | `barberia`, `salon` |
 | description | text | |
 | phone | string | |
@@ -451,4 +451,4 @@ Este esquema soporta:
 
 ## Visión de datos
 
-> Agendify no es solo una agenda. Es una base de datos del comportamiento de miles de negocios de servicios. Los `analytics_events`, las citas, los patrones de clientes — eso es lo que realmente tiene valor a escala.
+> Agendity no es solo una agenda. Es una base de datos del comportamiento de miles de negocios de servicios. Los `analytics_events`, las citas, los patrones de clientes — eso es lo que realmente tiene valor a escala.

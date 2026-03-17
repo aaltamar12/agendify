@@ -1,4 +1,4 @@
-# Sistema de Planes y Suscripciones — Agendify
+# Sistema de Planes y Suscripciones — Agendity
 
 > Última actualización: 2026-03-16
 

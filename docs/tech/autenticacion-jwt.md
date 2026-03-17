@@ -1,10 +1,10 @@
-# Autenticación JWT — Agendify
+# Autenticación JWT — Agendity
 
 > Última actualización: 2026-03-16
 
 ## Resumen
 
-Agendify usa JWT (JSON Web Tokens) para autenticar la comunicación frontend ↔ API. El sistema incluye:
+Agendity usa JWT (JSON Web Tokens) para autenticar la comunicación frontend ↔ API. El sistema incluye:
 - Tokens de acceso (1 día de expiración)
 - Refresh tokens (30 días, rotación por uso)
 - Denylist para revocación de tokens (logout)
@@ -30,10 +30,10 @@ sequenceDiagram
 
     Note over FE: setAuth() guarda en:
     Note over FE: 1. Zustand (localStorage)
-    Note over FE: 2. Cookie "agendify-auth"
+    Note over FE: 2. Cookie "agendity-auth"
 
     FE->>FE: router.push('/dashboard/agenda')
-    MW->>MW: Lee cookie "agendify-auth"
+    MW->>MW: Lee cookie "agendity-auth"
     MW->>MW: Verifica token existe → permite acceso
 
     FE->>API: GET /api/v1/services (Authorization: Bearer <token>)
@@ -103,7 +103,7 @@ end
 | Storage | Quién lo lee | Para qué |
 |---|---|---|
 | **localStorage** (Zustand persist) | JavaScript del cliente | Axios interceptor, estado de la app |
-| **Cookie** `agendify-auth` | Next.js middleware (servidor) | Protección de rutas antes del render |
+| **Cookie** `agendity-auth` | Next.js middleware (servidor) | Protección de rutas antes del render |
 
 ### Implementación en auth-store.ts
 
@@ -113,7 +113,7 @@ setAuth: (token, refreshToken, user) => {
   set({ token, refreshToken, user });
 
   // 2. Sincronizar a cookie para middleware
-  document.cookie = `agendify-auth=${encodeURIComponent(
+  document.cookie = `agendity-auth=${encodeURIComponent(
     JSON.stringify({ state: { token, user } })
   )};path=/;max-age=${60 * 60 * 24 * 30};samesite=lax`;
 },
@@ -121,7 +121,7 @@ setAuth: (token, refreshToken, user) => {
 clearAuth: () => {
   set({ token: null, refreshToken: null, user: null });
   // Borrar cookie
-  document.cookie = 'agendify-auth=;path=/;max-age=0';
+  document.cookie = 'agendity-auth=;path=/;max-age=0';
 },
 ```
 
@@ -216,5 +216,5 @@ curl -X DELETE http://localhost:3001/api/v1/auth/logout \
 | Token revocation | Denylist en BD (tabla jwt_denylists) |
 | Refresh rotation | Token anterior se destruye al rotar |
 | Rate limiting | Rack::Attack: 5 req/20s en login |
-| CORS | Solo permite `localhost:3000` y `AGENDIFY_WEB_URL` |
+| CORS | Solo permite `localhost:3000` y `AGENDITY_WEB_URL` |
 | Cookie flags | `samesite=lax`, `path=/` |

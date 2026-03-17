@@ -1,10 +1,10 @@
-# Sistema de Soporte por Plan — Agendify
+# Sistema de Soporte por Plan — Agendity
 
 > Última actualización: 2026-03-17
 
 ## Resumen
 
-Agendify ofrece canales de soporte diferenciados por plan. El botón de ayuda (?) en el topbar del dashboard muestra los canales disponibles según el plan del negocio.
+Agendity ofrece canales de soporte diferenciados por plan. El botón de ayuda (?) en el topbar del dashboard muestra los canales disponibles según el plan del negocio.
 
 ---
 
@@ -17,7 +17,7 @@ Agendify ofrece canales de soporte diferenciados por plan. El botón de ayuda (?
 | **Chat en vivo** | 🔒 | 🔒 | ✅ | 🔒 |
 
 ### Datos de contacto
-- **Email:** soporte@agendify.com
+- **Email:** soporte@agendity.com
 - **WhatsApp:** +573001234567
 
 ---
@@ -51,7 +51,7 @@ SUPPORT_CHANNELS_BY_PLAN = { basico: ['email'], profesional: ['email','whatsapp'
 
 ### 1. Chat en vivo (Plan Inteligente) — PENDIENTE
 - **Estado:** No implementado. Actualmente el canal "chat" abre WhatsApp con prefijo "Soporte prioritario"
-- **Plan ideal:** Widget de chat real-time con el admin de Agendify
+- **Plan ideal:** Widget de chat real-time con el admin de Agendity
 - **Opciones técnicas:**
   - **Crisp/Tawk.to** — widget embebido, gratis hasta cierto volumen, fácil de integrar con `<script>` tag
   - **Custom con NATS** — usar el servidor NATS existente para chat directo. Crear un canal `support.{business_id}` y un panel de admin para responder

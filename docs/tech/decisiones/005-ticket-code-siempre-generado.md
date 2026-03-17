@@ -69,6 +69,6 @@ end
 
 ## Archivos relevantes
 
-- `agendify-api/app/services/appointments/create_appointment_service.rb` — Genera `ticket_code` siempre
-- `agendify-api/app/models/appointment.rb` — Modelo con campo `ticket_code`
-- `agendify-web` — Componente de ticket con vista condicional por plan (VIP vs simplificada)
+- `agendity-api/app/services/appointments/create_appointment_service.rb` — Genera `ticket_code` siempre
+- `agendity-api/app/models/appointment.rb` — Modelo con campo `ticket_code`
+- `agendity-web` — Componente de ticket con vista condicional por plan (VIP vs simplificada)

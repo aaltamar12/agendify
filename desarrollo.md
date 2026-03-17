@@ -1,4 +1,4 @@
-# Proyecto: AGENDIFY
+# Proyecto: AGENDITY
 
 Plataforma SaaS de gestión de citas para negocios que trabajan por reservas.
 
@@ -6,7 +6,7 @@ Plataforma SaaS de gestión de citas para negocios que trabajan por reservas.
 
 ## 1. Contexto del proyecto
 
-Agendify es una plataforma de gestión de citas para negocios que trabajan por reservas.
+Agendity es una plataforma de gestión de citas para negocios que trabajan por reservas.
 
 ### Enfoque inicial
 - Barberías
@@ -56,7 +56,7 @@ Agendify es una plataforma de gestión de citas para negocios que trabajan por r
 | **Sidekiq + Redis** | Jobs en background (emails, notificaciones, WhatsApp) |
 | **rack-cors** | CORS para comunicación frontend ↔ API |
 | **Geocoder** | Geolocalización de negocios |
-| **friendly_id** | Slugs para URLs públicas (`agendify.com/barberia-elite`) |
+| **friendly_id** | Slugs para URLs públicas (`agendity.com/barberia-elite`) |
 | **Pagy** | Paginación |
 | **Grover** | Generación de tickets digitales (HTML/CSS → PDF/imagen via Chromium) |
 | **RSpec** | Testing |
@@ -67,8 +67,8 @@ Agendify es una plataforma de gestión de citas para negocios que trabajan por r
 
 ### Repositorios
 Dos repos separados en GitHub:
-- `agendify-api` — Backend Rails API
-- `agendify-web` — Frontend Next.js PWA
+- `agendity-api` — Backend Rails API
+- `agendity-web` — Frontend Next.js PWA
 
 ### Multi-tenancy
 Enfoque por `business_id` en cada tabla. Cada negocio solo accede a sus propios datos. Se implementa con scopes de Rails y políticas de Pundit.
@@ -77,8 +77,8 @@ Enfoque por `business_id` en cada tabla. Cada negocio solo accede a sus propios 
 
 ## 4. Terminología y tipos de usuarios
 
-> **Importante:** En Agendify distinguimos claramente entre:
-> - **Cliente** = el negocio que paga la suscripción (barbería, salón, spa). Es el cliente de Agendify.
+> **Importante:** En Agendity distinguimos claramente entre:
+> - **Cliente** = el negocio que paga la suscripción (barbería, salón, spa). Es el cliente de Agendity.
 > - **Usuario final** = la persona que reserva citas en un negocio. No paga suscripción, no necesita cuenta.
 
 ### 4.1 Usuario final (quien reserva)
@@ -184,7 +184,7 @@ Base de datos automática (se crea al recibir reservas).
 
 ## 7. Sistema de reservas públicas
 
-Cada negocio tiene una página pública: `agendify.com/barberia-elite`
+Cada negocio tiene una página pública: `agendity.com/barberia-elite`
 
 **Páginas públicas renderizadas con SSG** (Static Site Generation) en Next.js para SEO y velocidad.
 
@@ -444,7 +444,7 @@ El superusuario puede modificar precios, límites y características desde Activ
 
 El producto está funcional de punta a punta. Todas las features core están implementadas e integradas (frontend + backend). El sistema es usable en su totalidad.
 
-### Frontend (agendify-web) — Next.js 16 PWA
+### Frontend (agendity-web) — Next.js 16 PWA
 - [x] Registro de negocio + wizard de onboarding (6 pasos)
 - [x] Creación de servicios (CRUD con modal)
 - [x] Creación de empleados (CRUD con modal + asignación de servicios + horarios)
@@ -479,7 +479,7 @@ El producto está funcional de punta a punta. Todas las features core están imp
 - [x] Middleware de protección de rutas (JWT cookie sync)
 - [x] 18 hooks (TanStack Query): auth, appointments, services, employees, customers, business, onboarding, reports, reviews, blocked-slots, public, explore, payments, notifications, subscription, realtime, event-notifications, locations
 
-### Backend (agendify-api) — Rails 8 API
+### Backend (agendity-api) — Rails 8 API
 - [x] 18+ modelos + 25 migraciones (PostgreSQL)
 - [x] 18+ controllers (v1 + public + admin, CRUD + state machines + check-in)
 - [x] 22+ service objects (SOLID: BaseService + ServiceResult + NatsPublisher + SlotLockService)

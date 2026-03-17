@@ -1,4 +1,4 @@
-Agendify nace para resolver un problema enorme y muy poco atendido en Latinoamérica:
+Agendity nace para resolver un problema enorme y muy poco atendido en Latinoamérica:
 la falta de herramientas simples y profesionales para negocios que trabajan por citas.
 
 En ciudades como Barranquilla, Medellín o Bogotá existen miles de barberías, salones de belleza y negocios de estética, pero la gran mayoría todavía opera de forma informal:
@@ -15,7 +15,7 @@ ingresos que no se controlan
 
 Esto genera pérdidas constantes de dinero y tiempo.
 
-Agendify no es solo una agenda digital.
+Agendity no es solo una agenda digital.
 
 Es una plataforma de gestión y crecimiento para negocios de servicios, diseñada específicamente para barberías, salones y negocios similares que necesitan organizar su operación y aumentar sus ingresos.
 
@@ -23,7 +23,7 @@ Es una plataforma de gestión y crecimiento para negocios de servicios, diseñad
 
 La mayoría de herramientas existentes solo permiten agendar citas.
 
-Agendify va mucho más allá.
+Agendity va mucho más allá.
 
 La plataforma convierte la agenda en el centro de inteligencia del negocio, integrando:
 
@@ -43,7 +43,7 @@ Esto transforma negocios informales en negocios gestionados con datos.
 
 🤖 Inteligencia artificial aplicada al negocio
 
-Uno de los pilares diferenciales de Agendify es la incorporación de IA como herramienta de crecimiento para el negocio, no solo como función tecnológica.
+Uno de los pilares diferenciales de Agendity es la incorporación de IA como herramienta de crecimiento para el negocio, no solo como función tecnológica.
 
 Los planes premium incluirán herramientas como:
 
@@ -71,11 +71,11 @@ alertar cuando un cliente importante no ha regresado
 
 proyectar ingresos del mes según el ritmo de reservas
 
-Esto convierte a Agendify en un asesor digital del negocio, no solo en un calendario.
+Esto convierte a Agendity en un asesor digital del negocio, no solo en un calendario.
 
 💰 Modelo de negocio escalable
 
-Agendify funciona bajo un modelo SaaS (software por suscripción).
+Agendity funciona bajo un modelo SaaS (software por suscripción).
 
 El negocio puede usar la plataforma gratis por 30 días.
 
@@ -136,7 +136,7 @@ Esto crea una enorme oportunidad para una plataforma simple, rápida y pensada p
 
 🚀 Estrategia de crecimiento
 
-Agendify inicia en Barranquilla para validar el modelo y luego se expande a otras ciudades de Colombia.
+Agendity inicia en Barranquilla para validar el modelo y luego se expande a otras ciudades de Colombia.
 
 La estrategia combina:
 
@@ -171,7 +171,7 @@ Con expansión regional en LATAM el potencial puede ser mucho mayor.
 
 🌎 Visión a largo plazo
 
-Agendify busca convertirse en la plataforma líder de gestión para negocios de servicios en Latinoamérica.
+Agendity busca convertirse en la plataforma líder de gestión para negocios de servicios en Latinoamérica.
 
 A medida que crece, el sistema puede integrar nuevas soluciones como:
 
@@ -192,7 +192,7 @@ El problema es real.
 La tecnología es escalable.
 Y el modelo SaaS permite crecimiento exponencial.
 
-Agendify no busca ser simplemente una agenda digital.
+Agendity no busca ser simplemente una agenda digital.
 
 Busca convertirse en la infraestructura tecnológica de miles de negocios de servicios en Latinoamérica.
 

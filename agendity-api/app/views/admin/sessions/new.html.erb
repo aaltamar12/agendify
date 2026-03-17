@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agendity Admin - Login</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .login-container {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      padding: 40px;
+      width: 100%;
+      max-width: 400px;
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 8px;
+      font-size: 24px;
+    }
+    .subtitle {
+      text-align: center;
+      color: #888;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+    .flash { padding: 10px; border-radius: 4px; margin-bottom: 16px; font-size: 14px; }
+    .flash-error { background: #fee; color: #c00; border: 1px solid #fcc; }
+    .flash-notice { background: #efe; color: #060; border: 1px solid #cfc; }
+    label { display: block; margin-bottom: 4px; font-weight: 600; color: #555; font-size: 14px; }
+    input[type="email"], input[type="password"] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+    input[type="email"]:focus, input[type="password"]:focus {
+      outline: none;
+      border-color: #7c3aed;
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #7c3aed;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button:hover { background: #6d28d9; }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <h2>Agendity Admin</h2>
+    <p class="subtitle">Sign in to the admin panel</p>
+
+    <% if flash[:error] %>
+      <div class="flash flash-error"><%= flash[:error] %></div>
+    <% end %>
+    <% if flash[:notice] %>
+      <div class="flash flash-notice"><%= flash[:notice] %></div>
+    <% end %>
+
+    <%= form_tag admin_create_session_path, method: :post do %>
+      <label for="email">Email</label>
+      <input type="email" name="email" id="email" autofocus required placeholder="admin@agendity.com" />
+
+      <label for="password">Password</label>
+      <input type="password" name="password" id="password" required placeholder="Enter password" />
+
+      <button type="submit">Login</button>
+    <% end %>
+  </div>
+</body>
+</html>

@@ -1,7 +1,7 @@
-# Detalle de Funcionalidades por Plan — Agendify
+# Detalle de Funcionalidades por Plan — Agendity
 
 > Generado: 2026-03-17
-> Fuente: Análisis exhaustivo de `agendify-web` (110+ archivos TS/TSX) + `agendify-api` (120+ archivos Ruby) + documentación interna
+> Fuente: Análisis exhaustivo de `agendity-web` (110+ archivos TS/TSX) + `agendity-api` (120+ archivos Ruby) + documentación interna
 
 ---
 
@@ -43,7 +43,7 @@ Estas funcionalidades están disponibles en todos los planes, incluido el trial 
 ### 1.1 Funcionalidades visuales (UI)
 
 #### Landing page pública
-- **Descripción:** Página de marketing de Agendify con hero, features, "Cómo funciona", CTA de registro y footer.
+- **Descripción:** Página de marketing de Agendity con hero, features, "Cómo funciona", CTA de registro y footer.
 - **Detalles:** Hero con tagline "Tu negocio, siempre lleno", 4 cards de features, sección de social proof, pasos 1-2-3, CTA de prueba gratis, footer con links.
 
 #### Registro e inicio de sesión
@@ -161,7 +161,7 @@ Estas funcionalidades están disponibles en todos los planes, incluido el trial 
 ### 1.2 Funcionalidades públicas (usuario final — sin cuenta)
 
 #### Página pública del negocio
-- **Descripción:** Perfil público del negocio accesible en `agendify.com/[slug]`. Cualquier persona puede verlo.
+- **Descripción:** Perfil público del negocio accesible en `agendity.com/[slug]`. Cualquier persona puede verlo.
 - **Contenido:**
   - Cover/header con logo, nombre, tipo de negocio, calificación promedio
   - Botón "Reservar cita" (CTA principal)
@@ -203,7 +203,7 @@ Estas funcionalidades están disponibles en todos los planes, incluido el trial 
 #### Ticket digital VIP
 - **Descripción:** Página pública que muestra el ticket de confirmación de cita, estilo boarding pass.
 - **Diseño:** Tarjeta estilo boarding pass con:
-  - Header "AGENDIFY" en violeta
+  - Header "AGENDITY" en violeta
   - Nombre del negocio
   - Badge de estado de la cita
   - Datos: cliente, servicio, profesional, fecha, hora, dirección
@@ -213,7 +213,7 @@ Estas funcionalidades están disponibles en todos los planes, incluido el trial 
   - Botón "Guardar"
 
 #### Explorar negocios
-- **Descripción:** Directorio público de negocios registrados en Agendify con búsqueda, filtros y mapa.
+- **Descripción:** Directorio público de negocios registrados en Agendity con búsqueda, filtros y mapa.
 - **Sub-funcionalidades:**
   - Búsqueda por nombre y ciudad
   - Filtros por tipo (Todas, Barberías, Salones, Spa, Uñas)
@@ -262,7 +262,7 @@ Estas funcionalidades están disponibles en todos los planes, incluido el trial 
 - **Descripción:** Instalable desde el navegador en Android/iOS. Funciona como app nativa desde la pantalla de inicio.
 
 #### Panel de superusuario
-- **Descripción:** Panel de administración interno para el equipo de Agendify.
+- **Descripción:** Panel de administración interno para el equipo de Agendity.
 - **Funciones:** Dashboard global, gestión de negocios, usuarios, planes, suscripciones, citas, reseñas, clientes.
 
 #### Protección contra abuso
@@ -344,7 +344,7 @@ Las siguientes funcionalidades están bloqueadas para el plan Básico:
 - **Vistas por estado:** Pendiente de pago (instrucciones), Pago en revisión, Confirmada (ticket VIP con QR), Check-in completado, Cancelada.
 
 #### Negocio destacado en mapa
-- **Descripción:** El negocio aparece destacado en el directorio/explorador de Agendify con badge "Destacado" y ordenamiento preferente.
+- **Descripción:** El negocio aparece destacado en el directorio/explorador de Agendity con badge "Destacado" y ordenamiento preferente.
 - **Restricción:** Solo Pro+. Negocios Pro+ aparecen primero en resultados.
 
 ### 3.3 Soporte

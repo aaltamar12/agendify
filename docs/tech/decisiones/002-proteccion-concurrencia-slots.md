@@ -2,7 +2,7 @@
 
 > **Fecha:** 2026-03-16
 > **Estado:** Aceptada
-> **Contexto:** Sistema de reservas publicas de Agendify
+> **Contexto:** Sistema de reservas publicas de Agendity
 
 ## Problema
 
