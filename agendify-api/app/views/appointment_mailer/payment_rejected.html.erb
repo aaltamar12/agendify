@@ -1,0 +1,41 @@
+<h2>Tu comprobante fue rechazado</h2>
+
+<p>Hola, <%= @customer.name %>. Tu comprobante de pago para tu cita en <strong><%= @business.name %></strong> fue rechazado.</p>
+
+<% if @reason.present? %>
+  <div style="background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 12px 16px; margin: 16px 0;">
+    <p style="margin: 0; color: #991b1b;"><strong>Motivo:</strong> <%= @reason %></p>
+  </div>
+<% end %>
+
+<table class="detail-table">
+  <tr>
+    <td>Servicio</td>
+    <td><%= @service.name %></td>
+  </tr>
+  <tr>
+    <td>Profesional</td>
+    <td><%= @employee.name %></td>
+  </tr>
+  <tr>
+    <td>Fecha</td>
+    <td><%= I18n.l(@appointment.appointment_date, format: :long, locale: :es) rescue @appointment.appointment_date.strftime("%d/%m/%Y") %></td>
+  </tr>
+  <tr>
+    <td>Hora</td>
+    <td><%= @appointment.start_time.strftime("%I:%M %p") %></td>
+  </tr>
+  <tr>
+    <td>Precio</td>
+    <td>$<%= number_with_delimiter(@appointment.price.to_i) %> COP</td>
+  </tr>
+</table>
+
+<% if @appointment.ticket_code.present? %>
+  <p><strong>Tu código de ticket:</strong></p>
+  <div class="ticket-code"><%= @appointment.ticket_code %></div>
+<% end %>
+
+<p>Por favor, sube un nuevo comprobante de pago desde la página de tu ticket para que el negocio pueda confirmar tu cita.</p>
+
+<p>¡Gracias!</p>

@@ -1,0 +1,12 @@
+<h2>Hola, <%= @business.name %></h2>
+
+<p>Te recordamos que tu pago de suscripción al plan <strong><%= @plan.name %></strong> vence el <strong><%= @order.due_date.strftime('%d/%m/%Y') %></strong>.</p>
+
+<p>
+  <strong>Monto:</strong> $<%= number_with_delimiter(@order.amount.to_i) %> COP<br>
+  <strong>Período:</strong> <%= @order.period_start.strftime('%d/%m/%Y') %> — <%= @order.period_end.strftime('%d/%m/%Y') %>
+</p>
+
+<p>Realiza tu pago para que tu suscripción no se interrumpa.</p>
+
+<p>— El equipo de Agendify</p>

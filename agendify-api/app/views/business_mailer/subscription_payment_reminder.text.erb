@@ -1,0 +1,10 @@
+Hola, <%= @business.name %>
+
+Te recordamos que tu pago de suscripción al plan <%= @plan.name %> vence el <%= @order.due_date.strftime('%d/%m/%Y') %>.
+
+Monto: $<%= @order.amount.to_i %> COP
+Período: <%= @order.period_start.strftime('%d/%m/%Y') %> — <%= @order.period_end.strftime('%d/%m/%Y') %>
+
+Realiza tu pago para que tu suscripción no se interrumpa.
+
+— El equipo de Agendify

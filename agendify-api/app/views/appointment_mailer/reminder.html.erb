@@ -1,0 +1,33 @@
+<h2>Recordatorio de tu cita</h2>
+
+<p>¡Hola, <%= @customer.name %>! Te recordamos que tienes una cita programada para mañana en <strong><%= @business.name %></strong>.</p>
+
+<table class="detail-table">
+  <tr>
+    <td>Servicio</td>
+    <td><%= @service.name %></td>
+  </tr>
+  <tr>
+    <td>Profesional</td>
+    <td><%= @employee.name %></td>
+  </tr>
+  <tr>
+    <td>Fecha</td>
+    <td><%= I18n.l(@appointment.appointment_date, format: :long, locale: :es) rescue @appointment.appointment_date.strftime("%d/%m/%Y") %></td>
+  </tr>
+  <tr>
+    <td>Hora</td>
+    <td><%= @appointment.start_time.strftime("%I:%M %p") %></td>
+  </tr>
+  <tr>
+    <td>Lugar</td>
+    <td><%= @business.name %><%= " — #{@business.address}" if @business.address.present? %></td>
+  </tr>
+</table>
+
+<% if @appointment.ticket_code.present? %>
+  <p><strong>Tu código de ticket:</strong></p>
+  <div class="ticket-code"><%= @appointment.ticket_code %></div>
+<% end %>
+
+<p>¡Te esperamos!</p>

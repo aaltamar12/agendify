@@ -1,0 +1,112 @@
+# frozen_string_literal: true
+
+Rails.application.routes.draw do
+  # ActiveAdmin panel
+  ActiveAdmin.routes(self)
+
+  # Admin session-based authentication (separate from API JWT auth)
+  get  "admin/login",  to: "admin/sessions#new",     as: :admin_login
+  post "admin/login",  to: "admin/sessions#create",  as: :admin_create_session
+  get  "admin/logout", to: "admin/sessions#destroy", as: :admin_logout
+
+  # Health check for load balancers and uptime monitors
+  get "up" => "rails/health#show", as: :rails_health_check
+
+  namespace :api do
+    namespace :v1 do
+      # Auth
+      post "auth/login",    to: "auth#login"
+      post "auth/register", to: "auth#register"
+      post "auth/refresh",  to: "auth#refresh"
+      get  "auth/me",       to: "auth#me"
+      delete "auth/logout", to: "auth#logout"
+
+      # Business (singular resource — current user's business)
+      resource :business, only: %i[show update] do
+        post :upload_logo, on: :member
+        post :onboarding, on: :member
+      end
+
+      # Resources scoped to business
+      resources :services
+      resources :employees
+      resources :customers, only: %i[index show]
+
+      resources :appointments do
+        collection do
+          post :checkin_by_code
+        end
+        member do
+          post :confirm
+          post :checkin
+          post :cancel
+          post :complete
+          post :remind_payment
+        end
+      end
+
+      # Payments on appointments
+      post "appointments/:appointment_id/payments/submit", to: "payments#submit"
+
+      resources :payments, only: [] do
+        member do
+          post :approve
+          post :reject
+        end
+      end
+
+      resources :notifications, only: [:index] do
+        post :mark_read, on: :member
+        collection do
+          post :mark_all_read
+          get :unread_count
+        end
+      end
+
+      resources :reviews, only: %i[index]
+
+      resource :business_hours, only: %i[show update]
+      resources :blocked_slots, only: %i[index show create update destroy]
+
+      # Reports
+      get "reports/summary",            to: "reports#summary"
+      get "reports/revenue",            to: "reports#revenue"
+      get "reports/top_services",       to: "reports#top_services"
+      get "reports/top_employees",      to: "reports#top_employees"
+      get "reports/frequent_customers", to: "reports#frequent_customers"
+
+      # QR
+      post "qr/generate", to: "qr#generate"
+
+      # Admin endpoints (superadmin only)
+      namespace :admin do
+        get  "businesses", to: "businesses#index"
+        post "impersonate", to: "impersonation#create"
+        post "stop_impersonation", to: "impersonation#destroy"
+      end
+
+      # Locations (no auth required)
+      get "locations/countries", to: "locations#countries"
+      get "locations/states",   to: "locations#states"
+      get "locations/cities",   to: "locations#cities"
+
+      # Public endpoints (no auth required)
+      namespace :public do
+        # Static routes first (before :slug catch-all)
+        get  "tickets/:code",        to: "tickets#show"
+        post "tickets/:code/cancel",  to: "tickets#cancel"
+        post "tickets/:code/payment", to: "tickets#submit_payment"
+        get  "explore",            to: "explore#index"
+        # Slug-based routes (frontend uses /api/v1/public/:slug)
+        get  "customer_lookup",    to: "bookings#customer_lookup"
+        get  "cities",             to: "explore#cities"
+        get  ":slug",              to: "businesses#show"
+        get  ":slug/availability", to: "businesses#availability"
+        get  ":slug/check_slot",   to: "bookings#check_slot"
+        post ":slug/book",         to: "bookings#create"
+        post ":slug/lock_slot",    to: "bookings#lock_slot"
+        post ":slug/unlock_slot",  to: "bookings#unlock_slot"
+      end
+    end
+  end
+end

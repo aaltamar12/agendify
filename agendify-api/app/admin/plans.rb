@@ -1,0 +1,49 @@
+# frozen_string_literal: true
+
+ActiveAdmin.register Plan do
+  permit_params :name, :price_monthly, :max_employees, :max_services,
+                :max_reservations_month, :max_customers,
+                :ai_features, :ticket_digital, :advanced_reports,
+                :brand_customization, :featured_listing, :priority_support
+
+  # -- Index --
+  index do
+    selectable_column
+    id_column
+    column :name
+    column(:price_monthly) { |p| "$#{p.price_monthly.to_f.round(0)} COP" }
+    column :max_employees
+    column :max_services
+    column :max_reservations_month
+    column :ai_features
+    column :ticket_digital
+    column :advanced_reports
+    actions
+  end
+
+  # -- Filters --
+  filter :name
+  filter :ai_features
+  filter :ticket_digital
+
+  # -- Form --
+  form do |f|
+    f.inputs "Plan Details" do
+      f.input :name
+      f.input :price_monthly
+      f.input :max_employees
+      f.input :max_services
+      f.input :max_reservations_month
+      f.input :max_customers
+    end
+    f.inputs "Features" do
+      f.input :ai_features
+      f.input :ticket_digital
+      f.input :advanced_reports
+      f.input :brand_customization
+      f.input :featured_listing
+      f.input :priority_support
+    end
+    f.actions
+  end
+end

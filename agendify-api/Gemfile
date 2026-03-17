@@ -1,0 +1,79 @@
+source "https://rubygems.org"
+
+gem "rails", "~> 8.0.4"
+gem "pg", "~> 1.1"
+gem "puma", ">= 5.0"
+gem "tzinfo-data", platforms: %i[ windows jruby ]
+gem "bootsnap", require: false
+
+# Auth
+gem "devise"
+gem "devise-jwt"
+
+# Authorization
+gem "pundit"
+
+# CORS
+gem "rack-cors"
+
+# Pagination
+gem "pagy"
+
+# Slugs
+gem "friendly_id"
+
+# Geocoding
+gem "geocoder"
+
+# Geographic data (countries, states, cities)
+gem "city-state"
+
+# Background jobs
+gem "sidekiq", "~> 7.0"
+
+# Redis
+gem "redis"
+
+# Real-time (NATS)
+gem "nats-pure"
+
+# Serialization
+gem "blueprinter"
+
+# File uploads
+gem "aws-sdk-s3", require: false
+
+# Rate limiting
+gem "rack-attack"
+
+# Admin
+gem "activeadmin"
+gem "activeadmin_addons"
+gem "sprockets-rails"
+gem "sassc-rails"
+
+# Charts & date grouping (ActiveAdmin dashboard)
+gem "chartkick"
+gem "groupdate"
+
+# Markdown rendering
+gem "redcarpet"
+
+# Environment variables
+gem "dotenv-rails"
+
+group :development, :test do
+  gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
+  gem "brakeman", require: false
+  gem "rubocop-rails-omakase", require: false
+  gem "rspec-rails"
+  gem "factory_bot_rails"
+  gem "faker"
+end
+
+group :test do
+  gem "shoulda-matchers"
+  gem "database_cleaner-active_record"
+end
+
+gem "connection_pool", "~> 2.4"

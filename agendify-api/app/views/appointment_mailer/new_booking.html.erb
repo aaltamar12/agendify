@@ -1,0 +1,36 @@
+<h2>Nueva reserva recibida</h2>
+
+<p>Se ha recibido una nueva reserva en <strong><%= @business.name %></strong>.</p>
+
+<table class="detail-table">
+  <tr>
+    <td>Cliente</td>
+    <td><%= @customer.name %></td>
+  </tr>
+  <tr>
+    <td>Servicio</td>
+    <td><%= @service.name %></td>
+  </tr>
+  <tr>
+    <td>Profesional</td>
+    <td><%= @employee.name %></td>
+  </tr>
+  <tr>
+    <td>Fecha</td>
+    <td><%= I18n.l(@appointment.appointment_date, format: :long, locale: :es) rescue @appointment.appointment_date.strftime("%d/%m/%Y") %></td>
+  </tr>
+  <tr>
+    <td>Hora</td>
+    <td><%= @appointment.start_time.strftime("%I:%M %p") %></td>
+  </tr>
+  <tr>
+    <td>Precio</td>
+    <td>$<%= number_with_delimiter(@appointment.price.to_i) %> COP</td>
+  </tr>
+  <tr>
+    <td>Estado</td>
+    <td>Pendiente de pago</td>
+  </tr>
+</table>
+
+<p>Revisa tu panel de Agendify para gestionar esta reserva.</p>

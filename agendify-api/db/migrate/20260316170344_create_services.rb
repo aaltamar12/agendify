@@ -1,0 +1,18 @@
+# frozen_string_literal: true
+
+class CreateServices < ActiveRecord::Migration[8.0]
+  def change
+    create_table :services do |t|
+      t.references :business, null: false, foreign_key: true
+      t.string  :name, null: false
+      t.text    :description
+      t.decimal :price, precision: 10, scale: 2, null: false
+      t.integer :duration_minutes, null: false
+      t.boolean :active, default: true, null: false
+      t.string  :category
+      t.string  :image_url
+
+      t.timestamps
+    end
+  end
+end

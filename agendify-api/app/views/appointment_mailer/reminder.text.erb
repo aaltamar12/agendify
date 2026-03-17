@@ -1,0 +1,15 @@
+RECORDATORIO DE TU CITA
+=======================
+
+¡Hola, <%= @customer.name %>! Te recordamos que tienes una cita programada para mañana en <%= @business.name %>.
+
+Servicio: <%= @service.name %>
+Profesional: <%= @employee.name %>
+Fecha: <%= @appointment.appointment_date.strftime("%d/%m/%Y") %>
+Hora: <%= @appointment.start_time.strftime("%I:%M %p") %>
+Lugar: <%= @business.name %><%= " — #{@business.address}" if @business.address.present? %>
+<% if @appointment.ticket_code.present? %>
+Código de ticket: <%= @appointment.ticket_code %>
+<% end %>
+
+¡Te esperamos!

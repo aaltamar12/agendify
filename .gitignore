@@ -12,10 +12,6 @@ Thumbs.db
 # === Ruby LSP ===
 .ruby-lsp/
 
-# === Subrepos (tienen su propio git) ===
-agendify-api/
-agendify-web/
-
 # === Environment / Secrets ===
 .env
 .env.local

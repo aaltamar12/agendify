@@ -1,0 +1,17 @@
+Tu cita está pendiente de pago
+
+¡Hola, <%= @customer.name %>! Tu cita en <%= @business.name %> está pendiente de pago. Sube tu comprobante para confirmarla.
+
+Servicio: <%= @service.name %>
+Profesional: <%= @employee.name %>
+Fecha: <%= @appointment.appointment_date.strftime("%d/%m/%Y") %>
+Hora: <%= @appointment.start_time.strftime("%I:%M %p") %>
+Precio: $<%= @appointment.price.to_i %> COP
+
+<% if @appointment.ticket_code.present? %>
+Tu código de ticket: <%= @appointment.ticket_code %>
+<% end %>
+
+Sube tu comprobante de pago para que el negocio pueda confirmar tu cita.
+
+¡Gracias!

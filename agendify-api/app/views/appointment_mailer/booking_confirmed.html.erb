@@ -1,0 +1,34 @@
+<h2>Tu cita está confirmada</h2>
+
+<p>¡Hola, <%= @customer.name %>! Tu cita en <strong><%= @business.name %></strong> ha sido confirmada.</p>
+
+<table class="detail-table">
+  <tr>
+    <td>Servicio</td>
+    <td><%= @service.name %></td>
+  </tr>
+  <tr>
+    <td>Profesional</td>
+    <td><%= @employee.name %></td>
+  </tr>
+  <tr>
+    <td>Fecha</td>
+    <td><%= I18n.l(@appointment.appointment_date, format: :long, locale: :es) rescue @appointment.appointment_date.strftime("%d/%m/%Y") %></td>
+  </tr>
+  <tr>
+    <td>Hora</td>
+    <td><%= @appointment.start_time.strftime("%I:%M %p") %></td>
+  </tr>
+  <tr>
+    <td>Precio</td>
+    <td>$<%= number_with_delimiter(@appointment.price.to_i) %> COP</td>
+  </tr>
+</table>
+
+<% if @appointment.ticket_code.present? %>
+  <p><strong>Tu código de ticket:</strong></p>
+  <div class="ticket-code"><%= @appointment.ticket_code %></div>
+  <p>Presenta este código al llegar al negocio.</p>
+<% end %>
+
+<p>¡Te esperamos!</p>

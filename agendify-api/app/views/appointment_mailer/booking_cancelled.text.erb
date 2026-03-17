@@ -1,0 +1,16 @@
+CITA CANCELADA
+==============
+
+La siguiente cita ha sido cancelada:
+
+Cliente: <%= @customer.name %>
+Servicio: <%= @service.name %>
+Profesional: <%= @employee.name %>
+Fecha: <%= @appointment.appointment_date.strftime("%d/%m/%Y") %>
+Hora: <%= @appointment.start_time.strftime("%I:%M %p") %>
+Precio: $<%= @appointment.price.to_i %> COP
+<% if @appointment.cancellation_reason.present? %>
+Motivo: <%= @appointment.cancellation_reason %>
+<% end %>
+
+Si tienes preguntas, contacta al negocio directamente.
