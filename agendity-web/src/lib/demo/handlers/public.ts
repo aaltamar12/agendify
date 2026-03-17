@@ -9,6 +9,74 @@ function generateTicketCode(): string {
   return 'TK' + Math.random().toString(36).substring(2, 8).toUpperCase();
 }
 
+// ---------------------------------------------------------------
+// Static routes MUST be registered before :slug to avoid
+// the wildcard capturing "explore", "cities", etc. as a slug.
+// ---------------------------------------------------------------
+
+// GET /api/v1/public/explore
+route('get', '/api/v1/public/explore', ({ query }) => {
+  const store = getStore();
+
+  return {
+    data: [store.business],
+    meta: {
+      current_page: 1,
+      total_pages: 1,
+      total_count: 1,
+      per_page: 20,
+    },
+  };
+});
+
+// GET /api/v1/public/cities
+route('get', '/api/v1/public/cities', () => {
+  return {
+    data: [
+      { name: 'Barranquilla', count: 1 },
+    ],
+  };
+});
+
+// GET /api/v1/public/customer_lookup
+route('get', '/api/v1/public/customer_lookup', ({ query }) => {
+  const store = getStore();
+  const email = query.email ?? '';
+  const customer = store.customers.find((c) => c.email === email);
+
+  if (customer) {
+    return { data: { name: customer.name, phone: customer.phone, email: customer.email } };
+  }
+
+  return { data: null };
+});
+
+// POST /api/v1/public/checkin_by_code
+route('post', '/api/v1/public/checkin_by_code', ({ body }) => {
+  const code = (body as any)?.ticket_code;
+  const store = getStore();
+  const apt = store.appointments.find((a) => a.ticket_code === code);
+
+  if (!apt) {
+    throw { status: 404, message: 'Ticket no encontrado' };
+  }
+
+  updateStore((s) => {
+    const a = s.appointments.find((x) => x.id === apt.id);
+    if (a) {
+      a.status = 'checked_in';
+      a.updated_at = new Date().toISOString();
+    }
+  });
+
+  const updated = getStore().appointments.find((a) => a.id === apt.id);
+  return { data: updated };
+});
+
+// ---------------------------------------------------------------
+// Dynamic :slug routes (must come AFTER static routes above)
+// ---------------------------------------------------------------
+
 // GET /api/v1/public/:slug
 route('get', '/api/v1/public/:slug', ({ params }) => {
   const store = getStore();
@@ -279,43 +347,6 @@ route('post', '/api/v1/public/tickets/:code/payment', ({ params }) => {
   return { data: { status: 'submitted', message: 'Comprobante recibido' } };
 });
 
-// GET /api/v1/public/explore
-route('get', '/api/v1/public/explore', ({ query }) => {
-  const store = getStore();
-
-  return {
-    data: [store.business],
-    meta: {
-      current_page: 1,
-      total_pages: 1,
-      total_count: 1,
-      per_page: 20,
-    },
-  };
-});
-
-// GET /api/v1/public/cities
-route('get', '/api/v1/public/cities', () => {
-  return {
-    data: [
-      { name: 'Barranquilla', count: 1 },
-    ],
-  };
-});
-
-// GET /api/v1/public/customer_lookup
-route('get', '/api/v1/public/customer_lookup', ({ query }) => {
-  const store = getStore();
-  const email = query.email ?? '';
-  const customer = store.customers.find((c) => c.email === email);
-
-  if (customer) {
-    return { data: { name: customer.name, phone: customer.phone, email: customer.email } };
-  }
-
-  return { data: null };
-});
-
 // POST /api/v1/public/:slug/lock_slot
 route('post', '/api/v1/public/:slug/lock_slot', () => {
   return { data: { locked: true, expires_in: 300 } };
@@ -324,26 +355,4 @@ route('post', '/api/v1/public/:slug/lock_slot', () => {
 // POST /api/v1/public/:slug/unlock_slot
 route('post', '/api/v1/public/:slug/unlock_slot', () => {
   return { data: { unlocked: true } };
-});
-
-// POST /api/v1/public/checkin_by_code
-route('post', '/api/v1/public/checkin_by_code', ({ body }) => {
-  const code = (body as any)?.ticket_code;
-  const store = getStore();
-  const apt = store.appointments.find((a) => a.ticket_code === code);
-
-  if (!apt) {
-    throw { status: 404, message: 'Ticket no encontrado' };
-  }
-
-  updateStore((s) => {
-    const a = s.appointments.find((x) => x.id === apt.id);
-    if (a) {
-      a.status = 'checked_in';
-      a.updated_at = new Date().toISOString();
-    }
-  });
-
-  const updated = getStore().appointments.find((a) => a.id === apt.id);
-  return { data: updated };
 });
