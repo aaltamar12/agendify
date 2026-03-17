@@ -52,6 +52,22 @@ function isPublicRoute(pathname: string): boolean {
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // If authenticated user visits /login or /register, redirect to dashboard
+  if (pathname === '/login' || pathname === '/register') {
+    const authCookie = request.cookies.get('agendity-auth')?.value;
+    if (authCookie) {
+      try {
+        const parsed = JSON.parse(authCookie);
+        if (parsed?.state?.token) {
+          return NextResponse.redirect(new URL('/dashboard/agenda', request.url));
+        }
+      } catch {
+        // Invalid cookie, let them through to login
+      }
+    }
+    return NextResponse.next();
+  }
+
   // Allow public routes
   if (isPublicRoute(pathname)) {
     return NextResponse.next();

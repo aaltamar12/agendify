@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { Suspense, useState, useCallback, useEffect } from 'react';
 import {
   ChevronLeft,
   ChevronRight,
@@ -27,6 +27,14 @@ import type { Appointment, Employee, ApiResponse } from '@/lib/api/types';
 type CalendarView = 'timeGridDay' | 'timeGridWeek';
 
 export default function AgendaPage() {
+  return (
+    <Suspense>
+      <AgendaContent />
+    </Suspense>
+  );
+}
+
+function AgendaContent() {
   const addToast = useUIStore((s) => s.addToast);
   const searchParams = useSearchParams();
 

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import AppProviders from "@/providers/app-providers";
 import "./globals.css";
@@ -8,12 +8,78 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
-export const metadata: Metadata = {
-  title: "Agendity",
-  description:
-    "Plataforma de gesti\u00f3n de citas para barber\u00edas y salones",
-  manifest: "/manifest.json",
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://agendity.co";
+
+export const viewport: Viewport = {
   themeColor: "#7C3AED",
+  width: "device-width",
+  initialScale: 1,
+};
+
+export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "Agendity — Agenda de citas para barberías y salones",
+    template: "%s | Agendity",
+  },
+  description:
+    "Gestiona las citas de tu barbería o salón de belleza. Reservas online 24/7, agenda digital, control de ingresos y reportes. Empieza gratis.",
+  manifest: "/manifest.json",
+  keywords: [
+    "agenda de citas",
+    "reservas online barbería",
+    "software para salón de belleza",
+    "gestión de citas",
+    "agenda digital barbería",
+    "sistema de reservas",
+    "barbería Colombia",
+    "salón de belleza Colombia",
+    "Agendity",
+  ],
+  authors: [{ name: "Agendity", url: SITE_URL }],
+  creator: "Agendity",
+  openGraph: {
+    type: "website",
+    locale: "es_CO",
+    siteName: "Agendity",
+    title: "Agendity — Agenda de citas para barberías y salones",
+    description:
+      "Tus clientes reservan en segundos, tú te enfocas en lo que mejor haces. Reservas online 24/7, control de ingresos y reportes.",
+    url: SITE_URL,
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Agendity — Gestiona tu negocio, simplifica tus citas",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Agendity — Agenda de citas para barberías y salones",
+    description:
+      "Tus clientes reservan en segundos, tú te enfocas en lo que mejor haces. Empieza gratis.",
+    images: ["/og-image.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  alternates: {
+    canonical: SITE_URL,
+  },
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/icons/apple-touch-icon.png",
+  },
 };
 
 export default function RootLayout({
