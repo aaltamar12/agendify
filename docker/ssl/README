@@ -1,0 +1,3 @@
+# SSL certificates go here
+# Use certbot to generate:
+# certbot certonly --standalone -d agendify.com

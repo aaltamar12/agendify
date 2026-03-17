@@ -1,0 +1,28 @@
+# === OS ===
+.DS_Store
+Thumbs.db
+
+# === IDE / Editors ===
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# === Ruby LSP ===
+.ruby-lsp/
+
+# === Subrepos (tienen su propio git) ===
+agendify-api/
+agendify-web/
+
+# === Environment / Secrets ===
+.env
+.env.local
+.env.production
+*.pem
+*.key
+
+# === Temp ===
+*.log
+tmp/
