@@ -19,6 +19,9 @@ Thumbs.db
 *.pem
 *.key
 
+# === Build artifacts ===
+.next/
+
 # === Temp ===
 *.log
 tmp/

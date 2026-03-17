@@ -70,9 +70,9 @@ const FEATURES = [
   },
   {
     icon: Bell,
-    title: 'Recordatorios automáticos',
+    title: 'Notificaciones en tiempo real',
     description:
-      'Tus clientes reciben recordatorios por WhatsApp. Menos citas perdidas, más ingresos.',
+      'Recibe alertas instantáneas de nuevas reservas, pagos y cancelaciones. Todo llega a tu dashboard al momento.',
   },
   {
     icon: Shield,
@@ -115,11 +115,11 @@ const TESTIMONIALS = [
 const FAQ = [
   {
     question: '¿Agendity es gratis?',
-    answer: 'Sí, puedes usar Agendity gratis por 30 días con todas las funciones. Después eliges el plan que mejor se ajuste a tu negocio.',
+    answer: 'Sí. Tienes 30 días gratis con acceso completo al Plan Profesional, sin necesidad de tarjeta de crédito. Después eliges el plan que mejor se ajuste a tu negocio.',
   },
   {
     question: '¿Mis clientes necesitan descargar una app?',
-    answer: 'No. Tus clientes reservan desde tu link personalizado, directo en el navegador de su celular. Sin descargas, sin registros.',
+    answer: 'No. Tus clientes reservan desde tu link personalizado, directo en el navegador de su celular. Sin descargas, sin crear cuenta. Solo eligen servicio, empleado, fecha y listo.',
   },
   {
     question: '¿Qué tipo de negocios pueden usar Agendity?',
@@ -127,11 +127,27 @@ const FAQ = [
   },
   {
     question: '¿Puedo gestionar varios empleados?',
-    answer: 'Sí. Cada empleado tiene su propia agenda, servicios y horarios. Tú ves todo desde un solo panel.',
+    answer: 'Sí. Cada empleado tiene su propia agenda, servicios asignados y horarios de trabajo. Tú ves todo desde un solo panel y puedes filtrar la agenda por empleado.',
   },
   {
     question: '¿Cómo reciben las citas mis clientes?',
-    answer: 'Cada reserva genera un ticket digital con código QR que el cliente recibe al instante. También puedes activar recordatorios por WhatsApp.',
+    answer: 'Al reservar, el cliente ve un código de ticket en pantalla. Con el Plan Profesional, además recibe un ticket digital estilo VIP con código QR que puedes escanear cuando llegue al local.',
+  },
+  {
+    question: '¿Cómo funciona el pago de las citas?',
+    answer: 'El cliente paga directamente a tu negocio por transferencia o efectivo. Tú configuras tus datos de pago (Nequi, Daviplata, Bancolombia) y el cliente sube el comprobante. Tú lo apruebas desde el dashboard.',
+  },
+  {
+    question: '¿Qué pasa si un cliente cancela?',
+    answer: 'Tú defines la política de cancelación de tu negocio: el tiempo límite para cancelar sin penalización y el porcentaje de cobro por no-show. El cliente puede cancelar desde su ticket.',
+  },
+  {
+    question: '¿Puedo ver reportes de mi negocio?',
+    answer: 'Sí. Tienes reportes de ingresos por período, servicios más solicitados, empleados más ocupados y clientes frecuentes. Todo en tiempo real desde tu dashboard.',
+  },
+  {
+    question: '¿Funciona en celular?',
+    answer: 'Sí. Agendity es una app web que funciona en cualquier celular, tablet o computadora. Puedes instalarla en tu pantalla de inicio como si fuera una app nativa.',
   },
 ];
 
