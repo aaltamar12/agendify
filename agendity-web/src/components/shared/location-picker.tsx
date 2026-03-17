@@ -42,8 +42,15 @@ export function LocationPicker({
 
     const initMap = async () => {
       const L = (await import('leaflet')).default;
-      // @ts-expect-error -- CSS import for side effects
-      await import('leaflet/dist/leaflet.css');
+
+      // Inject Leaflet CSS via link tag (dynamic CSS imports fail in production)
+      if (!document.getElementById('leaflet-css')) {
+        const link = document.createElement('link');
+        link.id = 'leaflet-css';
+        link.rel = 'stylesheet';
+        link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+        document.head.appendChild(link);
+      }
 
       if (cancelled || !mapContainerRef.current) return;
 
