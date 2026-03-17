@@ -15,6 +15,7 @@ module Api
 
       before_action :authenticate_user!
       before_action :require_business!
+      before_action :render_empty_for_admin_without_business!
 
       # --- Error handling ---
 
@@ -42,10 +43,25 @@ module Api
       end
 
       def require_business!
-        return if current_user&.admin?
+        return if current_user&.admin? && !current_business
+          # Admin without business: skip guard but controllers must handle nil current_business
         return if current_business
 
         render_error("No business associated with this account", status: :forbidden)
+      end
+
+      # Returns true if current user is an admin without an associated business
+      # (i.e., not impersonating). Controllers use this to return empty data.
+      def admin_without_business?
+        current_user&.admin? && current_business.nil?
+      end
+
+      # Admins without a business (not impersonating) get empty responses
+      # instead of 500s from controllers that scope by current_business.
+      def render_empty_for_admin_without_business!
+        return unless admin_without_business?
+
+        render json: { data: [], meta: { current_page: 1, total_pages: 0, total_count: 0, per_page: 10 } }
       end
 
       # --- Helpers ---

@@ -6,6 +6,7 @@ module Api
       # Lists businesses for the admin impersonation dropdown.
       # SRP: Only handles the admin business search HTTP concern.
       class BusinessesController < BaseController
+        skip_before_action :render_empty_for_admin_without_business!
         before_action :require_admin!
 
         # GET /api/v1/admin/businesses?search=barber

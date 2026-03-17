@@ -15,6 +15,7 @@ module Api
       #   5. Random active business (for spot-checking)
       # This would require a new endpoint: GET /api/v1/admin/suggested_businesses
       class ImpersonationController < BaseController
+        skip_before_action :render_empty_for_admin_without_business!
         before_action :require_admin!
 
         # POST /api/v1/admin/impersonate

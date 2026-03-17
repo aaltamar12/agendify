@@ -5,8 +5,12 @@ module Api
     # Manages the current user's business (singular resource).
     # SRP: Only handles HTTP concerns for business management.
     class BusinessesController < BaseController
+      skip_before_action :render_empty_for_admin_without_business!, only: :show
+
       # GET /api/v1/business
       def show
+        return render_success(nil) if admin_without_business?
+
         render_success(BusinessSerializer.render_as_hash(current_business))
       end
 

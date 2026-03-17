@@ -5,6 +5,8 @@ module Api
     # In-app notifications for the current business.
     # SRP: Only handles HTTP concerns for notification listing and read-state management.
     class NotificationsController < BaseController
+      skip_before_action :render_empty_for_admin_without_business!, only: :unread_count
+
       # GET /api/v1/notifications
       def index
         notifications = current_business.notifications.order(created_at: :desc)
@@ -26,6 +28,8 @@ module Api
 
       # GET /api/v1/notifications/unread_count
       def unread_count
+        return render_success({ unread_count: 0 }) if admin_without_business?
+
         count = current_business.notifications.unread.count
         render_success({ unread_count: count })
       end
