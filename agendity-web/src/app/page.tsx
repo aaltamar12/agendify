@@ -12,6 +12,7 @@ import {
   ArrowRight,
   CheckCircle,
   Bell,
+  MessageCircle,
   Shield,
   Star,
   Zap,
@@ -69,10 +70,16 @@ const FEATURES = [
       'Cada cita genera un ticket digital con QR. Profesional, rápido y sin papel.',
   },
   {
+    icon: MessageCircle,
+    title: 'WhatsApp automático',
+    description:
+      'Confirmaciones y recordatorios por WhatsApp para tus clientes. Menos citas olvidadas, más sillas llenas. Disponible en Plan Profesional.',
+  },
+  {
     icon: Bell,
     title: 'Notificaciones en tiempo real',
     description:
-      'Recibe alertas instantáneas de nuevas reservas, pagos y cancelaciones. Todo llega a tu dashboard al momento.',
+      'Recibe alertas instantáneas de nuevas reservas, pagos y cancelaciones directo en tu dashboard.',
   },
   {
     icon: Shield,
@@ -293,6 +300,7 @@ export default function Home() {
                   <div className="mb-8 space-y-3">
                     {[
                       { icon: Calendar, text: 'Agenda digital que se llena sola' },
+                      { icon: MessageCircle, text: 'Confirmaciones y recordatorios por WhatsApp' },
                       { icon: DollarSign, text: 'Control de ingresos y pagos en tiempo real' },
                       { icon: Users, text: 'Gestión de empleados y horarios' },
                       { icon: Smartphone, text: 'Tus clientes reservan desde el celular' },
