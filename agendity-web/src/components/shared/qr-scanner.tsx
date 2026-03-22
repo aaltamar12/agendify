@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { Camera, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -10,57 +10,59 @@ interface QrScannerProps {
 }
 
 export function QrScanner({ onScan, onClose }: QrScannerProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const scannerRef = useRef<unknown>(null);
+  const scannerRef = useRef<{ stop: () => Promise<void> } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const hasScanned = useRef(false);
+
+  const handleScan = useCallback((code: string) => {
+    if (hasScanned.current) return;
+    hasScanned.current = true;
+    onScan(code);
+  }, [onScan]);
 
   useEffect(() => {
-    let scanner: { clear: () => Promise<void>; stop: () => Promise<void> } | null = null;
+    let mounted = true;
 
     async function startScanner() {
       try {
         const { Html5Qrcode } = await import('html5-qrcode');
-        const scannerId = 'qr-reader';
+        if (!mounted) return;
 
-        if (!document.getElementById(scannerId)) return;
+        const el = document.getElementById('qr-reader');
+        if (!el) return;
 
-        const html5QrCode = new Html5Qrcode(scannerId);
-        scanner = html5QrCode as unknown as typeof scanner;
+        const html5QrCode = new Html5Qrcode('qr-reader');
         scannerRef.current = html5QrCode;
 
         await html5QrCode.start(
           { facingMode: 'environment' },
-          {
-            fps: 10,
-            qrbox: { width: 250, height: 250 },
-            aspectRatio: 1,
-          },
+          { fps: 10, qrbox: { width: 200, height: 200 } },
           (decodedText: string) => {
-            onScan(decodedText);
+            handleScan(decodedText);
             html5QrCode.stop().catch(() => {});
           },
-          () => {
-            // QR not found in frame — ignore
-          },
+          () => {},
         );
       } catch (err) {
         console.error('QR Scanner error:', err);
-        setError('No se pudo acceder a la camara. Verifica los permisos.');
+        if (mounted) setError('No se pudo acceder a la camara. Verifica los permisos.');
       }
     }
 
     startScanner();
 
     return () => {
-      if (scanner) {
-        scanner.stop().catch(() => {});
-      }
+      mounted = false;
+      scannerRef.current?.stop().catch(() => {});
     };
-  }, [onScan]);
+  }, [handleScan]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-      <div className="mx-4 w-full max-w-sm overflow-hidden rounded-xl bg-white shadow-xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70" onClick={onClose}>
+      <div
+        className="mx-4 w-80 overflow-hidden rounded-xl bg-white shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
           <div className="flex items-center gap-2">
             <Camera className="h-5 w-5 text-violet-600" />
@@ -74,7 +76,7 @@ export function QrScanner({ onScan, onClose }: QrScannerProps) {
             <X className="h-5 w-5" />
           </button>
         </div>
-        <div className="p-4">
+        <div className="p-3">
           {error ? (
             <div className="py-8 text-center">
               <p className="mb-3 text-sm text-red-600">{error}</p>
@@ -86,10 +88,9 @@ export function QrScanner({ onScan, onClose }: QrScannerProps) {
             <>
               <div
                 id="qr-reader"
-                ref={containerRef}
-                className="overflow-hidden rounded-lg"
+                className="aspect-square overflow-hidden rounded-lg [&>canvas]:!hidden [&>img]:!hidden"
               />
-              <p className="mt-3 text-center text-xs text-gray-500">
+              <p className="mt-2 text-center text-xs text-gray-500">
                 Apunta la camara al codigo QR del ticket
               </p>
             </>
