@@ -35,16 +35,28 @@ module CashRegister
         close.save!
 
         @employee_payments.each do |ep|
+          employee = @business.employees.find(ep[:employee_id])
+          pending_prev = employee.pending_balance || 0
+          commission = (ep[:commission_amount] || 0).to_d
+          total_owed = commission + pending_prev
+          amount_paid = (ep[:amount_paid] || 0).to_d
+
           payment = close.employee_payments.find_or_initialize_by(employee_id: ep[:employee_id])
           payment.update!(
             appointments_count: ep[:appointments_count] || 0,
             total_earned: ep[:total_earned] || 0,
             commission_pct: ep[:commission_pct] || 0,
-            commission_amount: ep[:commission_amount] || 0,
-            amount_paid: ep[:amount_paid] || 0,
+            commission_amount: commission,
+            pending_from_previous: pending_prev,
+            total_owed: total_owed,
+            amount_paid: amount_paid,
             payment_method: ep[:payment_method] || :cash,
             notes: ep[:notes]
           )
+
+          # Update employee pending balance: if paid less than owed, carry forward
+          new_pending = [total_owed - amount_paid, 0].max
+          employee.update!(pending_balance: new_pending)
         end
       end
 

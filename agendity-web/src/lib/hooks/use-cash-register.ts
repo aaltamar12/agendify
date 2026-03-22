@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { get, post } from '@/lib/api/client';
+import apiClient, { get, post, del } from '@/lib/api/client';
 import { ENDPOINTS } from '@/lib/api/endpoints';
 import type { ApiResponse } from '@/lib/api/types';
 
@@ -19,7 +19,8 @@ interface EmployeeSummary {
   total_earned: number;
   commission_pct: number;
   commission_amount: number;
-  suggested_payment: number;
+  pending_from_previous: number;
+  total_owed: number;
   appointments: AppointmentDetail[];
 }
 
@@ -39,8 +40,12 @@ interface EmployeePaymentData {
   total_earned: number;
   commission_pct: number;
   commission_amount: number;
+  pending_from_previous?: number;
+  total_owed?: number;
   amount_paid: number;
   payment_method: string;
+  proof_url?: string | null;
+  remaining_debt?: number;
   notes?: string;
 }
 
@@ -80,6 +85,37 @@ export function useCloseCashRegister() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cash-register-today'] });
       queryClient.invalidateQueries({ queryKey: ['cash-register-history'] });
+    },
+  });
+}
+
+export function useUploadPaymentProof() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ employeePaymentId, file }: { employeePaymentId: number; file: File }) => {
+      const formData = new FormData();
+      formData.append('proof', file);
+      formData.append('employee_payment_id', String(employeePaymentId));
+      const response = await apiClient.post(ENDPOINTS.CASH_REGISTER.uploadProof, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cash-register'] });
+    },
+  });
+}
+
+export function useDeletePaymentProof() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (employeePaymentId: number) =>
+      del(ENDPOINTS.CASH_REGISTER.deleteProof, { params: { employee_payment_id: employeePaymentId } }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cash-register'] });
     },
   });
 }

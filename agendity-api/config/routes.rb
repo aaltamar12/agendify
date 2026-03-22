@@ -82,6 +82,8 @@ Rails.application.routes.draw do
           get :today
           post :close
           get :history
+          post :upload_proof
+          delete :delete_proof
         end
       end
 

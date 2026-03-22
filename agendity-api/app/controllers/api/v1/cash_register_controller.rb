@@ -53,6 +53,30 @@ module Api
         render_success(CashRegisterCloseSerializer.render_as_hash(close, view: :detailed))
       end
 
+      # POST /api/v1/cash_register/upload_proof
+      def upload_proof
+        payment = EmployeePayment.joins(:cash_register_close)
+          .where(cash_register_closes: { business_id: current_business.id })
+          .find(params[:employee_payment_id])
+
+        unless params[:proof].present?
+          return render_error("No se envió ningún archivo", status: :unprocessable_entity)
+        end
+
+        payment.proof.attach(params[:proof])
+        render_success({ attached: payment.proof.attached?, employee_payment_id: payment.id })
+      end
+
+      # DELETE /api/v1/cash_register/delete_proof
+      def delete_proof
+        payment = EmployeePayment.joins(:cash_register_close)
+          .where(cash_register_closes: { business_id: current_business.id })
+          .find(params[:employee_payment_id])
+
+        payment.proof.purge if payment.proof.attached?
+        render_success({ deleted: true, employee_payment_id: payment.id })
+      end
+
       private
 
       def require_professional_plan!

@@ -1,7 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
-import { DollarSign, Users, Calendar, CheckCircle, History, ChevronDown, ChevronRight } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import {
+  DollarSign, Users, Calendar, CheckCircle, History,
+  ChevronDown, ChevronRight, Upload, Check, X, AlertTriangle, Paperclip,
+} from 'lucide-react';
 import Link from 'next/link';
 import { Button, Card, Spinner } from '@/components/ui';
 import { UpgradeBanner } from '@/components/shared/upgrade-banner';
@@ -9,7 +12,7 @@ import { useDailySummary, useCloseCashRegister } from '@/lib/hooks/use-cash-regi
 import { useCurrentSubscription } from '@/lib/hooks/use-subscription';
 import { useUIStore } from '@/lib/stores/ui-store';
 import { ADVANCED_REPORTS_PLANS } from '@/lib/constants';
-import type { EmployeePaymentData } from '@/lib/hooks/use-cash-register';
+import type { EmployeePaymentData, EmployeeSummary } from '@/lib/hooks/use-cash-register';
 
 export default function CashRegisterPage() {
   const { planSlug } = useCurrentSubscription();
@@ -27,6 +30,15 @@ export default function CashRegisterPage() {
   return <CashRegisterContent />;
 }
 
+interface PaymentState {
+  method: 'cash' | 'transfer';
+  confirmed: boolean;
+  proofFile: File | null;
+  proofPreview: string | null;
+  amount_paid: number;
+  notes: string;
+}
+
 function CashRegisterContent() {
   const today = new Date().toISOString().split('T')[0];
   const [selectedDate, setSelectedDate] = useState(today);
@@ -34,30 +46,57 @@ function CashRegisterContent() {
   const closeMutation = useCloseCashRegister();
   const { addToast } = useUIStore();
 
-  const [payments, setPayments] = useState<Record<number, { amount_paid: number; payment_method: string; notes: string }>>({});
+  const [payments, setPayments] = useState<Record<number, PaymentState>>({});
   const [notes, setNotes] = useState('');
   const [expandedEmployee, setExpandedEmployee] = useState<number | null>(null);
 
-  const updatePayment = (employeeId: number, field: string, value: string | number) => {
+  const getPaymentState = (emp: EmployeeSummary): PaymentState => {
+    return payments[emp.employee_id] || {
+      method: 'cash',
+      confirmed: false,
+      proofFile: null,
+      proofPreview: null,
+      amount_paid: emp.total_owed,
+      notes: '',
+    };
+  };
+
+  const updatePaymentState = (employeeId: number, updates: Partial<PaymentState>) => {
     setPayments((prev) => ({
       ...prev,
-      [employeeId]: { ...prev[employeeId], [field]: value },
+      [employeeId]: { ...getPaymentStateById(employeeId), ...updates },
     }));
+  };
+
+  const getPaymentStateById = (employeeId: number): PaymentState => {
+    const emp = summary?.employees.find((e) => e.employee_id === employeeId);
+    return payments[employeeId] || {
+      method: 'cash',
+      confirmed: false,
+      proofFile: null,
+      proofPreview: null,
+      amount_paid: emp?.total_owed ?? 0,
+      notes: '',
+    };
   };
 
   const handleClose = async () => {
     if (!summary) return;
 
-    const employeePayments: EmployeePaymentData[] = summary.employees.map((emp) => ({
-      employee_id: emp.employee_id,
-      appointments_count: emp.appointments_count,
-      total_earned: emp.total_earned,
-      commission_pct: emp.commission_pct,
-      commission_amount: emp.commission_amount,
-      amount_paid: payments[emp.employee_id]?.amount_paid ?? emp.commission_amount,
-      payment_method: payments[emp.employee_id]?.payment_method ?? 'cash',
-      notes: payments[emp.employee_id]?.notes ?? '',
-    }));
+    const employeePayments: EmployeePaymentData[] = summary.employees.map((emp) => {
+      const state = getPaymentState(emp);
+      const isConfirmed = state.method === 'cash' ? state.confirmed : !!state.proofFile;
+      return {
+        employee_id: emp.employee_id,
+        appointments_count: emp.appointments_count,
+        total_earned: emp.total_earned,
+        commission_pct: emp.commission_pct,
+        commission_amount: emp.commission_amount,
+        amount_paid: isConfirmed ? state.amount_paid : 0,
+        payment_method: state.method,
+        notes: state.notes,
+      };
+    });
 
     try {
       await closeMutation.mutateAsync({
@@ -83,7 +122,6 @@ function CashRegisterContent() {
         </Link>
       </div>
 
-      {/* Date selector */}
       <div className="mb-6">
         <input
           type="date"
@@ -95,9 +133,7 @@ function CashRegisterContent() {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center py-12">
-          <Spinner size="lg" />
-        </div>
+        <div className="flex justify-center py-12"><Spinner size="lg" /></div>
       ) : !summary ? (
         <p className="text-gray-500">No se pudo cargar el resumen.</p>
       ) : summary.already_closed ? (
@@ -105,9 +141,7 @@ function CashRegisterContent() {
           <div className="flex flex-col items-center gap-3 py-8 text-center">
             <CheckCircle className="h-12 w-12 text-green-500" />
             <h2 className="text-lg font-semibold text-gray-900">Caja cerrada</h2>
-            <p className="text-sm text-gray-500">
-              La caja del {selectedDate} ya fue cerrada.
-            </p>
+            <p className="text-sm text-gray-500">La caja del {selectedDate} ya fue cerrada.</p>
             <Link href="/dashboard/cash-register/history">
               <Button variant="outline" size="sm">Ver en historial</Button>
             </Link>
@@ -124,9 +158,7 @@ function CashRegisterContent() {
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Ingresos</p>
-                  <p className="text-xl font-bold text-gray-900">
-                    ${summary.total_revenue.toLocaleString()}
-                  </p>
+                  <p className="text-xl font-bold text-gray-900">${summary.total_revenue.toLocaleString()}</p>
                 </div>
               </div>
             </Card>
@@ -158,94 +190,17 @@ function CashRegisterContent() {
           {summary.employees.length > 0 && (
             <Card className="mb-6">
               <h2 className="mb-4 text-lg font-semibold text-gray-900">Desglose por empleado</h2>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-gray-200 text-left text-gray-500">
-                      <th className="pb-3 font-medium">Empleado</th>
-                      <th className="pb-3 font-medium">Citas</th>
-                      <th className="pb-3 font-medium">Ingresos</th>
-                      <th className="pb-3 font-medium">Comisión</th>
-                      <th className="pb-3 font-medium">Pago</th>
-                      <th className="pb-3 font-medium">Método</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {summary.employees.map((emp) => {
-                      const isExpanded = expandedEmployee === emp.employee_id;
-                      return (
-                        <React.Fragment key={emp.employee_id}>
-                          <tr
-                            className="cursor-pointer border-b border-gray-100 hover:bg-gray-50"
-                            onClick={() => setExpandedEmployee(isExpanded ? null : emp.employee_id)}
-                          >
-                            <td className="py-3 font-medium text-gray-900">
-                              <div className="flex items-center gap-2">
-                                {isExpanded
-                                  ? <ChevronDown className="h-4 w-4 text-gray-400" />
-                                  : <ChevronRight className="h-4 w-4 text-gray-400" />
-                                }
-                                {emp.employee_name}
-                              </div>
-                            </td>
-                            <td className="py-3 text-gray-600">{emp.appointments_count}</td>
-                            <td className="py-3 text-gray-600">${emp.total_earned.toLocaleString()}</td>
-                            <td className="py-3 text-gray-600">
-                              ${emp.commission_amount.toLocaleString()} ({emp.commission_pct}%)
-                            </td>
-                            <td className="py-3" onClick={(e) => e.stopPropagation()}>
-                              <input
-                                type="number"
-                                defaultValue={emp.commission_amount}
-                                onChange={(e) => updatePayment(emp.employee_id, 'amount_paid', parseFloat(e.target.value) || 0)}
-                                className="w-28 rounded border border-gray-300 px-2 py-1 text-sm focus:border-violet-500 focus:outline-none"
-                              />
-                            </td>
-                            <td className="py-3" onClick={(e) => e.stopPropagation()}>
-                              <select
-                                defaultValue="cash"
-                                onChange={(e) => updatePayment(emp.employee_id, 'payment_method', e.target.value)}
-                                className="rounded border border-gray-300 px-2 py-1 text-sm focus:border-violet-500 focus:outline-none"
-                              >
-                                <option value="cash">Efectivo</option>
-                                <option value="transfer">Transferencia</option>
-                              </select>
-                            </td>
-                          </tr>
-                          {/* Expanded detail: appointment list */}
-                          {isExpanded && emp.appointments && (
-                            <tr>
-                              <td colSpan={6} className="bg-gray-50 px-4 pb-3 pt-1">
-                                <table className="w-full text-xs">
-                                  <thead>
-                                    <tr className="text-left text-gray-400">
-                                      <th className="pb-1 font-medium">Hora</th>
-                                      <th className="pb-1 font-medium">Cliente</th>
-                                      <th className="pb-1 font-medium">Servicio</th>
-                                      <th className="pb-1 font-medium text-right">Valor</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {emp.appointments.map((appt) => (
-                                      <tr key={appt.id} className="border-b border-gray-100 last:border-0">
-                                        <td className="py-1.5 text-gray-600">{appt.start_time}</td>
-                                        <td className="py-1.5 text-gray-700">{appt.customer_name}</td>
-                                        <td className="py-1.5 text-gray-600">{appt.service_name}</td>
-                                        <td className="py-1.5 text-right font-medium text-gray-900">
-                                          ${appt.price.toLocaleString()}
-                                        </td>
-                                      </tr>
-                                    ))}
-                                  </tbody>
-                                </table>
-                              </td>
-                            </tr>
-                          )}
-                        </React.Fragment>
-                      );
-                    })}
-                  </tbody>
-                </table>
+              <div className="space-y-3">
+                {summary.employees.map((emp) => (
+                  <EmployeeRow
+                    key={emp.employee_id}
+                    emp={emp}
+                    paymentState={getPaymentState(emp)}
+                    isExpanded={expandedEmployee === emp.employee_id}
+                    onToggleExpand={() => setExpandedEmployee(expandedEmployee === emp.employee_id ? null : emp.employee_id)}
+                    onUpdatePayment={(updates) => updatePaymentState(emp.employee_id, updates)}
+                  />
+                ))}
               </div>
             </Card>
           )}
@@ -255,7 +210,7 @@ function CashRegisterContent() {
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Notas u observaciones del día (opcional)..."
+              placeholder="Notas u observaciones del dia (opcional)..."
               rows={3}
               className="mb-4 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
             />
@@ -265,11 +220,254 @@ function CashRegisterContent() {
                 loading={closeMutation.isPending}
                 disabled={summary.total_appointments === 0}
               >
-                Cerrar caja del día
+                Cerrar caja del dia
               </Button>
             </div>
           </Card>
         </>
+      )}
+    </div>
+  );
+}
+
+function EmployeeRow({
+  emp,
+  paymentState,
+  isExpanded,
+  onToggleExpand,
+  onUpdatePayment,
+}: {
+  emp: EmployeeSummary;
+  paymentState: PaymentState;
+  isExpanded: boolean;
+  onToggleExpand: () => void;
+  onUpdatePayment: (updates: Partial<PaymentState>) => void;
+}) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const hasPending = emp.pending_from_previous > 0;
+  const hasCommission = emp.commission_pct > 0;
+
+  const handleProofUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    onUpdatePayment({
+      proofFile: file,
+      proofPreview: URL.createObjectURL(file),
+      confirmed: true,
+      amount_paid: emp.total_owed,
+    });
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleRemoveProof = () => {
+    onUpdatePayment({
+      proofFile: null,
+      proofPreview: null,
+      confirmed: false,
+    });
+  };
+
+  const handleCashConfirm = () => {
+    onUpdatePayment({ confirmed: true, amount_paid: emp.total_owed });
+  };
+
+  const handleCashUnconfirm = () => {
+    onUpdatePayment({ confirmed: false, amount_paid: 0 });
+  };
+
+  return (
+    <div className="rounded-lg border border-gray-200">
+      {/* Main row */}
+      <div
+        className="flex cursor-pointer items-center gap-3 px-4 py-3 hover:bg-gray-50"
+        onClick={onToggleExpand}
+      >
+        {isExpanded ? <ChevronDown className="h-4 w-4 text-gray-400" /> : <ChevronRight className="h-4 w-4 text-gray-400" />}
+
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-medium text-gray-900">{emp.employee_name}</p>
+          <p className="text-xs text-gray-500">
+            {emp.appointments_count} cita{emp.appointments_count !== 1 && 's'} · ${emp.total_earned.toLocaleString()} ingresos
+          </p>
+        </div>
+
+        {/* Commission info */}
+        <div className="text-right">
+          {hasCommission ? (
+            <>
+              <p className="text-sm font-medium text-gray-900">${emp.commission_amount.toLocaleString()}</p>
+              <p className="text-xs text-gray-500">Comision ({emp.commission_pct}%)</p>
+            </>
+          ) : (
+            <p className="text-xs text-gray-400">Sin comision</p>
+          )}
+        </div>
+
+        {/* Pending badge */}
+        {hasPending && (
+          <div className="flex items-center gap-1 rounded-full bg-orange-100 px-2 py-0.5">
+            <AlertTriangle className="h-3 w-3 text-orange-600" />
+            <span className="text-xs font-medium text-orange-700">
+              +${emp.pending_from_previous.toLocaleString()} pendiente
+            </span>
+          </div>
+        )}
+
+        {/* Total owed */}
+        {(hasCommission || hasPending) && (
+          <div className="text-right">
+            <p className="text-sm font-bold text-violet-700">${emp.total_owed.toLocaleString()}</p>
+            <p className="text-xs text-gray-500">Total a pagar</p>
+          </div>
+        )}
+
+        {/* Payment status */}
+        <div onClick={(e) => e.stopPropagation()}>
+          {paymentState.confirmed ? (
+            <div className="flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-1">
+              <Check className="h-3.5 w-3.5 text-green-600" />
+              <span className="text-xs font-medium text-green-700">Pagado</span>
+            </div>
+          ) : (
+            <div className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-500">
+              Pendiente
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Expanded content */}
+      {isExpanded && (
+        <div className="border-t border-gray-100 bg-gray-50 px-4 py-3">
+          {/* Appointment details */}
+          {emp.appointments && emp.appointments.length > 0 && (
+            <div className="mb-4">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="text-left text-gray-400">
+                    <th className="pb-1 font-medium">Hora</th>
+                    <th className="pb-1 font-medium">Cliente</th>
+                    <th className="pb-1 font-medium">Servicio</th>
+                    <th className="pb-1 font-medium text-right">Valor</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {emp.appointments.map((appt) => (
+                    <tr key={appt.id} className="border-b border-gray-100 last:border-0">
+                      <td className="py-1.5 text-gray-600">{appt.start_time}</td>
+                      <td className="py-1.5 text-gray-700">{appt.customer_name}</td>
+                      <td className="py-1.5 text-gray-600">{appt.service_name}</td>
+                      <td className="py-1.5 text-right font-medium text-gray-900">${appt.price.toLocaleString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* Payment section - only if there's something to pay */}
+          {(hasCommission || hasPending) && (
+            <div className="rounded-lg border border-gray-200 bg-white p-3">
+              <div className="mb-3 flex items-center gap-3">
+                <label className="text-sm font-medium text-gray-700">Metodo de pago:</label>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => onUpdatePayment({ method: 'cash', confirmed: false, proofFile: null, proofPreview: null })}
+                    className={`cursor-pointer rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                      paymentState.method === 'cash'
+                        ? 'bg-violet-100 text-violet-700'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    Efectivo
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onUpdatePayment({ method: 'transfer', confirmed: false, proofFile: null, proofPreview: null })}
+                    className={`cursor-pointer rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                      paymentState.method === 'transfer'
+                        ? 'bg-violet-100 text-violet-700'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    Transferencia
+                  </button>
+                </div>
+              </div>
+
+              {paymentState.method === 'cash' ? (
+                /* Cash: confirm button */
+                <div>
+                  {paymentState.confirmed ? (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Check className="h-4 w-4 text-green-600" />
+                        <span className="text-sm text-green-700">
+                          Pago en efectivo confirmado (${emp.total_owed.toLocaleString()})
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleCashUnconfirm}
+                        className="cursor-pointer text-xs text-gray-500 hover:text-red-600"
+                      >
+                        Deshacer
+                      </button>
+                    </div>
+                  ) : (
+                    <Button size="sm" onClick={handleCashConfirm}>
+                      <Check className="mr-1.5 h-4 w-4" />
+                      Confirmar pago de ${emp.total_owed.toLocaleString()}
+                    </Button>
+                  )}
+                </div>
+              ) : (
+                /* Transfer: upload proof */
+                <div>
+                  {paymentState.proofPreview ? (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-3">
+                        <Paperclip className="h-4 w-4 text-violet-600" />
+                        <span className="text-sm text-gray-700">Comprobante adjunto</span>
+                        <span className="text-xs text-green-600 font-medium">
+                          Pago: ${emp.total_owed.toLocaleString()}
+                        </span>
+                      </div>
+                      <img
+                        src={paymentState.proofPreview}
+                        alt="Comprobante"
+                        className="max-h-32 rounded-lg border border-gray-200 object-contain"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleRemoveProof}
+                        className="flex cursor-pointer items-center gap-1 text-xs text-red-600 hover:text-red-700"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                        Eliminar comprobante
+                      </button>
+                    </div>
+                  ) : (
+                    <div>
+                      <Button size="sm" variant="outline" onClick={() => fileInputRef.current?.click()}>
+                        <Upload className="mr-1.5 h-4 w-4" />
+                        Subir comprobante de transferencia
+                      </Button>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleProofUpload}
+                        className="hidden"
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

@@ -19,6 +19,8 @@ module CashRegister
         commission_pct = employee.commission_percentage || 0
         commission = (revenue * commission_pct / 100).round(2)
 
+        pending = employee.pending_balance || 0
+
         {
           employee_id: employee.id,
           employee_name: employee.name,
@@ -26,7 +28,8 @@ module CashRegister
           total_earned: revenue.to_f,
           commission_pct: commission_pct.to_f,
           commission_amount: commission.to_f,
-          suggested_payment: commission.to_f,
+          pending_from_previous: pending.to_f,
+          total_owed: (commission + pending).to_f,
           appointments: appts.map do |a|
             {
               id: a.id,

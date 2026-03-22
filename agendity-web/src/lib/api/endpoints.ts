@@ -90,6 +90,8 @@ export const ENDPOINTS = {
     close: `${BASE}/cash_register/close`,
     history: `${BASE}/cash_register/history`,
     show: (id: number) => `${BASE}/cash_register/${id}`,
+    uploadProof: `${BASE}/cash_register/upload_proof`,
+    deleteProof: `${BASE}/cash_register/delete_proof`,
   },
 
   REPORTS: {
