@@ -20,7 +20,7 @@ export default function CreditsPage() {
   const [selectedAccount, setSelectedAccount] = useState<CreditAccount | null>(null);
   const [adjustModal, setAdjustModal] = useState<CreditAccount | null>(null);
 
-  const totalCredits = accounts?.reduce((sum, a) => sum + a.balance, 0) ?? 0;
+  const totalCredits = accounts?.reduce((sum, a) => sum + Number(a.balance), 0) ?? 0;
 
   return (
     <div>
@@ -54,8 +54,8 @@ export default function CreditsPage() {
                 <tr className="border-b border-gray-200 text-left text-gray-500">
                   <th className="pb-3 font-medium">Cliente</th>
                   <th className="pb-3 font-medium">Email</th>
-                  <th className="pb-3 font-medium text-right">Balance</th>
-                  <th className="pb-3 font-medium">Acciones</th>
+                  <th className="pb-3 pl-4 font-medium text-right">Balance</th>
+                  <th className="pb-3 pl-4 font-medium">Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -63,8 +63,8 @@ export default function CreditsPage() {
                   <tr key={account.id} className="border-b border-gray-100">
                     <td className="py-3 font-medium text-gray-900">{account.customer_name}</td>
                     <td className="py-3 text-gray-500">{account.customer_email || '—'}</td>
-                    <td className="py-3 text-right font-bold text-green-600">${account.balance.toLocaleString()}</td>
-                    <td className="py-3">
+                    <td className="py-3 pl-4 text-right font-bold text-green-600">${Number(account.balance).toLocaleString()}</td>
+                    <td className="py-3 pl-4">
                       <div className="flex gap-2">
                         <button
                           type="button"
