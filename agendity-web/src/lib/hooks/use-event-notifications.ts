@@ -28,16 +28,6 @@ const EVENT_CONFIG: Record<string, { title: string; getBody: (data: any) => stri
     getBody: (data) =>
       `Pago confirmado para ${data.customer_name || 'un cliente'}`,
   },
-  appointment_completed: {
-    title: 'Cita completada',
-    getBody: (data) =>
-      `${data.customer_name || 'Un cliente'} completó su cita de ${data.service_name || 'un servicio'}`,
-  },
-  ai_suggestion: {
-    title: 'Sugerencia inteligente',
-    getBody: (data) =>
-      `Detectamos ${data.count || ''} oportunidad(es) para optimizar tus precios`,
-  },
 };
 
 export function useEventNotifications() {
