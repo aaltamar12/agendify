@@ -56,12 +56,6 @@ class Business < ApplicationRecord
   # -- Callbacks --
   before_save :extract_coords_from_google_maps_url, if: :google_maps_url_changed?
 
-  # -- Notification channels --
-  def notification_channels_for(_event)
-    channels = customer_notification_channels || { "email" => true }
-    channels.select { |_, enabled| enabled }.keys.map(&:to_sym)
-  end
-
   # -- Scopes --
   scope :active, -> { where(status: :active) }
   scope :in_trial, -> { where("trial_ends_at > ?", Time.current) }

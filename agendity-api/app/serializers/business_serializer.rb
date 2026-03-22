@@ -14,7 +14,6 @@ class BusinessSerializer < Blueprinter::Base
          :lunch_start_time, :lunch_end_time, :lunch_enabled,
          :slot_interval_minutes, :gap_between_appointments_minutes,
          :nequi_phone, :daviplata_phone, :bancolombia_account,
-         :customer_notification_channels,
          :created_at, :updated_at
 
   # Serve logo from ActiveStorage attachment, fallback to legacy logo_url column
