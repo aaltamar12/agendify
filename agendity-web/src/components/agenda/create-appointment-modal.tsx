@@ -109,7 +109,9 @@ export function CreateAppointmentModal({
 
   const handleClearCustomer = () => {
     setSelectedCustomer(null);
-    setShowNewCustomer(true);
+    setShowNewCustomer(false);
+    setCustomerSearch('');
+    setDebouncedSearch('');
     setValue('customer_name', '');
     setValue('customer_phone', '');
     setValue('customer_email', '');
@@ -209,7 +211,7 @@ export function CreateAppointmentModal({
               <button
                 type="button"
                 onClick={() => setShowNewCustomer(true)}
-                className="flex items-center gap-1 text-xs font-medium text-violet-600 hover:text-violet-700"
+                className="flex cursor-pointer items-center gap-1 text-xs font-medium text-violet-600 hover:text-violet-700"
               >
                 <UserPlus className="h-3.5 w-3.5" />
                 Nuevo cliente
@@ -219,7 +221,7 @@ export function CreateAppointmentModal({
               <button
                 type="button"
                 onClick={handleClearCustomer}
-                className="flex items-center gap-1 text-xs font-medium text-gray-500 hover:text-gray-700"
+                className="flex cursor-pointer items-center gap-1 text-xs font-medium text-gray-500 hover:text-gray-700"
               >
                 <X className="h-3.5 w-3.5" />
                 Cambiar
@@ -266,7 +268,7 @@ export function CreateAppointmentModal({
                           <button
                             type="button"
                             onClick={() => handleSelectCustomer(c)}
-                            className="flex w-full items-center gap-3 px-4 py-2.5 text-left hover:bg-gray-50"
+                            className="flex w-full cursor-pointer items-center gap-3 px-4 py-2.5 text-left hover:bg-gray-50"
                           >
                             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-100 text-xs font-medium text-violet-600">
                               {c.name.charAt(0).toUpperCase()}
@@ -288,7 +290,7 @@ export function CreateAppointmentModal({
                       <button
                         type="button"
                         onClick={() => { setShowNewCustomer(true); setCustomerSearch(''); }}
-                        className="mt-1 text-xs font-medium text-violet-600 hover:text-violet-700"
+                        className="mt-1 cursor-pointer text-xs font-medium text-violet-600 hover:text-violet-700"
                       >
                         Crear nuevo cliente
                       </button>
@@ -335,7 +337,7 @@ export function CreateAppointmentModal({
             <button
               type="button"
               onClick={() => setManualTime(!manualTime)}
-              className="text-xs font-medium text-violet-600 hover:text-violet-700"
+              className="cursor-pointer text-xs font-medium text-violet-600 hover:text-violet-700"
             >
               {manualTime ? 'Ver horarios disponibles' : 'Ingresar hora manual'}
             </button>
@@ -390,8 +392,8 @@ export function CreateAppointmentModal({
                           !slot.available
                             ? 'cursor-not-allowed border-gray-100 bg-gray-50 text-gray-300'
                             : selectedTime === slot.time
-                              ? 'border-violet-600 bg-violet-600 text-white'
-                              : 'border-gray-200 bg-white text-gray-700 hover:border-violet-300 hover:bg-violet-50'
+                              ? 'cursor-pointer border-violet-600 bg-violet-600 text-white'
+                              : 'cursor-pointer border-gray-200 bg-white text-gray-700 hover:border-violet-300 hover:bg-violet-50'
                         }`}
                       >
                         {slot.time}
