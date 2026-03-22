@@ -4,6 +4,15 @@
 # Run with: rails db:seed
 # Idempotent: safe to run multiple times.
 
+# Helper: create or update appointment using the unique index (employee, date, start_time)
+def seed_appointment!(employee:, appointment_date:, start_time:, **attrs)
+  appt = Appointment.find_or_initialize_by(employee: employee, appointment_date: appointment_date, start_time: start_time)
+  appt.assign_attributes(**attrs)
+  appt.ticket_code ||= "SEED-#{SecureRandom.hex(4).upcase}"
+  appt.save!
+  appt
+end
+
 puts "=" * 60
 puts "🌱 Seeding Agendity database..."
 puts "=" * 60
@@ -281,20 +290,17 @@ appointment_count = 0
 
   customer = elite_customers.sample
 
-  appt = Appointment.find_or_create_by!(
-    business: barberia_elite,
-    customer: customer,
+  appt = seed_appointment!(
+    employee: employee,
     appointment_date: date,
     start_time: start_time,
-    employee: employee
-  ) do |a|
-    a.service = service
-    a.end_time = end_time
-    a.price = service.price
-    a.status = :completed
-    a.ticket_code = "ELITE-#{SecureRandom.hex(4).upcase}"
-    a.notes = nil
-  end
+    business: barberia_elite,
+    customer: customer,
+    service: service,
+    end_time: end_time,
+    price: service.price,
+    status: :completed
+  )
 
   appointment_count += 1
 end
@@ -323,19 +329,17 @@ puts "  ✅ 15 completed appointments (past)"
   employee = eligible_employees.sample || emp_carlos
   customer = elite_customers.sample
 
-  Appointment.find_or_create_by!(
-    business: barberia_elite,
-    customer: customer,
+  seed_appointment!(
+    employee: employee,
     appointment_date: date,
     start_time: start_time,
-    employee: employee
-  ) do |a|
-    a.service = service
-    a.end_time = end_time
-    a.price = service.price
-    a.status = :confirmed
-    a.ticket_code = "ELITE-#{SecureRandom.hex(4).upcase}"
-  end
+    business: barberia_elite,
+    customer: customer,
+    service: service,
+    end_time: end_time,
+    price: service.price,
+    status: :confirmed
+  )
 
   appointment_count += 1
 end
@@ -363,18 +367,17 @@ puts "  ✅ 5 confirmed appointments (upcoming)"
   employee = eligible_employees.sample || emp_carlos
   customer = elite_customers.sample
 
-  Appointment.find_or_create_by!(
-    business: barberia_elite,
-    customer: customer,
+  seed_appointment!(
+    employee: employee,
     appointment_date: date,
     start_time: start_time,
-    employee: employee
-  ) do |a|
-    a.service = service
-    a.end_time = end_time
-    a.price = service.price
-    a.status = :pending_payment
-  end
+    business: barberia_elite,
+    customer: customer,
+    service: service,
+    end_time: end_time,
+    price: service.price,
+    status: :pending_payment
+  )
 
   appointment_count += 1
 end
@@ -399,20 +402,18 @@ puts "  ✅ 3 pending_payment appointments"
   employee = [emp_carlos, emp_andres][i]
   customer = elite_customers[i]
 
-  Appointment.find_or_create_by!(
-    business: barberia_elite,
-    customer: customer,
+  seed_appointment!(
+    employee: employee,
     appointment_date: today,
     start_time: start_time,
-    employee: employee
-  ) do |a|
-    a.service = service
-    a.end_time = end_time
-    a.price = service.price
-    a.status = :checked_in
-    a.ticket_code = "ELITE-#{SecureRandom.hex(4).upcase}"
-    a.checked_in_at = Time.current
-  end
+    business: barberia_elite,
+    customer: customer,
+    service: service,
+    end_time: end_time,
+    price: service.price,
+    status: :checked_in,
+    checked_in_at: Time.current
+  )
 
   appointment_count += 1
 end
@@ -434,19 +435,18 @@ puts "  ✅ 2 checked_in appointments (today)"
   employee = eligible_employees.sample || emp_carlos
   customer = elite_customers[8 + i]
 
-  Appointment.find_or_create_by!(
-    business: barberia_elite,
-    customer: customer,
+  seed_appointment!(
+    employee: employee,
     appointment_date: date,
     start_time: start_time,
-    employee: employee
-  ) do |a|
-    a.service = service
-    a.end_time = end_time
-    a.price = service.price
-    a.status = :cancelled
-    a.notes = "Cancelado por el cliente"
-  end
+    business: barberia_elite,
+    customer: customer,
+    service: service,
+    end_time: end_time,
+    price: service.price,
+    status: :cancelled,
+    notes: "Cancelado por el cliente"
+  )
 
   appointment_count += 1
 end
@@ -474,19 +474,17 @@ puts "  ✅ 2 cancelled appointments"
   employee = eligible_employees.sample || emp_carlos
   customer = elite_customers.sample
 
-  Appointment.find_or_create_by!(
-    business: barberia_elite,
-    customer: customer,
+  seed_appointment!(
+    employee: employee,
     appointment_date: date,
     start_time: start_time,
-    employee: employee
-  ) do |a|
-    a.service = service
-    a.end_time = end_time
-    a.price = service.price
-    a.status = :payment_sent
-    a.ticket_code = "ELITE-#{SecureRandom.hex(4).upcase}"
-  end
+    business: barberia_elite,
+    customer: customer,
+    service: service,
+    end_time: end_time,
+    price: service.price,
+    status: :payment_sent
+  )
 
   appointment_count += 1
 end
@@ -760,19 +758,17 @@ puts "  📅 Creating appointments..."
   employee = bella_employees.sample
   customer = bella_customers.sample
 
-  appt = Appointment.find_or_create_by!(
-    business: salon_bella,
-    customer: customer,
+  appt = seed_appointment!(
+    employee: employee,
     appointment_date: date,
     start_time: start_time,
-    employee: employee
-  ) do |a|
-    a.service = service
-    a.end_time = end_time
-    a.price = service.price
-    a.status = :completed
-    a.ticket_code = "BELLA-#{SecureRandom.hex(4).upcase}"
-  end
+    business: salon_bella,
+    customer: customer,
+    service: service,
+    end_time: end_time,
+    price: service.price,
+    status: :completed
+  )
 
   Payment.find_or_create_by!(appointment: appt) do |p|
     p.amount = appt.price
@@ -800,19 +796,17 @@ end
   employee = bella_employees.sample
   customer = bella_customers.sample
 
-  appt = Appointment.find_or_create_by!(
-    business: salon_bella,
-    customer: customer,
+  appt = seed_appointment!(
+    employee: employee,
     appointment_date: date,
     start_time: start_time,
-    employee: employee
-  ) do |a|
-    a.service = service
-    a.end_time = end_time
-    a.price = service.price
-    a.status = :confirmed
-    a.ticket_code = "BELLA-#{SecureRandom.hex(4).upcase}"
-  end
+    business: salon_bella,
+    customer: customer,
+    service: service,
+    end_time: end_time,
+    price: service.price,
+    status: :confirmed
+  )
 
   Payment.find_or_create_by!(appointment: appt) do |p|
     p.amount = appt.price
@@ -836,18 +830,17 @@ end
   employee = bella_employees.sample
   customer = bella_customers.sample
 
-  Appointment.find_or_create_by!(
-    business: salon_bella,
-    customer: customer,
+  seed_appointment!(
+    employee: employee,
     appointment_date: date,
     start_time: start_time,
-    employee: employee
-  ) do |a|
-    a.service = service
-    a.end_time = end_time
-    a.price = service.price
-    a.status = :pending_payment
-  end
+    business: salon_bella,
+    customer: customer,
+    service: service,
+    end_time: end_time,
+    price: service.price,
+    status: :pending_payment
+  )
 end
 
 puts "  ✅ Appointments: #{salon_bella.appointments.count}"
@@ -1045,13 +1038,17 @@ end
   end_min = service.duration_minutes
   end_time = "%02d:%02d" % [hour + end_min / 60, end_min % 60]
 
-  appt = Appointment.find_or_create_by!(business: barberia_93, customer: customer, appointment_date: date, start_time: start_time, employee: employee) do |a|
-    a.service = service
-    a.end_time = end_time
-    a.price = service.price
-    a.status = :completed
-    a.ticket_code = "LA93-#{SecureRandom.hex(4).upcase}"
-  end
+  appt = seed_appointment!(
+    employee: employee,
+    appointment_date: date,
+    start_time: start_time,
+    business: barberia_93,
+    customer: customer,
+    service: service,
+    end_time: end_time,
+    price: service.price,
+    status: :completed
+  )
   Payment.find_or_create_by!(appointment: appt) { |p| p.amount = appt.price; p.payment_method = [:cash, :transfer].sample; p.status = :approved }
 end
 
@@ -1068,13 +1065,17 @@ end
   em = end_min % 60
   end_time = "%02d:%02d" % [eh, em]
 
-  appt = Appointment.find_or_create_by!(business: barberia_93, customer: customer, appointment_date: date, start_time: start_time, employee: employee) do |a|
-    a.service = service
-    a.end_time = end_time
-    a.price = service.price
-    a.status = :confirmed
-    a.ticket_code = "LA93-#{SecureRandom.hex(4).upcase}"
-  end
+  appt = seed_appointment!(
+    employee: employee,
+    appointment_date: date,
+    start_time: start_time,
+    business: barberia_93,
+    customer: customer,
+    service: service,
+    end_time: end_time,
+    price: service.price,
+    status: :confirmed
+  )
   Payment.find_or_create_by!(appointment: appt) { |p| p.amount = appt.price; p.payment_method = :transfer; p.status = :approved }
 end
 
@@ -1232,13 +1233,17 @@ end
   end_min = service.duration_minutes
   end_time = "%02d:%02d" % [hour + end_min / 60, end_min % 60]
 
-  appt = Appointment.find_or_create_by!(business: studio_70, customer: customer, appointment_date: date, start_time: start_time, employee: employee) do |a|
-    a.service = service
-    a.end_time = end_time
-    a.price = service.price
-    a.status = :completed
-    a.ticket_code = "S70-#{SecureRandom.hex(4).upcase}"
-  end
+  appt = seed_appointment!(
+    employee: employee,
+    appointment_date: date,
+    start_time: start_time,
+    business: studio_70,
+    customer: customer,
+    service: service,
+    end_time: end_time,
+    price: service.price,
+    status: :completed
+  )
   Payment.find_or_create_by!(appointment: appt) { |p| p.amount = appt.price; p.payment_method = [:cash, :transfer].sample; p.status = :approved }
 end
 
@@ -1253,13 +1258,17 @@ end
   end_min = service.duration_minutes
   end_time = "%02d:%02d" % [hour + end_min / 60, end_min % 60]
 
-  appt = Appointment.find_or_create_by!(business: studio_70, customer: customer, appointment_date: date, start_time: start_time, employee: employee) do |a|
-    a.service = service
-    a.end_time = end_time
-    a.price = service.price
-    a.status = :confirmed
-    a.ticket_code = "S70-#{SecureRandom.hex(4).upcase}"
-  end
+  appt = seed_appointment!(
+    employee: employee,
+    appointment_date: date,
+    start_time: start_time,
+    business: studio_70,
+    customer: customer,
+    service: service,
+    end_time: end_time,
+    price: service.price,
+    status: :confirmed
+  )
   Payment.find_or_create_by!(appointment: appt) { |p| p.amount = appt.price; p.payment_method = :transfer; p.status = :approved }
 end
 
