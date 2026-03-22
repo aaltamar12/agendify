@@ -256,6 +256,22 @@ export default function SettingsPage() {
         {/* Notification preferences */}
         <NotificationSection />
 
+        {/* Customer notification channels */}
+        {!loadingBusiness && business && (
+          <CustomerNotificationChannelsSection
+            channels={business.customer_notification_channels || { email: true, whatsapp: false, push: false }}
+            onSave={async (channels) => {
+              try {
+                await updateBusiness.mutateAsync({ customer_notification_channels: channels } as Partial<typeof business>);
+                addToast({ type: 'success', message: 'Canales actualizados' });
+              } catch {
+                addToast({ type: 'error', message: 'Error al actualizar canales' });
+              }
+            }}
+            loading={updateBusiness.isPending}
+          />
+        )}
+
         {/* Brand customization (colors) — Profesional+ only */}
         {loadingBusiness ? (
           <Skeleton className="h-48 w-full" />
@@ -1051,6 +1067,58 @@ function PaymentSection({
           </Button>
         </div>
       </form>
+    </Card>
+  );
+}
+
+function CustomerNotificationChannelsSection({
+  channels,
+  onSave,
+  loading,
+}: {
+  channels: Record<string, boolean>;
+  onSave: (channels: Record<string, boolean>) => Promise<void>;
+  loading: boolean;
+}) {
+  const [localChannels, setLocalChannels] = useState(channels);
+
+  const toggle = (key: string) => {
+    const updated = { ...localChannels, [key]: !localChannels[key] };
+    setLocalChannels(updated);
+    onSave(updated);
+  };
+
+  const channelConfig = [
+    { key: 'email', label: 'Email', description: 'Enviar solicitudes de calificación y confirmaciones por correo electrónico' },
+    { key: 'whatsapp', label: 'WhatsApp', description: 'Enviar notificaciones por WhatsApp Business (requiere configuración)' },
+  ];
+
+  return (
+    <Card>
+      <h2 className="mb-1 text-lg font-semibold text-gray-900">Notificaciones al cliente</h2>
+      <p className="mb-4 text-sm text-gray-500">
+        Canales para notificar a tus clientes sobre calificaciones, confirmaciones y recordatorios.
+      </p>
+      <div className="space-y-4">
+        {channelConfig.map((ch) => (
+          <div key={ch.key} className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-700">{ch.label}</p>
+              <p className="text-xs text-gray-500">{ch.description}</p>
+            </div>
+            <label className="relative inline-flex cursor-pointer items-center">
+              <input
+                type="checkbox"
+                className="peer sr-only"
+                checked={localChannels[ch.key] ?? false}
+                onChange={() => toggle(ch.key)}
+                disabled={loading}
+              />
+              <div className="h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:bg-violet-600 peer-checked:after:translate-x-full" />
+            </label>
+          </div>
+        ))}
+      </div>
     </Card>
   );
 }

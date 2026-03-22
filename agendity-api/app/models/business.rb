@@ -40,6 +40,7 @@ class Business < ApplicationRecord
   has_many :activity_logs, dependent: :destroy
   has_many :subscriptions, dependent: :destroy
   has_many :subscription_payment_orders, dependent: :destroy
+  has_many :cash_register_closes, dependent: :destroy
 
   # -- Validations --
   validates :name, presence: true
@@ -54,6 +55,12 @@ class Business < ApplicationRecord
 
   # -- Callbacks --
   before_save :extract_coords_from_google_maps_url, if: :google_maps_url_changed?
+
+  # -- Notification channels --
+  def notification_channels_for(_event)
+    channels = customer_notification_channels || { "email" => true }
+    channels.select { |_, enabled| enabled }.keys.map(&:to_sym)
+  end
 
   # -- Scopes --
   scope :active, -> { where(status: :active) }

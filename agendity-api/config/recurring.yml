@@ -39,6 +39,11 @@ production:
     queue: default
     schedule: every day at 9am
 
+  complete_appointments:
+    class: CompleteAppointmentsJob
+    queue: default
+    schedule: every 15 minutes
+
   cleanup_request_logs:
     class: CleanupOldRequestLogsJob
     queue: low

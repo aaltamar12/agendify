@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_22_000001) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_22_000002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "unaccent"
@@ -156,6 +156,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_22_000001) do
     t.boolean "lunch_enabled", default: true
     t.integer "slot_interval_minutes", default: 30
     t.integer "gap_between_appointments_minutes", default: 0
+    t.string "cover_source", default: "upload"
     t.index ["city"], name: "index_businesses_on_city"
     t.index ["latitude", "longitude"], name: "index_businesses_on_latitude_and_longitude"
     t.index ["owner_id"], name: "index_businesses_on_owner_id"

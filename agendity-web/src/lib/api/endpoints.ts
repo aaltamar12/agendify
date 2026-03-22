@@ -85,6 +85,13 @@ export const ENDPOINTS = {
     delete: (id: number) => `${BASE}/blocked_slots/${id}`,
   },
 
+  CASH_REGISTER: {
+    today: `${BASE}/cash_register/today`,
+    close: `${BASE}/cash_register/close`,
+    history: `${BASE}/cash_register/history`,
+    show: (id: number) => `${BASE}/cash_register/${id}`,
+  },
+
   REPORTS: {
     summary: `${BASE}/reports/summary`,
     revenue: `${BASE}/reports/revenue`,

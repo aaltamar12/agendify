@@ -76,6 +76,15 @@ Rails.application.routes.draw do
       resource :business_hours, only: %i[show update]
       resources :blocked_slots, only: %i[index show create update destroy]
 
+      # Cash register
+      resources :cash_register, only: [:show] do
+        collection do
+          get :today
+          post :close
+          get :history
+        end
+      end
+
       # Reports
       get "reports/summary",            to: "reports#summary"
       get "reports/revenue",            to: "reports#revenue"

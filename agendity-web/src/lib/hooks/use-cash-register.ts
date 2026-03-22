@@ -1,0 +1,88 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { get, post } from '@/lib/api/client';
+import { ENDPOINTS } from '@/lib/api/endpoints';
+import type { ApiResponse } from '@/lib/api/types';
+
+interface EmployeeSummary {
+  employee_id: number;
+  employee_name: string;
+  appointments_count: number;
+  total_earned: number;
+  commission_pct: number;
+  commission_amount: number;
+  suggested_payment: number;
+}
+
+interface DailySummary {
+  date: string;
+  total_revenue: number;
+  total_appointments: number;
+  employees: EmployeeSummary[];
+  already_closed: boolean;
+  close_id: number | null;
+}
+
+interface EmployeePaymentData {
+  employee_id: number;
+  employee_name?: string;
+  appointments_count: number;
+  total_earned: number;
+  commission_pct: number;
+  commission_amount: number;
+  amount_paid: number;
+  payment_method: string;
+  notes?: string;
+}
+
+interface CashRegisterClose {
+  id: number;
+  date: string;
+  closed_at: string;
+  total_revenue: number;
+  total_tips: number;
+  total_appointments: number;
+  notes: string | null;
+  status: string;
+  created_at: string;
+  employee_payments?: EmployeePaymentData[];
+}
+
+export function useDailySummary(date?: string) {
+  return useQuery({
+    queryKey: ['cash-register-today', date],
+    queryFn: () =>
+      get<ApiResponse<DailySummary>>(ENDPOINTS.CASH_REGISTER.today, {
+        params: date ? { date } : undefined,
+      }),
+    select: (res) => res.data,
+  });
+}
+
+export function useCloseCashRegister() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: {
+      date: string;
+      employee_payments: EmployeePaymentData[];
+      notes?: string;
+    }) => post<ApiResponse<CashRegisterClose>>(ENDPOINTS.CASH_REGISTER.close, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cash-register-today'] });
+      queryClient.invalidateQueries({ queryKey: ['cash-register-history'] });
+    },
+  });
+}
+
+export function useCashRegisterHistory(filters?: { from?: string; to?: string }) {
+  return useQuery({
+    queryKey: ['cash-register-history', filters],
+    queryFn: () =>
+      get<ApiResponse<CashRegisterClose[]>>(ENDPOINTS.CASH_REGISTER.history, {
+        params: filters,
+      }),
+    select: (res) => res.data,
+  });
+}
+
+export type { DailySummary, EmployeeSummary, EmployeePaymentData, CashRegisterClose };
