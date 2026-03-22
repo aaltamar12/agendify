@@ -10,8 +10,8 @@ import type { BusinessType } from '@/lib/api/types';
 
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   active: { label: 'Activo', className: 'bg-emerald-50 text-emerald-700' },
-  suspended: { label: 'Suspendido', className: 'bg-red-50 text-red-700' },
-  inactive: { label: 'Inactivo', className: 'bg-gray-100 text-gray-500' },
+  suspended: { label: 'Oculto', className: 'bg-orange-50 text-orange-700' },
+  inactive: { label: 'Inactivo', className: 'bg-red-50 text-red-700' },
 };
 
 function StatusBadge({ status }: { status: string }) {
