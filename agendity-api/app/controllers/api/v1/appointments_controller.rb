@@ -117,6 +117,22 @@ module Api
         end
       end
 
+      # GET /api/v1/appointments/available_slots
+      def available_slots
+        result = Bookings::AvailabilityService.call(
+          business: current_business,
+          service_id: params[:service_id],
+          date: params[:date],
+          employee_id: params[:employee_id]
+        )
+
+        if result.success?
+          render_success(result.data)
+        else
+          render_error(result.error, status: :unprocessable_entity)
+        end
+      end
+
       # POST /api/v1/appointments/:id/remind_payment
       # Sends a payment reminder email to the customer.
       def remind_payment

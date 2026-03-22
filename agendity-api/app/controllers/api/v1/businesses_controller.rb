@@ -48,6 +48,47 @@ module Api
         end
       end
 
+      # POST /api/v1/business/upload_cover
+      def upload_cover
+        unless params[:cover].present?
+          return render_error("No se envió ningún archivo", status: :unprocessable_entity)
+        end
+
+        current_business.cover_image.attach(params[:cover])
+        current_business.update!(cover_source: "upload")
+
+        if current_business.cover_image.attached?
+          render_success(BusinessSerializer.render_as_hash(current_business))
+        else
+          render_error("Error al subir la portada", status: :unprocessable_entity)
+        end
+      end
+
+      # GET /api/v1/business/cover_gallery
+      def cover_gallery
+        query = params[:query] || current_business.business_type || "barbershop"
+        page = (params[:page] || 1).to_i
+        photos = PexelsService.search(query: query, per_page: 15, page: page)
+        render_success(photos)
+      end
+
+      # POST /api/v1/business/select_cover
+      def select_cover
+        url = params[:url]
+        return render_error("URL requerida", status: :unprocessable_entity) if url.blank?
+
+        # Download from Pexels and attach
+        require "open-uri"
+        file = URI.parse(url).open
+        filename = "cover_#{current_business.id}_#{Time.current.to_i}.jpg"
+        current_business.cover_image.attach(io: file, filename: filename, content_type: file.content_type || "image/jpeg")
+        current_business.update!(cover_source: "pexels")
+
+        render_success(BusinessSerializer.render_as_hash(current_business))
+      rescue OpenURI::HTTPError, URI::InvalidURIError => e
+        render_error("Error al descargar la imagen: #{e.message}", status: :unprocessable_entity)
+      end
+
       # POST /api/v1/business/onboarding
       def onboarding
         result = Businesses::CompleteOnboardingService.call(business: current_business, params: onboarding_params)

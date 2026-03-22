@@ -28,10 +28,19 @@ class BusinessSerializer < Blueprinter::Base
     end
   end
 
-  # Frontend expects cover_url, DB column is cover_image_url
+  # Serve cover from ActiveStorage, fallback to legacy cover_image_url column
   field :cover_url do |business, _options|
-    business.cover_image_url
+    if business.cover_image.attached?
+      Rails.application.routes.url_helpers.rails_blob_url(
+        business.cover_image,
+        host: ENV.fetch("API_HOST", "http://localhost:3001")
+      )
+    else
+      business.cover_image_url
+    end
   end
+
+  field :cover_source
 
   # Include current subscription with plan info
   association :current_subscription, blueprint: SubscriptionSerializer do |business, _options|

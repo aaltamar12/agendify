@@ -26,6 +26,9 @@ Rails.application.routes.draw do
       # Business (singular resource — current user's business)
       resource :business, only: %i[show update] do
         post :upload_logo, on: :member
+        post :upload_cover, on: :member
+        get  :cover_gallery, on: :member
+        post :select_cover, on: :member
         post :onboarding, on: :member
       end
 
@@ -39,6 +42,7 @@ Rails.application.routes.draw do
       resources :appointments do
         collection do
           post :checkin_by_code
+          get :available_slots
         end
         member do
           post :confirm

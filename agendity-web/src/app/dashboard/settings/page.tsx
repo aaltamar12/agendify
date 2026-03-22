@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { MapPin, Upload, Loader2, Bell, Volume2, VolumeX, Clock, Coffee, Timer } from 'lucide-react';
+import { MapPin, Upload, Loader2, Bell, Volume2, VolumeX, Clock, Coffee, Timer, Image, Search, X } from 'lucide-react';
 import { Button, Card, Input, Textarea, Select, Skeleton } from '@/components/ui';
 import { MapEmbed } from '@/components/shared/map-embed';
 import { LocationPicker } from '@/components/shared/location-picker';
@@ -13,6 +13,9 @@ import {
   useCurrentBusiness,
   useUpdateBusiness,
   useUploadLogo,
+  useUploadCover,
+  useCoverGallery,
+  useSelectCover,
   useBusinessHours,
   useUpdateBusinessHours,
 } from '@/lib/hooks/use-business';
@@ -73,6 +76,8 @@ export default function SettingsPage() {
   const { data: hours, isLoading: loadingHours } = useBusinessHours();
   const updateBusiness = useUpdateBusiness();
   const uploadLogo = useUploadLogo();
+  const uploadCover = useUploadCover();
+  const selectCover = useSelectCover();
   const updateHours = useUpdateBusinessHours();
   const { addToast } = useUIStore();
   const { planSlug } = useCurrentSubscription();
@@ -103,6 +108,32 @@ export default function SettingsPage() {
               loading={uploadLogo.isPending}
             />
           )
+        )}
+
+        {/* Cover image */}
+        {!loadingBusiness && business && (
+          <CoverSection
+            coverUrl={business.cover_url}
+            coverSource={business.cover_source}
+            businessType={business.business_type}
+            onUpload={async (file) => {
+              try {
+                await uploadCover.mutateAsync(file);
+                addToast({ type: 'success', message: 'Portada actualizada' });
+              } catch {
+                addToast({ type: 'error', message: 'Error al subir la portada' });
+              }
+            }}
+            onSelectFromGallery={async (url) => {
+              try {
+                await selectCover.mutateAsync(url);
+                addToast({ type: 'success', message: 'Portada seleccionada' });
+              } catch {
+                addToast({ type: 'error', message: 'Error al seleccionar la portada' });
+              }
+            }}
+            loading={uploadCover.isPending || selectCover.isPending}
+          />
         )}
 
         {/* Business Profile */}
@@ -363,6 +394,160 @@ function LogoSection({
           className="hidden"
         />
       </div>
+    </Card>
+  );
+}
+
+function CoverSection({
+  coverUrl,
+  coverSource,
+  businessType,
+  onUpload,
+  onSelectFromGallery,
+  loading,
+}: {
+  coverUrl: string | null;
+  coverSource: string | null;
+  businessType: string;
+  onUpload: (file: File) => Promise<void>;
+  onSelectFromGallery: (url: string) => Promise<void>;
+  loading: boolean;
+}) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [activeTab, setActiveTab] = useState<'upload' | 'gallery'>('upload');
+  const [searchQuery, setSearchQuery] = useState(businessType === 'barbershop' ? 'barbershop' : 'beauty salon');
+  const { data: photos, isLoading: loadingPhotos } = useCoverGallery(
+    activeTab === 'gallery' ? searchQuery : '',
+  );
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) return;
+    onUpload(file);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  return (
+    <Card>
+      <h2 className="mb-4 text-lg font-semibold text-gray-900">Portada del negocio</h2>
+
+      {/* Preview */}
+      {coverUrl && (
+        <div className="mb-4 overflow-hidden rounded-lg border border-gray-200">
+          <img
+            src={coverUrl}
+            alt="Portada"
+            className="h-32 w-full object-cover sm:h-40"
+          />
+          <p className="bg-gray-50 px-3 py-1.5 text-xs text-gray-500">
+            {coverSource === 'pexels' ? 'Imagen de Pexels' : 'Imagen subida'}
+          </p>
+        </div>
+      )}
+
+      {/* Tabs */}
+      <div className="mb-4 flex gap-2">
+        <button
+          type="button"
+          onClick={() => setActiveTab('upload')}
+          className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+            activeTab === 'upload'
+              ? 'bg-violet-100 text-violet-700'
+              : 'text-gray-600 hover:bg-gray-100'
+          }`}
+        >
+          <Upload className="mr-1.5 inline h-4 w-4" />
+          Subir imagen
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('gallery')}
+          className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+            activeTab === 'gallery'
+              ? 'bg-violet-100 text-violet-700'
+              : 'text-gray-600 hover:bg-gray-100'
+          }`}
+        >
+          <Image className="mr-1.5 inline h-4 w-4" />
+          Banco de imágenes
+        </button>
+      </div>
+
+      {activeTab === 'upload' ? (
+        <div>
+          <p className="mb-3 text-sm text-gray-500">
+            Dimensiones recomendadas: <strong>1200 x 400 px</strong> (ratio 3:1). Formatos: JPG, PNG, WebP.
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => fileInputRef.current?.click()}
+            loading={loading}
+          >
+            Seleccionar archivo
+          </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            className="hidden"
+          />
+        </div>
+      ) : (
+        <div>
+          {/* Search */}
+          <div className="mb-3 flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Buscar imágenes..."
+                className="w-full rounded-lg border border-gray-300 py-2 pl-9 pr-3 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+              />
+            </div>
+          </div>
+
+          {/* Gallery grid */}
+          {loadingPhotos ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-violet-600" />
+            </div>
+          ) : photos && photos.length > 0 ? (
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+              {photos.map((photo) => (
+                <button
+                  key={photo.id}
+                  type="button"
+                  disabled={loading}
+                  onClick={() => onSelectFromGallery(photo.url_large)}
+                  className="group relative overflow-hidden rounded-lg border border-gray-200 transition-all hover:border-violet-400 hover:shadow-md"
+                >
+                  <img
+                    src={photo.url_small}
+                    alt={photo.alt || 'Pexels photo'}
+                    className="h-24 w-full object-cover sm:h-28"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+                    <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-gray-900">
+                      Seleccionar
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <p className="py-4 text-center text-sm text-gray-500">
+              No se encontraron imágenes. Intenta con otra búsqueda.
+            </p>
+          )}
+          <p className="mt-2 text-xs text-gray-400">Imágenes proporcionadas por Pexels</p>
+        </div>
+      )}
     </Card>
   );
 }

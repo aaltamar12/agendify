@@ -19,6 +19,9 @@ export const ENDPOINTS = {
     current: `${BASE}/business`,
     onboarding: `${BASE}/business/onboarding`,
     uploadLogo: `${BASE}/business/upload_logo`,
+    uploadCover: `${BASE}/business/upload_cover`,
+    coverGallery: `${BASE}/business/cover_gallery`,
+    selectCover: `${BASE}/business/select_cover`,
   },
 
   SERVICES: {
@@ -47,6 +50,7 @@ export const ENDPOINTS = {
     confirm: (id: number) => `${BASE}/appointments/${id}/confirm`,
     checkin: (id: number) => `${BASE}/appointments/${id}/checkin`,
     checkinByCode: `${BASE}/appointments/checkin_by_code`,
+    availableSlots: `${BASE}/appointments/available_slots`,
     cancel: (id: number) => `${BASE}/appointments/${id}/cancel`,
     complete: (id: number) => `${BASE}/appointments/${id}/complete`,
     remindPayment: (id: number) => `${BASE}/appointments/${id}/remind_payment`,

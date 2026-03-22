@@ -24,6 +24,7 @@ class Business < ApplicationRecord
 
   # -- Attachments --
   has_one_attached :logo
+  has_one_attached :cover_image
 
   # -- Associations --
   belongs_to :owner, class_name: "User", inverse_of: :businesses

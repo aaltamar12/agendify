@@ -1,7 +1,16 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import apiClient, { get, put } from '@/lib/api/client';
+import apiClient, { get, post, put } from '@/lib/api/client';
 import { ENDPOINTS } from '@/lib/api/endpoints';
 import type { ApiResponse, Business, BusinessHour } from '@/lib/api/types';
+
+interface PexelsPhoto {
+  id: number;
+  url_small: string;
+  url_medium: string;
+  url_large: string;
+  photographer: string;
+  alt: string;
+}
 
 export function useCurrentBusiness() {
   return useQuery({
@@ -37,6 +46,50 @@ export function useUploadLogo() {
       );
       return response.data as ApiResponse<Business>;
     },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['business'] });
+    },
+  });
+}
+
+export function useUploadCover() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('cover', file);
+      const response = await apiClient.post(
+        ENDPOINTS.BUSINESS.uploadCover,
+        formData,
+        { headers: { 'Content-Type': 'multipart/form-data' } },
+      );
+      return response.data as ApiResponse<Business>;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['business'] });
+    },
+  });
+}
+
+export function useCoverGallery(query: string, page: number = 1) {
+  return useQuery({
+    queryKey: ['cover-gallery', query, page],
+    queryFn: () =>
+      get<ApiResponse<PexelsPhoto[]>>(ENDPOINTS.BUSINESS.coverGallery, {
+        params: { query, page },
+      }),
+    select: (res) => res.data,
+    enabled: !!query,
+  });
+}
+
+export function useSelectCover() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (url: string) =>
+      post<ApiResponse<Business>>(ENDPOINTS.BUSINESS.selectCover, { url }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['business'] });
     },
