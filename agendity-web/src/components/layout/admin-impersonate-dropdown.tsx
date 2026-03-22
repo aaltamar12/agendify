@@ -8,6 +8,30 @@ import { useImpersonationStore } from '@/lib/stores/impersonation-store';
 import { BUSINESS_TYPES } from '@/lib/constants';
 import type { BusinessType } from '@/lib/api/types';
 
+const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
+  active: { label: 'Activo', className: 'bg-emerald-50 text-emerald-700' },
+  suspended: { label: 'Suspendido', className: 'bg-red-50 text-red-700' },
+  inactive: { label: 'Inactivo', className: 'bg-gray-100 text-gray-500' },
+};
+
+function StatusBadge({ status }: { status: string }) {
+  const config = STATUS_CONFIG[status] ?? STATUS_CONFIG.inactive;
+  // Only show badge for non-active statuses to reduce visual noise
+  if (status === 'active') return null;
+  return (
+    <span className={`inline-flex shrink-0 items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium leading-none ${config.className}`}>
+      {config.label}
+    </span>
+  );
+}
+
+function PlanBadge({ planName }: { planName: string | null }) {
+  if (!planName) {
+    return <span className="text-[10px] font-medium text-amber-600">Trial</span>;
+  }
+  return <span className="text-[10px] font-medium text-violet-600">{planName}</span>;
+}
+
 export function AdminImpersonateDropdown() {
   const { user } = useAuthStore();
   const { isImpersonating } = useImpersonationStore();
@@ -99,12 +123,19 @@ export function AdminImpersonateDropdown() {
                     <Building2 className="h-4 w-4 text-violet-600" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium text-gray-900">
-                      {biz.name}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {BUSINESS_TYPES[biz.business_type as BusinessType] ?? biz.business_type}
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <p className="truncate font-medium text-gray-900">
+                        {biz.name}
+                      </p>
+                      <StatusBadge status={biz.status} />
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs text-gray-500">
+                        {BUSINESS_TYPES[biz.business_type as BusinessType] ?? biz.business_type}
+                      </span>
+                      <span className="text-xs text-gray-300">&middot;</span>
+                      <PlanBadge planName={biz.plan_name} />
+                    </div>
                   </div>
                 </button>
               ))}

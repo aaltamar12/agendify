@@ -15,12 +15,14 @@ module Api
           businesses = businesses.where("name ILIKE ?", "%#{params[:search]}%") if params[:search].present?
 
           render_success(
-            businesses.limit(20).map do |b|
+            businesses.limit(20).includes(subscriptions: :plan).map do |b|
               {
                 id: b.id,
                 name: b.name,
                 slug: b.slug,
-                business_type: b.business_type
+                business_type: b.business_type,
+                status: b.status,
+                plan_name: b.current_plan&.name
               }
             end
           )
