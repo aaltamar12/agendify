@@ -133,6 +133,10 @@ export const PLAN_FEATURE_LOCKS: Record<string, { requiredPlans: PlanSlug[]; too
     requiredPlans: ['profesional', 'inteligente'],
     tooltip: 'Disponible en Plan Profesional',
   },
+  '/dashboard/dynamic-pricing': {
+    requiredPlans: ['profesional', 'inteligente'],
+    tooltip: 'Disponible en Plan Profesional',
+  },
 };
 
 // Advanced reports lock (Básico gets basic reports, but advanced are locked)

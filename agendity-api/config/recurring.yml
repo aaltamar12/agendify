@@ -29,6 +29,11 @@ production:
     queue: default
     schedule: every day at 1am
 
+  pricing_suggestions:
+    class: Intelligence::PricingSuggestionJob
+    queue: intelligence
+    schedule: every 1st and 15th at 8am
+
   check_expired_subscriptions:
     class: CheckExpiredSubscriptionsJob
     queue: default

@@ -70,6 +70,15 @@ export const ENDPOINTS = {
     bulkAdjust: `${BASE}/credits/bulk_adjust`,
   },
 
+  DYNAMIC_PRICING: {
+    list: `${BASE}/dynamic_pricing`,
+    create: `${BASE}/dynamic_pricing`,
+    update: (id: number) => `${BASE}/dynamic_pricing/${id}`,
+    accept: (id: number) => `${BASE}/dynamic_pricing/${id}/accept`,
+    reject: (id: number) => `${BASE}/dynamic_pricing/${id}/reject`,
+    delete: (id: number) => `${BASE}/dynamic_pricing/${id}`,
+  },
+
   PAYMENTS: {
     submit: (appointmentId: number) =>
       `${BASE}/appointments/${appointmentId}/payments/submit`,

@@ -94,6 +94,14 @@ Rails.application.routes.draw do
       resource :business_hours, only: %i[show update]
       resources :blocked_slots, only: %i[index show create update destroy]
 
+      # Dynamic pricing
+      resources :dynamic_pricing, except: [:new, :edit] do
+        member do
+          patch :accept
+          patch :reject
+        end
+      end
+
       # Employee portal
       namespace :employee do
         get :dashboard, to: "dashboard#show"

@@ -48,7 +48,23 @@ module Appointments
 
         # Apply pending penalty from previous cancellations
         final_price = service.price
+        original_price = service.price
         penalty_applied = 0
+        dynamic_pricing = nil
+
+        # Check for active dynamic pricing
+        date = Date.parse(@params[:appointment_date].to_s) rescue Date.current
+        active_pricing = @business.dynamic_pricings
+          .for_date(date)
+          .where("service_id = ? OR service_id IS NULL", service.id)
+          .order(Arel.sql("service_id IS NOT NULL DESC")) # specific service first
+          .first
+
+        if active_pricing&.applies_on_day?(date)
+          dynamic_pricing = active_pricing
+          final_price = active_pricing.apply_to_price(final_price, date)
+        end
+
         if customer.pending_penalty.positive?
           penalty_applied = customer.pending_penalty
           final_price += penalty_applied
@@ -63,6 +79,8 @@ module Appointments
           start_time:       @params[:start_time],
           end_time:         end_time,
           price:            final_price,
+          original_price:   dynamic_pricing ? original_price : nil,
+          dynamic_pricing_id: dynamic_pricing&.id,
           notes:            @params[:notes],
           status:           :pending_payment,
           ticket_code:      generate_ticket_code

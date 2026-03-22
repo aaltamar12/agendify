@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_22_000008) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_22_000009) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "unaccent"
@@ -83,6 +83,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_22_000008) do
     t.boolean "checkin_substitute", default: false
     t.string "checkin_substitute_reason"
     t.decimal "credits_applied", precision: 12, scale: 2, default: "0.0"
+    t.bigint "dynamic_pricing_id"
+    t.decimal "original_price", precision: 12, scale: 2
     t.index ["business_id", "appointment_date", "status"], name: "idx_appointments_biz_date_status"
     t.index ["business_id"], name: "index_appointments_on_business_id"
     t.index ["customer_id"], name: "index_appointments_on_customer_id"
@@ -229,6 +231,30 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_22_000008) do
     t.index ["business_id", "email"], name: "index_customers_on_business_id_and_email", unique: true
     t.index ["business_id"], name: "index_customers_on_business_id"
     t.index ["email"], name: "index_customers_on_email"
+  end
+
+  create_table "dynamic_pricings", force: :cascade do |t|
+    t.bigint "business_id", null: false
+    t.bigint "service_id"
+    t.string "name", null: false
+    t.date "start_date", null: false
+    t.date "end_date", null: false
+    t.integer "price_adjustment_type", default: 0
+    t.integer "adjustment_mode", default: 0
+    t.decimal "adjustment_value", precision: 10, scale: 2
+    t.decimal "adjustment_start_value", precision: 10, scale: 2
+    t.decimal "adjustment_end_value", precision: 10, scale: 2
+    t.integer "days_of_week", default: [], array: true
+    t.integer "status", default: 0
+    t.string "suggested_by", default: "manual"
+    t.text "suggestion_reason"
+    t.jsonb "analysis_data", default: {}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["business_id", "start_date", "end_date"], name: "idx_on_business_id_start_date_end_date_ec10982d08"
+    t.index ["business_id", "status"], name: "index_dynamic_pricings_on_business_id_and_status"
+    t.index ["business_id"], name: "index_dynamic_pricings_on_business_id"
+    t.index ["service_id"], name: "index_dynamic_pricings_on_service_id"
   end
 
   create_table "employee_invitations", force: :cascade do |t|
@@ -472,6 +498,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_22_000008) do
   add_foreign_key "activity_logs", "businesses"
   add_foreign_key "appointments", "businesses"
   add_foreign_key "appointments", "customers"
+  add_foreign_key "appointments", "dynamic_pricings"
   add_foreign_key "appointments", "employees"
   add_foreign_key "appointments", "services"
   add_foreign_key "blocked_slots", "businesses"
@@ -486,6 +513,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_22_000008) do
   add_foreign_key "credit_transactions", "credit_accounts"
   add_foreign_key "credit_transactions", "users", column: "performed_by_user_id"
   add_foreign_key "customers", "businesses"
+  add_foreign_key "dynamic_pricings", "businesses"
+  add_foreign_key "dynamic_pricings", "services"
   add_foreign_key "employee_invitations", "businesses"
   add_foreign_key "employee_invitations", "employees"
   add_foreign_key "employee_payments", "cash_register_closes"

@@ -19,6 +19,7 @@ import {
   Sparkles,
   Wallet,
   Coins,
+  TrendingUp,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { useAuthStore } from '@/lib/stores/auth-store';
@@ -42,6 +43,7 @@ const navItems: NavItem[] = [
   { href: '/dashboard/payments', label: 'Pagos', icon: CreditCard },
   { href: '/dashboard/checkin', label: 'Check-in', icon: ScanLine },
   { href: '/dashboard/credits', label: 'Creditos', icon: Coins },
+  { href: '/dashboard/dynamic-pricing', label: 'Tarifas dinamicas', icon: TrendingUp },
   { href: '/dashboard/cash-register', label: 'Cierre de caja', icon: Wallet },
   { href: '/dashboard/reports', label: 'Reportes', icon: BarChart3 },
   { href: '/dashboard/reviews', label: 'Reseñas', icon: Star },
