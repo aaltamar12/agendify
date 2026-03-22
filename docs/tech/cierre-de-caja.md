@@ -7,6 +7,8 @@
 
 El cierre de caja permite al negocio cerrar contablemente el dia: ver ingresos, calcular comisiones por empleado, registrar pagos y generar un historial de cierres. Si se paga menos de lo owed a un empleado, la deuda se arrastra al siguiente cierre.
 
+**Validacion de consistencia:** Antes de cerrar caja, el sistema ejecuta `ReconciliationService` y **rechaza el cierre** si detecta discrepancias en saldos de empleados. El negocio debe resolver las inconsistencias (via reconciliacion) antes de poder cerrar.
+
 ---
 
 ## Modelos de datos
