@@ -24,6 +24,7 @@
 | [flujos-completos.md](flujos-completos.md) | Diagramas Mermaid completos: ciclo de reserva, mapa de actores, maquina de estados, cancelacion, pagos |
 | [sistema-ubicaciones.md](sistema-ubicaciones.md) | Sistema de ubicaciones geográficas: gema city-state, API locations, cascading selects |
 | [cierre-de-caja.md](cierre-de-caja.md) | Cierre de caja: comisiones, deuda acumulada, comprobantes, resumen neto (Profesional+) |
+| [portal-empleado.md](portal-empleado.md) | Portal del empleado: invitacion, registro, dashboard, check-in con sustituto, score, QR scanner |
 | [env-variables.md](env-variables.md) | Variables de entorno: frontend (4) + backend (25), valores dev/prod, notas de seguridad |
 | [decisiones/](decisiones/) | ADRs (Architecture Decision Records) |
 
