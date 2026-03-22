@@ -73,8 +73,8 @@ export function useInviteEmployee() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, email }: { id: number; email: string }) =>
-      post<ApiResponse<{ message: string }>>(ENDPOINTS.EMPLOYEES.invite(id), { email }),
+    mutationFn: ({ id, email, send_email = true }: { id: number; email: string; send_email?: boolean }) =>
+      post<ApiResponse<{ message: string; register_url: string }>>(ENDPOINTS.EMPLOYEES.invite(id), { email, send_email }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employees'] });
     },

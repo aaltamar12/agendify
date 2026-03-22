@@ -78,10 +78,13 @@ module Api
         email = params[:email] || @employee.email
         return render_error("Email requerido", status: :unprocessable_entity) if email.blank?
 
-        result = Employees::InviteService.call(employee: @employee, email: email)
+        send_email = params[:send_email] != false && params[:send_email] != "false"
+        result = Employees::InviteService.call(employee: @employee, email: email, send_email: send_email)
 
         if result.success?
-          render_success({ message: "Invitacion enviada", invitation_id: result.data.id })
+          invitation = result.data
+          register_url = "#{ENV.fetch('FRONTEND_URL', 'http://localhost:3000')}/employee/register?token=#{invitation.token}"
+          render_success({ message: "Invitacion enviada", invitation_id: invitation.id, register_url: register_url })
         else
           render_error(result.error, status: :unprocessable_entity)
         end

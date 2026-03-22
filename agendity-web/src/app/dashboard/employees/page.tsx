@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Users, Plus, Phone, Mail, CheckCircle } from 'lucide-react';
+import { Users, Plus, Phone, Mail, CheckCircle, Link2, Send } from 'lucide-react';
 import {
   Button,
   Card,
@@ -33,6 +33,7 @@ export default function EmployeesPage() {
   const { addToast } = useUIStore();
 
   const [modalOpen, setModalOpen] = useState(false);
+  const [inviteMenuOpen, setInviteMenuOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<
     (Employee & { service_ids?: number[]; schedules?: EmployeeSchedule[] }) | null
   >(null);
@@ -179,24 +180,70 @@ export default function EmployeesPage() {
                 Cuenta vinculada
               </span>
             ) : (
-              <Button
-                variant="outline"
-                size="sm"
-                loading={inviteEmployee.isPending}
-                onClick={async () => {
-                  const email = editingEmployee.email || prompt('Email del empleado:');
-                  if (!email) return;
-                  try {
-                    await inviteEmployee.mutateAsync({ id: editingEmployee.id, email });
-                    addToast({ type: 'success', message: 'Invitacion enviada' });
-                  } catch {
-                    addToast({ type: 'error', message: 'Error al enviar invitacion' });
-                  }
-                }}
-              >
-                <Mail className="mr-1.5 h-3.5 w-3.5" />
-                Invitar a Agendity
-              </Button>
+              <div className="relative">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setInviteMenuOpen(!inviteMenuOpen)}
+                >
+                  <Mail className="mr-1.5 h-3.5 w-3.5" />
+                  Invitar a Agendity
+                </Button>
+
+                {inviteMenuOpen && (
+                  <>
+                    <div className="fixed inset-0 z-10" onClick={() => setInviteMenuOpen(false)} />
+                    <div className="absolute bottom-full right-0 z-20 mb-2 w-56 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-lg">
+                      <button
+                        type="button"
+                        className="flex w-full cursor-pointer items-center gap-3 px-4 py-3 text-left text-sm hover:bg-gray-50"
+                        onClick={async () => {
+                          const email = editingEmployee.email || prompt('Email del empleado:');
+                          if (!email) return;
+                          setInviteMenuOpen(false);
+                          try {
+                            await inviteEmployee.mutateAsync({ id: editingEmployee.id, email });
+                            addToast({ type: 'success', message: 'Invitacion enviada por email' });
+                          } catch {
+                            addToast({ type: 'error', message: 'Error al enviar invitacion' });
+                          }
+                        }}
+                      >
+                        <Send className="h-4 w-4 text-violet-600" />
+                        <div>
+                          <p className="font-medium text-gray-900">Enviar por email</p>
+                          <p className="text-xs text-gray-500">Se envia un correo con el link</p>
+                        </div>
+                      </button>
+                      <button
+                        type="button"
+                        className="flex w-full cursor-pointer items-center gap-3 border-t border-gray-100 px-4 py-3 text-left text-sm hover:bg-gray-50"
+                        onClick={async () => {
+                          const email = editingEmployee.email || prompt('Email del empleado:');
+                          if (!email) return;
+                          setInviteMenuOpen(false);
+                          try {
+                            const result = await inviteEmployee.mutateAsync({ id: editingEmployee.id, email, send_email: false } as never);
+                            const url = (result as { data: { register_url?: string } }).data?.register_url;
+                            if (url) {
+                              await navigator.clipboard.writeText(url);
+                              addToast({ type: 'success', message: 'Link copiado al portapapeles' });
+                            }
+                          } catch {
+                            addToast({ type: 'error', message: 'Error al generar link' });
+                          }
+                        }}
+                      >
+                        <Link2 className="h-4 w-4 text-violet-600" />
+                        <div>
+                          <p className="font-medium text-gray-900">Copiar link</p>
+                          <p className="text-xs text-gray-500">Copia el enlace para compartir</p>
+                        </div>
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
             )}
           </div>
         )}
