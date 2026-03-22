@@ -1355,6 +1355,66 @@ end
 
 puts "  ✅ 3 AI pricing suggestions created for Studio 70"
 
+# --- Reconciliation discrepancies for Studio 70 (Plan Inteligente) ---
+puts "  ⚠️  Creating reconciliation discrepancies for Studio 70..."
+
+# Discrepancy 1: Employee Laura Montoya — pending_balance corrupted
+# Scenario: A cash register close was interrupted mid-transaction.
+# Laura was owed $4,500 (commission), got paid $3,000, so pending should be $1,500.
+# But the balance shows $3,200 (stale value from a previous close that got overwritten).
+laura = Employee.find_by(business: studio_70, name: "Laura Montoya")
+if laura
+  close_s70 = CashRegisterClose.find_or_create_by!(business: studio_70, date: Date.current - 2.days) do |c|
+    c.closed_by_user = studio_70.owner
+    c.closed_at = 2.days.ago
+    c.total_revenue = 90_000
+    c.total_appointments = 3
+    c.status = :closed
+  end
+
+  EmployeePayment.find_or_create_by!(cash_register_close: close_s70, employee: laura) do |ep|
+    ep.appointments_count = 3
+    ep.total_earned = 90_000
+    ep.commission_pct = 5
+    ep.commission_amount = 4_500
+    ep.pending_from_previous = 0
+    ep.total_owed = 4_500
+    ep.amount_paid = 3_000
+    ep.payment_method = :transfer
+  end
+
+  laura.update_column(:pending_balance, 3_200) # Should be 1,500
+  puts "  ⚠️  Laura Montoya: pending_balance=$3,200 (should be $1,500) — diff $1,700"
+end
+
+# Discrepancy 2: Employee Daniela Velásquez — negative balance that shouldn't exist
+# Scenario: An admin ran a manual SQL to "fix" a balance but set it negative by mistake.
+daniela = Employee.find_by(business: studio_70, name: "Daniela Velásquez")
+if daniela
+  daniela.update_column(:pending_balance, -800) # Should be 0 (no payments history)
+  puts "  ⚠️  Daniela Velásquez: pending_balance=-$800 (should be $0) — negative balance bug"
+end
+
+# Discrepancy 3: Credit account for a Medellín customer
+# Scenario: Customer got a manual credit of $5,000 but the transaction was created
+# with the wrong amount ($3,000) — balance and transactions don't match.
+mde_customer = Customer.find_by(business: studio_70, email: "natalia.ossa@gmail.com")
+if mde_customer
+  acct = CreditAccount.find_or_create_by!(customer: mde_customer, business: studio_70)
+  unless acct.credit_transactions.exists?(description: "Bonificacion de bienvenida")
+    acct.credit_transactions.create!(
+      amount: 3_000,
+      transaction_type: :manual_adjustment,
+      description: "Bonificacion de bienvenida"
+    )
+  end
+  # Balance says 5,000 but transactions only sum 3,000
+  acct.update_column(:balance, 5_000)
+  puts "  ⚠️  Natalia Ossa credits: balance=$5,000 (transactions sum=$3,000) — diff $2,000"
+end
+
+puts "  ✅ Reconciliation discrepancies created for Studio 70"
+
 # ============================================================================
 # SUSPENDED & INACTIVE BUSINESSES (status examples)
 # ============================================================================
