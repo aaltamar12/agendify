@@ -1301,6 +1301,60 @@ end
 
 puts "  ✅ Studio 70 fully seeded (Medellín, #{studio_70.appointments.count} appointments)"
 
+# --- AI Suggestions for Studio 70 (Plan Inteligente demo) ---
+puts "  🤖 Creating AI pricing suggestions for Studio 70..."
+
+DynamicPricing.find_or_create_by!(business: studio_70, name: "Temporada alta — Diciembre") do |dp|
+  dp.service = nil
+  dp.start_date = Date.new(Date.current.year, 12, 1)
+  dp.end_date = Date.new(Date.current.year, 12, 31)
+  dp.price_adjustment_type = :percentage
+  dp.adjustment_mode = :progressive_asc
+  dp.adjustment_start_value = 10
+  dp.adjustment_end_value = 25
+  dp.days_of_week = []
+  dp.status = :suggested
+  dp.suggested_by = "system"
+  dp.suggestion_reason = "Diciembre historicamente tiene 52% mas demanda que el promedio mensual. " \
+                         "Sugerimos un incremento progresivo del 10% al 25% a lo largo del mes " \
+                         "para maximizar ingresos sin perder clientes al inicio."
+  dp.analysis_data = { december_appointments: 78, monthly_avg: 51.3, pct_over: 52 }
+end
+
+DynamicPricing.find_or_create_by!(business: studio_70, name: "Premium fin de semana") do |dp|
+  dp.service = nil
+  dp.start_date = Date.current
+  dp.end_date = Date.current + 90.days
+  dp.price_adjustment_type = :percentage
+  dp.adjustment_mode = :fixed_mode
+  dp.adjustment_value = 15
+  dp.days_of_week = [6, 0]
+  dp.status = :suggested
+  dp.suggested_by = "system"
+  dp.suggestion_reason = "Los sabados y domingos tienes 38% mas citas que entre semana. " \
+                         "Puedes aprovechar la alta demanda con una tarifa premium de +15% " \
+                         "para estos dias sin afectar tu flujo entre semana."
+  dp.analysis_data = { weekday_avg: 12.4, weekend_avg: 17.1, pct_diff: 38 }
+end
+
+DynamicPricing.find_or_create_by!(business: studio_70, name: "Descuento martes y miercoles") do |dp|
+  dp.service = nil
+  dp.start_date = Date.current
+  dp.end_date = Date.current + 60.days
+  dp.price_adjustment_type = :percentage
+  dp.adjustment_mode = :fixed_mode
+  dp.adjustment_value = -10
+  dp.days_of_week = [2, 3]
+  dp.status = :suggested
+  dp.suggested_by = "system"
+  dp.suggestion_reason = "Los martes y miercoles son tus dias con menor ocupacion (45%). " \
+                         "Un descuento del 10% podria atraer mas clientes en estos dias " \
+                         "y equilibrar tu carga de trabajo durante la semana."
+  dp.analysis_data = { tuesday_occupancy: 0.42, wednesday_occupancy: 0.48, avg_occupancy: 0.68 }
+end
+
+puts "  ✅ 3 AI pricing suggestions created for Studio 70"
+
 # ============================================================================
 # SUSPENDED & INACTIVE BUSINESSES (status examples)
 # ============================================================================
