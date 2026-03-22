@@ -465,7 +465,7 @@ function EmployeeRow({
               </div>
             ) : (
               /* Editable amount: input + confirm */
-              <div>
+              <div className="space-y-3">
                 <div className="mb-2 flex items-center gap-2">
                   <label className="text-xs font-medium text-gray-600">Monto a pagar</label>
                   {hasFixedAmount && (
@@ -484,7 +484,7 @@ function EmployeeRow({
                   placeholder={hasFixedAmount ? String(emp.total_owed) : 'Ej: 50000'}
                   value={paymentState.amount_paid || ''}
                   onChange={(e) => onUpdatePayment({ amount_paid: parseFloat(e.target.value) || 0, confirmed: false })}
-                  className="mb-2 w-44 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+                  className="w-44 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
                 />
 
                 {paymentState.confirmed ? (
