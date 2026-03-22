@@ -139,6 +139,7 @@ export const ENDPOINTS = {
     topServices: `${BASE}/reports/top_services`,
     topEmployees: `${BASE}/reports/top_employees`,
     frequentCustomers: `${BASE}/reports/frequent_customers`,
+    profit: `${BASE}/reports/profit`,
   },
 
   QR: {

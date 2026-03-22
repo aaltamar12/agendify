@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { DollarSign, CalendarDays, Users, Star } from 'lucide-react';
+import { DollarSign, CalendarDays, Users, Star, TrendingUp, TrendingDown, Wallet, Coins, AlertTriangle, CheckCircle } from 'lucide-react';
 import { Card, Skeleton } from '@/components/ui';
 import { SummaryCard } from '@/components/reports/summary-card';
 import { RevenueChart } from '@/components/reports/revenue-chart';
@@ -13,7 +13,10 @@ import {
   useTopServices,
   useTopEmployees,
   useFrequentCustomers,
+  useProfitReport,
 } from '@/lib/hooks/use-reports';
+import { useReconciliationCheck } from '@/lib/hooks/use-reconciliation';
+import { AI_FEATURES_PLANS } from '@/lib/constants';
 import { useCurrentSubscription } from '@/lib/hooks/use-subscription';
 import { ADVANCED_REPORTS_PLANS } from '@/lib/constants';
 import { UpgradeBanner } from '@/components/shared/upgrade-banner';
@@ -35,6 +38,22 @@ export default function ReportsPage() {
   const { data: topServices, isLoading: servicesLoading } = useTopServices();
   const { data: topEmployees, isLoading: employeesLoading } = useTopEmployees();
   const { data: frequentCustomers, isLoading: customersLoading } = useFrequentCustomers();
+  const { data: profit } = useProfitReport(revenuePeriod);
+  const hasAI = AI_FEATURES_PLANS.includes(planSlug);
+  const reconciliation = useReconciliationCheck();
+
+  // Auto-check reconciliation when profit section loads (Plan Inteligente only)
+  const [reconciliationChecked, setReconciliationChecked] = useState(false);
+  if (hasAdvancedReports && profit && !reconciliationChecked && hasAI) {
+    reconciliation.mutate(undefined, {
+      onSettled: () => setReconciliationChecked(true),
+    });
+  }
+  const reconResult = reconciliation.data?.data;
+  const hasDiscrepancies = reconResult && (
+    reconResult.cash_register?.status === 'discrepancies' ||
+    reconResult.credits?.status === 'discrepancies'
+  );
 
   return (
     <div>
@@ -85,6 +104,89 @@ export default function ReportsPage() {
             icon={Star}
           />
         </div>
+      )}
+
+      {/* Profit section (Profesional+) */}
+      {hasAdvancedReports && profit && (
+        <Card className="mb-8">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-gray-900">Ganancias netas</h2>
+            {hasDiscrepancies && (
+              <a
+                href="/dashboard/reconciliation"
+                className="flex items-center gap-1.5 rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-700 hover:bg-red-200 transition-colors"
+              >
+                <AlertTriangle className="h-3.5 w-3.5" />
+                Datos inconsistentes — Revisar reconciliacion
+              </a>
+            )}
+            {reconResult && !hasDiscrepancies && (
+              <span className="flex items-center gap-1.5 text-xs text-green-600">
+                <CheckCircle className="h-3.5 w-3.5" />
+                Datos verificados
+              </span>
+            )}
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="rounded-lg border border-gray-200 p-4">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-green-600" />
+                <p className="text-xs text-gray-500">Ingresos</p>
+              </div>
+              <p className="mt-1 text-xl font-bold text-gray-900">${Number(profit.revenue).toLocaleString()}</p>
+            </div>
+            <div className="rounded-lg border border-gray-200 p-4">
+              <div className="flex items-center gap-2">
+                <Wallet className="h-5 w-5 text-red-500" />
+                <p className="text-xs text-gray-500">Pagos empleados</p>
+              </div>
+              <p className="mt-1 text-xl font-bold text-red-600">-${Number(profit.employee_payments).toLocaleString()}</p>
+            </div>
+            <div className="rounded-lg border border-gray-200 p-4">
+              <div className="flex items-center gap-2">
+                {profit.net_profit >= 0 ? <TrendingUp className="h-5 w-5 text-green-600" /> : <TrendingDown className="h-5 w-5 text-red-600" />}
+                <p className="text-xs text-gray-500">Ganancia neta</p>
+              </div>
+              <p className={`mt-1 text-xl font-bold ${profit.net_profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                ${Number(profit.net_profit).toLocaleString()}
+              </p>
+            </div>
+            <div className="rounded-lg border border-gray-200 p-4">
+              <div className="flex items-center gap-2">
+                <CalendarDays className="h-5 w-5 text-violet-600" />
+                <p className="text-xs text-gray-500">Cierres de caja</p>
+              </div>
+              <p className="mt-1 text-xl font-bold text-gray-900">{profit.cash_register_closes}</p>
+            </div>
+          </div>
+
+          {/* Additional metrics */}
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            <div className="flex items-center gap-3 rounded-lg bg-gray-50 p-3">
+              <Coins className="h-4 w-4 text-green-600" />
+              <div>
+                <p className="text-xs text-gray-500">Creditos en circulacion</p>
+                <p className="text-sm font-semibold text-gray-900">${Number(profit.total_credits_in_circulation).toLocaleString()}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 rounded-lg bg-gray-50 p-3">
+              <DollarSign className="h-4 w-4 text-blue-600" />
+              <div>
+                <p className="text-xs text-gray-500">Cashback otorgado</p>
+                <p className="text-sm font-semibold text-gray-900">${Number(profit.credits_issued).toLocaleString()}</p>
+              </div>
+            </div>
+            {profit.pending_employee_debt > 0 && (
+              <div className="flex items-center gap-3 rounded-lg bg-orange-50 p-3">
+                <AlertTriangle className="h-4 w-4 text-orange-600" />
+                <div>
+                  <p className="text-xs text-orange-700">Deuda pendiente empleados</p>
+                  <p className="text-sm font-semibold text-orange-900">${Number(profit.pending_employee_debt).toLocaleString()}</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </Card>
       )}
 
       {/* Revenue chart */}

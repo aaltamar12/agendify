@@ -33,6 +33,19 @@ export interface FrequentCustomer {
   total_spent: number;
 }
 
+export interface ProfitReport {
+  period: string;
+  from_date: string;
+  revenue: number;
+  employee_payments: number;
+  net_profit: number;
+  credits_issued: number;
+  credits_redeemed: number;
+  cash_register_closes: number;
+  pending_employee_debt: number;
+  total_credits_in_circulation: number;
+}
+
 // --- Hooks ---
 
 export function useReportSummary() {
@@ -69,6 +82,15 @@ export function useTopEmployees() {
     queryKey: ['reports', 'topEmployees'],
     queryFn: () =>
       get<ApiResponse<TopEmployee[]>>(ENDPOINTS.REPORTS.topEmployees),
+    select: (res) => res.data,
+  });
+}
+
+export function useProfitReport(period: 'week' | 'month' | 'year' = 'month') {
+  return useQuery({
+    queryKey: ['reports', 'profit', period],
+    queryFn: () =>
+      get<ApiResponse<ProfitReport>>(ENDPOINTS.REPORTS.profit, { params: { period } }),
     select: (res) => res.data,
   });
 }

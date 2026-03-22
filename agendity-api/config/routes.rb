@@ -133,6 +133,7 @@ Rails.application.routes.draw do
       get "reports/top_services",       to: "reports#top_services"
       get "reports/top_employees",      to: "reports#top_employees"
       get "reports/frequent_customers", to: "reports#frequent_customers"
+      get "reports/profit",              to: "reports#profit"
 
       # QR
       post "qr/generate", to: "qr#generate"

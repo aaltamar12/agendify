@@ -55,6 +55,58 @@ module Api
         render_success(data)
       end
 
+      # GET /api/v1/reports/profit
+      def profit
+        period = params[:period] || "month"
+        from_date = case period
+                    when "week" then 1.week.ago.to_date
+                    when "month" then 1.month.ago.to_date
+                    when "year" then 1.year.ago.to_date
+                    else 1.month.ago.to_date
+                    end
+
+        revenue = current_business.appointments
+          .where(status: [:checked_in, :completed])
+          .where("appointment_date >= ?", from_date)
+          .sum(:price).to_f
+
+        employee_payments_total = EmployeePayment
+          .joins(:cash_register_close)
+          .where(cash_register_closes: { business_id: current_business.id })
+          .where("cash_register_closes.date >= ?", from_date)
+          .sum(:amount_paid).to_f
+
+        credits_issued = CreditTransaction
+          .joins(:credit_account)
+          .where(credit_accounts: { business_id: current_business.id })
+          .where("credit_transactions.created_at >= ?", from_date)
+          .where(transaction_type: [:cashback, :cancellation_refund])
+          .sum(:amount).to_f
+
+        credits_redeemed = CreditTransaction
+          .joins(:credit_account)
+          .where(credit_accounts: { business_id: current_business.id })
+          .where("credit_transactions.created_at >= ?", from_date)
+          .where(transaction_type: :redemption)
+          .sum(:amount).to_f.abs
+
+        net_profit = revenue - employee_payments_total
+        closes_count = current_business.cash_register_closes.where("date >= ?", from_date).closed.count
+
+        render_success({
+          period: period,
+          from_date: from_date,
+          revenue: revenue,
+          employee_payments: employee_payments_total,
+          net_profit: net_profit,
+          credits_issued: credits_issued,
+          credits_redeemed: credits_redeemed,
+          cash_register_closes: closes_count,
+          pending_employee_debt: current_business.employees.sum(:pending_balance).to_f,
+          total_credits_in_circulation: current_business.credit_accounts.sum(:balance).to_f
+        })
+      end
+
       # GET /api/v1/reports/frequent_customers
       def frequent_customers
         data = current_business.appointments
