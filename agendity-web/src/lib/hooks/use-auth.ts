@@ -22,7 +22,7 @@ export function useLogin() {
     onSuccess: (response) => {
       const { token, refresh_token, user } = response.data;
       setAuth(token, refresh_token, user);
-      router.push('/dashboard/agenda');
+      router.push(user.role === 'employee' ? '/employee' : '/dashboard/agenda');
     },
   });
 }

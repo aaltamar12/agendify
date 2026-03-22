@@ -10,11 +10,14 @@ const PUBLIC_ROUTES = [
   '/login',
   '/register',
   '/explore',
+  '/forgot-password',
+  '/reset-password',
 ];
 
 // Prefixes for public dynamic routes
 const PUBLIC_PREFIXES = [
   '/explore',
+  '/employee/register',  // Employee invitation registration
 ];
 
 function isPublicRoute(pathname: string): boolean {
@@ -38,7 +41,7 @@ function isPublicRoute(pathname: string): boolean {
   const segments = pathname.split('/').filter(Boolean);
   if (segments.length >= 1) {
     const firstSegment = segments[0];
-    const isReserved = ['dashboard', 'login', 'register', 'explore'].includes(firstSegment);
+    const isReserved = ['dashboard', 'employee', 'login', 'register', 'explore', 'forgot-password', 'reset-password'].includes(firstSegment);
     if (!isReserved) {
       // /[slug] or /[slug]/ticket/[code]
       if (segments.length === 1) return true;
@@ -52,14 +55,16 @@ function isPublicRoute(pathname: string): boolean {
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // If authenticated user visits /login or /register, redirect to dashboard
+  // If authenticated user visits /login or /register, redirect to their portal
   if (pathname === '/login' || pathname === '/register') {
     const authCookie = request.cookies.get('agendity-auth')?.value;
     if (authCookie) {
       try {
         const parsed = JSON.parse(authCookie);
         if (parsed?.state?.token) {
-          return NextResponse.redirect(new URL('/dashboard/agenda', request.url));
+          const role = parsed?.state?.user?.role;
+          const redirectUrl = role === 'employee' ? '/employee' : '/dashboard/agenda';
+          return NextResponse.redirect(new URL(redirectUrl, request.url));
         }
       } catch {
         // Invalid cookie, let them through to login
