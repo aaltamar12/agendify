@@ -48,6 +48,7 @@ const navItems: NavItem[] = [
   { href: '/dashboard/credits', label: 'Creditos', icon: Coins },
   { href: '/dashboard/dynamic-pricing', label: 'Tarifas dinamicas', icon: TrendingUp },
   { href: '/dashboard/cash-register', label: 'Cierre de caja', icon: Wallet },
+  { href: '/dashboard/reconciliation', label: 'Reconciliacion', icon: Sparkles },
   { href: '/dashboard/reports', label: 'Reportes', icon: BarChart3 },
   { href: '/dashboard/reviews', label: 'Reseñas', icon: Star },
   { href: '/dashboard/qr', label: 'Código QR', icon: QrCode },

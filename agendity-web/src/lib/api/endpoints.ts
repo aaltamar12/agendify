@@ -70,6 +70,15 @@ export const ENDPOINTS = {
     bulkAdjust: `${BASE}/credits/bulk_adjust`,
   },
 
+  RECONCILIATION: {
+    check: `${BASE}/reconciliation/check`,
+  },
+
+  EMPLOYEE_BALANCE: {
+    adjust: (id: number) => `${BASE}/employees/${id}/adjust_balance`,
+    history: (id: number) => `${BASE}/employees/${id}/balance_history`,
+  },
+
   DYNAMIC_PRICING: {
     list: `${BASE}/dynamic_pricing`,
     create: `${BASE}/dynamic_pricing`,
