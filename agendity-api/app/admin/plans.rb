@@ -4,7 +4,8 @@ ActiveAdmin.register Plan do
   permit_params :name, :price_monthly, :price_monthly_usd, :max_employees, :max_services,
                 :max_reservations_month, :max_customers,
                 :ai_features, :ticket_digital, :advanced_reports,
-                :brand_customization, :featured_listing, :priority_support
+                :brand_customization, :featured_listing, :priority_support,
+                :cashback_enabled, :cashback_percentage
 
   # -- Index --
   index do
@@ -19,6 +20,8 @@ ActiveAdmin.register Plan do
     column :ai_features
     column :ticket_digital
     column :advanced_reports
+    column :cashback_enabled
+    column("Cashback %") { |p| p.cashback_percentage ? "#{p.cashback_percentage}%" : "—" }
     actions
   end
 
@@ -45,6 +48,10 @@ ActiveAdmin.register Plan do
       f.input :brand_customization
       f.input :featured_listing
       f.input :priority_support
+    end
+    f.inputs "Cashback" do
+      f.input :cashback_enabled, label: "Cashback Enabled"
+      f.input :cashback_percentage, label: "Cashback Percentage (%)"
     end
     f.actions
   end

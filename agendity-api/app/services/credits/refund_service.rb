@@ -10,7 +10,8 @@ module Credits
     end
 
     def call
-      return success(nil) unless @business.cancellation_refund_as_credit?
+      plan = @business.current_plan
+      return success(nil) unless plan&.cashback_enabled?
       return success(nil) unless @customer.present?
 
       account = CreditAccount.find_or_create_by!(customer: @customer, business: @business)

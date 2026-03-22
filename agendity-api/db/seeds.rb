@@ -51,7 +51,9 @@ plan_profesional.update!(
   advanced_reports: true,
   brand_customization: true,
   featured_listing: true,
-  priority_support: false
+  priority_support: false,
+  cashback_enabled: true,
+  cashback_percentage: 5
 )
 
 plan_inteligente = Plan.find_or_initialize_by(name: "Inteligente")
@@ -67,7 +69,9 @@ plan_inteligente.update!(
   advanced_reports: true,
   brand_customization: true,
   featured_listing: true,
-  priority_support: true
+  priority_support: true,
+  cashback_enabled: true,
+  cashback_percentage: 5
 )
 
 puts "  ✅ Plans: #{Plan.count} (Básico, Profesional, Inteligente)"
@@ -1360,13 +1364,8 @@ puts "  ✅ Glamour Studio (inactive)"
 # ============================================================================
 puts "\n💳 Seeding credit system..."
 
-# Enable cashback on Barbería Elite
-barberia_elite.update!(
-  cashback_enabled: true,
-  cashback_percentage: 5,
-  cancellation_refund_as_credit: true
-)
-puts "  ✅ Barbería Elite: cashback 5%, refund as credit enabled"
+# Cashback is now configured at the Plan level (Profesional+)
+puts "  ✅ Cashback configured via Plan (Profesional: 5%, Inteligente: 5%)"
 
 # Get some customers for credit scenarios
 c_juan     = Customer.find_by!(business: barberia_elite, email: "juan.herrera@gmail.com")

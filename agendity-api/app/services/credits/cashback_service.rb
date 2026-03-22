@@ -10,18 +10,20 @@ module Credits
     end
 
     def call
-      return success(nil) unless @business.cashback_enabled?
-      return success(nil) unless @business.cashback_percentage&.positive?
+      plan = @business.current_plan
+      return success(nil) unless plan&.cashback_enabled?
+      return success(nil) unless plan.cashback_percentage&.positive?
       return success(nil) unless @customer.present?
 
-      cashback_amount = (@appointment.price * @business.cashback_percentage / 100).round(2)
+      cashback_pct = plan.cashback_percentage
+      cashback_amount = (@appointment.price * cashback_pct / 100).round(2)
       return success(nil) if cashback_amount.zero?
 
       account = CreditAccount.find_or_create_by!(customer: @customer, business: @business)
       account.credit!(
         cashback_amount,
         transaction_type: :cashback,
-        description: "Cashback #{@business.cashback_percentage}% — #{@appointment.service&.name}",
+        description: "Cashback #{cashback_pct}% — #{@appointment.service&.name}",
         appointment: @appointment
       )
 

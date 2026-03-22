@@ -253,62 +253,6 @@ export default function SettingsPage() {
           )
         )}
 
-        {/* Cashback config */}
-        {!loadingBusiness && business && (
-          <Card>
-            <h2 className="mb-4 text-lg font-semibold text-gray-900">Cashback y creditos</h2>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-700">Activar cashback</p>
-                  <p className="text-xs text-gray-500">Los clientes reciben un % de credito por cada servicio completado</p>
-                </div>
-                <label className="relative inline-flex cursor-pointer items-center">
-                  <input
-                    type="checkbox"
-                    className="peer sr-only"
-                    checked={business.cashback_enabled ?? false}
-                    onChange={(e) => updateBusiness.mutate({ cashback_enabled: e.target.checked } as Partial<typeof business>)}
-                  />
-                  <div className="h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:bg-violet-600 peer-checked:after:translate-x-full" />
-                </label>
-              </div>
-              {business.cashback_enabled && (
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">Porcentaje de cashback</label>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="number"
-                      min={0}
-                      max={100}
-                      step={1}
-                      defaultValue={business.cashback_percentage ?? 0}
-                      onBlur={(e) => updateBusiness.mutate({ cashback_percentage: parseFloat(e.target.value) || 0 } as Partial<typeof business>)}
-                      className="w-20 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-violet-500 focus:outline-none"
-                    />
-                    <span className="text-sm text-gray-500">%</span>
-                  </div>
-                  <p className="mt-1 text-xs text-gray-400">Ej: 5% = por cada $100,000, el cliente recibe $5,000 en creditos</p>
-                </div>
-              )}
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-700">Reembolsar cancelaciones como credito</p>
-                  <p className="text-xs text-gray-500">Al cancelar, el reembolso (menos penalizacion) se acredita como saldo</p>
-                </div>
-                <label className="relative inline-flex cursor-pointer items-center">
-                  <input
-                    type="checkbox"
-                    className="peer sr-only"
-                    checked={business.cancellation_refund_as_credit ?? true}
-                    onChange={(e) => updateBusiness.mutate({ cancellation_refund_as_credit: e.target.checked } as Partial<typeof business>)}
-                  />
-                  <div className="h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:bg-violet-600 peer-checked:after:translate-x-full" />
-                </label>
-              </div>
-            </div>
-          </Card>
-        )}
 
         {/* Notification preferences */}
         <NotificationSection />

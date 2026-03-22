@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_22_000007) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_22_000008) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "unaccent"
@@ -353,6 +353,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_22_000007) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.decimal "price_monthly_usd", precision: 8, scale: 2
+    t.boolean "cashback_enabled", default: false, null: false
+    t.decimal "cashback_percentage", precision: 5, scale: 2, default: "0.0", null: false
   end
 
   create_table "refresh_tokens", force: :cascade do |t|
