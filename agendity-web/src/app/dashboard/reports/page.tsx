@@ -56,8 +56,8 @@ export default function ReportsPage() {
   const reconFailed = reconciliation.isError;
   const reconLoading = reconciliation.isPending;
   const hasDiscrepancies = reconResult && (
-    reconResult.cash_register?.status === 'discrepancies' ||
-    reconResult.credits?.status === 'discrepancies'
+    reconResult.cash_register?.ok === false ||
+    reconResult.credits?.ok === false
   );
   const reconVerified = reconciliationChecked && reconResult && !hasDiscrepancies && !reconFailed;
 

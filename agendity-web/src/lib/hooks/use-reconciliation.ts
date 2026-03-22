@@ -13,11 +13,11 @@ interface Discrepancy {
 
 interface ReconciliationResult {
   cash_register: {
-    status: 'ok' | 'discrepancies';
+    ok: boolean;
     discrepancies: Discrepancy[];
   };
   credits: {
-    status: 'ok' | 'discrepancies';
+    ok: boolean;
     discrepancies: Discrepancy[];
   };
 }

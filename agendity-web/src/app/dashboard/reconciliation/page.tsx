@@ -43,8 +43,8 @@ function ReconciliationContent() {
     }
   };
 
-  const cashOk = result?.cash_register?.status === 'ok';
-  const creditsOk = result?.credits?.status === 'ok';
+  const cashOk = result?.cash_register?.ok !== false;
+  const creditsOk = result?.credits?.ok !== false;
 
   return (
     <div>
