@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_22_000006) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_22_000007) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "unaccent"
@@ -82,6 +82,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_22_000006) do
     t.integer "checked_in_by_id"
     t.boolean "checkin_substitute", default: false
     t.string "checkin_substitute_reason"
+    t.decimal "credits_applied", precision: 12, scale: 2, default: "0.0"
     t.index ["business_id", "appointment_date", "status"], name: "idx_appointments_biz_date_status"
     t.index ["business_id"], name: "index_appointments_on_business_id"
     t.index ["customer_id"], name: "index_appointments_on_customer_id"
@@ -162,6 +163,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_22_000006) do
     t.integer "gap_between_appointments_minutes", default: 0
     t.string "cover_source", default: "upload"
     t.jsonb "customer_notification_channels", default: {"push" => false, "email" => true, "whatsapp" => false}
+    t.boolean "cashback_enabled", default: false
+    t.decimal "cashback_percentage", precision: 5, scale: 2, default: "0.0"
+    t.boolean "cancellation_refund_as_credit", default: true
     t.index ["city"], name: "index_businesses_on_city"
     t.index ["latitude", "longitude"], name: "index_businesses_on_latitude_and_longitude"
     t.index ["owner_id"], name: "index_businesses_on_owner_id"
@@ -184,6 +188,33 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_22_000006) do
     t.index ["business_id", "date"], name: "index_cash_register_closes_on_business_id_and_date", unique: true
     t.index ["business_id"], name: "index_cash_register_closes_on_business_id"
     t.index ["closed_by_user_id"], name: "index_cash_register_closes_on_closed_by_user_id"
+  end
+
+  create_table "credit_accounts", force: :cascade do |t|
+    t.bigint "customer_id", null: false
+    t.bigint "business_id", null: false
+    t.decimal "balance", precision: 12, scale: 2, default: "0.0", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["business_id"], name: "index_credit_accounts_on_business_id"
+    t.index ["customer_id", "business_id"], name: "index_credit_accounts_on_customer_id_and_business_id", unique: true
+    t.index ["customer_id"], name: "index_credit_accounts_on_customer_id"
+  end
+
+  create_table "credit_transactions", force: :cascade do |t|
+    t.bigint "credit_account_id", null: false
+    t.decimal "amount", precision: 12, scale: 2, null: false
+    t.integer "transaction_type", null: false
+    t.string "description"
+    t.bigint "appointment_id"
+    t.bigint "performed_by_user_id"
+    t.jsonb "metadata", default: {}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["appointment_id"], name: "index_credit_transactions_on_appointment_id"
+    t.index ["credit_account_id"], name: "index_credit_transactions_on_credit_account_id"
+    t.index ["performed_by_user_id"], name: "index_credit_transactions_on_performed_by_user_id"
+    t.index ["transaction_type"], name: "index_credit_transactions_on_transaction_type"
   end
 
   create_table "customers", force: :cascade do |t|
@@ -447,6 +478,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_22_000006) do
   add_foreign_key "businesses", "users", column: "owner_id"
   add_foreign_key "cash_register_closes", "businesses"
   add_foreign_key "cash_register_closes", "users", column: "closed_by_user_id"
+  add_foreign_key "credit_accounts", "businesses"
+  add_foreign_key "credit_accounts", "customers"
+  add_foreign_key "credit_transactions", "appointments"
+  add_foreign_key "credit_transactions", "credit_accounts"
+  add_foreign_key "credit_transactions", "users", column: "performed_by_user_id"
   add_foreign_key "customers", "businesses"
   add_foreign_key "employee_invitations", "businesses"
   add_foreign_key "employee_invitations", "employees"

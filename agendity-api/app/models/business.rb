@@ -41,6 +41,7 @@ class Business < ApplicationRecord
   has_many :subscriptions, dependent: :destroy
   has_many :subscription_payment_orders, dependent: :destroy
   has_many :cash_register_closes, dependent: :destroy
+  has_many :credit_accounts, dependent: :destroy
 
   # -- Validations --
   validates :name, presence: true

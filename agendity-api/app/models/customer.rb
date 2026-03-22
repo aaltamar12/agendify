@@ -8,6 +8,7 @@ class Customer < ApplicationRecord
   # -- Associations --
   has_many :appointments, dependent: :restrict_with_error
   has_many :reviews, dependent: :nullify
+  has_many :credit_accounts, dependent: :destroy
 
   # -- Validations --
   validates :email, uniqueness: { scope: :business_id, allow_blank: true }

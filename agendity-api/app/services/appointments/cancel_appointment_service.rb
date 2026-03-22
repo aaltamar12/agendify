@@ -21,7 +21,13 @@ module Appointments
 
         if @cancelled_by == "customer"
           penalty_amount = calculate_penalty
-          if penalty_amount.positive?
+          business = @appointment.business
+
+          if business.cancellation_refund_as_credit? && @appointment.customer.present?
+            # Refund as credits (minus penalty)
+            Credits::RefundService.call(appointment: @appointment)
+          elsif penalty_amount.positive?
+            # Legacy: add to pending_penalty
             @appointment.customer.increment!(:pending_penalty, penalty_amount)
           end
         end

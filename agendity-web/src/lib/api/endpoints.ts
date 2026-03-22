@@ -60,6 +60,13 @@ export const ENDPOINTS = {
   CUSTOMERS: {
     list: `${BASE}/customers`,
     show: (id: number) => `${BASE}/customers/${id}`,
+    credits: (id: number) => `${BASE}/customers/${id}/credits`,
+    adjustCredits: (id: number) => `${BASE}/customers/${id}/credits/adjust`,
+    creditBalance: (id: number) => `${BASE}/customers/${id}/credit_balance`,
+  },
+
+  CREDITS: {
+    summary: `${BASE}/credits/summary`,
   },
 
   PAYMENTS: {

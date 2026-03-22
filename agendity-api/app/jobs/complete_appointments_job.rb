@@ -23,6 +23,9 @@ class CompleteAppointmentsJob < ApplicationJob
         resource: appointment
       )
 
+      # Award cashback credits
+      Credits::CashbackService.call(appointment: appointment)
+
       # Send rating request to customer
       SendRatingRequestJob.perform_later(appointment.id)
 

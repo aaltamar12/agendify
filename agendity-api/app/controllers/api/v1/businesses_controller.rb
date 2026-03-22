@@ -112,7 +112,8 @@ module Api
           :primary_color, :secondary_color,
           :cancellation_policy_pct, :cancellation_deadline_hours,
           :lunch_start_time, :lunch_end_time, :lunch_enabled,
-          :slot_interval_minutes, :gap_between_appointments_minutes
+          :slot_interval_minutes, :gap_between_appointments_minutes,
+          :cashback_enabled, :cashback_percentage, :cancellation_refund_as_credit
         )
         # Map frontend cover_url to DB column cover_image_url
         if permitted.key?(:cover_url)

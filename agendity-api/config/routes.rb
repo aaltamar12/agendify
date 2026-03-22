@@ -45,7 +45,16 @@ Rails.application.routes.draw do
       resources :employee_invitations, only: [:show], param: :token do
         post :accept, on: :member
       end
-      resources :customers, only: %i[index show]
+      resources :customers, only: %i[index show] do
+        member do
+          get :credits, to: "credits#show"
+          post "credits/adjust", to: "credits#adjust"
+          get :credit_balance, to: "credits#balance"
+        end
+      end
+
+      # Credits summary
+      get "credits/summary", to: "credits#summary"
 
       resources :appointments do
         collection do
