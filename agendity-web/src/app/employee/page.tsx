@@ -76,14 +76,16 @@ export default function EmployeeDashboardPage() {
       {score && (
         <Card className="mb-6">
           <h2 className="mb-3 text-lg font-semibold text-gray-900">Desempeno</h2>
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2">
             <div className="flex items-center gap-2">
               <Star className="h-4 w-4 text-yellow-500" />
-              <span className="text-sm text-gray-600">Calificacion: <strong>{score.rating_avg}/5</strong></span>
+              <span className="text-sm text-gray-600">Calificacion clientes: <strong>{score.rating_avg}/5</strong></span>
             </div>
-            <div className="text-sm text-gray-600">Tasa completadas: <strong>{score.completion_rate}%</strong></div>
             <div className="text-sm text-gray-600">Puntualidad: <strong>{score.on_time_rate}%</strong></div>
           </div>
+          <p className="mt-2 text-xs text-gray-400">
+            Score = calificacion (60%) + puntualidad (40%)
+          </p>
         </Card>
       )}
 

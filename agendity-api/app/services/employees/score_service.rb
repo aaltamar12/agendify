@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 module Employees
-  # Calculates an employee's performance score based on ratings, completion rate, and punctuality.
+  # Calculates an employee's performance score based on customer ratings and punctuality.
+  # Only factors the employee can control — excludes completion rate (client cancellations
+  # would unfairly penalize the employee).
   class ScoreService < BaseService
     def initialize(employee:)
       @employee = employee
@@ -11,9 +13,8 @@ module Employees
       success({
         overall: calculate_overall,
         rating_avg: average_rating,
-        completed_appointments: completed_count,
-        completion_rate: completion_rate,
         on_time_rate: on_time_rate,
+        completed_appointments: completed_count,
         total_revenue: total_revenue
       })
     end
@@ -30,12 +31,6 @@ module Employees
       @employee.appointments.where(status: :completed).count
     end
 
-    def completion_rate
-      total = @employee.appointments.where.not(status: :cancelled).count
-      return 0 if total.zero?
-      ((completed_count.to_f / total) * 100).round(1)
-    end
-
     def on_time_rate
       checked_in = @employee.appointments.where(status: [:checked_in, :completed]).where.not(checked_in_at: nil)
       return 0 if checked_in.count.zero?
@@ -48,11 +43,11 @@ module Employees
     end
 
     def calculate_overall
-      weights = { rating: 0.4, completion: 0.3, on_time: 0.3 }
+      # Rating (60%) + Punctuality (40%)
+      # Only things the employee controls
       rating_score = average_rating > 0 ? (average_rating / 5.0) * 100 : 50
-      (rating_score * weights[:rating] +
-       completion_rate * weights[:completion] +
-       on_time_rate * weights[:on_time]).round(0)
+      punctuality = on_time_rate > 0 ? on_time_rate : 50
+      (rating_score * 0.6 + punctuality * 0.4).round(0)
     end
   end
 end

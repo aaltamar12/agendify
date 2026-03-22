@@ -20,6 +20,18 @@ class EmployeeSerializer < Blueprinter::Base
     employee.user_id.present?
   end
 
+  # Score: rating (60%) + punctuality (40%)
+  field :score do |employee, _options|
+    result = Employees::ScoreService.call(employee: employee)
+    result.success? ? result.data[:overall] : nil
+  end
+
+  field :rating_avg do |employee, _options|
+    Review.joins(:appointment)
+          .where(appointments: { employee_id: employee.id })
+          .average(:rating)&.round(1).to_f || 0
+  end
+
   # IDs of services this employee can perform
   field :service_ids do |employee, _options|
     employee.employee_services.pluck(:service_id)
