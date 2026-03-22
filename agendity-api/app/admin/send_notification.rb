@@ -65,9 +65,26 @@ ActiveAdmin.register_page "Send Notification" do
         }
       )
 
+      ActivityLog.log(
+        business: business,
+        action: "admin_notification_sent",
+        description: "Notificacion enviada por admin: #{title}",
+        actor_type: "admin",
+        actor_name: current_admin_user&.email || "SuperAdmin",
+        resource: notification,
+        metadata: {
+          notification_type: notification_type,
+          title: title,
+          body: body,
+          link: link,
+          sent_by: current_admin_user&.email
+        }
+      )
+
       count += 1
     end
 
+    Rails.logger.info("[SendNotification] Admin #{current_admin_user&.email} sent #{count} notification(s) type=#{notification_type} title=#{title}")
     redirect_to admin_send_notification_path, notice: "#{count} notificacion(es) enviada(s) exitosamente."
   end
 
