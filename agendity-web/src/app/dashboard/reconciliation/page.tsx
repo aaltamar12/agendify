@@ -159,7 +159,7 @@ function DiscrepancyTable({ items, type, onAdjust }: { items: Discrepancy[]; typ
             <th className="pb-2 font-medium text-right">Esperado</th>
             <th className="pb-2 font-medium text-right">Actual</th>
             <th className="pb-2 font-medium text-right">Diferencia</th>
-            {onAdjust && <th className="pb-2 font-medium">Accion</th>}
+            {onAdjust && <th className="pb-2 pl-4 font-medium">Accion</th>}
           </tr>
         </thead>
         <tbody>
@@ -172,7 +172,7 @@ function DiscrepancyTable({ items, type, onAdjust }: { items: Discrepancy[]; typ
                 {d.difference > 0 ? '+' : ''}{d.difference.toLocaleString()}
               </td>
               {onAdjust && (
-                <td className="py-2">
+                <td className="py-2 pl-4">
                   <button
                     type="button"
                     onClick={() => onAdjust(d)}
