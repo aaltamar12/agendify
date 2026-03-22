@@ -246,6 +246,9 @@ function EmployeeRow({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const hasPending = emp.pending_from_previous > 0;
   const hasCommission = emp.commission_pct > 0;
+  const hasFixedAmount = hasCommission || hasPending;
+  const [editingAmount, setEditingAmount] = useState(false);
+  const [showDebtModal, setShowDebtModal] = useState(false);
 
   const handleProofUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -400,36 +403,16 @@ function EmployeeRow({
               </div>
             </div>
 
-            {/* Amount input */}
-            <div className="mb-3">
-              <label className="mb-1 block text-xs font-medium text-gray-600">
-                {hasCommission || hasPending ? 'Monto a pagar (editable)' : 'Monto a pagar'}
-              </label>
-              <input
-                type="number"
-                min={0}
-                placeholder={hasCommission || hasPending ? String(emp.total_owed) : 'Ej: 50000'}
-                value={paymentState.amount_paid || ''}
-                onChange={(e) => onUpdatePayment({ amount_paid: parseFloat(e.target.value) || 0, confirmed: false })}
-                className="w-44 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
-              />
-              {(hasCommission || hasPending) && paymentState.amount_paid < emp.total_owed && paymentState.amount_paid > 0 && (
-                <p className="mt-1 flex items-center gap-1 text-xs text-orange-600">
-                  <AlertTriangle className="h-3 w-3" />
-                  Quedara un pendiente de ${(emp.total_owed - paymentState.amount_paid).toLocaleString()} para el proximo cierre
-                </p>
-              )}
-            </div>
-
-            {paymentState.method === 'cash' ? (
-              /* Cash flow */
+            {/* Amount section */}
+            {hasFixedAmount && !editingAmount ? (
+              /* Fixed amount: show confirm button + edit toggle */
               <div>
                 {paymentState.confirmed ? (
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Check className="h-4 w-4 text-green-600" />
                       <span className="text-sm text-green-700">
-                        Pago en efectivo confirmado (${paymentState.amount_paid.toLocaleString()})
+                        Pago confirmado: ${paymentState.amount_paid.toLocaleString()}
                       </span>
                     </div>
                     <button
@@ -441,43 +424,107 @@ function EmployeeRow({
                     </button>
                   </div>
                 ) : (
+                  <div className="flex items-center gap-3">
+                    {paymentState.method === 'cash' ? (
+                      <Button size="sm" onClick={handleCashConfirm}>
+                        <Check className="mr-1.5 h-4 w-4" />
+                        Confirmar pago de ${emp.total_owed.toLocaleString()}
+                      </Button>
+                    ) : paymentState.proofPreview ? (
+                      <div className="flex-1 space-y-2">
+                        <div className="flex items-center gap-3">
+                          <Paperclip className="h-4 w-4 text-violet-600" />
+                          <span className="text-sm text-gray-700">Comprobante adjunto</span>
+                          <span className="text-xs font-medium text-green-600">
+                            Pago: ${paymentState.amount_paid.toLocaleString()}
+                          </span>
+                        </div>
+                        <img src={paymentState.proofPreview} alt="Comprobante" className="max-h-32 rounded-lg border border-gray-200 object-contain" />
+                        <button type="button" onClick={handleRemoveProof} className="flex cursor-pointer items-center gap-1 text-xs text-red-600 hover:text-red-700">
+                          <X className="h-3.5 w-3.5" /> Eliminar comprobante
+                        </button>
+                      </div>
+                    ) : (
+                      <div>
+                        <Button size="sm" variant="outline" onClick={() => fileInputRef.current?.click()}>
+                          <Upload className="mr-1.5 h-4 w-4" />
+                          Subir comprobante (${emp.total_owed.toLocaleString()})
+                        </Button>
+                        <input ref={fileInputRef} type="file" accept="image/*" onChange={handleProofUpload} className="hidden" />
+                      </div>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => { setEditingAmount(true); onUpdatePayment({ confirmed: false, amount_paid: emp.total_owed }); }}
+                      className="cursor-pointer text-xs font-medium text-violet-600 hover:text-violet-700"
+                    >
+                      Editar monto
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              /* Editable amount: input + confirm */
+              <div>
+                <div className="mb-2 flex items-center gap-2">
+                  <label className="text-xs font-medium text-gray-600">Monto a pagar</label>
+                  {hasFixedAmount && (
+                    <button
+                      type="button"
+                      onClick={() => { setEditingAmount(false); onUpdatePayment({ amount_paid: emp.total_owed, confirmed: false }); }}
+                      className="cursor-pointer text-xs text-gray-500 hover:text-gray-700"
+                    >
+                      Cancelar edicion
+                    </button>
+                  )}
+                </div>
+                <input
+                  type="number"
+                  min={0}
+                  placeholder={hasFixedAmount ? String(emp.total_owed) : 'Ej: 50000'}
+                  value={paymentState.amount_paid || ''}
+                  onChange={(e) => onUpdatePayment({ amount_paid: parseFloat(e.target.value) || 0, confirmed: false })}
+                  className="mb-2 w-44 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+                />
+
+                {paymentState.confirmed ? (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Check className="h-4 w-4 text-green-600" />
+                      <span className="text-sm text-green-700">
+                        Pago confirmado: ${paymentState.amount_paid.toLocaleString()}
+                      </span>
+                    </div>
+                    <button type="button" onClick={handleCashUnconfirm} className="cursor-pointer text-xs text-gray-500 hover:text-red-600">
+                      Deshacer
+                    </button>
+                  </div>
+                ) : paymentState.method === 'cash' ? (
                   <Button
                     size="sm"
-                    onClick={handleCashConfirm}
+                    onClick={() => {
+                      if (hasFixedAmount && paymentState.amount_paid < emp.total_owed && paymentState.amount_paid > 0) {
+                        setShowDebtModal(true);
+                      } else {
+                        handleCashConfirm();
+                      }
+                    }}
                     disabled={paymentState.amount_paid <= 0}
                   >
                     <Check className="mr-1.5 h-4 w-4" />
                     {paymentState.amount_paid > 0
                       ? `Confirmar pago de $${paymentState.amount_paid.toLocaleString()}`
-                      : 'Ingresa el monto a pagar'
-                    }
+                      : 'Ingresa el monto'}
                   </Button>
-                )}
-              </div>
-            ) : (
-              /* Transfer flow */
-              <div>
-                {paymentState.proofPreview ? (
+                ) : paymentState.proofPreview ? (
                   <div className="space-y-2">
                     <div className="flex items-center gap-3">
                       <Paperclip className="h-4 w-4 text-violet-600" />
                       <span className="text-sm text-gray-700">Comprobante adjunto</span>
-                      <span className="text-xs font-medium text-green-600">
-                        Pago: ${paymentState.amount_paid.toLocaleString()}
-                      </span>
                     </div>
-                    <img
-                      src={paymentState.proofPreview}
-                      alt="Comprobante"
-                      className="max-h-32 rounded-lg border border-gray-200 object-contain"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleRemoveProof}
-                      className="flex cursor-pointer items-center gap-1 text-xs text-red-600 hover:text-red-700"
-                    >
-                      <X className="h-3.5 w-3.5" />
-                      Eliminar comprobante
+                    <img src={paymentState.proofPreview} alt="Comprobante" className="max-h-32 rounded-lg border border-gray-200 object-contain" />
+                    <button type="button" onClick={handleRemoveProof} className="flex cursor-pointer items-center gap-1 text-xs text-red-600 hover:text-red-700">
+                      <X className="h-3.5 w-3.5" /> Eliminar comprobante
                     </button>
                   </div>
                 ) : (
@@ -485,24 +532,62 @@ function EmployeeRow({
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => fileInputRef.current?.click()}
+                      onClick={() => {
+                        if (hasFixedAmount && paymentState.amount_paid < emp.total_owed && paymentState.amount_paid > 0) {
+                          setShowDebtModal(true);
+                        } else {
+                          fileInputRef.current?.click();
+                        }
+                      }}
                       disabled={paymentState.amount_paid <= 0}
                     >
                       <Upload className="mr-1.5 h-4 w-4" />
-                      Subir comprobante de transferencia
+                      Subir comprobante
                     </Button>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleProofUpload}
-                      className="hidden"
-                    />
+                    <input ref={fileInputRef} type="file" accept="image/*" onChange={handleProofUpload} className="hidden" />
                   </div>
                 )}
               </div>
             )}
           </div>
+
+          {/* Debt warning modal */}
+          {showDebtModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowDebtModal(false)}>
+              <div className="mx-4 w-full max-w-sm rounded-xl bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+                <div className="mb-4 flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-100">
+                    <AlertTriangle className="h-5 w-5 text-orange-600" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900">Pago parcial</h3>
+                </div>
+                <p className="mb-2 text-sm text-gray-600">
+                  Le debes <strong>${emp.total_owed.toLocaleString()}</strong> a {emp.employee_name} y vas a pagar <strong>${paymentState.amount_paid.toLocaleString()}</strong>.
+                </p>
+                <p className="mb-6 text-sm text-orange-700 font-medium">
+                  La diferencia de ${(emp.total_owed - paymentState.amount_paid).toLocaleString()} se sumara como pendiente en el proximo cierre de caja.
+                </p>
+                <div className="flex justify-end gap-3">
+                  <Button variant="ghost" size="sm" onClick={() => setShowDebtModal(false)}>
+                    Cancelar
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      setShowDebtModal(false);
+                      if (paymentState.method === 'transfer') {
+                        fileInputRef.current?.click();
+                      } else {
+                        handleCashConfirm();
+                      }
+                    }}
+                  >
+                    Confirmar pago parcial
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
