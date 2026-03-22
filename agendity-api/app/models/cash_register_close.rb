@@ -16,4 +16,8 @@ class CashRegisterClose < ApplicationRecord
   def self.ransackable_attributes(_auth_object = nil)
     %w[date status business_id created_at]
   end
+
+  def self.ransackable_associations(_auth_object = nil)
+    %w[business closed_by_user employee_payments]
+  end
 end
