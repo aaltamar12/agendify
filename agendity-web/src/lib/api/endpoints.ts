@@ -153,6 +153,10 @@ export const ENDPOINTS = {
     markAllRead: `${BASE}/notifications/mark_all_read`,
   },
 
+  NOTIFICATION_CONFIG: {
+    list: `${BASE}/notification_config`,
+  },
+
   ADMIN: {
     businesses: `${BASE}/admin/businesses`,
     impersonate: `${BASE}/admin/impersonate`,
