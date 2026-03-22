@@ -7,6 +7,8 @@ class Review < ApplicationRecord
 
   # -- Associations --
   belongs_to :customer, optional: true
+  belongs_to :appointment, optional: true
+  belongs_to :employee, optional: true
 
   # -- Validations --
   validates :rating, presence: true, numericality: { in: 1..5, only_integer: true }
