@@ -457,9 +457,12 @@ end
 
 puts "  ✅ 2 cancelled appointments"
 
-# 3 PAYMENT_SENT appointments (upcoming)
+# 3 PAYMENT_SENT appointments (upcoming, starting from next business day)
+next_business_day = today + 1
+next_business_day += 1 while next_business_day.wday == 0
+
 3.times do |i|
-  date = today + rand(1..4)
+  date = next_business_day + i
   date += 1 if date.wday == 0
   hour = rand(10..16)
   minute = [0, 30].sample
