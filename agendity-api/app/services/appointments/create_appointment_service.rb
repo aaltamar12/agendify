@@ -16,6 +16,11 @@ module Appointments
         return failure("No puedes agendar en un horario que ya pasó.")
       end
 
+      # Reject bookings on closed days
+      if day_closed?
+        return failure("El negocio no opera este dia. Selecciona otra fecha.")
+      end
+
       service  = find_service
       return failure("Service not found or does not belong to this business") unless service
 
@@ -208,6 +213,13 @@ module Appointments
         time:        appointment.start_time.strftime("%H:%M"),
         token:       @lock_token
       )
+    end
+
+    def day_closed?
+      date = @params[:appointment_date]
+      parsed_date = date.is_a?(String) ? Date.parse(date) : date
+      bh = @business.business_hours.find_by(day_of_week: parsed_date.wday)
+      bh.nil? || bh.closed?
     end
 
     def booking_in_the_past?

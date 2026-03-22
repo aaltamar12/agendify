@@ -18,6 +18,7 @@ import {
   type CreateAppointmentFormData,
 } from '@/lib/validations/appointment';
 import { useCreateAppointment } from '@/lib/hooks/use-appointments';
+import { useBusinessHours } from '@/lib/hooks/use-business';
 import { useUIStore } from '@/lib/stores/ui-store';
 
 interface Slot {
@@ -40,6 +41,12 @@ export function CreateAppointmentModal({
 }: CreateAppointmentModalProps) {
   const addToast = useUIStore((s) => s.addToast);
   const createAppointment = useCreateAppointment();
+  const { data: businessHours } = useBusinessHours();
+
+  // Days the business is closed (for date picker validation)
+  const closedDays = (businessHours || [])
+    .filter((h) => h.closed)
+    .map((h) => h.day_of_week);
   const [manualTime, setManualTime] = useState(false);
   const [customerSearch, setCustomerSearch] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
@@ -343,12 +350,28 @@ export function CreateAppointmentModal({
             </button>
           </div>
 
-          <Input
-            label="Fecha"
-            type="date"
-            error={errors.appointment_date?.message}
-            {...register('appointment_date')}
-          />
+          <div>
+            <Input
+              label="Fecha"
+              type="date"
+              error={errors.appointment_date?.message}
+              {...register('appointment_date', {
+                validate: (value) => {
+                  if (!value) return 'La fecha es requerida';
+                  const date = new Date(value + 'T00:00:00');
+                  if (closedDays.includes(date.getDay())) {
+                    return 'El negocio no opera este dia';
+                  }
+                  return true;
+                },
+              })}
+            />
+            {closedDays.length > 0 && (
+              <p className="mt-1 text-xs text-gray-400">
+                Dias cerrados: {closedDays.map((d) => ['Dom','Lun','Mar','Mie','Jue','Vie','Sab'][d]).join(', ')}
+              </p>
+            )}
+          </div>
 
           {manualTime ? (
             <div className="mt-3">
