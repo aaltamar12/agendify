@@ -1,10 +1,14 @@
 'use client';
 
-import { useState } from 'react';
-import { DollarSign, Plus, Minus, History } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { DollarSign, Plus, Minus, History, Search, UserPlus } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { Button, Card, Spinner, Modal, Input } from '@/components/ui';
+import { get } from '@/lib/api/client';
+import { ENDPOINTS } from '@/lib/api/endpoints';
 import { useCreditsSummary, useCustomerCredits, useAdjustCredits } from '@/lib/hooks/use-credits';
 import { useUIStore } from '@/lib/stores/ui-store';
+import type { ApiResponse, Customer } from '@/lib/api/types';
 import type { CreditAccount } from '@/lib/hooks/use-credits';
 
 const TX_TYPE_LABELS: Record<string, { label: string; color: string }> = {
@@ -19,12 +23,19 @@ export default function CreditsPage() {
   const { data: accounts, isLoading } = useCreditsSummary();
   const [selectedAccount, setSelectedAccount] = useState<CreditAccount | null>(null);
   const [adjustModal, setAdjustModal] = useState<CreditAccount | null>(null);
+  const [openCreditModal, setOpenCreditModal] = useState(false);
 
   const totalCredits = accounts?.reduce((sum, a) => sum + Number(a.balance), 0) ?? 0;
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold text-gray-900">Creditos de clientes</h1>
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-gray-900">Creditos de clientes</h1>
+        <Button onClick={() => setOpenCreditModal(true)}>
+          <UserPlus className="mr-2 h-4 w-4" />
+          Abrir credito
+        </Button>
+      </div>
 
       {/* Summary */}
       <Card className="mb-6">
@@ -106,6 +117,13 @@ export default function CreditsPage() {
           onClose={() => setAdjustModal(null)}
         />
       )}
+
+      {/* Open credit modal */}
+      {openCreditModal && (
+        <OpenCreditModal
+          onClose={() => setOpenCreditModal(false)}
+        />
+      )}
     </div>
   );
 }
@@ -116,7 +134,7 @@ function TransactionHistoryModal({ account, onClose }: { account: CreditAccount;
   return (
     <Modal open onClose={onClose} title={`Creditos — ${account.customer_name}`} size="lg">
       <div className="mb-4 text-center">
-        <p className="text-2xl font-bold text-green-600">${account.balance.toLocaleString()}</p>
+        <p className="text-2xl font-bold text-green-600">${Number(account.balance).toLocaleString()}</p>
         <p className="text-xs text-gray-500">Balance actual</p>
       </div>
 
@@ -221,6 +239,148 @@ function AdjustCreditsModal({ account, onClose }: { account: CreditAccount; onCl
           )}
         </Button>
       </div>
+    </Modal>
+  );
+}
+
+function OpenCreditModal({ onClose }: { onClose: () => void }) {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [amount, setAmount] = useState('');
+  const [description, setDescription] = useState('');
+  const adjustMutation = useAdjustCredits();
+  const { addToast } = useUIStore();
+  const timeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
+
+  useEffect(() => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => setDebouncedSearch(searchQuery), 300);
+    return () => { if (timeoutRef.current) clearTimeout(timeoutRef.current); };
+  }, [searchQuery]);
+
+  const { data: customers, isLoading: searching } = useQuery({
+    queryKey: ['customers-search-credits', debouncedSearch],
+    queryFn: () => get<{ data: Customer[]; meta: unknown }>(ENDPOINTS.CUSTOMERS.list, { params: { search: debouncedSearch, per_page: 5 } }),
+    enabled: debouncedSearch.length >= 2 && !selectedCustomer,
+    select: (res) => res.data,
+  });
+
+  const handleSubmit = async () => {
+    if (!selectedCustomer || !parseFloat(amount)) return;
+    try {
+      await adjustMutation.mutateAsync({
+        customerId: selectedCustomer.id,
+        amount: parseFloat(amount),
+        description: description || 'Credito inicial',
+      });
+      addToast({ type: 'success', message: `Credito abierto para ${selectedCustomer.name}` });
+      onClose();
+    } catch {
+      addToast({ type: 'error', message: 'Error al abrir credito' });
+    }
+  };
+
+  return (
+    <Modal open onClose={onClose} title="Abrir credito" size="lg">
+      {!selectedCustomer ? (
+        <div>
+          <p className="mb-3 text-sm text-gray-500">Busca un cliente por nombre, email o telefono</p>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Buscar cliente..."
+              className="w-full rounded-lg border border-gray-300 py-2.5 pl-9 pr-3 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+              autoFocus
+            />
+          </div>
+
+          {debouncedSearch.length >= 2 && (
+            <div className="mt-2 max-h-60 overflow-y-auto rounded-lg border border-gray-200">
+              {searching ? (
+                <div className="px-4 py-3 text-sm text-gray-500">Buscando...</div>
+              ) : customers && customers.length > 0 ? (
+                <ul>
+                  {customers.map((c) => (
+                    <li key={c.id}>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedCustomer(c)}
+                        className="flex w-full cursor-pointer items-center gap-3 px-4 py-2.5 text-left hover:bg-gray-50"
+                      >
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-100 text-xs font-medium text-violet-600">
+                          {c.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">{c.name}</p>
+                          <p className="text-xs text-gray-500">{c.email || c.phone}</p>
+                        </div>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="px-4 py-3 text-sm text-gray-500">No se encontraron clientes</div>
+              )}
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between rounded-lg border border-violet-200 bg-violet-50 p-3">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-violet-600 text-sm font-medium text-white">
+                {selectedCustomer.name.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-900">{selectedCustomer.name}</p>
+                <p className="text-xs text-gray-500">{selectedCustomer.email || selectedCustomer.phone}</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => { setSelectedCustomer(null); setSearchQuery(''); }}
+              className="cursor-pointer text-xs text-gray-500 hover:text-gray-700"
+            >
+              Cambiar
+            </button>
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">Monto del credito</label>
+            <input
+              type="number"
+              min={1}
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="Ej: 10000"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-violet-500 focus:outline-none"
+            />
+          </div>
+
+          <Input
+            label="Descripcion (opcional)"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Ej: Bonificacion, credito inicial..."
+          />
+
+          <div className="flex justify-end gap-3">
+            <Button variant="ghost" onClick={onClose}>Cancelar</Button>
+            <Button
+              onClick={handleSubmit}
+              loading={adjustMutation.isPending}
+              disabled={!parseFloat(amount) || parseFloat(amount) <= 0}
+            >
+              <Plus className="mr-1.5 h-4 w-4" />
+              Abrir credito de ${parseFloat(amount || '0').toLocaleString()}
+            </Button>
+          </div>
+        </div>
+      )}
     </Modal>
   );
 }
