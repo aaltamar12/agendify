@@ -318,3 +318,192 @@ token_cleanup:
   class: CleanupExpiredTokensJob
   schedule: every sunday at 3am
 ```
+
+---
+
+## Sistema de notificaciones configurables (Etapa 9)
+
+> Agregado: 2026-03-22
+
+El sistema de notificaciones del negocio (browser push, sonido, in-app) ahora es **configurable desde ActiveAdmin** mediante el modelo `NotificationEventConfig`. Esto permite al SuperAdmin activar/desactivar tipos de notificacion, cambiar textos y controlar canales sin deployar codigo.
+
+### Modelo `NotificationEventConfig`
+
+Tabla global (no pertenece a un negocio — la configuracion es igual para todos los clientes).
+
+```sql
+CREATE TABLE notification_event_configs (
+  id bigint PRIMARY KEY,
+  event_key varchar NOT NULL,       -- identificador unico del evento (ej: "new_booking")
+  title varchar NOT NULL,           -- titulo mostrado en la notificacion del navegador
+  body_template varchar,            -- template del cuerpo con variables {{variable}}
+  browser_notification boolean DEFAULT true NOT NULL,  -- mostrar notificacion del navegador
+  sound_enabled boolean DEFAULT true NOT NULL,         -- reproducir sonido
+  in_app_notification boolean DEFAULT true NOT NULL,   -- mostrar en campanita in-app
+  active boolean DEFAULT true NOT NULL,                -- si el evento esta activo
+  created_at timestamp NOT NULL,
+  updated_at timestamp NOT NULL
+);
+
+-- Indice unico para evitar duplicados
+CREATE UNIQUE INDEX index_notification_event_configs_on_event_key ON notification_event_configs (event_key);
+```
+
+**Validaciones del modelo:**
+- `event_key`: presence + uniqueness
+- `title`: presence
+- Scope `active`: filtra solo registros con `active: true`
+
+### Eventos configurados por defecto
+
+Se crean via `db/seeds.rb` con `find_or_initialize_by(:event_key)` (idempotente):
+
+| `event_key` | `title` | `body_template` | Browser | Sound | In-app |
+|---|---|---|---|---|---|
+| `new_booking` | Nueva reserva | `{{customer_name}} reservó {{service_name}}` | true | true | true |
+| `payment_submitted` | Comprobante recibido | `{{customer_name}} envió un comprobante` | true | true | true |
+| `booking_confirmed` | Pago confirmado | `Pago confirmado para {{customer_name}}` | true | true | true |
+| `booking_cancelled` | Cita cancelada | `{{customer_name}} canceló su cita` | true | true | true |
+| `appointment_completed` | Cita completada | `{{customer_name}} completó su cita` | false | false | true |
+| `ai_suggestion` | Sugerencia inteligente | `Detectamos oportunidades para optimizar tus precios` | false | false | true |
+
+### Interpolacion de variables (`body_template`)
+
+El `body_template` soporta placeholders con sintaxis `{{variable}}`. El frontend reemplaza cada `{{key}}` con el valor correspondiente del payload del evento NATS.
+
+**Variables disponibles** (dependen del evento):
+- `{{customer_name}}` — nombre del usuario final
+- `{{service_name}}` — nombre del servicio reservado
+
+Funcion de interpolacion en el frontend:
+
+```typescript
+function renderTemplate(template: string, data: Record<string, unknown>): string {
+  return template.replace(/\{\{(\w+)\}\}/g, (_, key) => String(data[key] || ''));
+}
+```
+
+### API Endpoint
+
+```
+GET /api/v1/notification_config
+```
+
+**Publico, sin autenticacion.** La configuracion es global (no depende del negocio ni del usuario). Retorna solo los eventos activos, ordenados por `event_key`.
+
+**Ejemplo con curl:**
+
+```bash
+curl -s https://api.agendity.com/api/v1/notification_config | jq
+```
+
+**Respuesta:**
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "event_key": "ai_suggestion",
+      "title": "Sugerencia inteligente",
+      "body_template": "Detectamos oportunidades para optimizar tus precios",
+      "browser_notification": false,
+      "sound_enabled": false,
+      "in_app_notification": true
+    },
+    {
+      "event_key": "booking_cancelled",
+      "title": "Cita cancelada",
+      "body_template": "{{customer_name}} canceló su cita",
+      "browser_notification": true,
+      "sound_enabled": true,
+      "in_app_notification": true
+    }
+  ]
+}
+```
+
+**Archivos clave del endpoint:**
+- Controller: `app/controllers/api/v1/notification_config_controller.rb`
+- Ruta: `config/routes.rb` → `get "notification_config", to: "notification_config#index"`
+
+### Frontend: `useEventNotifications`
+
+El hook `useEventNotifications` (`agendity-web/src/lib/hooks/use-event-notifications.ts`) conecta la configuracion del servidor con el sistema de notificaciones en tiempo real.
+
+**Flujo:**
+
+1. Al montar, hace `GET /api/v1/notification_config` via TanStack Query (cache 5 min, `staleTime: 5 * 60 * 1000`)
+2. Cuando llega un evento NATS, busca la config del servidor por `event_key`
+3. Si no hay config del servidor, usa el **fallback hardcoded** (`FALLBACK_CONFIG`)
+4. Segun la config:
+   - Si `browser_notification: true` → muestra notificacion del navegador con titulo y body interpolado
+   - Si `sound_enabled: true` **Y** el usuario tiene sonido habilitado en su UI → reproduce sonido
+5. Siempre invalida las queries relevantes (appointments, payments, notifications, etc.)
+
+**Prioridad de config:** server config > fallback hardcoded > desactivado
+
+```
+Evento NATS llega
+       |
+  ¿Existe config del servidor para este event_key?
+     /          \
+    Si           No
+    |            |
+  Usar config   ¿Existe FALLBACK_CONFIG?
+  del servidor     /          \
+                  Si           No
+                  |            |
+               Usar fallback  Ignorar (no notification)
+```
+
+### ActiveAdmin (SuperAdmin)
+
+El CRUD esta registrado en `app/admin/notification_event_configs.rb`:
+
+- **Menu:** Settings → Notification Events
+- **Acciones:** listar, ver, crear, editar, eliminar
+- **Filtros:** por `event_key`, `title`, y cada flag booleano
+- **Formulario:** todos los campos editables, con hint en `body_template` mostrando las variables disponibles
+
+Esto permite al SuperAdmin:
+- Desactivar un tipo de notificacion (ej: desactivar `ai_suggestion`) sin tocar codigo
+- Cambiar el texto de una notificacion (ej: mejorar el copy de `new_booking`)
+- Activar/desactivar browser push o sonido por tipo de evento
+
+### Como agregar un nuevo tipo de evento
+
+1. **Seeds:** agregar un nuevo hash en el array `notification_events` en `db/seeds.rb`:
+   ```ruby
+   {
+     event_key: "new_event_key",
+     title: "Titulo visible",
+     body_template: "{{variable1}} hizo algo con {{variable2}}",
+     browser_notification: true,
+     sound_enabled: true,
+     in_app_notification: true,
+     active: true
+   }
+   ```
+   Ejecutar `rails db:seed` (es idempotente, no duplica registros existentes).
+
+2. **Frontend fallback:** agregar la entrada correspondiente en `FALLBACK_CONFIG` dentro de `use-event-notifications.ts`:
+   ```typescript
+   new_event_key: {
+     title: 'Titulo visible',
+     body_template: '{{variable1}} hizo algo con {{variable2}}',
+     browser_notification: true,
+     sound_enabled: true,
+   },
+   ```
+
+3. **Query invalidation:** en el `handleEvent` del mismo hook, agregar las invalidaciones de cache necesarias:
+   ```typescript
+   if (event === 'new_event_key') {
+     queryClient.invalidateQueries({ queryKey: ['relevant-query'] });
+   }
+   ```
+
+4. **Backend publish:** asegurarse de que el job o servicio que genera el evento publique al subject NATS correcto con los datos que el template necesita (ej: `customer_name`, `service_name`).
+
+5. **ActiveAdmin:** no requiere cambios — el nuevo registro aparece automaticamente en el CRUD tras el seed.
