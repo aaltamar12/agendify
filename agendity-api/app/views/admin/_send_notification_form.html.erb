@@ -1,0 +1,103 @@
+<%= form_tag admin_send_notification_deliver_path, method: :post, class: "send-notification-form" do %>
+
+  <style>
+    .send-notification-form { max-width: 800px; }
+    .send-notification-form fieldset { border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin-bottom: 16px; }
+    .send-notification-form legend { font-weight: 600; font-size: 1.1em; padding: 0 8px; color: #374151; }
+    .send-notification-form .form-row { margin-bottom: 16px; }
+    .send-notification-form label { display: block; font-weight: 500; margin-bottom: 6px; color: #374151; }
+    .send-notification-form select,
+    .send-notification-form input[type="text"],
+    .send-notification-form textarea { width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; }
+    .send-notification-form select[multiple] { height: 180px; }
+    .send-notification-form textarea { min-height: 80px; resize: vertical; }
+    .send-notification-form .radio-group { display: flex; gap: 20px; align-items: center; margin-bottom: 12px; }
+    .send-notification-form .radio-group label { display: inline; font-weight: normal; cursor: pointer; }
+    .send-notification-form .hint { font-size: 12px; color: #6b7280; margin-top: 4px; }
+    .send-notification-form .submit-btn {
+      background: #7C3AED; color: white; border: none; padding: 10px 24px;
+      border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer;
+      margin-top: 8px;
+    }
+    .send-notification-form .submit-btn:hover { background: #6D28D9; }
+    .send-notification-form .section-divider { border-top: 1px solid #e5e7eb; margin: 20px 0; }
+  </style>
+
+  <fieldset>
+    <legend>Destinatarios</legend>
+
+    <div class="form-row">
+      <div class="radio-group">
+        <label>
+          <input type="radio" name="target" value="selected" checked onchange="toggleBusinessSelect(this)">
+          Negocios seleccionados
+        </label>
+        <label>
+          <input type="radio" name="target" value="all" onchange="toggleBusinessSelect(this)">
+          Todos los negocios (<%= Business.count %>)
+        </label>
+      </div>
+    </div>
+
+    <div class="form-row" id="business-select-wrapper">
+      <label for="business_ids">Seleccionar negocios</label>
+      <select name="business_ids[]" id="business_ids" multiple>
+        <% businesses.each do |name, id| %>
+          <option value="<%= id %>"><%= name %> (ID: <%= id %>)</option>
+        <% end %>
+      </select>
+      <div class="hint">Manten Ctrl / Cmd presionado para seleccionar multiples negocios.</div>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Contenido de la notificacion</legend>
+
+    <div class="form-row">
+      <label for="notification_type">Tipo de notificacion *</label>
+      <select name="notification_type" id="notification_type" required>
+        <% notification_types.each do |type| %>
+          <option value="<%= type %>"><%= type.humanize %></option>
+        <% end %>
+      </select>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <div class="form-row">
+      <label for="custom_title">Titulo personalizado</label>
+      <input type="text" name="custom_title" id="custom_title" placeholder="Dejar vacio para usar el titulo por defecto segun el tipo">
+      <div class="hint">Si se deja vacio, se usara un titulo por defecto basado en el tipo de notificacion.</div>
+    </div>
+
+    <div class="form-row">
+      <label for="custom_body">Mensaje personalizado</label>
+      <textarea name="custom_body" id="custom_body" placeholder="Dejar vacio para usar el mensaje por defecto segun el tipo"></textarea>
+      <div class="hint">Si se deja vacio, se usara un mensaje por defecto basado en el tipo de notificacion.</div>
+    </div>
+
+    <div class="form-row">
+      <label for="link">Link (opcional)</label>
+      <input type="text" name="link" id="link" placeholder="/dashboard/appointments o https://...">
+      <div class="hint">URL a la que se redirige al hacer clic en la notificacion.</div>
+    </div>
+  </fieldset>
+
+  <input type="submit" value="Enviar notificacion" class="submit-btn"
+         data-confirm="¿Estas seguro de enviar esta notificacion?">
+
+<% end %>
+
+<script>
+  function toggleBusinessSelect(radio) {
+    var wrapper = document.getElementById('business-select-wrapper');
+    var select = document.getElementById('business_ids');
+    if (radio.value === 'all') {
+      wrapper.style.display = 'none';
+      select.disabled = true;
+    } else {
+      wrapper.style.display = 'block';
+      select.disabled = false;
+    }
+  }
+</script>
