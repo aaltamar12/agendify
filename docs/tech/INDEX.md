@@ -26,6 +26,7 @@
 | [cierre-de-caja.md](cierre-de-caja.md) | Cierre de caja: comisiones, deuda acumulada, comprobantes, resumen neto (Profesional+) |
 | [portal-empleado.md](portal-empleado.md) | Portal del empleado: invitacion, registro, dashboard, check-in con sustituto, score, QR scanner |
 | [sistema-creditos-cashback.md](sistema-creditos-cashback.md) | Creditos y cashback: modelos, servicios, endpoints, bulk adjust, integracion con cancelaciones (Profesional+) |
+| [tarifas-dinamicas.md](tarifas-dinamicas.md) | Tarifas dinamicas: modos fijo/progresivo, incremento/descuento, IA, escalamiento a Claude API |
 | [env-variables.md](env-variables.md) | Variables de entorno: frontend (4) + backend (25), valores dev/prod, notas de seguridad |
 | [decisiones/](decisiones/) | ADRs (Architecture Decision Records) |
 
