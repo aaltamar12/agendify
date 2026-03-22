@@ -503,7 +503,5 @@ function EmployeeRow({
         </div>
       )}
     </div>
-      )}
-    </div>
   );
 }
