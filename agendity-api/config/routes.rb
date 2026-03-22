@@ -38,6 +38,8 @@ Rails.application.routes.draw do
         member do
           post :upload_avatar
           post :invite
+          post :adjust_balance
+          get :balance_history
         end
       end
 
@@ -121,6 +123,9 @@ Rails.application.routes.draw do
           delete :delete_proof
         end
       end
+
+      # Reconciliation
+      get "reconciliation/check", to: "reconciliation#check"
 
       # Reports
       get "reports/summary",            to: "reports#summary"

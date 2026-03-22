@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_22_000009) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_22_000010) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "unaccent"
@@ -255,6 +255,23 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_22_000009) do
     t.index ["business_id", "status"], name: "index_dynamic_pricings_on_business_id_and_status"
     t.index ["business_id"], name: "index_dynamic_pricings_on_business_id"
     t.index ["service_id"], name: "index_dynamic_pricings_on_service_id"
+  end
+
+  create_table "employee_balance_adjustments", force: :cascade do |t|
+    t.bigint "business_id", null: false
+    t.bigint "employee_id", null: false
+    t.bigint "performed_by_user_id", null: false
+    t.decimal "amount", precision: 12, scale: 2, null: false
+    t.decimal "balance_before", precision: 12, scale: 2
+    t.decimal "balance_after", precision: 12, scale: 2
+    t.string "reason", null: false
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["business_id", "employee_id"], name: "idx_on_business_id_employee_id_b8c08dcc7a"
+    t.index ["business_id"], name: "index_employee_balance_adjustments_on_business_id"
+    t.index ["employee_id"], name: "index_employee_balance_adjustments_on_employee_id"
+    t.index ["performed_by_user_id"], name: "index_employee_balance_adjustments_on_performed_by_user_id"
   end
 
   create_table "employee_invitations", force: :cascade do |t|
@@ -515,6 +532,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_22_000009) do
   add_foreign_key "customers", "businesses"
   add_foreign_key "dynamic_pricings", "businesses"
   add_foreign_key "dynamic_pricings", "services"
+  add_foreign_key "employee_balance_adjustments", "businesses"
+  add_foreign_key "employee_balance_adjustments", "employees"
+  add_foreign_key "employee_balance_adjustments", "users", column: "performed_by_user_id"
   add_foreign_key "employee_invitations", "businesses"
   add_foreign_key "employee_invitations", "employees"
   add_foreign_key "employee_payments", "cash_register_closes"

@@ -5,7 +5,8 @@ module Api
     # Full CRUD for employees scoped to the current business.
     # SRP: Only handles HTTP concerns for employee resources.
     class EmployeesController < BaseController
-      before_action :set_employee, only: %i[show update destroy upload_avatar invite]
+      before_action :set_employee, only: %i[show update destroy upload_avatar invite adjust_balance balance_history]
+      before_action :require_intelligent_plan!, only: %i[adjust_balance balance_history]
 
       # GET /api/v1/employees
       def index
@@ -90,6 +91,70 @@ module Api
         end
       end
 
+      # POST /api/v1/employees/:id/adjust_balance
+      # Manual balance adjustment (Plan Inteligente only)
+      def adjust_balance
+        result = CashRegister::AdjustBalanceService.call(
+          employee: @employee,
+          amount: params[:amount],
+          reason: params[:reason],
+          performed_by: current_user,
+          notes: params[:notes]
+        )
+
+        if result.success?
+          render_success(EmployeeBalanceAdjustmentSerializer.render_as_hash(result.data))
+        else
+          render_error(result.error, status: :unprocessable_entity)
+        end
+      end
+
+      # GET /api/v1/employees/:id/balance_history
+      # Unified timeline of payments + adjustments (Plan Inteligente only)
+      def balance_history
+        payments = @employee.employee_payments
+          .includes(:cash_register_close)
+          .order(created_at: :asc)
+          .map do |p|
+            {
+              type: "payment",
+              id: p.id,
+              date: p.created_at,
+              total_owed: p.total_owed.to_f,
+              amount_paid: p.amount_paid.to_f,
+              remaining_debt: p.remaining_debt.to_f,
+              payment_method: p.payment_method,
+              notes: p.notes
+            }
+          end
+
+        adjustments = @employee.employee_balance_adjustments
+          .includes(:performed_by_user)
+          .order(created_at: :asc)
+          .map do |a|
+            {
+              type: "adjustment",
+              id: a.id,
+              date: a.created_at,
+              amount: a.amount.to_f,
+              balance_before: a.balance_before.to_f,
+              balance_after: a.balance_after.to_f,
+              reason: a.reason,
+              notes: a.notes,
+              performed_by: a.performed_by_user&.name
+            }
+          end
+
+        timeline = (payments + adjustments).sort_by { |entry| entry[:date] }
+
+        render_success({
+          employee_id: @employee.id,
+          employee_name: @employee.name,
+          current_balance: @employee.pending_balance.to_f,
+          timeline: timeline
+        })
+      end
+
       # DELETE /api/v1/employees/:id
       def destroy
         authorize @employee
@@ -105,6 +170,15 @@ module Api
 
       def employee_params
         params.require(:employee).permit(:name, :phone, :email, :photo_url, :active, :commission_percentage, service_ids: [])
+      end
+
+      def require_intelligent_plan!
+        unless current_business.has_feature?(:ai_features)
+          render_error(
+            "Esta funcionalidad requiere Plan Inteligente.",
+            status: :forbidden
+          )
+        end
       end
     end
   end

@@ -15,6 +15,8 @@ class Employee < ApplicationRecord
   has_many :employee_schedules, dependent: :destroy
   has_many :appointments, dependent: :restrict_with_error
   has_many :blocked_slots, dependent: :destroy
+  has_many :employee_payments, dependent: :restrict_with_error
+  has_many :employee_balance_adjustments, dependent: :destroy
 
   # -- Validations --
   validates :name, presence: true
