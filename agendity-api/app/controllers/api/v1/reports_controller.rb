@@ -90,13 +90,25 @@ module Api
           .where(transaction_type: :redemption)
           .sum(:amount).to_f.abs
 
-        net_profit = revenue - employee_payments_total
+        # Penalty income from cancellations (money the business retains)
+        # For Pro+ plans: tracked via CreditTransaction penalty amounts
+        # For Basic: tracked via pending_penalty applied to next booking (already in revenue)
+        penalty_income = current_business.appointments
+          .where(status: :cancelled)
+          .where("appointment_date >= ?", from_date)
+          .where.not(cancelled_by: "business")
+          .sum("price * #{current_business.cancellation_policy_pct} / 100.0").to_f
+
+        total_income = revenue + penalty_income
+        net_profit = total_income - employee_payments_total
         closes_count = current_business.cash_register_closes.where("date >= ?", from_date).closed.count
 
         render_success({
           period: period,
           from_date: from_date,
           revenue: revenue,
+          penalty_income: penalty_income,
+          total_income: total_income,
           employee_payments: employee_payments_total,
           net_profit: net_profit,
           credits_issued: credits_issued,

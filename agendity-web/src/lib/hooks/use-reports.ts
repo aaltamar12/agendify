@@ -37,6 +37,8 @@ export interface ProfitReport {
   period: string;
   from_date: string;
   revenue: number;
+  penalty_income: number;
+  total_income: number;
   employee_payments: number;
   net_profit: number;
   credits_issued: number;

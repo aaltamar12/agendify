@@ -127,14 +127,24 @@ export default function ReportsPage() {
               </span>
             )}
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
             <div className="rounded-lg border border-gray-200 p-4">
               <div className="flex items-center gap-2">
                 <TrendingUp className="h-5 w-5 text-green-600" />
-                <p className="text-xs text-gray-500">Ingresos</p>
+                <p className="text-xs text-gray-500">Ingresos (servicios)</p>
               </div>
               <p className="mt-1 text-xl font-bold text-gray-900">${Number(profit.revenue).toLocaleString()}</p>
             </div>
+            {profit.penalty_income > 0 && (
+              <div className="rounded-lg border border-orange-200 bg-orange-50 p-4">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5 text-orange-600" />
+                  <p className="text-xs text-orange-700">Penalizaciones</p>
+                </div>
+                <p className="mt-1 text-xl font-bold text-orange-700">+${Number(profit.penalty_income).toLocaleString()}</p>
+                <p className="text-[10px] text-orange-500">Retencion por cancelaciones</p>
+              </div>
+            )}
             <div className="rounded-lg border border-gray-200 p-4">
               <div className="flex items-center gap-2">
                 <Wallet className="h-5 w-5 text-red-500" />
