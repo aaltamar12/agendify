@@ -1549,6 +1549,59 @@ puts "  ✅ Alejandro Gómez: earned $2,500 + redeemed all = balance $0 (won't s
 puts "  ✅ Credit accounts: #{CreditAccount.count}, Transactions: #{CreditTransaction.count}"
 
 # ============================================================================
+# RECONCILIATION TEST — Intentional discrepancies for Barbería Elite
+# ============================================================================
+puts "\n⚠️  Creating intentional discrepancies for reconciliation testing..."
+
+# Discrepancy 1: Employee pending_balance doesn't match payments history
+# Scenario: Andrés López was paid partially ($2,000 of $3,000 owed), so pending_balance
+# should be $1,000. But a "glitch" set it to $2,500 (as if the close service didn't
+# finish correctly — browser closed mid-request, server timeout, etc.)
+andres = Employee.find_by(business: barberia_elite, name: "Andrés López")
+if andres
+  # Create a cash register close with partial payment
+  close = CashRegisterClose.find_or_create_by!(business: barberia_elite, date: Date.current - 3.days) do |c|
+    c.closed_by_user = barberia_elite.owner
+    c.closed_at = 3.days.ago
+    c.total_revenue = 30_000
+    c.total_appointments = 1
+    c.status = :closed
+  end
+
+  EmployeePayment.find_or_create_by!(cash_register_close: close, employee: andres) do |ep|
+    ep.appointments_count = 1
+    ep.total_earned = 30_000
+    ep.commission_pct = 10
+    ep.commission_amount = 3_000
+    ep.pending_from_previous = 0
+    ep.total_owed = 3_000
+    ep.amount_paid = 2_000  # paid $2,000 of $3,000 — should leave $1,000 pending
+    ep.payment_method = :cash
+  end
+
+  # But set pending_balance to wrong value (simulating a bug/timeout)
+  andres.update_column(:pending_balance, 2_500)  # Should be 1,000 but is 2,500
+  puts "  ⚠️  Andrés López: pending_balance set to $2,500 (should be $1,000) — discrepancy of $1,500"
+end
+
+# Discrepancy 2: Credit account balance doesn't match transaction sum
+# Scenario: Juan Herrera has 3 cashback transactions totaling $4,750 but his
+# balance shows $5,200 — maybe an admin did a direct DB update to "fix" something
+# but forgot to create a CreditTransaction
+c_juan = Customer.find_by(business: barberia_elite, email: "juan.herrera@gmail.com")
+if c_juan
+  account = CreditAccount.find_by(customer: c_juan, business: barberia_elite)
+  if account
+    real_sum = account.credit_transactions.sum(:amount)
+    # Set balance higher than the sum of transactions (simulating manual DB edit)
+    account.update_column(:balance, real_sum + 450)
+    puts "  ⚠️  Juan Herrera credits: balance set to $#{(real_sum + 450).to_i} (transactions sum: $#{real_sum.to_i}) — discrepancy of $450"
+  end
+end
+
+puts "  ✅ Reconciliation test discrepancies created for Barbería Elite"
+
+# ============================================================================
 # SUMMARY
 # ============================================================================
 puts "\n" + "=" * 60
