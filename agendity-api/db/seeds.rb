@@ -1356,6 +1356,143 @@ end
 puts "  ✅ Glamour Studio (inactive)"
 
 # ============================================================================
+# CREDIT SYSTEM — All possible cases
+# ============================================================================
+puts "\n💳 Seeding credit system..."
+
+# Enable cashback on Barbería Elite
+barberia_elite.update!(
+  cashback_enabled: true,
+  cashback_percentage: 5,
+  cancellation_refund_as_credit: true
+)
+puts "  ✅ Barbería Elite: cashback 5%, refund as credit enabled"
+
+# Get some customers for credit scenarios
+c_juan     = Customer.find_by!(business: barberia_elite, email: "juan.herrera@gmail.com")
+c_pedro    = Customer.find_by!(business: barberia_elite, email: "pedro.martinez@gmail.com")
+c_luis     = Customer.find_by!(business: barberia_elite, email: "luis.rodriguez@hotmail.com")
+c_diego    = Customer.find_by!(business: barberia_elite, email: "diego.ramirez@gmail.com")
+c_sebastian = Customer.find_by!(business: barberia_elite, email: "sebastian.diaz@outlook.com")
+c_alejandro = Customer.find_by!(business: barberia_elite, email: "alejandro.gomez@gmail.com")
+
+admin_user = User.find_by!(email: "admin@agendity.com")
+owner_user = barberia_elite.owner
+
+# --- Case 1: Cashback from completed appointments ---
+# Juan: 3 completed services, earned cashback each time
+account_juan = CreditAccount.find_or_create_by!(customer: c_juan, business: barberia_elite)
+[
+  { amount: 1250, desc: "Cashback 5% — Corte clásico ($25,000)", type: :cashback },
+  { amount: 1500, desc: "Cashback 5% — Corte degradado (fade) ($30,000)", type: :cashback },
+  { amount: 2000, desc: "Cashback 5% — Corte + barba ($40,000)", type: :cashback },
+].each do |tx|
+  unless account_juan.credit_transactions.exists?(description: tx[:desc])
+    account_juan.credit_transactions.create!(
+      amount: tx[:amount],
+      transaction_type: tx[:type],
+      description: tx[:desc]
+    )
+  end
+end
+account_juan.update!(balance: account_juan.credit_transactions.sum(:amount).clamp(0..))
+puts "  ✅ Juan Herrera: 3 cashback transactions, balance $#{account_juan.reload.balance.to_i}"
+
+# --- Case 2: Cancellation refund as credit ---
+# Pedro: cancelled a $40,000 service, 30% penalty = $12,000, refund $28,000
+account_pedro = CreditAccount.find_or_create_by!(customer: c_pedro, business: barberia_elite)
+[
+  { amount: 28000, desc: "Reembolso por cancelacion — Corte + barba", type: :cancellation_refund },
+].each do |tx|
+  unless account_pedro.credit_transactions.exists?(description: tx[:desc])
+    account_pedro.credit_transactions.create!(
+      amount: tx[:amount],
+      transaction_type: tx[:type],
+      description: tx[:desc]
+    )
+  end
+end
+account_pedro.update!(balance: account_pedro.credit_transactions.sum(:amount).clamp(0..))
+puts "  ✅ Pedro Martínez: cancellation refund $28,000 (original $40k - 30% penalty)"
+
+# --- Case 3: Cashback + partial redemption ---
+# Luis: earned cashback, then used some credits on a booking
+account_luis = CreditAccount.find_or_create_by!(customer: c_luis, business: barberia_elite)
+[
+  { amount: 2000, desc: "Cashback 5% — Corte + barba ($40,000)", type: :cashback },
+  { amount: 1500, desc: "Cashback 5% — Corte degradado (fade) ($30,000)", type: :cashback },
+  { amount: -1000, desc: "Creditos aplicados a reserva #SEED-REDEEM1", type: :redemption },
+].each do |tx|
+  unless account_luis.credit_transactions.exists?(description: tx[:desc])
+    account_luis.credit_transactions.create!(
+      amount: tx[:amount],
+      transaction_type: tx[:type],
+      description: tx[:desc]
+    )
+  end
+end
+account_luis.update!(balance: account_luis.credit_transactions.sum(:amount).clamp(0..))
+puts "  ✅ Luis Rodríguez: cashback $3,500 - redeemed $1,000 = balance $#{account_luis.reload.balance.to_i}"
+
+# --- Case 4: Manual adjustment (bonus) ---
+# Diego: business gave him a bonus for being a loyal customer
+account_diego = CreditAccount.find_or_create_by!(customer: c_diego, business: barberia_elite)
+[
+  { amount: 1250, desc: "Cashback 5% — Corte clásico ($25,000)", type: :cashback },
+  { amount: 5000, desc: "Bonificacion por cliente frecuente", type: :manual_adjustment },
+].each do |tx|
+  unless account_diego.credit_transactions.exists?(description: tx[:desc])
+    account_diego.credit_transactions.create!(
+      amount: tx[:amount],
+      transaction_type: tx[:type],
+      description: tx[:desc],
+      performed_by_user: owner_user
+    )
+  end
+end
+account_diego.update!(balance: account_diego.credit_transactions.sum(:amount).clamp(0..))
+puts "  ✅ Diego Ramírez: cashback $1,250 + bonus $5,000 = balance $#{account_diego.reload.balance.to_i}"
+
+# --- Case 5: Manual negative adjustment (correction) ---
+# Sebastián: had credits, business corrected an error
+account_seb = CreditAccount.find_or_create_by!(customer: c_sebastian, business: barberia_elite)
+[
+  { amount: 3000, desc: "Cashback 5% — Barba completa ($18,000) + Corte ($25,000)", type: :cashback },
+  { amount: -1500, desc: "Correccion: cashback calculado incorrectamente", type: :manual_adjustment },
+].each do |tx|
+  unless account_seb.credit_transactions.exists?(description: tx[:desc])
+    account_seb.credit_transactions.create!(
+      amount: tx[:amount],
+      transaction_type: tx[:type],
+      description: tx[:desc],
+      performed_by_user: owner_user
+    )
+  end
+end
+account_seb.update!(balance: account_seb.credit_transactions.sum(:amount).clamp(0..))
+puts "  ✅ Sebastián Díaz: cashback $3,000 - correction $1,500 = balance $#{account_seb.reload.balance.to_i}"
+
+# --- Case 6: Full redemption (zero balance) ---
+# Alejandro: had credits, used them all
+account_ale = CreditAccount.find_or_create_by!(customer: c_alejandro, business: barberia_elite)
+[
+  { amount: 2500, desc: "Cashback 5% — Varios servicios", type: :cashback },
+  { amount: -2500, desc: "Creditos aplicados a reserva #SEED-REDEEM2", type: :redemption },
+].each do |tx|
+  unless account_ale.credit_transactions.exists?(description: tx[:desc])
+    account_ale.credit_transactions.create!(
+      amount: tx[:amount],
+      transaction_type: tx[:type],
+      description: tx[:desc]
+    )
+  end
+end
+account_ale.update!(balance: 0)
+puts "  ✅ Alejandro Gómez: earned $2,500 + redeemed all = balance $0 (won't show in summary)"
+
+puts "  ✅ Credit accounts: #{CreditAccount.count}, Transactions: #{CreditTransaction.count}"
+
+# ============================================================================
 # SUMMARY
 # ============================================================================
 puts "\n" + "=" * 60
@@ -1374,6 +1511,8 @@ puts "  Payments:       #{Payment.count}"
 puts "  Reviews:        #{Review.count}"
 puts "  Blocked Slots:  #{BlockedSlot.count}"
 puts "  Subscriptions:  #{Subscription.count}"
+puts "  Credit Accts:   #{CreditAccount.count}"
+puts "  Credit Txns:    #{CreditTransaction.count}"
 puts ""
 puts "🔑 Login credentials:"
 puts "  Admin:           admin@agendity.com / password123"
