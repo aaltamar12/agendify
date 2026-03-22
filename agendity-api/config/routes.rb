@@ -53,8 +53,9 @@ Rails.application.routes.draw do
         end
       end
 
-      # Credits summary
+      # Credits
       get "credits/summary", to: "credits#summary"
+      post "credits/bulk_adjust", to: "credits#bulk_adjust"
 
       resources :appointments do
         collection do

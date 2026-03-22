@@ -12,9 +12,9 @@ module Api
         render_success(CreditAccountSerializer.render_as_hash(accounts))
       end
 
-      # GET /api/v1/customers/:customer_id/credits
+      # GET /api/v1/customers/:id/credits
       def show
-        customer = current_business.customers.find(params[:customer_id])
+        customer = current_business.customers.find(params[:id])
         account = CreditAccount.find_by(customer: customer, business: current_business)
 
         if account
@@ -28,9 +28,9 @@ module Api
         end
       end
 
-      # POST /api/v1/customers/:customer_id/credits/adjust
+      # POST /api/v1/customers/:id/credits/adjust
       def adjust
-        customer = current_business.customers.find(params[:customer_id])
+        customer = current_business.customers.find(params[:id])
 
         result = Credits::AdjustService.call(
           customer: customer,
@@ -47,10 +47,39 @@ module Api
         end
       end
 
-      # GET /api/v1/customers/:customer_id/credit_balance
-      # Quick balance check (used in appointment creation modal)
+      # POST /api/v1/credits/bulk_adjust
+      # Applies credit to multiple customers or all customers
+      def bulk_adjust
+        amount = params[:amount].to_d
+        return render_error("Monto requerido", status: :unprocessable_entity) if amount.zero?
+
+        description = params[:description].presence || "Credito masivo"
+        customer_ids = params[:customer_ids]
+
+        customers = if customer_ids.present?
+          current_business.customers.where(id: customer_ids)
+        else
+          current_business.customers.all
+        end
+
+        count = 0
+        customers.find_each do |customer|
+          Credits::AdjustService.call(
+            customer: customer,
+            business: current_business,
+            amount: amount,
+            description: description,
+            performed_by: current_user
+          )
+          count += 1
+        end
+
+        render_success({ message: "Credito aplicado a #{count} clientes", count: count })
+      end
+
+      # GET /api/v1/customers/:id/credit_balance
       def balance
-        customer = current_business.customers.find(params[:customer_id])
+        customer = current_business.customers.find(params[:id])
         account = CreditAccount.find_by(customer: customer, business: current_business)
         render_success({ balance: account&.balance.to_f || 0 })
       end

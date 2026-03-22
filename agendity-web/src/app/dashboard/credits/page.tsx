@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Button, Card, Spinner, Modal, Input } from '@/components/ui';
 import { get } from '@/lib/api/client';
 import { ENDPOINTS } from '@/lib/api/endpoints';
-import { useCreditsSummary, useCustomerCredits, useAdjustCredits } from '@/lib/hooks/use-credits';
+import { useCreditsSummary, useCustomerCredits, useAdjustCredits, useBulkAdjustCredits } from '@/lib/hooks/use-credits';
 import { useUIStore } from '@/lib/stores/ui-store';
 import type { ApiResponse, Customer } from '@/lib/api/types';
 import type { CreditAccount } from '@/lib/hooks/use-credits';
@@ -244,12 +244,15 @@ function AdjustCreditsModal({ account, onClose }: { account: CreditAccount; onCl
 }
 
 function OpenCreditModal({ onClose }: { onClose: () => void }) {
+  const [mode, setMode] = useState<'select' | 'form'>('select');
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [selectedCustomers, setSelectedCustomers] = useState<Customer[]>([]);
+  const [applyToAll, setApplyToAll] = useState(false);
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const adjustMutation = useAdjustCredits();
+  const bulkMutation = useBulkAdjustCredits();
   const { addToast } = useUIStore();
   const timeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
 
@@ -261,96 +264,168 @@ function OpenCreditModal({ onClose }: { onClose: () => void }) {
 
   const { data: customers, isLoading: searching } = useQuery({
     queryKey: ['customers-search-credits', debouncedSearch],
-    queryFn: () => get<{ data: Customer[]; meta: unknown }>(ENDPOINTS.CUSTOMERS.list, { params: { search: debouncedSearch, per_page: 5 } }),
-    enabled: debouncedSearch.length >= 2 && !selectedCustomer,
+    queryFn: () => get<{ data: Customer[]; meta: unknown }>(ENDPOINTS.CUSTOMERS.list, { params: { search: debouncedSearch, per_page: 8 } }),
+    enabled: debouncedSearch.length >= 2 && mode === 'select',
     select: (res) => res.data,
   });
 
+  const addCustomer = (c: Customer) => {
+    if (!selectedCustomers.find((s) => s.id === c.id)) {
+      setSelectedCustomers([...selectedCustomers, c]);
+    }
+    setSearchQuery('');
+    setDebouncedSearch('');
+  };
+
+  const removeCustomer = (id: number) => {
+    setSelectedCustomers(selectedCustomers.filter((c) => c.id !== id));
+  };
+
   const handleSubmit = async () => {
-    if (!selectedCustomer || !parseFloat(amount)) return;
+    const amt = parseFloat(amount);
+    if (!amt || amt <= 0) return;
+
     try {
-      await adjustMutation.mutateAsync({
-        customerId: selectedCustomer.id,
-        amount: parseFloat(amount),
-        description: description || 'Credito inicial',
-      });
-      addToast({ type: 'success', message: `Credito abierto para ${selectedCustomer.name}` });
+      if (applyToAll) {
+        await bulkMutation.mutateAsync({ amount: amt, description: description || 'Credito masivo' });
+        addToast({ type: 'success', message: 'Credito aplicado a todos los clientes' });
+      } else if (selectedCustomers.length === 1) {
+        await adjustMutation.mutateAsync({
+          customerId: selectedCustomers[0].id,
+          amount: amt,
+          description: description || 'Credito inicial',
+        });
+        addToast({ type: 'success', message: `Credito abierto para ${selectedCustomers[0].name}` });
+      } else {
+        await bulkMutation.mutateAsync({
+          customer_ids: selectedCustomers.map((c) => c.id),
+          amount: amt,
+          description: description || 'Credito masivo',
+        });
+        addToast({ type: 'success', message: `Credito aplicado a ${selectedCustomers.length} clientes` });
+      }
       onClose();
     } catch {
       addToast({ type: 'error', message: 'Error al abrir credito' });
     }
   };
 
+  const isLoading = adjustMutation.isPending || bulkMutation.isPending;
+  const canSubmit = (applyToAll || selectedCustomers.length > 0) && parseFloat(amount) > 0;
+
   return (
     <Modal open onClose={onClose} title="Abrir credito" size="lg">
-      {!selectedCustomer ? (
-        <div>
-          <p className="mb-3 text-sm text-gray-500">Busca un cliente por nombre, email o telefono</p>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Buscar cliente..."
-              className="w-full rounded-lg border border-gray-300 py-2.5 pl-9 pr-3 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
-              autoFocus
-            />
+      {mode === 'select' ? (
+        <div className="space-y-4">
+          {/* Apply to all toggle */}
+          <div className="flex items-center justify-between rounded-lg border border-gray-200 p-3">
+            <div>
+              <p className="text-sm font-medium text-gray-700">Aplicar a todos los clientes</p>
+              <p className="text-xs text-gray-500">Dar credito a todos los clientes del negocio</p>
+            </div>
+            <label className="relative inline-flex cursor-pointer items-center">
+              <input
+                type="checkbox"
+                className="peer sr-only"
+                checked={applyToAll}
+                onChange={(e) => { setApplyToAll(e.target.checked); if (e.target.checked) setSelectedCustomers([]); }}
+              />
+              <div className="h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:bg-violet-600 peer-checked:after:translate-x-full" />
+            </label>
           </div>
 
-          {debouncedSearch.length >= 2 && (
-            <div className="mt-2 max-h-60 overflow-y-auto rounded-lg border border-gray-200">
-              {searching ? (
-                <div className="px-4 py-3 text-sm text-gray-500">Buscando...</div>
-              ) : customers && customers.length > 0 ? (
-                <ul>
-                  {customers.map((c) => (
-                    <li key={c.id}>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedCustomer(c)}
-                        className="flex w-full cursor-pointer items-center gap-3 px-4 py-2.5 text-left hover:bg-gray-50"
-                      >
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-100 text-xs font-medium text-violet-600">
-                          {c.name.charAt(0).toUpperCase()}
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">{c.name}</p>
-                          <p className="text-xs text-gray-500">{c.email || c.phone}</p>
-                        </div>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <div className="px-4 py-3 text-sm text-gray-500">No se encontraron clientes</div>
+          {!applyToAll && (
+            <>
+              {/* Search */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Buscar cliente..."
+                  className="w-full rounded-lg border border-gray-300 py-2.5 pl-9 pr-3 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+                  autoFocus
+                />
+              </div>
+
+              {/* Search results */}
+              {debouncedSearch.length >= 2 && (
+                <div className="max-h-40 overflow-y-auto rounded-lg border border-gray-200">
+                  {searching ? (
+                    <div className="px-4 py-3 text-sm text-gray-500">Buscando...</div>
+                  ) : customers && customers.length > 0 ? (
+                    <ul>
+                      {customers.map((c) => (
+                        <li key={c.id}>
+                          <button
+                            type="button"
+                            onClick={() => addCustomer(c)}
+                            className="flex w-full cursor-pointer items-center gap-3 px-4 py-2 text-left hover:bg-gray-50"
+                          >
+                            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-violet-100 text-xs font-medium text-violet-600">
+                              {c.name.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-gray-900">{c.name}</p>
+                              <p className="text-xs text-gray-500">{c.email || c.phone}</p>
+                            </div>
+                            {selectedCustomers.find((s) => s.id === c.id) && (
+                              <span className="ml-auto text-xs text-green-600">Agregado</span>
+                            )}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <div className="px-4 py-3 text-sm text-gray-500">No se encontraron clientes</div>
+                  )}
+                </div>
               )}
-            </div>
+
+              {/* Selected customers chips */}
+              {selectedCustomers.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {selectedCustomers.map((c) => (
+                    <span key={c.id} className="inline-flex items-center gap-1 rounded-full bg-violet-100 px-3 py-1 text-xs font-medium text-violet-700">
+                      {c.name}
+                      <button type="button" onClick={() => removeCustomer(c.id)} className="cursor-pointer hover:text-violet-900">&times;</button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </>
           )}
+
+          <div className="flex justify-end">
+            <Button
+              onClick={() => setMode('form')}
+              disabled={!applyToAll && selectedCustomers.length === 0}
+            >
+              Continuar
+            </Button>
+          </div>
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="flex items-center justify-between rounded-lg border border-violet-200 bg-violet-50 p-3">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-violet-600 text-sm font-medium text-white">
-                {selectedCustomer.name.charAt(0).toUpperCase()}
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-900">{selectedCustomer.name}</p>
-                <p className="text-xs text-gray-500">{selectedCustomer.email || selectedCustomer.phone}</p>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => { setSelectedCustomer(null); setSearchQuery(''); }}
-              className="cursor-pointer text-xs text-gray-500 hover:text-gray-700"
-            >
-              Cambiar
-            </button>
+          {/* Summary */}
+          <div className="rounded-lg bg-violet-50 p-3">
+            <p className="text-sm font-medium text-gray-900">
+              {applyToAll
+                ? 'Credito para todos los clientes'
+                : selectedCustomers.length === 1
+                  ? `Credito para ${selectedCustomers[0].name}`
+                  : `Credito para ${selectedCustomers.length} clientes`}
+            </p>
+            {!applyToAll && selectedCustomers.length > 1 && (
+              <p className="mt-1 text-xs text-gray-500">
+                {selectedCustomers.map((c) => c.name).join(', ')}
+              </p>
+            )}
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Monto del credito</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700">Monto por cliente</label>
             <input
               type="number"
               min={1}
@@ -358,6 +433,7 @@ function OpenCreditModal({ onClose }: { onClose: () => void }) {
               onChange={(e) => setAmount(e.target.value)}
               placeholder="Ej: 10000"
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-violet-500 focus:outline-none"
+              autoFocus
             />
           </div>
 
@@ -365,18 +441,16 @@ function OpenCreditModal({ onClose }: { onClose: () => void }) {
             label="Descripcion (opcional)"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Ej: Bonificacion, credito inicial..."
+            placeholder="Ej: Promocion de apertura, bonificacion..."
           />
 
-          <div className="flex justify-end gap-3">
-            <Button variant="ghost" onClick={onClose}>Cancelar</Button>
-            <Button
-              onClick={handleSubmit}
-              loading={adjustMutation.isPending}
-              disabled={!parseFloat(amount) || parseFloat(amount) <= 0}
-            >
+          <div className="flex justify-between">
+            <Button variant="ghost" onClick={() => setMode('select')}>Atras</Button>
+            <Button onClick={handleSubmit} loading={isLoading} disabled={!canSubmit}>
               <Plus className="mr-1.5 h-4 w-4" />
-              Abrir credito de ${parseFloat(amount || '0').toLocaleString()}
+              {applyToAll
+                ? `Dar $${parseFloat(amount || '0').toLocaleString()} a todos`
+                : `Dar $${parseFloat(amount || '0').toLocaleString()} a ${selectedCustomers.length} cliente${selectedCustomers.length !== 1 ? 's' : ''}`}
             </Button>
           </div>
         </div>

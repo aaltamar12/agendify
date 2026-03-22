@@ -69,4 +69,16 @@ export function useAdjustCredits() {
   });
 }
 
+export function useBulkAdjustCredits() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: { customer_ids?: number[]; amount: number; description?: string }) =>
+      post<ApiResponse<{ message: string; count: number }>>(ENDPOINTS.CREDITS.bulkAdjust, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['credits-summary'] });
+    },
+  });
+}
+
 export type { CreditAccount, CreditTransaction, CustomerCredits };

@@ -67,6 +67,7 @@ export const ENDPOINTS = {
 
   CREDITS: {
     summary: `${BASE}/credits/summary`,
+    bulkAdjust: `${BASE}/credits/bulk_adjust`,
   },
 
   PAYMENTS: {
