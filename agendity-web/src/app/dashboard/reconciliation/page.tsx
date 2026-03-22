@@ -163,8 +163,8 @@ function DiscrepancyTable({ items, type, onAdjust }: { items: Discrepancy[]; typ
           </tr>
         </thead>
         <tbody>
-          {items.map((d) => (
-            <tr key={d.id} className="border-b border-gray-100">
+          {items.map((d, idx) => (
+            <tr key={d.id || `${d.name}-${idx}`} className="border-b border-gray-100">
               <td className="py-2 font-medium text-gray-900">{d.name}</td>
               <td className="py-2 text-right text-gray-600">${d.expected.toLocaleString()}</td>
               <td className="py-2 text-right text-gray-600">${d.actual.toLocaleString()}</td>
