@@ -205,6 +205,39 @@ function CashRegisterContent() {
             </Card>
           )}
 
+          {/* Totals after payments */}
+          {summary.employees.length > 0 && (
+            <Card className="mb-6">
+              {(() => {
+                const totalPaid = summary.employees.reduce((sum, emp) => {
+                  const state = getPaymentState(emp);
+                  return sum + (state.confirmed ? state.amount_paid : 0);
+                }, 0);
+                const netProfit = summary.total_revenue - totalPaid;
+                return (
+                  <div className="flex items-center justify-between">
+                    <div className="grid grid-cols-3 gap-8">
+                      <div>
+                        <p className="text-xs text-gray-500">Ingresos del dia</p>
+                        <p className="text-lg font-bold text-gray-900">${summary.total_revenue.toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Total pagos empleados</p>
+                        <p className="text-lg font-bold text-red-600">-${totalPaid.toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Ganancia neta</p>
+                        <p className={`text-lg font-bold ${netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          ${netProfit.toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+            </Card>
+          )}
+
           {/* Notes and close */}
           <Card>
             <textarea
@@ -466,26 +499,28 @@ function EmployeeRow({
             ) : (
               /* Editable amount: input + confirm */
               <div className="space-y-3">
-                <div className="mb-2 flex items-center gap-2">
-                  <label className="text-xs font-medium text-gray-600">Monto a pagar</label>
-                  {hasFixedAmount && (
-                    <button
-                      type="button"
-                      onClick={() => { setEditingAmount(false); onUpdatePayment({ amount_paid: emp.total_owed, confirmed: false }); }}
-                      className="cursor-pointer text-xs text-gray-500 hover:text-gray-700"
-                    >
-                      Cancelar edicion
-                    </button>
-                  )}
+                <div>
+                  <div className="mb-1 flex items-center gap-2">
+                    <label className="text-xs font-medium text-gray-600">Monto a pagar</label>
+                    {hasFixedAmount && (
+                      <button
+                        type="button"
+                        onClick={() => { setEditingAmount(false); onUpdatePayment({ amount_paid: emp.total_owed, confirmed: false }); }}
+                        className="cursor-pointer text-xs text-gray-500 hover:text-gray-700"
+                      >
+                        Cancelar edicion
+                      </button>
+                    )}
+                  </div>
+                  <input
+                    type="number"
+                    min={0}
+                    placeholder={hasFixedAmount ? String(emp.total_owed) : 'Ej: 50000'}
+                    value={paymentState.amount_paid || ''}
+                    onChange={(e) => onUpdatePayment({ amount_paid: parseFloat(e.target.value) || 0, confirmed: false })}
+                    className="w-44 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+                  />
                 </div>
-                <input
-                  type="number"
-                  min={0}
-                  placeholder={hasFixedAmount ? String(emp.total_owed) : 'Ej: 50000'}
-                  value={paymentState.amount_paid || ''}
-                  onChange={(e) => onUpdatePayment({ amount_paid: parseFloat(e.target.value) || 0, confirmed: false })}
-                  className="w-44 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
-                />
 
                 {paymentState.confirmed ? (
                   <div className="flex items-center justify-between">
