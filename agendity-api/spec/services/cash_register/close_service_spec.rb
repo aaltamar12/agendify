@@ -122,6 +122,61 @@ RSpec.describe CashRegister::CloseService do
     end
   end
 
+  describe "fails to close if reconciliation finds discrepancies" do
+    let(:employee_payments) do
+      [{
+        employee_id: employee.id,
+        appointments_count: 2,
+        total_earned: 60_000,
+        commission_pct: 40,
+        commission_amount: 24_000,
+        amount_paid: 29_000,
+        payment_method: :cash
+      }]
+    end
+
+    before do
+      # Create an EmployeePayment from a previous close that leaves a debt,
+      # then manually tamper with the employee's pending_balance so reconciliation
+      # detects a discrepancy.
+      prev_close = create(:cash_register_close,
+        business: business,
+        closed_by_user: user,
+        date: today - 1,
+        status: :closed)
+
+      create(:employee_payment,
+        cash_register_close: prev_close,
+        employee: employee,
+        total_owed: 10_000,
+        amount_paid: 5_000)
+
+      # pending_balance should be 5,000 from the previous payment + the factory default,
+      # but we deliberately set it to 0 to create a discrepancy.
+      employee.update_column(:pending_balance, 0)
+    end
+
+    subject do
+      described_class.call(
+        business: business,
+        user: user,
+        date: today,
+        employee_payments: employee_payments
+      )
+    end
+
+    it "returns failure with discrepancy message" do
+      result = subject
+      expect(result).to be_failure
+      expect(result.error).to include("inconsistencias")
+      expect(result.error).to include(employee.name)
+    end
+
+    it "does not create a cash register close record" do
+      expect { subject }.not_to change(CashRegisterClose.where(date: today), :count)
+    end
+  end
+
   describe "cannot close same date twice" do
     before do
       create(:cash_register_close,
