@@ -1,134 +1,165 @@
 # Sistema de Cancelaciones y Penalizaciones
 
-> Última actualización: 2026-03-16
+> Ultima actualizacion: 2026-03-22
 
 ## Resumen
 
-El sistema de cancelaciones permite tanto al negocio (cliente) como al usuario final cancelar citas, con un mecanismo de penalización configurable por cada negocio. Las penalizaciones se acumulan en el registro del usuario final y se cobran en su siguiente reserva.
+El sistema de cancelaciones permite tanto al negocio como al usuario final cancelar citas, con penalizacion configurable. El comportamiento de la penalizacion depende del plan del negocio:
+
+- **Plan Profesional/Inteligente (con cashback):** la penalizacion se descuenta del reembolso, y el resto se acredita como creditos al cliente
+- **Plan Basico (sin cashback):** la penalizacion se acumula en `pending_penalty` y se cobra en la siguiente reserva
 
 ---
 
 ## Reglas de negocio
 
-### 1. Cancelación por el negocio (desde dashboard)
+### 1. Cancelacion por el negocio (desde dashboard)
 
 - El negocio puede cancelar **cualquier cita en cualquier momento**
-- **NO genera penalización** al usuario final
-- El slot se libera inmediatamente (se elimina el Redis lock si existe)
-- Se envía notificación al usuario final (email + in-app)
-- Se registra `cancelled_by: 'business'` en la cita
+- **NO genera penalizacion** al usuario final
+- **NO genera creditos** al usuario final
+- El slot se libera inmediatamente
+- Se envia notificacion al usuario final (email + WhatsApp)
+- Se registra `cancelled_by: 'business'`
 
-### 2. Cancelación por el usuario final (desde ticket)
+### 2. Cancelacion por el usuario final (desde ticket)
 
-- El usuario puede cancelar su cita desde la página del ticket (`/[slug]/ticket/[code]`)
-- Si cancela **antes** del plazo límite (`cancellation_deadline_hours`): **sin penalización**
-- Si cancela **después** del plazo: **penalización = precio del servicio × (cancellation_policy_pct / 100)**
-- Se registra `cancelled_by: 'customer'` en la cita
-- Se envía notificación al negocio (email + in-app)
+- El usuario puede cancelar desde la pagina del ticket (`/[slug]/ticket/[code]`)
+- Si cancela **antes** del plazo limite (`cancellation_deadline_hours`): **sin penalizacion**
+- Si cancela **despues** del plazo: **penalizacion = precio x cancellation_policy_pct / 100**
+- Se registra `cancelled_by: 'customer'`
 
-### 3. Penalización pendiente
+### 3. Que pasa con el dinero — depende del plan
 
-- Se almacena en `customers.pending_penalty` (decimal)
-- Al crear una nueva cita, se suma la penalización pendiente al precio del servicio
-- Se muestra al usuario en la pantalla de confirmación de reserva
-- Se resetea a `0` después de aplicarse al crear la nueva cita
+```mermaid
+flowchart TD
+    A[Usuario cancela despues del deadline] --> B{Plan del negocio?}
+    B -->|Profesional/Inteligente<br>cashback_enabled: true| C[Credits::RefundService]
+    B -->|Basico<br>cashback_enabled: false| D[Legacy: pending_penalty]
+
+    C --> E[Calcula penalizacion]
+    E --> F[Reembolso = precio - penalizacion]
+    F --> G[Acredita reembolso como CreditTransaction<br>tipo: cancellation_refund]
+    G --> H[Cliente tiene saldo a favor]
+
+    D --> I[Calcula penalizacion]
+    I --> J[customer.pending_penalty += penalizacion]
+    J --> K[Se cobra en la proxima reserva]
+```
 
 ---
 
-## Configuración por negocio
+## Comparacion por plan
 
-Cada negocio configura su política de cancelación desde **Settings > Cancelación** en el dashboard.
+| Aspecto | Basico | Profesional / Inteligente |
+|---|---|---|
+| **Cancelacion por negocio** | Sin penalizacion | Sin penalizacion |
+| **Cancelacion por cliente antes del deadline** | Sin penalizacion | Sin penalizacion |
+| **Cancelacion por cliente despues del deadline** | Penalizacion se suma a `pending_penalty` | Penalizacion se descuenta del reembolso como credito |
+| **Donde se registra la penalizacion** | `customers.pending_penalty` | `CreditTransaction` (tipo: `cancellation_refund`) |
+| **Como se cobra** | Se suma al precio de la proxima cita | El credito se puede usar en futuras reservas |
+| **Ejemplo: servicio $40,000, penalizacion 30%** | pending_penalty += $12,000 | Credito: $28,000 (reembolso) |
 
-| Campo | Tipo | Descripción | Default |
+### Ejemplo detallado
+
+**Servicio:** Corte + barba $40,000 COP
+**Politica:** 30% penalizacion, 24h deadline
+
+#### Plan Basico:
+1. Cliente cancela 2 horas antes (despues del deadline)
+2. Penalizacion: $40,000 x 30% = $12,000
+3. `customer.pending_penalty` pasa de $0 a $12,000
+4. Proxima reserva: corte clasico $25,000 + $12,000 penalizacion = **$37,000 a pagar**
+5. `pending_penalty` se resetea a $0
+
+#### Plan Profesional:
+1. Cliente cancela 2 horas antes (despues del deadline)
+2. Penalizacion: $40,000 x 30% = $12,000
+3. Reembolso como credito: $40,000 - $12,000 = **$28,000 en creditos**
+4. Se crea `CreditTransaction(amount: 28000, type: cancellation_refund)`
+5. El cliente puede usar esos $28,000 en futuras reservas
+
+---
+
+## Configuracion por negocio
+
+Cada negocio configura su politica desde **Settings > Cancelacion**:
+
+| Campo | Tipo | Descripcion | Default |
 |---|---|---|---|
-| `cancellation_policy_pct` | integer | Porcentaje de penalización (0, 30, 50, 100) | `0` |
-| `cancellation_deadline_hours` | integer | Horas antes de la cita para cancelar sin penalización | `24` |
+| `cancellation_policy_pct` | integer | Porcentaje de penalizacion (0-100) | `0` |
+| `cancellation_deadline_hours` | integer | Horas antes de la cita para cancelar sin penalizacion | `24` |
 
-**Ejemplo:** Si un negocio tiene `cancellation_policy_pct: 50` y `cancellation_deadline_hours: 24`:
-- Un corte de cabello cuesta $30.000 COP
-- Si el usuario cancela con menos de 24h de anticipación, se le aplica una penalización de $15.000 COP
-- Esos $15.000 se suman al precio de su próxima reserva
+> **Nota:** El cashback y reembolso como credito lo controla el **SuperAdmin** desde el Plan en ActiveAdmin (`cashback_enabled`). El negocio NO configura esto.
 
 ---
 
-## Flujo técnico
+## Flujo tecnico
 
-```mermaid
-flowchart TD
-    A[Solicitud de cancelación] --> B{¿Quién cancela?}
-    B -->|Negocio| C[Cancelar sin penalización]
-    B -->|Usuario final| D{¿Dentro del plazo?}
-    D -->|Sí: faltan más horas que cancellation_deadline_hours| C
-    D -->|No: faltan menos horas| E[Calcular penalización]
-    E --> F[Guardar en customer.pending_penalty]
-    F --> G[Cancelar cita]
-    C --> G
-    G --> H[Liberar slot]
-    H --> I[Enviar notificaciones]
-```
-
-### Flujo de cobro de penalización en nueva reserva
-
-```mermaid
-flowchart TD
-    J[Nueva reserva] --> K{¿Customer tiene pending_penalty > 0?}
-    K -->|Sí| L[Sumar pending_penalty al precio del servicio]
-    L --> M[Mostrar desglose en confirmación]
-    M --> N[Crear cita con precio total]
-    N --> O[Resetear pending_penalty a 0]
-    K -->|No| P[Precio normal del servicio]
-    P --> N
-```
-
----
-
-## Cálculo de penalización
+### CancelAppointmentService
 
 ```ruby
-# Pseudocódigo del cálculo
-if cancelled_by == 'business'
-  penalty = 0
-elsif time_until_appointment > business.cancellation_deadline_hours.hours
-  penalty = 0
-else
-  penalty = appointment.price * (business.cancellation_policy_pct / 100.0)
-end
+# Flujo simplificado
+if cancelled_by == "customer"
+  penalty = calculate_penalty  # basado en deadline + policy_pct
+  plan = business.current_plan
 
-customer.pending_penalty += penalty
+  if plan.cashback_enabled? && customer.present?
+    # Plan Profesional+: reembolso como credito
+    Credits::RefundService.call(appointment: appointment)
+    # RefundService calcula: refund = price - penalty
+    # Crea CreditTransaction con el refund amount
+  elsif penalty > 0
+    # Plan Basico: legacy pending_penalty
+    customer.increment!(:pending_penalty, penalty)
+  end
+end
 ```
 
-### Casos especiales
+### Credits::RefundService
 
-- Si `cancellation_policy_pct` es `0`, nunca se genera penalización (política desactivada)
-- Si la cita está en estado `pending_payment` (no pagada), no se aplica penalización
-- La penalización se acumula: si el usuario cancela dos citas tarde, ambas penalizaciones se suman
+```ruby
+# Solo se ejecuta si plan.cashback_enabled?
+penalty_pct = business.cancellation_policy_pct
+penalty_amount = (price * penalty_pct / 100).round(2)
+refund_amount = (price - penalty_amount).round(2)
+
+if refund_amount > 0
+  account.credit!(refund_amount, type: :cancellation_refund)
+end
+```
+
+---
+
+## Casos especiales
+
+| Caso | Resultado |
+|---|---|
+| `cancellation_policy_pct = 0` | Sin penalizacion, sin credito |
+| Cita en `pending_payment` | No aplica penalizacion (no pago nada) |
+| Penalizaciones acumuladas (plan Basico) | Se suman en `pending_penalty` |
+| Plan Basico → upgrade a Profesional | Las `pending_penalty` existentes siguen funcionando, nuevas cancelaciones generan creditos |
+| Negocio cancela | Nunca penalizacion, nunca credito |
 
 ---
 
 ## Endpoints
 
-### Cancelación por el negocio (autenticado)
+### Cancelacion por el negocio (autenticado)
 
-```
+```bash
 POST /api/v1/appointments/:id/cancel
 Authorization: Bearer <token>
+Content-Type: application/json
+
+{"cancellation_reason": "El barbero no puede atender hoy"}
 ```
 
-- Requiere autenticación JWT del negocio
-- Valida que la cita pertenezca al negocio (Pundit policy)
-- Establece `cancelled_by: 'business'`
-- No genera penalización
+### Cancelacion por el usuario final (publico)
 
-### Cancelación por el usuario final (público)
-
-```
+```bash
 POST /api/v1/public/tickets/:code/cancel
 ```
-
-- Endpoint público, no requiere autenticación
-- Se identifica la cita por el código único del ticket
-- Evalúa si aplica penalización según la política del negocio
-- Establece `cancelled_by: 'customer'`
 
 ---
 
@@ -136,67 +167,50 @@ POST /api/v1/public/tickets/:code/cancel
 
 ### Tabla `appointments`
 
-| Campo | Tipo | Descripción |
+| Campo | Tipo | Descripcion |
 |---|---|---|
-| `cancelled_by` | string (nullable) | `'business'` o `'customer'`. `NULL` si no está cancelada |
-| `status` | string | Cambia a `'cancelled'` al cancelar |
+| `cancelled_by` | string (nullable) | `'business'` o `'customer'` |
+| `cancellation_reason` | text (nullable) | Motivo de cancelacion |
+| `status` | enum | Cambia a `cancelled` |
 
 ### Tabla `customers`
 
-| Campo | Tipo | Descripción |
+| Campo | Tipo | Descripcion |
 |---|---|---|
-| `pending_penalty` | decimal(10,2) | Monto acumulado pendiente de cobrar. Default: `0` |
+| `pending_penalty` | decimal(10,2) | Penalizacion acumulada (solo Plan Basico). Default: `0` |
 
-### Tabla `businesses`
+### Tabla `credit_transactions` (Plan Profesional+)
 
-| Campo | Tipo | Descripción |
+| Campo | Valor |
+|---|---|
+| `transaction_type` | `cancellation_refund` |
+| `amount` | Precio - penalizacion (positivo) |
+| `description` | "Reembolso por cancelacion — {servicio}" |
+| `appointment_id` | Referencia a la cita cancelada |
+
+### Tabla `plans`
+
+| Campo | Tipo | Descripcion |
 |---|---|---|
-| `cancellation_policy_pct` | integer | Porcentaje de penalización: 0, 30, 50, 100. Default: `0` |
-| `cancellation_deadline_hours` | integer | Horas límite para cancelar sin penalización. Default: `24` |
+| `cashback_enabled` | boolean | Determina si se usa creditos o pending_penalty |
 
 ---
 
-## Notificaciones
+## Relacion con otros sistemas
 
-| Evento | Destinatario | Canales |
-|---|---|---|
-| Cita cancelada por el negocio | Usuario final | Email + in-app |
-| Cita cancelada por el usuario (sin penalización) | Negocio | Email + in-app |
-| Cita cancelada por el usuario (con penalización) | Negocio | Email + in-app (incluye monto de penalización) |
-
-### Cuerpo de la notificación
-
-El texto del cuerpo varía según quién canceló:
-- **Negocio cancela** → `"Cancelada por [nombre del negocio]"`
-- **Usuario cancela** → `"El cliente canceló"`
+- **Sistema de creditos** → ver [cierre-de-caja.md](cierre-de-caja.md): creditos y cashback
+- **Notificaciones** → ver [notificaciones.md](notificaciones.md): MultiChannelService envia email + WhatsApp
+- **Concurrencia de slots** → ver [concurrencia-slots.md](concurrencia-slots.md): al cancelar se libera el slot
+- **Planes** → `plan.cashback_enabled?` determina el comportamiento del reembolso
 
 ---
 
 ## Archivos relevantes
 
-### Backend (agendity-api)
-
 | Archivo | Responsabilidad |
 |---|---|
-| `app/services/appointments/cancel_appointment_service.rb` | Lógica de cancelación: determina penalización, actualiza customer, cambia estado |
-| `app/controllers/api/v1/appointments_controller.rb` | Endpoint autenticado para cancelación por el negocio |
-| `app/controllers/api/v1/public/tickets_controller.rb` | Endpoint público `#cancel` para cancelación por el usuario final |
-| `app/services/appointments/create_appointment_service.rb` | Verifica `pending_penalty` al crear cita y lo suma al precio |
-| `app/models/customer.rb` | Campo `pending_penalty` |
-| `app/models/business.rb` | Campos `cancellation_policy_pct` y `cancellation_deadline_hours` |
-
-### Frontend (agendity-web)
-
-| Archivo | Responsabilidad |
-|---|---|
-| `src/app/[slug]/ticket/[code]/page.tsx` | Página del ticket con botón de cancelar para el usuario final |
-| `src/components/agenda/appointment-detail-modal.tsx` | Modal de detalle de cita con botón de cancelar para el negocio |
-
----
-
-## Relación con otros sistemas
-
-- **Sistema de pagos P2P** → ver [sistema-pagos-p2p.md](sistema-pagos-p2p.md): si la cita estaba en `pending_payment`, no aplica penalización
-- **Concurrencia de slots** → ver [concurrencia-slots.md](concurrencia-slots.md): al cancelar se libera el slot y el Redis lock
-- **Notificaciones** → ver [notificaciones.md](notificaciones.md): jobs de Sidekiq envían email + in-app al cancelar
-- **Sistema de planes** → ver [sistema-planes.md](sistema-planes.md): la política de cancelación configurable está disponible en planes Profesional e Inteligente
+| `app/services/appointments/cancel_appointment_service.rb` | Logica de cancelacion: decide credito vs penalty segun plan |
+| `app/services/credits/refund_service.rb` | Calcula reembolso como credito (Profesional+) |
+| `app/controllers/api/v1/appointments_controller.rb` | Endpoint autenticado para cancelacion por negocio |
+| `app/controllers/api/v1/public/tickets_controller.rb` | Endpoint publico para cancelacion por usuario |
+| `app/services/appointments/create_appointment_service.rb` | Cobra `pending_penalty` en nueva cita (Basico) |
