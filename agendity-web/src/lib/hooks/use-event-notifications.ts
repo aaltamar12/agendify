@@ -28,6 +28,16 @@ const EVENT_CONFIG: Record<string, { title: string; getBody: (data: any) => stri
     getBody: (data) =>
       `Pago confirmado para ${data.customer_name || 'un cliente'}`,
   },
+  appointment_completed: {
+    title: 'Cita completada',
+    getBody: (data) =>
+      `${data.customer_name || 'Un cliente'} completó su cita de ${data.service_name || 'un servicio'}`,
+  },
+  ai_suggestion: {
+    title: 'Sugerencia inteligente',
+    getBody: (data) =>
+      `Detectamos ${data.count || ''} oportunidad(es) para optimizar tus precios`,
+  },
 };
 
 export function useEventNotifications() {
@@ -42,6 +52,14 @@ export function useEventNotifications() {
       }
       if (event === 'payment_submitted') {
         queryClient.invalidateQueries({ queryKey: ['payments'] });
+      }
+      if (event === 'appointment_completed') {
+        queryClient.invalidateQueries({ queryKey: ['appointments'] });
+        queryClient.invalidateQueries({ queryKey: ['cash-register-today'] });
+      }
+      if (event === 'ai_suggestion') {
+        queryClient.invalidateQueries({ queryKey: ['dynamic-pricing'] });
+        queryClient.invalidateQueries({ queryKey: ['dynamic-pricing-suggestions-count'] });
       }
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       queryClient.invalidateQueries({ queryKey: ['notificationsUnreadCount'] });
