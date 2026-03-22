@@ -208,6 +208,7 @@ function CashRegisterContent() {
           {/* Totals after payments */}
           {summary.employees.length > 0 && (
             <Card className="mb-6">
+              <h2 className="mb-4 text-lg font-semibold text-gray-900">Resumen del dia</h2>
               {(() => {
                 const totalPaid = summary.employees.reduce((sum, emp) => {
                   const state = getPaymentState(emp);
