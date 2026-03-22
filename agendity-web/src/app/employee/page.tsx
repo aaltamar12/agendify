@@ -24,17 +24,28 @@ export default function EmployeeDashboardPage() {
       <h1 className="mb-6 text-2xl font-bold text-gray-900">Mi dashboard</h1>
 
       {/* Score + Stats */}
-      <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {score && (
-          <Card>
-            <div className="flex items-center gap-3">
-              <div className={`text-3xl font-bold ${scoreColor}`}>{score.overall}</div>
-              <div>
-                <p className="text-sm text-gray-500">Score</p>
-                <p className="text-xs text-gray-400">de 100</p>
+          <>
+            <Card>
+              <div className="flex items-center gap-3">
+                <div className={`text-3xl font-bold ${scoreColor}`}>{score.overall}</div>
+                <div>
+                  <p className="text-sm text-gray-500">Score</p>
+                  <p className="text-xs text-gray-400">de 100</p>
+                </div>
               </div>
-            </div>
-          </Card>
+            </Card>
+            <Card>
+              <div className="flex items-center gap-3">
+                <Star className="h-5 w-5 text-yellow-500" />
+                <div>
+                  <p className="text-lg font-bold text-gray-900">{score.rating_avg}/5</p>
+                  <p className="text-xs text-gray-500">Calificacion</p>
+                </div>
+              </div>
+            </Card>
+          </>
         )}
         <Card>
           <div className="flex items-center gap-3">

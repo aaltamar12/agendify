@@ -1,54 +1,43 @@
 'use client';
 
 import { useState } from 'react';
-import { ScanLine, Check, AlertTriangle } from 'lucide-react';
-import { Button, Card, Input, Modal } from '@/components/ui';
-import { useEmployeeCheckin } from '@/lib/hooks/use-employee-dashboard';
+import { ScanLine, Check, AlertTriangle, Camera, Keyboard } from 'lucide-react';
+import { Button, Card, Input } from '@/components/ui';
+import { QrScanner } from '@/components/shared/qr-scanner';
+import { useCheckinByCode } from '@/lib/hooks/use-appointments';
 import { useUIStore } from '@/lib/stores/ui-store';
-
-const SUBSTITUTE_REASONS = [
-  'Cambio de turno',
-  'Empleado ausente',
-  'Reasignacion',
-  'Solicitud del cliente',
-  'Otro',
-];
 
 export default function EmployeeCheckinPage() {
   const [ticketCode, setTicketCode] = useState('');
-  const [checkinResult, setCheckinResult] = useState<{ success: boolean; message: string } | null>(null);
-  const [substituteModal, setSubstituteModal] = useState<{ appointmentId: number; assignedEmployee: string } | null>(null);
-  const [substituteReason, setSubstituteReason] = useState('');
-  const [customReason, setCustomReason] = useState('');
-  const checkinMutation = useEmployeeCheckin();
+  const [showScanner, setShowScanner] = useState(false);
+  const [checkinResult, setCheckinResult] = useState<{ success: boolean; message: string; details?: string } | null>(null);
+  const checkinMutation = useCheckinByCode();
   const { addToast } = useUIStore();
 
-  // First we need to find the appointment by ticket code, then do check-in
-  // For now, we use the appointment ID from a search or the ticket code
-  // The employee portal check-in works by appointment ID
-
-  const handleCheckin = async () => {
-    // TODO: Add endpoint to find appointment by ticket_code in employee context
-    // For now this is a placeholder — in the real flow, the employee scans QR which gives the appointment ID
-    addToast({ type: 'info', message: 'Ingresa el codigo del ticket para hacer check-in' });
-  };
-
-  const handleSubstituteConfirm = async () => {
-    if (!substituteModal) return;
-    const reason = substituteReason === 'Otro' ? customReason : substituteReason;
+  const handleCheckin = async (code?: string) => {
+    const codeToUse = code || ticketCode.trim();
+    if (!codeToUse) return;
 
     try {
-      await checkinMutation.mutateAsync({
-        appointmentId: substituteModal.appointmentId,
-        confirmed: true,
-        substitute_reason: reason,
+      await checkinMutation.mutateAsync(codeToUse);
+      setCheckinResult({
+        success: true,
+        message: 'Check-in exitoso',
+        details: `Ticket: ${codeToUse}`,
       });
-      setSubstituteModal(null);
-      setCheckinResult({ success: true, message: 'Check-in realizado como sustituto' });
+      setTicketCode('');
       addToast({ type: 'success', message: 'Check-in completado' });
-    } catch {
-      addToast({ type: 'error', message: 'Error al hacer check-in' });
+    } catch (err) {
+      const message = (err as Error)?.message || 'Error al hacer check-in';
+      setCheckinResult({ success: false, message });
+      addToast({ type: 'error', message });
     }
+  };
+
+  const handleScan = (code: string) => {
+    setShowScanner(false);
+    setTicketCode(code);
+    handleCheckin(code);
   };
 
   return (
@@ -62,88 +51,68 @@ export default function EmployeeCheckinPage() {
           </div>
           <div>
             <h2 className="font-semibold text-gray-900">Registrar llegada</h2>
-            <p className="text-xs text-gray-500">Ingresa el codigo del ticket del cliente</p>
+            <p className="text-xs text-gray-500">Escanea el QR o ingresa el codigo manualmente</p>
           </div>
         </div>
 
+        {/* Scanner button */}
+        <Button
+          className="mb-4 w-full"
+          onClick={() => setShowScanner(true)}
+        >
+          <Camera className="mr-2 h-4 w-4" />
+          Escanear codigo QR
+        </Button>
+
+        {/* Manual input */}
         <div className="flex gap-2">
           <Input
             value={ticketCode}
             onChange={(e) => setTicketCode(e.target.value.toUpperCase())}
             placeholder="Codigo de ticket"
             className="flex-1"
+            onKeyDown={(e) => e.key === 'Enter' && handleCheckin()}
           />
           <Button
-            onClick={handleCheckin}
-            disabled={!ticketCode.trim()}
+            variant="outline"
+            onClick={() => handleCheckin()}
+            disabled={!ticketCode.trim() || checkinMutation.isPending}
             loading={checkinMutation.isPending}
           >
-            <Check className="mr-1.5 h-4 w-4" />
-            Check-in
+            <Keyboard className="mr-1.5 h-4 w-4" />
+            Manual
           </Button>
         </div>
 
+        {/* Result */}
         {checkinResult && (
-          <div className={`mt-4 rounded-lg p-3 ${checkinResult.success ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
-            <p className="text-sm font-medium">{checkinResult.message}</p>
+          <div className={`mt-4 rounded-lg p-3 ${checkinResult.success ? 'bg-green-50' : 'bg-red-50'}`}>
+            <div className="flex items-center gap-2">
+              {checkinResult.success ? (
+                <Check className="h-5 w-5 text-green-600" />
+              ) : (
+                <AlertTriangle className="h-5 w-5 text-red-600" />
+              )}
+              <div>
+                <p className={`text-sm font-medium ${checkinResult.success ? 'text-green-700' : 'text-red-700'}`}>
+                  {checkinResult.message}
+                </p>
+                {checkinResult.details && (
+                  <p className="text-xs text-gray-500">{checkinResult.details}</p>
+                )}
+              </div>
+            </div>
           </div>
         )}
       </Card>
 
-      {/* Substitute confirmation modal */}
-      <Modal
-        open={!!substituteModal}
-        onClose={() => setSubstituteModal(null)}
-        title="Check-in de otro empleado"
-      >
-        {substituteModal && (
-          <div className="space-y-4">
-            <div className="flex items-center gap-3 rounded-lg bg-orange-50 p-3">
-              <AlertTriangle className="h-5 w-5 text-orange-600" />
-              <div>
-                <p className="text-sm font-medium text-orange-800">
-                  Esta cita esta asignada a {substituteModal.assignedEmployee}
-                </p>
-                <p className="text-xs text-orange-600">¿Deseas hacer el check-in de todos modos?</p>
-              </div>
-            </div>
-
-            <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Razon</label>
-              <select
-                value={substituteReason}
-                onChange={(e) => setSubstituteReason(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-violet-500 focus:outline-none"
-              >
-                <option value="">Selecciona una razon</option>
-                {SUBSTITUTE_REASONS.map((r) => (
-                  <option key={r} value={r}>{r}</option>
-                ))}
-              </select>
-            </div>
-
-            {substituteReason === 'Otro' && (
-              <Input
-                label="Especificar razon"
-                value={customReason}
-                onChange={(e) => setCustomReason(e.target.value)}
-                placeholder="Describe la razon..."
-              />
-            )}
-
-            <div className="flex justify-end gap-3">
-              <Button variant="ghost" onClick={() => setSubstituteModal(null)}>Cancelar</Button>
-              <Button
-                onClick={handleSubstituteConfirm}
-                disabled={!substituteReason || (substituteReason === 'Otro' && !customReason)}
-                loading={checkinMutation.isPending}
-              >
-                Confirmar check-in
-              </Button>
-            </div>
-          </div>
-        )}
-      </Modal>
+      {/* QR Scanner modal */}
+      {showScanner && (
+        <QrScanner
+          onScan={handleScan}
+          onClose={() => setShowScanner(false)}
+        />
+      )}
     </div>
   );
 }

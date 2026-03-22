@@ -9,14 +9,17 @@ import {
   User,
   Calendar,
   Clock,
+  Camera,
 } from 'lucide-react';
 import { Button, Card, Input } from '@/components/ui';
+import { QrScanner } from '@/components/shared/qr-scanner';
 import { useCheckinByCode } from '@/lib/hooks/use-appointments';
 import { formatDate, formatTime } from '@/lib/utils/date';
 import type { Appointment } from '@/lib/api/types';
 
 export default function CheckinPage() {
   const [ticketCode, setTicketCode] = useState('');
+  const [showScanner, setShowScanner] = useState(false);
   const [checkedInAppointment, setCheckedInAppointment] =
     useState<Appointment | null>(null);
 
@@ -27,6 +30,17 @@ export default function CheckinPage() {
     const code = ticketCode.trim();
     if (!code) return;
 
+    try {
+      const result = await checkinMutation.mutateAsync(code);
+      setCheckedInAppointment(result.data);
+    } catch {
+      // Error handled by mutation state
+    }
+  }
+
+  async function handleScan(code: string) {
+    setShowScanner(false);
+    setTicketCode(code);
     try {
       const result = await checkinMutation.mutateAsync(code);
       setCheckedInAppointment(result.data);
@@ -119,6 +133,22 @@ export default function CheckinPage() {
           </div>
 
           <form onSubmit={handleCheckin} className="mt-6 space-y-4">
+            <Button
+              type="button"
+              fullWidth
+              size="lg"
+              onClick={() => setShowScanner(true)}
+            >
+              <Camera className="mr-2 h-5 w-5" />
+              Escanear codigo QR
+            </Button>
+
+            <div className="relative flex items-center">
+              <div className="flex-grow border-t border-gray-200" />
+              <span className="mx-3 text-xs text-gray-400">o ingresa manualmente</span>
+              <div className="flex-grow border-t border-gray-200" />
+            </div>
+
             <Input
               label="Código del ticket"
               placeholder="Ej: FE89E62168B5"
@@ -148,6 +178,13 @@ export default function CheckinPage() {
             </Button>
           </form>
         </Card>
+      )}
+      {/* QR Scanner */}
+      {showScanner && (
+        <QrScanner
+          onScan={handleScan}
+          onClose={() => setShowScanner(false)}
+        />
       )}
     </div>
   );
