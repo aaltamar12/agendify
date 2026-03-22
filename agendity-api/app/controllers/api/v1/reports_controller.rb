@@ -121,14 +121,23 @@ module Api
 
       # GET /api/v1/reports/frequent_customers
       def frequent_customers
-        data = current_business.appointments
+        visits = current_business.appointments
           .where.not(status: :cancelled)
           .joins(:customer)
           .group("customers.name", "customers.email")
           .order("count_all DESC")
           .limit(20)
           .count
-          .map { |(name, email), count| { name: name, email: email, visits: count } }
+
+        spent = current_business.appointments
+          .where.not(status: :cancelled)
+          .joins(:customer)
+          .group("customers.name", "customers.email")
+          .sum(:price)
+
+        data = visits.map do |(name, email), count|
+          { name: name, email: email, visits: count, total_spent: (spent[[name, email]] || 0).to_f }
+        end
 
         render_success(data)
       end
