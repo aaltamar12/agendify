@@ -53,10 +53,13 @@ export default function ReportsPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasAdvancedReports, hasAI, profit, reconciliationChecked]);
   const reconResult = reconciliation.data?.data;
+  const reconFailed = reconciliation.isError;
+  const reconLoading = reconciliation.isPending;
   const hasDiscrepancies = reconResult && (
     reconResult.cash_register?.status === 'discrepancies' ||
     reconResult.credits?.status === 'discrepancies'
   );
+  const reconVerified = reconciliationChecked && reconResult && !hasDiscrepancies && !reconFailed;
 
   return (
     <div>
@@ -123,11 +126,18 @@ export default function ReportsPage() {
                 Datos inconsistentes — Revisar reconciliacion
               </a>
             )}
-            {reconResult && !hasDiscrepancies && (
+            {reconVerified && (
               <span className="flex items-center gap-1.5 text-xs text-green-600">
                 <CheckCircle className="h-3.5 w-3.5" />
                 Datos verificados
               </span>
+            )}
+            {reconLoading && (
+              <span className="text-xs text-gray-400">Verificando...</span>
+            )}
+            {reconFailed && !hasAI && null}
+            {reconFailed && hasAI && (
+              <span className="text-xs text-orange-500">No se pudo verificar</span>
             )}
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
