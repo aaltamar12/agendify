@@ -11,6 +11,8 @@ export const ENDPOINTS = {
     refresh: `${BASE}/auth/refresh`,
     me: `${BASE}/auth/me`,
     logout: `${BASE}/auth/logout`,
+    forgotPassword: `${BASE}/auth/forgot_password`,
+    resetPassword: `${BASE}/auth/reset_password`,
   },
 
   BUSINESS: {
@@ -33,6 +35,7 @@ export const ENDPOINTS = {
     show: (id: number) => `${BASE}/employees/${id}`,
     update: (id: number) => `${BASE}/employees/${id}`,
     delete: (id: number) => `${BASE}/employees/${id}`,
+    uploadAvatar: (id: number) => `${BASE}/employees/${id}/upload_avatar`,
   },
 
   APPOINTMENTS: {

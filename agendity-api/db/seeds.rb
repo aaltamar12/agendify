@@ -13,47 +13,53 @@ puts "=" * 60
 # ============================================================================
 puts "\n📋 Creating plans..."
 
-plan_basico = Plan.find_or_create_by!(name: "Básico") do |p|
-  p.price_monthly = 30_000
-  p.max_employees = 3
-  p.max_services = 5
-  p.max_reservations_month = nil
-  p.max_customers = nil
-  p.ai_features = false
-  p.ticket_digital = false
-  p.advanced_reports = false
-  p.brand_customization = false
-  p.featured_listing = false
-  p.priority_support = false
-end
+plan_basico = Plan.find_or_initialize_by(name: "Básico")
+plan_basico.update!(
+  price_monthly: 37_000,
+  price_monthly_usd: 8,
+  max_employees: 3,
+  max_services: 5,
+  max_reservations_month: nil,
+  max_customers: nil,
+  ai_features: false,
+  ticket_digital: false,
+  advanced_reports: false,
+  brand_customization: false,
+  featured_listing: false,
+  priority_support: false
+)
 
-plan_profesional = Plan.find_or_create_by!(name: "Profesional") do |p|
-  p.price_monthly = 59_900
-  p.max_employees = 10
-  p.max_services = nil # unlimited
-  p.max_reservations_month = nil
-  p.max_customers = nil
-  p.ai_features = false
-  p.ticket_digital = true
-  p.advanced_reports = true
-  p.brand_customization = true
-  p.featured_listing = true
-  p.priority_support = false
-end
+plan_profesional = Plan.find_or_initialize_by(name: "Profesional")
+plan_profesional.update!(
+  price_monthly: 75_000,
+  price_monthly_usd: 17,
+  max_employees: 10,
+  max_services: nil, # unlimited
+  max_reservations_month: nil,
+  max_customers: nil,
+  ai_features: false,
+  ticket_digital: true,
+  advanced_reports: true,
+  brand_customization: true,
+  featured_listing: true,
+  priority_support: false
+)
 
-plan_inteligente = Plan.find_or_create_by!(name: "Inteligente") do |p|
-  p.price_monthly = 99_900
-  p.max_employees = nil # unlimited
-  p.max_services = nil
-  p.max_reservations_month = nil
-  p.max_customers = nil
-  p.ai_features = true
-  p.ticket_digital = true
-  p.advanced_reports = true
-  p.brand_customization = true
-  p.featured_listing = true
-  p.priority_support = true
-end
+plan_inteligente = Plan.find_or_initialize_by(name: "Inteligente")
+plan_inteligente.update!(
+  price_monthly: 99_000,
+  price_monthly_usd: 23,
+  max_employees: nil, # unlimited
+  max_services: nil,
+  max_reservations_month: nil,
+  max_customers: nil,
+  ai_features: true,
+  ticket_digital: true,
+  advanced_reports: true,
+  brand_customization: true,
+  featured_listing: true,
+  priority_support: true
+)
 
 puts "  ✅ Plans: #{Plan.count} (Básico, Profesional, Inteligente)"
 

@@ -15,11 +15,13 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       # Auth
-      post "auth/login",    to: "auth#login"
-      post "auth/register", to: "auth#register"
-      post "auth/refresh",  to: "auth#refresh"
-      get  "auth/me",       to: "auth#me"
-      delete "auth/logout", to: "auth#logout"
+      post "auth/login",            to: "auth#login"
+      post "auth/register",         to: "auth#register"
+      post "auth/refresh",          to: "auth#refresh"
+      get  "auth/me",               to: "auth#me"
+      delete "auth/logout",         to: "auth#logout"
+      post "auth/forgot_password",  to: "passwords#forgot_password"
+      post "auth/reset_password",   to: "passwords#reset_password"
 
       # Business (singular resource — current user's business)
       resource :business, only: %i[show update] do
@@ -29,7 +31,9 @@ Rails.application.routes.draw do
 
       # Resources scoped to business
       resources :services
-      resources :employees
+      resources :employees do
+        post :upload_avatar, on: :member
+      end
       resources :customers, only: %i[index show]
 
       resources :appointments do

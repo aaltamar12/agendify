@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register Plan do
-  permit_params :name, :price_monthly, :max_employees, :max_services,
+  permit_params :name, :price_monthly, :price_monthly_usd, :max_employees, :max_services,
                 :max_reservations_month, :max_customers,
                 :ai_features, :ticket_digital, :advanced_reports,
                 :brand_customization, :featured_listing, :priority_support
@@ -11,7 +11,8 @@ ActiveAdmin.register Plan do
     selectable_column
     id_column
     column :name
-    column(:price_monthly) { |p| "$#{p.price_monthly.to_f.round(0)} COP" }
+    column("Price (COP)") { |p| "$#{p.price_monthly.to_f.round(0)} COP" }
+    column("Price (USD)") { |p| p.price_monthly_usd ? "$#{p.price_monthly_usd} USD" : "—" }
     column :max_employees
     column :max_services
     column :max_reservations_month
@@ -30,7 +31,8 @@ ActiveAdmin.register Plan do
   form do |f|
     f.inputs "Plan Details" do
       f.input :name
-      f.input :price_monthly
+      f.input :price_monthly, label: "Price Monthly (COP)"
+      f.input :price_monthly_usd, label: "Price Monthly (USD)"
       f.input :max_employees
       f.input :max_services
       f.input :max_reservations_month

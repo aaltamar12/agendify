@@ -5,7 +5,7 @@ module Api
     # Full CRUD for employees scoped to the current business.
     # SRP: Only handles HTTP concerns for employee resources.
     class EmployeesController < BaseController
-      before_action :set_employee, only: %i[show update destroy]
+      before_action :set_employee, only: %i[show update destroy upload_avatar]
 
       # GET /api/v1/employees
       def index
@@ -55,6 +55,21 @@ module Api
             status: :unprocessable_entity,
             details: @employee.errors.messages
           )
+        end
+      end
+
+      # POST /api/v1/employees/:id/upload_avatar
+      def upload_avatar
+        unless params[:avatar].present?
+          return render_error("No se envió ningún archivo", status: :unprocessable_entity)
+        end
+
+        @employee.avatar.attach(params[:avatar])
+
+        if @employee.avatar.attached?
+          render_success(EmployeeSerializer.render_as_hash(@employee))
+        else
+          render_error("Error al subir la foto", status: :unprocessable_entity)
         end
       end
 

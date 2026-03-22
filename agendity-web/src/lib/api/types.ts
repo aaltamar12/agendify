@@ -265,6 +265,7 @@ export interface Plan {
   slug: string;
   description: string | null;
   price_monthly: number;
+  price_monthly_usd: number | null;
   price_yearly: number;
   currency: string;
   max_employees: number;

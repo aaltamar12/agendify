@@ -4,7 +4,7 @@ import { get, post } from '@/lib/api/client';
 import { ENDPOINTS } from '@/lib/api/endpoints';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import type { ApiResponse, User } from '@/lib/api/types';
-import type { LoginFormData, RegisterFormData } from '@/lib/validations/auth';
+import type { LoginFormData, RegisterFormData, ForgotPasswordFormData, ResetPasswordFormData } from '@/lib/validations/auth';
 
 interface AuthResponse {
   token: string;
@@ -56,6 +56,29 @@ export function useCurrentUser() {
     queryKey: ['currentUser'],
     queryFn: () => get<ApiResponse<User>>(ENDPOINTS.AUTH.me),
     enabled: isAuthenticated(),
+  });
+}
+
+export function useForgotPassword() {
+  return useMutation({
+    mutationFn: (data: ForgotPasswordFormData) =>
+      post<ApiResponse<{ message: string }>>(ENDPOINTS.AUTH.forgotPassword, data),
+  });
+}
+
+export function useResetPassword() {
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: (data: ResetPasswordFormData & { token: string }) =>
+      post<ApiResponse<{ message: string }>>(ENDPOINTS.AUTH.resetPassword, {
+        token: data.token,
+        password: data.password,
+        password_confirmation: data.passwordConfirmation,
+      }),
+    onSuccess: () => {
+      router.push('/login?reset=success');
+    },
   });
 }
 

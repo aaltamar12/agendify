@@ -1,10 +1,13 @@
 'use client';
 
+import { useRef, useState } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Button, Input } from '@/components/ui';
+import { Camera } from 'lucide-react';
+import { Button, Input, Avatar } from '@/components/ui';
 import { useServices } from '@/lib/hooks/use-services';
+import { useUploadEmployeeAvatar } from '@/lib/hooks/use-employees';
 import { DAYS_OF_WEEK } from '@/lib/constants';
 import type { Employee, EmployeeSchedule } from '@/lib/api/types';
 
@@ -71,6 +74,17 @@ interface EmployeeFormProps {
 
 export function EmployeeForm({ employee, onSubmit, loading }: EmployeeFormProps) {
   const { data: services } = useServices();
+  const uploadAvatar = useUploadEmployeeAvatar();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(employee?.avatar_url || null);
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !employee?.id) return;
+
+    setAvatarPreview(URL.createObjectURL(file));
+    uploadAvatar.mutate({ id: employee.id, file });
+  };
 
   const {
     register,
@@ -113,6 +127,38 @@ export function EmployeeForm({ employee, onSubmit, loading }: EmployeeFormProps)
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      {/* Avatar upload */}
+      <div className="flex items-center gap-4">
+        <div className="relative">
+          <Avatar
+            name={watch('name') || 'E'}
+            src={avatarPreview || undefined}
+            size="xl"
+          />
+          {employee?.id && (
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-violet-600 text-white shadow-sm hover:bg-violet-700"
+            >
+              <Camera className="h-3.5 w-3.5" />
+            </button>
+          )}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleAvatarChange}
+          />
+        </div>
+        <div className="text-sm text-gray-500">
+          {employee?.id
+            ? 'Haz clic en el icono para cambiar la foto'
+            : 'Podrás agregar una foto después de crear el empleado'}
+        </div>
+      </div>
+
       <Input
         label="Nombre"
         placeholder="Ej: Carlos Pérez"

@@ -4,6 +4,9 @@
 class Employee < ApplicationRecord
   include BusinessScoped
 
+  # -- Attachments --
+  has_one_attached :avatar
+
   # -- Associations --
   has_many :employee_services, dependent: :destroy
   has_many :services, through: :employee_services

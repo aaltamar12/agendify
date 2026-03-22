@@ -7,9 +7,13 @@ class EmployeeSerializer < Blueprinter::Base
          :bio, :active, :commission_percentage,
          :created_at, :updated_at
 
-  # Frontend expects avatar_url, DB column is photo_url
+  # Frontend expects avatar_url — prefer ActiveStorage avatar, fallback to legacy photo_url
   field :avatar_url do |employee, _options|
-    employee.photo_url
+    if employee.avatar.attached?
+      Rails.application.routes.url_helpers.url_for(employee.avatar)
+    else
+      employee.photo_url
+    end
   end
 
   # IDs of services this employee can perform

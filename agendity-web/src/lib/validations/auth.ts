@@ -33,5 +33,28 @@ export const registerSchema = z
     path: ['passwordConfirmation'],
   });
 
+export const forgotPasswordSchema = z.object({
+  email: z
+    .string()
+    .min(1, 'El correo es requerido')
+    .email('Ingresa un correo válido'),
+});
+
+export const resetPasswordSchema = z
+  .object({
+    password: z
+      .string()
+      .min(8, 'La contraseña debe tener al menos 8 caracteres'),
+    passwordConfirmation: z
+      .string()
+      .min(1, 'Confirma tu contraseña'),
+  })
+  .refine((data) => data.password === data.passwordConfirmation, {
+    message: 'Las contraseñas no coinciden',
+    path: ['passwordConfirmation'],
+  });
+
 export type LoginFormData = z.infer<typeof loginSchema>;
 export type RegisterFormData = z.infer<typeof registerSchema>;
+export type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
+export type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;

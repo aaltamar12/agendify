@@ -395,27 +395,30 @@ El sistema debe estar preparado para incluir IA.
 
 **Trial:** 30 días gratis con acceso completo al Plan Profesional. Después elige un plan.
 
-> ⚠️ **PENDIENTE:** Definir precios de planes Profesional e Inteligente, y los límites exactos de cada plan.
+**Estrategia de pricing:** El plan Inteligente debe ser el más atractivo. La diferencia de solo $6 USD ($24k COP) con el Profesional incentiva a elegir el plan con IA.
 
 | | **Básico** | **Profesional** | **Inteligente** |
 |---|---|---|---|
-| **Precio/mes** | $30.000 COP | ⚠️ POR DEFINIR | ⚠️ POR DEFINIR |
+| **Precio/mes (USD)** | $8 | $17 | $23 |
+| **Precio/mes (COP)** | $37,000 | $75,000 | $99,000 |
 | Agenda y calendario | Si | Si | Si |
-| Servicios | ⚠️ POR DEFINIR | ⚠️ POR DEFINIR | ⚠️ POR DEFINIR |
-| Empleados | ⚠️ POR DEFINIR | ⚠️ POR DEFINIR | ⚠️ POR DEFINIR |
-| Reservas online | ⚠️ POR DEFINIR | ⚠️ POR DEFINIR | ⚠️ POR DEFINIR |
-| Clientes en BD | ⚠️ POR DEFINIR | ⚠️ POR DEFINIR | ⚠️ POR DEFINIR |
+| Servicios | Hasta 5 | Ilimitados | Ilimitados |
+| Empleados | Hasta 3 | Hasta 10 | Ilimitados |
+| Reservas online | Si | Si | Si |
+| Clientes en BD | Ilimitados | Ilimitados | Ilimitados |
 | Página pública del negocio | Si | Si | Si |
 | QR de reservas | Si | Si | Si |
-| Notificaciones WhatsApp | ⚠️ POR DEFINIR | ⚠️ POR DEFINIR | ⚠️ POR DEFINIR |
 | Notificaciones Email | Si | Si | Si |
+| Notificaciones WhatsApp | No | Si | Si |
 | Ticket digital VIP | No | Si | Si |
 | Reportes básicos | Si | Si | Si |
 | Reportes avanzados | No | Si | Si |
+| Cierre de caja | No | Si | Si |
 | Personalización de marca | No | Si (logo, colores) | Si (logo, colores) |
 | Mapa de negocios | Listado | Listado + destacado | Listado + destacado |
 | Bloqueo de slots | Si | Si | Si |
 | Políticas de cancelación | Básica | Configurable | Configurable |
+| Tarifas dinámicas | No | Manual | Manual + sugerencias IA |
 | Análisis inteligente (IA) | No | No | Si |
 | Predicción de ingresos | No | No | Si |
 | Recomendaciones de precios | No | No | Si |

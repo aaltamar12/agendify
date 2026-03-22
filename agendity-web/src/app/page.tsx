@@ -10,12 +10,14 @@ import {
   Users,
   Smartphone,
   ArrowRight,
+  Check,
   CheckCircle,
   Bell,
   MessageCircle,
   Shield,
   Star,
   Zap,
+  Sparkles,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -422,6 +424,95 @@ export default function Home() {
                   </div>
                 </article>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Pricing */}
+        <section id="precios" className="px-6 py-20">
+          <div className="mx-auto max-w-5xl">
+            <h2 className="mb-4 text-center text-3xl font-bold text-gray-900">
+              Planes simples, sin sorpresas
+            </h2>
+            <p className="mx-auto mb-12 max-w-xl text-center text-gray-500">
+              30 días gratis con acceso completo al Plan Profesional. Sin tarjeta de crédito.
+            </p>
+
+            <div className="grid gap-6 sm:grid-cols-3">
+              {/* Básico */}
+              <div className="flex flex-col rounded-2xl border border-gray-200 bg-white p-6">
+                <h3 className="text-lg font-semibold text-gray-900">Básico</h3>
+                <p className="mt-1 text-sm text-gray-500">Para empezar a organizarte</p>
+                <div className="mt-4">
+                  <span className="text-4xl font-bold text-gray-900">$8</span>
+                  <span className="text-sm text-gray-500"> USD/mes</span>
+                  <p className="mt-1 text-xs text-gray-400">~$37,000 COP/mes</p>
+                </div>
+                <ul className="mt-6 flex-1 space-y-3">
+                  {['Agenda y calendario', 'Hasta 3 empleados', 'Hasta 5 servicios', 'Página pública', 'QR de reservas', 'Reportes básicos'].map((f) => (
+                    <li key={f} className="flex items-start gap-2 text-sm text-gray-600">
+                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-violet-600" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/register" className="mt-6">
+                  <Button variant="outline" fullWidth>Empezar gratis</Button>
+                </Link>
+              </div>
+
+              {/* Profesional */}
+              <div className="flex flex-col rounded-2xl border-2 border-violet-600 bg-white p-6 shadow-lg">
+                <div className="mb-2 flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-gray-900">Profesional</h3>
+                  <span className="rounded-full bg-violet-100 px-3 py-0.5 text-xs font-semibold text-violet-700">Popular</span>
+                </div>
+                <p className="text-sm text-gray-500">Para negocios que quieren crecer</p>
+                <div className="mt-4">
+                  <span className="text-4xl font-bold text-gray-900">$17</span>
+                  <span className="text-sm text-gray-500"> USD/mes</span>
+                  <p className="mt-1 text-xs text-gray-400">~$75,000 COP/mes</p>
+                </div>
+                <ul className="mt-6 flex-1 space-y-3">
+                  {['Todo del plan Básico', 'Hasta 10 empleados', 'Servicios ilimitados', 'Ticket digital VIP con QR', 'Reportes avanzados', 'Personalización de marca', 'Negocio destacado', 'Cierre de caja'].map((f) => (
+                    <li key={f} className="flex items-start gap-2 text-sm text-gray-600">
+                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-violet-600" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/register" className="mt-6">
+                  <Button fullWidth>Empezar gratis</Button>
+                </Link>
+              </div>
+
+              {/* Inteligente */}
+              <div className="relative flex flex-col rounded-2xl border border-gray-200 bg-gradient-to-br from-violet-50 to-white p-6">
+                <div className="mb-2 flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-gray-900">Inteligente</h3>
+                  <Sparkles className="h-5 w-5 text-violet-600" />
+                </div>
+                <p className="text-sm text-gray-500">IA que hace crecer tu negocio</p>
+                <div className="mt-4">
+                  <span className="text-4xl font-bold text-gray-900">$23</span>
+                  <span className="text-sm text-gray-500"> USD/mes</span>
+                  <p className="mt-1 text-xs text-gray-400">~$99,000 COP/mes</p>
+                </div>
+                <ul className="mt-6 flex-1 space-y-3">
+                  {['Todo del plan Profesional', 'Empleados ilimitados', 'Análisis inteligente con IA', 'Predicción de ingresos', 'Recomendaciones de precios', 'Alertas de clientes inactivos', 'Tarifas dinámicas automáticas', 'Soporte prioritario'].map((f) => (
+                    <li key={f} className="flex items-start gap-2 text-sm text-gray-600">
+                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-violet-600" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/register" className="mt-6">
+                  <Button fullWidth>Empezar gratis</Button>
+                </Link>
+                <p className="mt-2 text-center text-xs text-violet-600 font-medium">
+                  Solo $6 USD más que el Profesional
+                </p>
+              </div>
             </div>
           </div>
         </section>

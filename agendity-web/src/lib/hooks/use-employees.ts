@@ -51,6 +51,23 @@ export function useUpdateEmployee() {
   });
 }
 
+export function useUploadEmployeeAvatar() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, file }: { id: number; file: File }) => {
+      const formData = new FormData();
+      formData.append('avatar', file);
+      return post<ApiResponse<Employee>>(ENDPOINTS.EMPLOYEES.uploadAvatar(id), formData, {
+        headers: { 'Content-Type': undefined as unknown as string },
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['employees'] });
+    },
+  });
+}
+
 export function useDeleteEmployee() {
   const queryClient = useQueryClient();
 
