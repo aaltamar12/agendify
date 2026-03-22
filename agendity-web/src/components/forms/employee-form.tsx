@@ -36,6 +36,7 @@ const employeeFormSchema = z.object({
     .optional()
     .or(z.literal('')),
   active: z.boolean(),
+  commission_percentage: z.coerce.number().min(0).max(100).optional(),
   service_ids: z.array(z.number()),
   schedules: z.array(scheduleEntrySchema),
 });
@@ -100,6 +101,7 @@ export function EmployeeForm({ employee, onSubmit, loading }: EmployeeFormProps)
       phone: employee?.phone ?? '',
       email: employee?.email ?? '',
       active: employee?.active ?? true,
+      commission_percentage: employee?.commission_percentage ?? 0,
       service_ids: employee?.service_ids ?? [],
       schedules: buildDefaultSchedules(employee?.schedules),
     },
@@ -194,6 +196,21 @@ export function EmployeeForm({ employee, onSubmit, loading }: EmployeeFormProps)
         </label>
         <span className="text-sm text-gray-700">Empleado activo</span>
       </div>
+
+      {/* Commission */}
+      <Input
+        label="Comisión (%)"
+        type="number"
+        min={0}
+        max={100}
+        step={1}
+        placeholder="0 = sin comisión"
+        error={errors.commission_percentage?.message}
+        {...register('commission_percentage')}
+      />
+      <p className="!mt-1 text-xs text-gray-500">
+        Porcentaje de comisión sobre los servicios realizados. Déjalo en 0 si no aplica.
+      </p>
 
       {/* Service assignment */}
       {services && services.length > 0 && (

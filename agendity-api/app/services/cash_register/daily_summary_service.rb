@@ -26,7 +26,17 @@ module CashRegister
           total_earned: revenue.to_f,
           commission_pct: commission_pct.to_f,
           commission_amount: commission.to_f,
-          suggested_payment: commission.to_f
+          suggested_payment: commission.to_f,
+          appointments: appts.map do |a|
+            {
+              id: a.id,
+              customer_name: a.customer&.name,
+              service_name: a.service&.name,
+              start_time: a.start_time&.strftime("%H:%M"),
+              price: a.price.to_f,
+              status: a.status
+            }
+          end
         }
       end
 

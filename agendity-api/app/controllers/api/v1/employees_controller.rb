@@ -87,7 +87,7 @@ module Api
       end
 
       def employee_params
-        params.require(:employee).permit(:name, :phone, :email, :photo_url, :active, service_ids: [])
+        params.require(:employee).permit(:name, :phone, :email, :photo_url, :active, :commission_percentage, service_ids: [])
       end
     end
   end

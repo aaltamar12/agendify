@@ -3,6 +3,15 @@ import { get, post } from '@/lib/api/client';
 import { ENDPOINTS } from '@/lib/api/endpoints';
 import type { ApiResponse } from '@/lib/api/types';
 
+interface AppointmentDetail {
+  id: number;
+  customer_name: string;
+  service_name: string;
+  start_time: string;
+  price: number;
+  status: string;
+}
+
 interface EmployeeSummary {
   employee_id: number;
   employee_name: string;
@@ -11,6 +20,7 @@ interface EmployeeSummary {
   commission_pct: number;
   commission_amount: number;
   suggested_payment: number;
+  appointments: AppointmentDetail[];
 }
 
 interface DailySummary {

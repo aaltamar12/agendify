@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { DollarSign, Users, Calendar, CheckCircle, History } from 'lucide-react';
+import React, { useState } from 'react';
+import { DollarSign, Users, Calendar, CheckCircle, History, ChevronDown, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { Button, Card, Spinner } from '@/components/ui';
 import { UpgradeBanner } from '@/components/shared/upgrade-banner';
@@ -36,6 +36,7 @@ function CashRegisterContent() {
 
   const [payments, setPayments] = useState<Record<number, { amount_paid: number; payment_method: string; notes: string }>>({});
   const [notes, setNotes] = useState('');
+  const [expandedEmployee, setExpandedEmployee] = useState<number | null>(null);
 
   const updatePayment = (employeeId: number, field: string, value: string | number) => {
     setPayments((prev) => ({
@@ -170,34 +171,79 @@ function CashRegisterContent() {
                     </tr>
                   </thead>
                   <tbody>
-                    {summary.employees.map((emp) => (
-                      <tr key={emp.employee_id} className="border-b border-gray-100">
-                        <td className="py-3 font-medium text-gray-900">{emp.employee_name}</td>
-                        <td className="py-3 text-gray-600">{emp.appointments_count}</td>
-                        <td className="py-3 text-gray-600">${emp.total_earned.toLocaleString()}</td>
-                        <td className="py-3 text-gray-600">
-                          ${emp.commission_amount.toLocaleString()} ({emp.commission_pct}%)
-                        </td>
-                        <td className="py-3">
-                          <input
-                            type="number"
-                            defaultValue={emp.commission_amount}
-                            onChange={(e) => updatePayment(emp.employee_id, 'amount_paid', parseFloat(e.target.value) || 0)}
-                            className="w-28 rounded border border-gray-300 px-2 py-1 text-sm focus:border-violet-500 focus:outline-none"
-                          />
-                        </td>
-                        <td className="py-3">
-                          <select
-                            defaultValue="cash"
-                            onChange={(e) => updatePayment(emp.employee_id, 'payment_method', e.target.value)}
-                            className="rounded border border-gray-300 px-2 py-1 text-sm focus:border-violet-500 focus:outline-none"
+                    {summary.employees.map((emp) => {
+                      const isExpanded = expandedEmployee === emp.employee_id;
+                      return (
+                        <React.Fragment key={emp.employee_id}>
+                          <tr
+                            className="cursor-pointer border-b border-gray-100 hover:bg-gray-50"
+                            onClick={() => setExpandedEmployee(isExpanded ? null : emp.employee_id)}
                           >
-                            <option value="cash">Efectivo</option>
-                            <option value="transfer">Transferencia</option>
-                          </select>
-                        </td>
-                      </tr>
-                    ))}
+                            <td className="py-3 font-medium text-gray-900">
+                              <div className="flex items-center gap-2">
+                                {isExpanded
+                                  ? <ChevronDown className="h-4 w-4 text-gray-400" />
+                                  : <ChevronRight className="h-4 w-4 text-gray-400" />
+                                }
+                                {emp.employee_name}
+                              </div>
+                            </td>
+                            <td className="py-3 text-gray-600">{emp.appointments_count}</td>
+                            <td className="py-3 text-gray-600">${emp.total_earned.toLocaleString()}</td>
+                            <td className="py-3 text-gray-600">
+                              ${emp.commission_amount.toLocaleString()} ({emp.commission_pct}%)
+                            </td>
+                            <td className="py-3" onClick={(e) => e.stopPropagation()}>
+                              <input
+                                type="number"
+                                defaultValue={emp.commission_amount}
+                                onChange={(e) => updatePayment(emp.employee_id, 'amount_paid', parseFloat(e.target.value) || 0)}
+                                className="w-28 rounded border border-gray-300 px-2 py-1 text-sm focus:border-violet-500 focus:outline-none"
+                              />
+                            </td>
+                            <td className="py-3" onClick={(e) => e.stopPropagation()}>
+                              <select
+                                defaultValue="cash"
+                                onChange={(e) => updatePayment(emp.employee_id, 'payment_method', e.target.value)}
+                                className="rounded border border-gray-300 px-2 py-1 text-sm focus:border-violet-500 focus:outline-none"
+                              >
+                                <option value="cash">Efectivo</option>
+                                <option value="transfer">Transferencia</option>
+                              </select>
+                            </td>
+                          </tr>
+                          {/* Expanded detail: appointment list */}
+                          {isExpanded && emp.appointments && (
+                            <tr>
+                              <td colSpan={6} className="bg-gray-50 px-4 pb-3 pt-1">
+                                <table className="w-full text-xs">
+                                  <thead>
+                                    <tr className="text-left text-gray-400">
+                                      <th className="pb-1 font-medium">Hora</th>
+                                      <th className="pb-1 font-medium">Cliente</th>
+                                      <th className="pb-1 font-medium">Servicio</th>
+                                      <th className="pb-1 font-medium text-right">Valor</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {emp.appointments.map((appt) => (
+                                      <tr key={appt.id} className="border-b border-gray-100 last:border-0">
+                                        <td className="py-1.5 text-gray-600">{appt.start_time}</td>
+                                        <td className="py-1.5 text-gray-700">{appt.customer_name}</td>
+                                        <td className="py-1.5 text-gray-600">{appt.service_name}</td>
+                                        <td className="py-1.5 text-right font-medium text-gray-900">
+                                          ${appt.price.toLocaleString()}
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </td>
+                            </tr>
+                          )}
+                        </React.Fragment>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
