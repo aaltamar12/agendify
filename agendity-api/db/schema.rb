@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_22_000005) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_22_000006) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "unaccent"
@@ -78,6 +78,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_22_000005) do
     t.datetime "updated_at", null: false
     t.string "cancellation_reason"
     t.string "cancelled_by"
+    t.string "checked_in_by_type"
+    t.integer "checked_in_by_id"
+    t.boolean "checkin_substitute", default: false
+    t.string "checkin_substitute_reason"
     t.index ["business_id", "appointment_date", "status"], name: "idx_appointments_biz_date_status"
     t.index ["business_id"], name: "index_appointments_on_business_id"
     t.index ["customer_id"], name: "index_appointments_on_customer_id"
@@ -194,6 +198,20 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_22_000005) do
     t.index ["business_id", "email"], name: "index_customers_on_business_id_and_email", unique: true
     t.index ["business_id"], name: "index_customers_on_business_id"
     t.index ["email"], name: "index_customers_on_email"
+  end
+
+  create_table "employee_invitations", force: :cascade do |t|
+    t.bigint "employee_id", null: false
+    t.bigint "business_id", null: false
+    t.string "email", null: false
+    t.string "token", null: false
+    t.datetime "accepted_at"
+    t.datetime "expires_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["business_id"], name: "index_employee_invitations_on_business_id"
+    t.index ["employee_id"], name: "index_employee_invitations_on_employee_id"
+    t.index ["token"], name: "index_employee_invitations_on_token", unique: true
   end
 
   create_table "employee_payments", force: :cascade do |t|
@@ -430,6 +448,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_22_000005) do
   add_foreign_key "cash_register_closes", "businesses"
   add_foreign_key "cash_register_closes", "users", column: "closed_by_user_id"
   add_foreign_key "customers", "businesses"
+  add_foreign_key "employee_invitations", "businesses"
+  add_foreign_key "employee_invitations", "employees"
   add_foreign_key "employee_payments", "cash_register_closes"
   add_foreign_key "employee_payments", "employees"
   add_foreign_key "employee_schedules", "employees"

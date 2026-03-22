@@ -78,7 +78,7 @@ export default function EmployeeRegisterPage() {
       });
       const { token: jwt, refresh_token, user } = result.data;
       setAuth(jwt, refresh_token, user as never);
-      router.push('/dashboard/employee');
+      router.push('/employee');
     } catch {
       // error shown by mutation
     }

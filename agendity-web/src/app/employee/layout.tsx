@@ -8,9 +8,9 @@ import { useAuthStore } from '@/lib/stores/auth-store';
 import { useEmployeeDashboard } from '@/lib/hooks/use-employee-dashboard';
 
 const NAV_ITEMS = [
-  { href: '/dashboard/employee', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/dashboard/employee/appointments', label: 'Mis citas', icon: Calendar },
-  { href: '/dashboard/employee/checkin', label: 'Check-in', icon: ScanLine },
+  { href: '/employee', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/employee/appointments', label: 'Mis citas', icon: Calendar },
+  { href: '/employee/checkin', label: 'Check-in', icon: ScanLine },
 ];
 
 export default function EmployeeLayout({ children }: { children: React.ReactNode }) {
@@ -24,7 +24,7 @@ export default function EmployeeLayout({ children }: { children: React.ReactNode
       <header className="border-b border-gray-200 bg-white px-4 py-3">
         <div className="mx-auto flex max-w-5xl items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link href="/dashboard/employee" className="text-lg font-bold text-violet-600">
+            <Link href="/employee" className="text-lg font-bold text-violet-600">
               Agendity
             </Link>
             {data?.business && (
