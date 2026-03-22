@@ -43,6 +43,7 @@ export function useRealtime() {
 
         nc = await connect({
           servers: process.env.NEXT_PUBLIC_NATS_WS_URL || 'ws://localhost:8222',
+          token: process.env.NEXT_PUBLIC_NATS_AUTH_TOKEN,
         });
 
         if (closed) {
