@@ -34,7 +34,7 @@ module Employees
     def on_time_rate
       checked_in = @employee.appointments.where(status: [:checked_in, :completed]).where.not(checked_in_at: nil)
       return 0 if checked_in.count.zero?
-      on_time = checked_in.where("checked_in_at <= start_time + interval '5 minutes'").count
+      on_time = checked_in.where("checked_in_at <= (appointment_date + start_time + interval '5 minutes')").count
       ((on_time.to_f / checked_in.count) * 100).round(1)
     end
 

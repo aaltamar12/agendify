@@ -43,7 +43,7 @@ class EmployeeSerializer < Blueprinter::Base
 
   view :minimal do
     excludes :business_id, :user_id, :phone, :email, :bio,
-             :commission_percentage,
+             :commission_percentage, :score, :rating_avg,
              :created_at, :updated_at
   end
 end
