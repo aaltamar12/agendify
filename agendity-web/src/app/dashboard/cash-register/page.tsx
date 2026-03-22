@@ -254,7 +254,6 @@ function EmployeeRow({
       proofFile: file,
       proofPreview: URL.createObjectURL(file),
       confirmed: true,
-      amount_paid: emp.total_owed,
     });
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
@@ -268,7 +267,7 @@ function EmployeeRow({
   };
 
   const handleCashConfirm = () => {
-    onUpdatePayment({ confirmed: true, amount_paid: emp.total_owed });
+    onUpdatePayment({ confirmed: true });
   };
 
   const handleCashUnconfirm = () => {
@@ -401,20 +400,26 @@ function EmployeeRow({
               </div>
             </div>
 
-            {/* Manual amount input for employees without commission */}
-            {!hasCommission && !hasPending && (
-              <div className="mb-3">
-                <label className="mb-1 block text-xs font-medium text-gray-600">Monto a pagar</label>
-                <input
-                  type="number"
-                  min={0}
-                  placeholder="Ej: 50000"
-                  value={paymentState.amount_paid || ''}
-                  onChange={(e) => onUpdatePayment({ amount_paid: parseFloat(e.target.value) || 0 })}
-                  className="w-40 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
-                />
-              </div>
-            )}
+            {/* Amount input */}
+            <div className="mb-3">
+              <label className="mb-1 block text-xs font-medium text-gray-600">
+                {hasCommission || hasPending ? 'Monto a pagar (editable)' : 'Monto a pagar'}
+              </label>
+              <input
+                type="number"
+                min={0}
+                placeholder={hasCommission || hasPending ? String(emp.total_owed) : 'Ej: 50000'}
+                value={paymentState.amount_paid || ''}
+                onChange={(e) => onUpdatePayment({ amount_paid: parseFloat(e.target.value) || 0, confirmed: false })}
+                className="w-44 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+              />
+              {(hasCommission || hasPending) && paymentState.amount_paid < emp.total_owed && paymentState.amount_paid > 0 && (
+                <p className="mt-1 flex items-center gap-1 text-xs text-orange-600">
+                  <AlertTriangle className="h-3 w-3" />
+                  Quedara un pendiente de ${(emp.total_owed - paymentState.amount_paid).toLocaleString()} para el proximo cierre
+                </p>
+              )}
+            </div>
 
             {paymentState.method === 'cash' ? (
               /* Cash flow */
@@ -424,7 +429,7 @@ function EmployeeRow({
                     <div className="flex items-center gap-2">
                       <Check className="h-4 w-4 text-green-600" />
                       <span className="text-sm text-green-700">
-                        Pago en efectivo confirmado (${(hasCommission || hasPending ? emp.total_owed : paymentState.amount_paid).toLocaleString()})
+                        Pago en efectivo confirmado (${paymentState.amount_paid.toLocaleString()})
                       </span>
                     </div>
                     <button
@@ -439,14 +444,12 @@ function EmployeeRow({
                   <Button
                     size="sm"
                     onClick={handleCashConfirm}
-                    disabled={!hasCommission && !hasPending && paymentState.amount_paid <= 0}
+                    disabled={paymentState.amount_paid <= 0}
                   >
                     <Check className="mr-1.5 h-4 w-4" />
-                    {hasCommission || hasPending
-                      ? `Confirmar pago de $${emp.total_owed.toLocaleString()}`
-                      : paymentState.amount_paid > 0
-                        ? `Confirmar pago de $${paymentState.amount_paid.toLocaleString()}`
-                        : 'Ingresa el monto a pagar'
+                    {paymentState.amount_paid > 0
+                      ? `Confirmar pago de $${paymentState.amount_paid.toLocaleString()}`
+                      : 'Ingresa el monto a pagar'
                     }
                   </Button>
                 )}
@@ -460,7 +463,7 @@ function EmployeeRow({
                       <Paperclip className="h-4 w-4 text-violet-600" />
                       <span className="text-sm text-gray-700">Comprobante adjunto</span>
                       <span className="text-xs font-medium text-green-600">
-                        Pago: ${(hasCommission || hasPending ? emp.total_owed : paymentState.amount_paid).toLocaleString()}
+                        Pago: ${paymentState.amount_paid.toLocaleString()}
                       </span>
                     </div>
                     <img
@@ -483,7 +486,7 @@ function EmployeeRow({
                       size="sm"
                       variant="outline"
                       onClick={() => fileInputRef.current?.click()}
-                      disabled={!hasCommission && !hasPending && paymentState.amount_paid <= 0}
+                      disabled={paymentState.amount_paid <= 0}
                     >
                       <Upload className="mr-1.5 h-4 w-4" />
                       Subir comprobante de transferencia
