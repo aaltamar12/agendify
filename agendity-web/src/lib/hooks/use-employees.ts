@@ -15,6 +15,7 @@ interface EmployeePayload {
   email?: string;
   phone?: string;
   active?: boolean;
+  commission_percentage?: number;
   service_ids?: number[];
   schedules?: ScheduleEntry[];
 }
