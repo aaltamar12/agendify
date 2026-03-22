@@ -12,6 +12,7 @@ import {
   useRejectDynamicPricing, useDeleteDynamicPricing,
 } from '@/lib/hooks/use-dynamic-pricing';
 import { useServices } from '@/lib/hooks/use-services';
+import { useBusinessHours } from '@/lib/hooks/use-business';
 import { useCurrentSubscription } from '@/lib/hooks/use-subscription';
 import { useUIStore } from '@/lib/stores/ui-store';
 import { ADVANCED_REPORTS_PLANS, AI_FEATURES_PLANS } from '@/lib/constants';
@@ -206,7 +207,13 @@ function formatAdjustment(p: { adjustment_mode: string; price_adjustment_type: s
 function CreatePricingModal({ onClose }: { onClose: () => void }) {
   const createMutation = useCreateDynamicPricing();
   const { data: services } = useServices();
+  const { data: businessHours } = useBusinessHours();
   const { addToast } = useUIStore();
+
+  // Days the business is open (not closed)
+  const openDays = (businessHours || [])
+    .filter((h) => !h.closed)
+    .map((h) => h.day_of_week);
 
   const [form, setForm] = useState<DynamicPricingPayload>({
     name: '',
@@ -379,22 +386,28 @@ function CreatePricingModal({ onClose }: { onClose: () => void }) {
           <label className="mb-2 block text-sm font-medium text-gray-700">
             Dias de la semana (opcional)
           </label>
-          <p className="mb-2 text-xs text-gray-400">Vacio = todos los dias</p>
+          <p className="mb-2 text-xs text-gray-400">Vacio = todos los dias laborales. Dias cerrados deshabilitados.</p>
           <div className="flex gap-1.5">
-            {DAY_LABELS.map((label, i) => (
+            {DAY_LABELS.map((label, i) => {
+              const isClosed = !openDays.includes(i);
+              return (
               <button
                 key={i}
                 type="button"
+                disabled={isClosed}
                 onClick={() => toggleDay(i)}
-                className={`cursor-pointer rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-                  (form.days_of_week || []).includes(i)
-                    ? 'bg-violet-600 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                  isClosed
+                    ? 'cursor-not-allowed bg-gray-50 text-gray-300 line-through'
+                    : (form.days_of_week || []).includes(i)
+                      ? 'cursor-pointer bg-violet-600 text-white'
+                      : 'cursor-pointer bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
                 {label}
               </button>
-            ))}
+              );
+            })}
           </div>
         </div>
 
