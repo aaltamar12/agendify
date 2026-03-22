@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Users, Plus, Phone } from 'lucide-react';
+import { Users, Plus, Phone, Mail, CheckCircle } from 'lucide-react';
 import {
   Button,
   Card,
@@ -17,6 +17,7 @@ import {
   useCreateEmployee,
   useUpdateEmployee,
   useDeleteEmployee,
+  useInviteEmployee,
 } from '@/lib/hooks/use-employees';
 import { useUIStore } from '@/lib/stores/ui-store';
 import { formatPhone } from '@/lib/utils/format';
@@ -28,6 +29,7 @@ export default function EmployeesPage() {
   const createEmployee = useCreateEmployee();
   const updateEmployee = useUpdateEmployee();
   const deleteEmployee = useDeleteEmployee();
+  const inviteEmployee = useInviteEmployee();
   const { addToast } = useUIStore();
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -162,7 +164,7 @@ export default function EmployeesPage() {
           loading={createEmployee.isPending || updateEmployee.isPending}
         />
         {editingEmployee && (
-          <div className="mt-4 border-t border-gray-200 pt-4">
+          <div className="mt-4 flex items-center justify-between border-t border-gray-200 pt-4">
             <Button
               variant="destructive"
               size="sm"
@@ -171,6 +173,31 @@ export default function EmployeesPage() {
             >
               Eliminar empleado
             </Button>
+            {editingEmployee.has_account ? (
+              <span className="flex items-center gap-1 text-xs font-medium text-green-600">
+                <CheckCircle className="h-3.5 w-3.5" />
+                Cuenta vinculada
+              </span>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                loading={inviteEmployee.isPending}
+                onClick={async () => {
+                  const email = editingEmployee.email || prompt('Email del empleado:');
+                  if (!email) return;
+                  try {
+                    await inviteEmployee.mutateAsync({ id: editingEmployee.id, email });
+                    addToast({ type: 'success', message: 'Invitacion enviada' });
+                  } catch {
+                    addToast({ type: 'error', message: 'Error al enviar invitacion' });
+                  }
+                }}
+              >
+                <Mail className="mr-1.5 h-3.5 w-3.5" />
+                Invitar a Agendity
+              </Button>
+            )}
           </div>
         )}
       </Modal>

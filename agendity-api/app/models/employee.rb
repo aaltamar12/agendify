@@ -8,6 +8,8 @@ class Employee < ApplicationRecord
   has_one_attached :avatar
 
   # -- Associations --
+  belongs_to :user, optional: true
+  has_many :employee_invitations, dependent: :destroy
   has_many :employee_services, dependent: :destroy
   has_many :services, through: :employee_services
   has_many :employee_schedules, dependent: :destroy

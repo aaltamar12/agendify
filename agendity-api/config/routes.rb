@@ -35,7 +35,15 @@ Rails.application.routes.draw do
       # Resources scoped to business
       resources :services
       resources :employees do
-        post :upload_avatar, on: :member
+        member do
+          post :upload_avatar
+          post :invite
+        end
+      end
+
+      # Employee invitations (public — no auth)
+      resources :employee_invitations, only: [:show], param: :token do
+        post :accept, on: :member
       end
       resources :customers, only: %i[index show]
 
@@ -75,6 +83,15 @@ Rails.application.routes.draw do
 
       resource :business_hours, only: %i[show update]
       resources :blocked_slots, only: %i[index show create update destroy]
+
+      # Employee portal
+      namespace :employee do
+        get :dashboard, to: "dashboard#show"
+        get :score, to: "dashboard#score"
+        resources :appointments, only: [:index] do
+          post :checkin, on: :member
+        end
+      end
 
       # Cash register
       resources :cash_register, only: [:show] do

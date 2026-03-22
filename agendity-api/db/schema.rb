@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_22_000002) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_22_000005) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "unaccent"
@@ -157,11 +157,29 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_22_000002) do
     t.integer "slot_interval_minutes", default: 30
     t.integer "gap_between_appointments_minutes", default: 0
     t.string "cover_source", default: "upload"
+    t.jsonb "customer_notification_channels", default: {"push" => false, "email" => true, "whatsapp" => false}
     t.index ["city"], name: "index_businesses_on_city"
     t.index ["latitude", "longitude"], name: "index_businesses_on_latitude_and_longitude"
     t.index ["owner_id"], name: "index_businesses_on_owner_id"
     t.index ["slug"], name: "index_businesses_on_slug", unique: true
     t.index ["status"], name: "index_businesses_on_status"
+  end
+
+  create_table "cash_register_closes", force: :cascade do |t|
+    t.bigint "business_id", null: false
+    t.bigint "closed_by_user_id", null: false
+    t.date "date", null: false
+    t.datetime "closed_at"
+    t.decimal "total_revenue", precision: 12, scale: 2, default: "0.0"
+    t.decimal "total_tips", precision: 12, scale: 2, default: "0.0"
+    t.integer "total_appointments", default: 0
+    t.text "notes"
+    t.integer "status", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["business_id", "date"], name: "index_cash_register_closes_on_business_id_and_date", unique: true
+    t.index ["business_id"], name: "index_cash_register_closes_on_business_id"
+    t.index ["closed_by_user_id"], name: "index_cash_register_closes_on_closed_by_user_id"
   end
 
   create_table "customers", force: :cascade do |t|
@@ -176,6 +194,24 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_22_000002) do
     t.index ["business_id", "email"], name: "index_customers_on_business_id_and_email", unique: true
     t.index ["business_id"], name: "index_customers_on_business_id"
     t.index ["email"], name: "index_customers_on_email"
+  end
+
+  create_table "employee_payments", force: :cascade do |t|
+    t.bigint "cash_register_close_id", null: false
+    t.bigint "employee_id", null: false
+    t.integer "appointments_count", default: 0
+    t.decimal "total_earned", precision: 12, scale: 2, default: "0.0"
+    t.decimal "commission_pct", precision: 5, scale: 2, default: "0.0"
+    t.decimal "commission_amount", precision: 12, scale: 2, default: "0.0"
+    t.decimal "amount_paid", precision: 12, scale: 2, default: "0.0"
+    t.integer "payment_method", default: 0
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.decimal "pending_from_previous", precision: 12, scale: 2, default: "0.0"
+    t.decimal "total_owed", precision: 12, scale: 2, default: "0.0"
+    t.index ["cash_register_close_id"], name: "index_employee_payments_on_cash_register_close_id"
+    t.index ["employee_id"], name: "index_employee_payments_on_employee_id"
   end
 
   create_table "employee_schedules", force: :cascade do |t|
@@ -211,6 +247,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_22_000002) do
     t.bigint "user_id"
     t.text "bio"
     t.decimal "commission_percentage", precision: 5, scale: 2
+    t.decimal "pending_balance", precision: 12, scale: 2, default: "0.0"
     t.index ["business_id"], name: "index_employees_on_business_id"
     t.index ["user_id"], name: "index_employees_on_user_id"
   end
@@ -390,7 +427,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_22_000002) do
   add_foreign_key "blocked_slots", "employees"
   add_foreign_key "business_hours", "businesses"
   add_foreign_key "businesses", "users", column: "owner_id"
+  add_foreign_key "cash_register_closes", "businesses"
+  add_foreign_key "cash_register_closes", "users", column: "closed_by_user_id"
   add_foreign_key "customers", "businesses"
+  add_foreign_key "employee_payments", "cash_register_closes"
+  add_foreign_key "employee_payments", "employees"
   add_foreign_key "employee_schedules", "employees"
   add_foreign_key "employee_services", "employees"
   add_foreign_key "employee_services", "services"

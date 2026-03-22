@@ -69,6 +69,18 @@ export function useUploadEmployeeAvatar() {
   });
 }
 
+export function useInviteEmployee() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, email }: { id: number; email: string }) =>
+      post<ApiResponse<{ message: string }>>(ENDPOINTS.EMPLOYEES.invite(id), { email }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['employees'] });
+    },
+  });
+}
+
 export function useDeleteEmployee() {
   const queryClient = useQueryClient();
 

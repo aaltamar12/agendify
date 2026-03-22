@@ -39,6 +39,7 @@ export const ENDPOINTS = {
     update: (id: number) => `${BASE}/employees/${id}`,
     delete: (id: number) => `${BASE}/employees/${id}`,
     uploadAvatar: (id: number) => `${BASE}/employees/${id}/upload_avatar`,
+    invite: (id: number) => `${BASE}/employees/${id}/invite`,
   },
 
   APPOINTMENTS: {
@@ -92,6 +93,18 @@ export const ENDPOINTS = {
     show: (id: number) => `${BASE}/cash_register/${id}`,
     uploadProof: `${BASE}/cash_register/upload_proof`,
     deleteProof: `${BASE}/cash_register/delete_proof`,
+  },
+
+  EMPLOYEE_INVITATIONS: {
+    show: (token: string) => `${BASE}/employee_invitations/${token}`,
+    accept: (token: string) => `${BASE}/employee_invitations/${token}/accept`,
+  },
+
+  EMPLOYEE_PORTAL: {
+    dashboard: `${BASE}/employee/dashboard`,
+    score: `${BASE}/employee/score`,
+    appointments: `${BASE}/employee/appointments`,
+    checkin: (id: number) => `${BASE}/employee/appointments/${id}/checkin`,
   },
 
   REPORTS: {

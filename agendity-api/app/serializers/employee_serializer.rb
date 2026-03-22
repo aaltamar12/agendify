@@ -16,6 +16,10 @@ class EmployeeSerializer < Blueprinter::Base
     end
   end
 
+  field :has_account do |employee, _options|
+    employee.user_id.present?
+  end
+
   # IDs of services this employee can perform
   field :service_ids do |employee, _options|
     employee.employee_services.pluck(:service_id)
