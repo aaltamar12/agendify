@@ -14,4 +14,12 @@ class EmployeePayment < ApplicationRecord
   def remaining_debt
     total_owed - amount_paid
   end
+
+  def self.ransackable_attributes(_auth_object = nil)
+    %w[payment_method cash_register_close_id employee_id amount_paid total_owed created_at]
+  end
+
+  def self.ransackable_associations(_auth_object = nil)
+    %w[cash_register_close employee]
+  end
 end

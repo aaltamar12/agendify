@@ -14,4 +14,12 @@ class CreditTransaction < ApplicationRecord
   }
 
   validates :amount, numericality: { other_than: 0 }
+
+  def self.ransackable_attributes(_auth_object = nil)
+    %w[transaction_type amount credit_account_id appointment_id created_at]
+  end
+
+  def self.ransackable_associations(_auth_object = nil)
+    %w[credit_account appointment performed_by_user]
+  end
 end
