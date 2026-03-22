@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQuery } from '@tanstack/react-query';
-import { Clock } from 'lucide-react';
+import { Clock, Search, UserPlus, X } from 'lucide-react';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,7 +12,7 @@ import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { get } from '@/lib/api/client';
 import { ENDPOINTS } from '@/lib/api/endpoints';
-import type { ApiResponse, Service, Employee } from '@/lib/api/types';
+import type { ApiResponse, Service, Employee, Customer } from '@/lib/api/types';
 import {
   createAppointmentSchema,
   type CreateAppointmentFormData,
@@ -41,6 +41,10 @@ export function CreateAppointmentModal({
   const addToast = useUIStore((s) => s.addToast);
   const createAppointment = useCreateAppointment();
   const [manualTime, setManualTime] = useState(false);
+  const [customerSearch, setCustomerSearch] = useState('');
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [showNewCustomer, setShowNewCustomer] = useState(false);
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
 
   const {
     register,
@@ -72,8 +76,44 @@ export function CreateAppointmentModal({
         customer_phone: '',
       });
       setManualTime(false);
+      setCustomerSearch('');
+      setSelectedCustomer(null);
+      setShowNewCustomer(false);
     }
   }, [open, defaultDate, defaultTime, reset]);
+
+  // Debounced customer search
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  useEffect(() => {
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    searchTimeoutRef.current = setTimeout(() => {
+      setDebouncedSearch(customerSearch);
+    }, 300);
+    return () => { if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current); };
+  }, [customerSearch]);
+
+  const { data: customerResults, isLoading: searchingCustomers } = useQuery({
+    queryKey: ['customers-search', debouncedSearch],
+    queryFn: () => get<{ data: Customer[]; meta: unknown }>(ENDPOINTS.CUSTOMERS.list, { params: { search: debouncedSearch, per_page: 5 } }),
+    enabled: debouncedSearch.length >= 2 && !selectedCustomer,
+    select: (res) => res.data,
+  });
+
+  const handleSelectCustomer = (customer: Customer) => {
+    setSelectedCustomer(customer);
+    setCustomerSearch('');
+    setValue('customer_name', customer.name, { shouldValidate: true });
+    setValue('customer_phone', customer.phone || '', { shouldValidate: true });
+    setValue('customer_email', customer.email || '');
+  };
+
+  const handleClearCustomer = () => {
+    setSelectedCustomer(null);
+    setShowNewCustomer(true);
+    setValue('customer_name', '');
+    setValue('customer_phone', '');
+    setValue('customer_email', '');
+  };
 
   // Fetch services
   const { data: servicesData } = useQuery({
@@ -161,33 +201,129 @@ export function CreateAppointmentModal({
 
         {/* Customer info */}
         <div className="border-t border-gray-200 pt-4">
-          <h3 className="mb-3 text-sm font-semibold text-gray-700">
-            Datos del cliente
-          </h3>
-          <div className="space-y-3">
-            <Input
-              label="Nombre"
-              placeholder="Nombre del cliente"
-              error={errors.customer_name?.message}
-              {...register('customer_name')}
-            />
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <Input
-                label="Teléfono"
-                placeholder="3001234567"
-                type="tel"
-                error={errors.customer_phone?.message}
-                {...register('customer_phone')}
-              />
-              <Input
-                label="Correo (opcional)"
-                placeholder="correo@ejemplo.com"
-                type="email"
-                error={errors.customer_email?.message}
-                {...register('customer_email')}
-              />
-            </div>
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-gray-700">
+              Cliente
+            </h3>
+            {!selectedCustomer && !showNewCustomer && (
+              <button
+                type="button"
+                onClick={() => setShowNewCustomer(true)}
+                className="flex items-center gap-1 text-xs font-medium text-violet-600 hover:text-violet-700"
+              >
+                <UserPlus className="h-3.5 w-3.5" />
+                Nuevo cliente
+              </button>
+            )}
+            {(selectedCustomer || showNewCustomer) && (
+              <button
+                type="button"
+                onClick={handleClearCustomer}
+                className="flex items-center gap-1 text-xs font-medium text-gray-500 hover:text-gray-700"
+              >
+                <X className="h-3.5 w-3.5" />
+                Cambiar
+              </button>
+            )}
           </div>
+
+          {selectedCustomer ? (
+            /* Selected customer card */
+            <div className="flex items-center gap-3 rounded-lg border border-violet-200 bg-violet-50 p-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-violet-600 text-sm font-medium text-white">
+                {selectedCustomer.name.charAt(0).toUpperCase()}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-gray-900">{selectedCustomer.name}</p>
+                <p className="text-xs text-gray-500">
+                  {selectedCustomer.phone}
+                  {selectedCustomer.email && ` · ${selectedCustomer.email}`}
+                </p>
+              </div>
+            </div>
+          ) : !showNewCustomer ? (
+            /* Customer search */
+            <div className="relative">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  value={customerSearch}
+                  onChange={(e) => setCustomerSearch(e.target.value)}
+                  placeholder="Buscar por nombre, teléfono o correo..."
+                  className="w-full rounded-lg border border-gray-300 py-2.5 pl-9 pr-3 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+                />
+              </div>
+              {/* Search results dropdown */}
+              {debouncedSearch.length >= 2 && !selectedCustomer && (
+                <div className="absolute left-0 right-0 top-full z-10 mt-1 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-lg">
+                  {searchingCustomers ? (
+                    <div className="px-4 py-3 text-sm text-gray-500">Buscando...</div>
+                  ) : customerResults && customerResults.length > 0 ? (
+                    <ul className="max-h-48 overflow-y-auto">
+                      {customerResults.map((c) => (
+                        <li key={c.id}>
+                          <button
+                            type="button"
+                            onClick={() => handleSelectCustomer(c)}
+                            className="flex w-full items-center gap-3 px-4 py-2.5 text-left hover:bg-gray-50"
+                          >
+                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-100 text-xs font-medium text-violet-600">
+                              {c.name.charAt(0).toUpperCase()}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-sm font-medium text-gray-900">{c.name}</p>
+                              <p className="text-xs text-gray-500">
+                                {c.phone}{c.email && ` · ${c.email}`}
+                                {c.total_visits > 0 && ` · ${c.total_visits} visitas`}
+                              </p>
+                            </div>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <div className="px-4 py-3">
+                      <p className="text-sm text-gray-500">No se encontraron clientes</p>
+                      <button
+                        type="button"
+                        onClick={() => { setShowNewCustomer(true); setCustomerSearch(''); }}
+                        className="mt-1 text-xs font-medium text-violet-600 hover:text-violet-700"
+                      >
+                        Crear nuevo cliente
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          ) : (
+            /* New customer form */
+            <div className="space-y-3">
+              <Input
+                label="Nombre"
+                placeholder="Nombre del cliente"
+                error={errors.customer_name?.message}
+                {...register('customer_name')}
+              />
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <Input
+                  label="Teléfono"
+                  placeholder="3001234567"
+                  type="tel"
+                  error={errors.customer_phone?.message}
+                  {...register('customer_phone')}
+                />
+                <Input
+                  label="Correo (opcional)"
+                  placeholder="correo@ejemplo.com"
+                  type="email"
+                  error={errors.customer_email?.message}
+                  {...register('customer_email')}
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Date and time */}
