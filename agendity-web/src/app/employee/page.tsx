@@ -1,7 +1,7 @@
 'use client';
 
 import { Calendar, DollarSign, CheckCircle, Star } from 'lucide-react';
-import { Card, Spinner, Badge } from '@/components/ui';
+import { Card, Spinner } from '@/components/ui';
 import { useEmployeeDashboard, useEmployeeScore } from '@/lib/hooks/use-employee-dashboard';
 import { formatCurrency } from '@/lib/utils/format';
 
@@ -25,28 +25,24 @@ export default function EmployeeDashboardPage() {
 
       {/* Score + Stats */}
       <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        {score && (
-          <>
-            <Card>
-              <div className="flex items-center gap-3">
-                <div className={`text-3xl font-bold ${scoreColor}`}>{score.overall}</div>
-                <div>
-                  <p className="text-sm text-gray-500">Score</p>
-                  <p className="text-xs text-gray-400">de 100</p>
-                </div>
-              </div>
-            </Card>
-            <Card>
-              <div className="flex items-center gap-3">
-                <Star className="h-5 w-5 text-yellow-500" />
-                <div>
-                  <p className="text-lg font-bold text-gray-900">{score.rating_avg}/5</p>
-                  <p className="text-xs text-gray-500">Calificacion</p>
-                </div>
-              </div>
-            </Card>
-          </>
-        )}
+        <Card>
+          <div className="flex items-center gap-3">
+            <div className={`text-3xl font-bold ${scoreColor}`}>{score?.overall ?? '—'}</div>
+            <div>
+              <p className="text-sm text-gray-500">Score</p>
+              <p className="text-xs text-gray-400">de 100</p>
+            </div>
+          </div>
+        </Card>
+        <Card>
+          <div className="flex items-center gap-3">
+            <Star className="h-5 w-5 text-yellow-500" />
+            <div>
+              <p className="text-lg font-bold text-gray-900">{score?.rating_avg ?? 0}/5</p>
+              <p className="text-xs text-gray-500">Calificacion</p>
+            </div>
+          </div>
+        </Card>
         <Card>
           <div className="flex items-center gap-3">
             <Calendar className="h-5 w-5 text-violet-600" />
@@ -106,9 +102,18 @@ export default function EmployeeDashboardPage() {
                   </p>
                   <p className="text-xs text-gray-500">{appt.service?.name}</p>
                 </div>
-                <Badge variant={appt.status === 'confirmed' ? 'default' : appt.status === 'checked_in' ? 'success' : 'default'}>
-                  {appt.status === 'confirmed' ? 'Confirmada' : appt.status === 'checked_in' ? 'Check-in' : appt.status === 'completed' ? 'Completada' : appt.status}
-                </Badge>
+                {(() => {
+                  const map: Record<string, { label: string; color: string }> = {
+                    pending_payment: { label: 'Pendiente pago', color: 'bg-orange-100 text-orange-700' },
+                    payment_sent: { label: 'Comprobante', color: 'bg-blue-100 text-blue-700' },
+                    confirmed: { label: 'Confirmada', color: 'bg-green-100 text-green-700' },
+                    checked_in: { label: 'En atencion', color: 'bg-violet-100 text-violet-700' },
+                    completed: { label: 'Completada', color: 'bg-gray-100 text-gray-600' },
+                    cancelled: { label: 'Cancelada', color: 'bg-red-100 text-red-700' },
+                  };
+                  const info = map[appt.status] || { label: appt.status, color: 'bg-gray-100 text-gray-600' };
+                  return <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${info.color}`}>{info.label}</span>;
+                })()}
               </div>
             ))}
           </div>

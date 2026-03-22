@@ -1,16 +1,16 @@
 'use client';
 
 import { useState } from 'react';
-import { Card, Spinner, Badge } from '@/components/ui';
+import { Card, Spinner } from '@/components/ui';
 import { useEmployeeAppointments } from '@/lib/hooks/use-employee-dashboard';
 
-const STATUS_LABELS: Record<string, { label: string; variant: 'default' | 'success' | 'destructive' }> = {
-  pending_payment: { label: 'Pendiente pago', variant: 'default' },
-  payment_sent: { label: 'Comprobante enviado', variant: 'default' },
-  confirmed: { label: 'Confirmada', variant: 'default' },
-  checked_in: { label: 'Check-in', variant: 'success' },
-  completed: { label: 'Completada', variant: 'success' },
-  cancelled: { label: 'Cancelada', variant: 'destructive' },
+const STATUS_LABELS: Record<string, { label: string; color: string }> = {
+  pending_payment: { label: 'Pendiente pago', color: 'bg-orange-100 text-orange-700' },
+  payment_sent: { label: 'Comprobante enviado', color: 'bg-blue-100 text-blue-700' },
+  confirmed: { label: 'Confirmada', color: 'bg-green-100 text-green-700' },
+  checked_in: { label: 'En atencion', color: 'bg-violet-100 text-violet-700' },
+  completed: { label: 'Completada', color: 'bg-gray-100 text-gray-600' },
+  cancelled: { label: 'Cancelada', color: 'bg-red-100 text-red-700' },
 };
 
 export default function EmployeeAppointmentsPage() {
@@ -55,7 +55,9 @@ export default function EmployeeAppointmentsPage() {
                       {appt.price && ` · $${Number(appt.price).toLocaleString()}`}
                     </p>
                   </div>
-                  <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
+                  <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${statusInfo.color}`}>
+                    {statusInfo.label}
+                  </span>
                 </div>
               </Card>
             );

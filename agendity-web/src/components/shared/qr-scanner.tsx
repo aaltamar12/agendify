@@ -36,7 +36,7 @@ export function QrScanner({ onScan, onClose }: QrScannerProps) {
 
         await html5QrCode.start(
           { facingMode: 'environment' },
-          { fps: 10, qrbox: { width: 200, height: 200 } },
+          { fps: 10, qrbox: { width: 220, height: 220 } },
           (decodedText: string) => {
             handleScan(decodedText);
             html5QrCode.stop().catch(() => {});
@@ -58,39 +58,54 @@ export function QrScanner({ onScan, onClose }: QrScannerProps) {
   }, [handleScan]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80" onClick={onClose}>
       <div
-        className="mx-4 w-80 overflow-hidden rounded-xl bg-white shadow-xl"
+        className="mx-4 w-full max-w-md overflow-hidden rounded-xl bg-black shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
+        <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
-            <Camera className="h-5 w-5 text-violet-600" />
-            <h3 className="font-semibold text-gray-900">Escanear QR</h3>
+            <Camera className="h-5 w-5 text-white" />
+            <h3 className="font-semibold text-white">Escanear QR</h3>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="cursor-pointer text-gray-400 hover:text-gray-600"
+            className="cursor-pointer text-gray-400 hover:text-white"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
-        <div className="p-3">
+        <div>
           {error ? (
-            <div className="py-8 text-center">
-              <p className="mb-3 text-sm text-red-600">{error}</p>
+            <div className="px-4 py-12 text-center">
+              <p className="mb-3 text-sm text-red-400">{error}</p>
               <Button variant="outline" size="sm" onClick={onClose}>
                 Cerrar
               </Button>
             </div>
           ) : (
             <>
+              <style>{`
+                #qr-reader video {
+                  width: 100% !important;
+                  height: auto !important;
+                  object-fit: cover !important;
+                  border-radius: 0 !important;
+                }
+                #qr-reader canvas,
+                #qr-reader img:not([alt=""]) {
+                  display: none !important;
+                }
+                #qr-reader {
+                  border: none !important;
+                }
+              `}</style>
               <div
                 id="qr-reader"
-                className="aspect-square overflow-hidden rounded-lg [&>canvas]:!hidden [&>img]:!hidden"
+                className="w-full overflow-hidden bg-black"
               />
-              <p className="mt-2 text-center text-xs text-gray-500">
+              <p className="py-3 text-center text-xs text-gray-400">
                 Apunta la camara al codigo QR del ticket
               </p>
             </>
