@@ -13,7 +13,10 @@
     .send-notification-form textarea { min-height: 80px; resize: vertical; }
     .send-notification-form .radio-group { display: flex; gap: 20px; align-items: center; margin-bottom: 12px; }
     .send-notification-form .radio-group label { display: inline; font-weight: normal; cursor: pointer; }
+    .send-notification-form .check-group label { display: inline; font-weight: normal; cursor: pointer; }
     .send-notification-form .hint { font-size: 12px; color: #6b7280; margin-top: 4px; }
+    .send-notification-form .default-preview { background: #f3f4f6; border-radius: 6px; padding: 12px; margin-top: 8px; font-size: 13px; color: #374151; }
+    .send-notification-form .default-preview strong { color: #111827; }
     .send-notification-form .submit-btn {
       background: #7C3AED; color: white; border: none; padding: 10px 24px;
       border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer;
@@ -55,7 +58,7 @@
 
     <div class="form-row">
       <label for="notification_type">Tipo de notificacion *</label>
-      <select name="notification_type" id="notification_type" required>
+      <select name="notification_type" id="notification_type" required onchange="updateDefaultPreview()">
         <% notification_types.each do |type| %>
           <option value="<%= type %>"><%= type.humanize %></option>
         <% end %>
@@ -65,15 +68,34 @@
     <div class="section-divider"></div>
 
     <div class="form-row">
-      <label for="custom_title">Titulo personalizado</label>
-      <input type="text" name="custom_title" id="custom_title" placeholder="Dejar vacio para usar el titulo por defecto segun el tipo">
-      <div class="hint">Si se deja vacio, se usara un titulo por defecto basado en el tipo de notificacion.</div>
+      <div class="check-group">
+        <label>
+          <input type="checkbox" id="use_default" name="use_default" value="1" checked onchange="toggleCustomFields()">
+          Usar mensaje predeterminado
+        </label>
+        <div class="hint">Si esta marcado, se enviara el titulo y mensaje por defecto segun el tipo seleccionado.</div>
+      </div>
     </div>
 
-    <div class="form-row">
-      <label for="custom_body">Mensaje personalizado</label>
-      <textarea name="custom_body" id="custom_body" placeholder="Dejar vacio para usar el mensaje por defecto segun el tipo"></textarea>
-      <div class="hint">Si se deja vacio, se usara un mensaje por defecto basado en el tipo de notificacion.</div>
+    <!-- Default preview (shown when use_default is checked) -->
+    <div class="form-row" id="default-preview-wrapper">
+      <div class="default-preview">
+        <div><strong>Titulo:</strong> <span id="preview-title">Nueva reserva</span></div>
+        <div style="margin-top: 4px;"><strong>Mensaje:</strong> <span id="preview-body">Tienes una nueva reserva pendiente.</span></div>
+      </div>
+    </div>
+
+    <!-- Custom fields (shown when use_default is unchecked) -->
+    <div id="custom-fields-wrapper" style="display: none;">
+      <div class="form-row">
+        <label for="custom_title">Titulo *</label>
+        <input type="text" name="custom_title" id="custom_title" placeholder="Titulo de la notificacion">
+      </div>
+
+      <div class="form-row">
+        <label for="custom_body">Mensaje *</label>
+        <textarea name="custom_body" id="custom_body" placeholder="Contenido del mensaje"></textarea>
+      </div>
     </div>
 
     <div class="form-row">
@@ -89,6 +111,23 @@
 <% end %>
 
 <script>
+  var DEFAULT_TITLES = {
+    new_booking: "Nueva reserva",
+    payment_submitted: "Pago enviado",
+    payment_approved: "Pago aprobado",
+    booking_cancelled: "Reserva cancelada",
+    reminder: "Recordatorio",
+    ai_suggestion: "Sugerencia de Agendity"
+  };
+  var DEFAULT_BODIES = {
+    new_booking: "Tienes una nueva reserva pendiente.",
+    payment_submitted: "Se ha enviado un nuevo pago para revision.",
+    payment_approved: "Un pago ha sido aprobado.",
+    booking_cancelled: "Una reserva ha sido cancelada.",
+    reminder: "Este es un recordatorio del equipo de Agendity.",
+    ai_suggestion: "Tenemos una sugerencia para mejorar tu negocio."
+  };
+
   function toggleBusinessSelect(radio) {
     var wrapper = document.getElementById('business-select-wrapper');
     var select = document.getElementById('business_ids');
@@ -99,5 +138,27 @@
       wrapper.style.display = 'block';
       select.disabled = false;
     }
+  }
+
+  function toggleCustomFields() {
+    var useDefault = document.getElementById('use_default').checked;
+    document.getElementById('default-preview-wrapper').style.display = useDefault ? 'block' : 'none';
+    document.getElementById('custom-fields-wrapper').style.display = useDefault ? 'none' : 'block';
+
+    var titleInput = document.getElementById('custom_title');
+    var bodyInput = document.getElementById('custom_body');
+    if (useDefault) {
+      titleInput.removeAttribute('required');
+      bodyInput.removeAttribute('required');
+    } else {
+      titleInput.setAttribute('required', 'required');
+      bodyInput.setAttribute('required', 'required');
+    }
+  }
+
+  function updateDefaultPreview() {
+    var type = document.getElementById('notification_type').value;
+    document.getElementById('preview-title').textContent = DEFAULT_TITLES[type] || 'Notificacion';
+    document.getElementById('preview-body').textContent = DEFAULT_BODIES[type] || '';
   }
 </script>
