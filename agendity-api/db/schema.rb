@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_22_000010) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_22_233901) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "unaccent"
@@ -348,6 +348,19 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_22_000010) do
     t.string "jti", null: false
     t.datetime "exp", null: false
     t.index ["jti"], name: "index_jwt_denylists_on_jti", unique: true
+  end
+
+  create_table "notification_event_configs", force: :cascade do |t|
+    t.string "event_key", null: false
+    t.string "title", null: false
+    t.string "body_template"
+    t.boolean "browser_notification", default: true, null: false
+    t.boolean "sound_enabled", default: true, null: false
+    t.boolean "in_app_notification", default: true, null: false
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["event_key"], name: "index_notification_event_configs_on_event_key", unique: true
   end
 
   create_table "notifications", force: :cascade do |t|

@@ -145,6 +145,9 @@ Rails.application.routes.draw do
         post "stop_impersonation", to: "impersonation#destroy"
       end
 
+      # Notification config (public, no auth required)
+      get "notification_config", to: "notification_config#index"
+
       # Locations (no auth required)
       get "locations/countries", to: "locations#countries"
       get "locations/states",   to: "locations#states"

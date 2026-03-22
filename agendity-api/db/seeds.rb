@@ -1693,3 +1693,73 @@ puts "  Studio 70:       laura@studio70.com / password123         (Medellín)"
 puts "  Barber King:     suspended@example.com / password123      (Barranquilla, suspended)"
 puts "  Glamour Studio:  inactive@example.com / password123       (Barranquilla, inactive)"
 puts ""
+
+# ============================================================================
+# NOTIFICATION EVENT CONFIGS
+# ============================================================================
+puts "\n📋 Creating notification event configs..."
+
+notification_events = [
+  {
+    event_key: "new_booking",
+    title: "Nueva reserva",
+    body_template: "{{customer_name}} reservó {{service_name}}",
+    browser_notification: true,
+    sound_enabled: true,
+    in_app_notification: true,
+    active: true
+  },
+  {
+    event_key: "payment_submitted",
+    title: "Comprobante recibido",
+    body_template: "{{customer_name}} envió un comprobante",
+    browser_notification: true,
+    sound_enabled: true,
+    in_app_notification: true,
+    active: true
+  },
+  {
+    event_key: "booking_confirmed",
+    title: "Pago confirmado",
+    body_template: "Pago confirmado para {{customer_name}}",
+    browser_notification: true,
+    sound_enabled: true,
+    in_app_notification: true,
+    active: true
+  },
+  {
+    event_key: "booking_cancelled",
+    title: "Cita cancelada",
+    body_template: "{{customer_name}} canceló su cita",
+    browser_notification: true,
+    sound_enabled: true,
+    in_app_notification: true,
+    active: true
+  },
+  {
+    event_key: "appointment_completed",
+    title: "Cita completada",
+    body_template: "{{customer_name}} completó su cita",
+    browser_notification: false,
+    sound_enabled: false,
+    in_app_notification: true,
+    active: true
+  },
+  {
+    event_key: "ai_suggestion",
+    title: "Sugerencia inteligente",
+    body_template: "Detectamos oportunidades para optimizar tus precios",
+    browser_notification: false,
+    sound_enabled: false,
+    in_app_notification: true,
+    active: true
+  }
+]
+
+notification_events.each do |attrs|
+  config = NotificationEventConfig.find_or_initialize_by(event_key: attrs[:event_key])
+  config.assign_attributes(attrs)
+  config.save!
+end
+
+puts "  ✅ #{NotificationEventConfig.count} notification event configs"
