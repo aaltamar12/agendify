@@ -21,10 +21,13 @@ import {
   Coins,
   TrendingUp,
 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { cn } from '@/lib/utils/cn';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { useCurrentBusiness } from '@/lib/hooks/use-business';
 import { useCurrentSubscription } from '@/lib/hooks/use-subscription';
+import { get } from '@/lib/api/client';
+import { ENDPOINTS } from '@/lib/api/endpoints';
 import { PLAN_FEATURE_LOCKS, AI_FEATURES_PLANS } from '@/lib/constants';
 import type { PlanSlug } from '@/lib/constants';
 import type { LucideIcon } from 'lucide-react';
@@ -61,6 +64,18 @@ export function Sidebar({ className, topOffset = 0 }: SidebarProps) {
   const { user, clearAuth } = useAuthStore();
   const { planSlug } = useCurrentSubscription();
   const { data: business } = useCurrentBusiness();
+  const isAIPlan = AI_FEATURES_PLANS.includes(planSlug);
+
+  // Count pending AI suggestions for badge
+  const { data: pricingSuggestions } = useQuery({
+    queryKey: ['dynamic-pricing-suggestions-count'],
+    queryFn: () => get<{ data: { id: number; status: string }[] }>(ENDPOINTS.DYNAMIC_PRICING.list, { params: { status: 'suggested' } }),
+    select: (res) => res.data?.length ?? 0,
+    enabled: isAIPlan,
+    refetchInterval: 60000, // refresh every minute
+  });
+
+  const suggestionsCount = pricingSuggestions ?? 0;
 
   const handleLogout = () => {
     clearAuth();
@@ -94,6 +109,7 @@ export function Sidebar({ className, topOffset = 0 }: SidebarProps) {
             item={item}
             isActive={pathname.startsWith(item.href)}
             planSlug={planSlug}
+            badge={item.href === '/dashboard/dynamic-pricing' && suggestionsCount > 0 ? suggestionsCount : undefined}
           />
         ))}
       </nav>
@@ -123,9 +139,10 @@ interface SidebarItemProps {
   item: NavItem;
   isActive: boolean;
   planSlug: PlanSlug;
+  badge?: number;
 }
 
-function SidebarItem({ item, isActive, planSlug }: SidebarItemProps) {
+function SidebarItem({ item, isActive, planSlug, badge }: SidebarItemProps) {
   const [showTooltip, setShowTooltip] = useState(false);
   const { href, label, icon: Icon } = item;
 
@@ -159,6 +176,11 @@ function SidebarItem({ item, isActive, planSlug }: SidebarItemProps) {
         <span className="flex-1">{label}</span>
         {isLocked && <Lock className="h-3.5 w-3.5 text-gray-400" />}
         {isAIFeature && <Sparkles className="h-3.5 w-3.5 text-amber-500" />}
+        {badge && badge > 0 && (
+          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-500 px-1.5 text-[10px] font-bold text-white">
+            {badge}
+          </span>
+        )}
       </Link>
 
       {/* Lock tooltip */}
