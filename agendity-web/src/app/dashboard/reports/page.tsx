@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { DollarSign, CalendarDays, Users, Star, TrendingUp, TrendingDown, Wallet, Coins, AlertTriangle, CheckCircle } from 'lucide-react';
 import { Card, Skeleton } from '@/components/ui';
 import { SummaryCard } from '@/components/reports/summary-card';
@@ -42,13 +42,16 @@ export default function ReportsPage() {
   const hasAI = AI_FEATURES_PLANS.includes(planSlug);
   const reconciliation = useReconciliationCheck();
 
-  // Auto-check reconciliation when profit section loads (Plan Inteligente only)
+  // Auto-check reconciliation when profit loads (Plan Inteligente only)
   const [reconciliationChecked, setReconciliationChecked] = useState(false);
-  if (hasAdvancedReports && profit && !reconciliationChecked && hasAI) {
-    reconciliation.mutate(undefined, {
-      onSettled: () => setReconciliationChecked(true),
-    });
-  }
+  useEffect(() => {
+    if (hasAdvancedReports && profit && !reconciliationChecked && hasAI) {
+      reconciliation.mutate(undefined, {
+        onSettled: () => setReconciliationChecked(true),
+      });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasAdvancedReports, hasAI, profit, reconciliationChecked]);
   const reconResult = reconciliation.data?.data;
   const hasDiscrepancies = reconResult && (
     reconResult.cash_register?.status === 'discrepancies' ||
