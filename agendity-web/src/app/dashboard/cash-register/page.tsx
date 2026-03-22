@@ -314,12 +314,17 @@ function EmployeeRow({
         )}
 
         {/* Total owed */}
-        {(hasCommission || hasPending) && (
+        {(hasCommission || hasPending) ? (
           <div className="text-right">
             <p className="text-sm font-bold text-violet-700">${emp.total_owed.toLocaleString()}</p>
             <p className="text-xs text-gray-500">Total a pagar</p>
           </div>
-        )}
+        ) : paymentState.amount_paid > 0 && paymentState.confirmed ? (
+          <div className="text-right">
+            <p className="text-sm font-bold text-violet-700">${paymentState.amount_paid.toLocaleString()}</p>
+            <p className="text-xs text-gray-500">Pago del dia</p>
+          </div>
+        ) : null}
 
         {/* Payment status */}
         <div onClick={(e) => e.stopPropagation()}>
@@ -365,109 +370,139 @@ function EmployeeRow({
             </div>
           )}
 
-          {/* Payment section - only if there's something to pay */}
-          {(hasCommission || hasPending) && (
-            <div className="rounded-lg border border-gray-200 bg-white p-3">
-              <div className="mb-3 flex items-center gap-3">
-                <label className="text-sm font-medium text-gray-700">Metodo de pago:</label>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => onUpdatePayment({ method: 'cash', confirmed: false, proofFile: null, proofPreview: null })}
-                    className={`cursor-pointer rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-                      paymentState.method === 'cash'
-                        ? 'bg-violet-100 text-violet-700'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                    }`}
-                  >
-                    Efectivo
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => onUpdatePayment({ method: 'transfer', confirmed: false, proofFile: null, proofPreview: null })}
-                    className={`cursor-pointer rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-                      paymentState.method === 'transfer'
-                        ? 'bg-violet-100 text-violet-700'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                    }`}
-                  >
-                    Transferencia
-                  </button>
-                </div>
+          {/* Payment section */}
+          <div className="rounded-lg border border-gray-200 bg-white p-3">
+            {/* Payment method selector */}
+            <div className="mb-3 flex items-center gap-3">
+              <label className="text-sm font-medium text-gray-700">Metodo de pago:</label>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => onUpdatePayment({ method: 'cash', confirmed: false, proofFile: null, proofPreview: null })}
+                  className={`cursor-pointer rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                    paymentState.method === 'cash'
+                      ? 'bg-violet-100 text-violet-700'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  Efectivo
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onUpdatePayment({ method: 'transfer', confirmed: false, proofFile: null, proofPreview: null })}
+                  className={`cursor-pointer rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                    paymentState.method === 'transfer'
+                      ? 'bg-violet-100 text-violet-700'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  Transferencia
+                </button>
               </div>
-
-              {paymentState.method === 'cash' ? (
-                /* Cash: confirm button */
-                <div>
-                  {paymentState.confirmed ? (
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Check className="h-4 w-4 text-green-600" />
-                        <span className="text-sm text-green-700">
-                          Pago en efectivo confirmado (${emp.total_owed.toLocaleString()})
-                        </span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={handleCashUnconfirm}
-                        className="cursor-pointer text-xs text-gray-500 hover:text-red-600"
-                      >
-                        Deshacer
-                      </button>
-                    </div>
-                  ) : (
-                    <Button size="sm" onClick={handleCashConfirm}>
-                      <Check className="mr-1.5 h-4 w-4" />
-                      Confirmar pago de ${emp.total_owed.toLocaleString()}
-                    </Button>
-                  )}
-                </div>
-              ) : (
-                /* Transfer: upload proof */
-                <div>
-                  {paymentState.proofPreview ? (
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-3">
-                        <Paperclip className="h-4 w-4 text-violet-600" />
-                        <span className="text-sm text-gray-700">Comprobante adjunto</span>
-                        <span className="text-xs text-green-600 font-medium">
-                          Pago: ${emp.total_owed.toLocaleString()}
-                        </span>
-                      </div>
-                      <img
-                        src={paymentState.proofPreview}
-                        alt="Comprobante"
-                        className="max-h-32 rounded-lg border border-gray-200 object-contain"
-                      />
-                      <button
-                        type="button"
-                        onClick={handleRemoveProof}
-                        className="flex cursor-pointer items-center gap-1 text-xs text-red-600 hover:text-red-700"
-                      >
-                        <X className="h-3.5 w-3.5" />
-                        Eliminar comprobante
-                      </button>
-                    </div>
-                  ) : (
-                    <div>
-                      <Button size="sm" variant="outline" onClick={() => fileInputRef.current?.click()}>
-                        <Upload className="mr-1.5 h-4 w-4" />
-                        Subir comprobante de transferencia
-                      </Button>
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        onChange={handleProofUpload}
-                        className="hidden"
-                      />
-                    </div>
-                  )}
-                </div>
-              )}
             </div>
-          )}
+
+            {/* Manual amount input for employees without commission */}
+            {!hasCommission && !hasPending && (
+              <div className="mb-3">
+                <label className="mb-1 block text-xs font-medium text-gray-600">Monto a pagar</label>
+                <input
+                  type="number"
+                  min={0}
+                  placeholder="Ej: 50000"
+                  value={paymentState.amount_paid || ''}
+                  onChange={(e) => onUpdatePayment({ amount_paid: parseFloat(e.target.value) || 0 })}
+                  className="w-40 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+                />
+              </div>
+            )}
+
+            {paymentState.method === 'cash' ? (
+              /* Cash flow */
+              <div>
+                {paymentState.confirmed ? (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Check className="h-4 w-4 text-green-600" />
+                      <span className="text-sm text-green-700">
+                        Pago en efectivo confirmado (${(hasCommission || hasPending ? emp.total_owed : paymentState.amount_paid).toLocaleString()})
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleCashUnconfirm}
+                      className="cursor-pointer text-xs text-gray-500 hover:text-red-600"
+                    >
+                      Deshacer
+                    </button>
+                  </div>
+                ) : (
+                  <Button
+                    size="sm"
+                    onClick={handleCashConfirm}
+                    disabled={!hasCommission && !hasPending && paymentState.amount_paid <= 0}
+                  >
+                    <Check className="mr-1.5 h-4 w-4" />
+                    {hasCommission || hasPending
+                      ? `Confirmar pago de $${emp.total_owed.toLocaleString()}`
+                      : paymentState.amount_paid > 0
+                        ? `Confirmar pago de $${paymentState.amount_paid.toLocaleString()}`
+                        : 'Ingresa el monto a pagar'
+                    }
+                  </Button>
+                )}
+              </div>
+            ) : (
+              /* Transfer flow */
+              <div>
+                {paymentState.proofPreview ? (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3">
+                      <Paperclip className="h-4 w-4 text-violet-600" />
+                      <span className="text-sm text-gray-700">Comprobante adjunto</span>
+                      <span className="text-xs font-medium text-green-600">
+                        Pago: ${(hasCommission || hasPending ? emp.total_owed : paymentState.amount_paid).toLocaleString()}
+                      </span>
+                    </div>
+                    <img
+                      src={paymentState.proofPreview}
+                      alt="Comprobante"
+                      className="max-h-32 rounded-lg border border-gray-200 object-contain"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleRemoveProof}
+                      className="flex cursor-pointer items-center gap-1 text-xs text-red-600 hover:text-red-700"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                      Eliminar comprobante
+                    </button>
+                  </div>
+                ) : (
+                  <div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={!hasCommission && !hasPending && paymentState.amount_paid <= 0}
+                    >
+                      <Upload className="mr-1.5 h-4 w-4" />
+                      Subir comprobante de transferencia
+                    </Button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleProofUpload}
+                      className="hidden"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
+      )}
+    </div>
       )}
     </div>
   );
