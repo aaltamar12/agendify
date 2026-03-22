@@ -53,18 +53,15 @@ ActiveAdmin.register_page "Send Notification" do
         read: false
       )
 
-      # Publish NATS event for real-time push
+      # Publish NATS event using notification_type as event name
+      # so the frontend EVENT_CONFIG matches and shows browser notification
       Realtime::NatsPublisher.publish(
         business_id: business.id,
-        event: "notification.created",
+        event: notification_type,
         data: {
-          id: notification.id,
-          title: notification.title,
-          body: notification.body,
-          notification_type: notification.notification_type,
-          link: notification.link,
-          read: false,
-          created_at: notification.created_at.iso8601
+          notification_id: notification.id,
+          customer_name: "Test (Admin)",
+          service_name: "Test notification"
         }
       )
 
