@@ -117,7 +117,7 @@ barberia_elite = Business.find_or_create_by!(slug: "barberia-elite") do |b|
   b.country = "CO"
   b.timezone = "America/Bogota"
   b.currency = "COP"
-  b.payment_instructions = "Puedes pagar por Nequi, Daviplata o transferencia Bancolombia."
+  # payment_instructions removed — payment methods are specific fields now
   b.nequi_phone = "+573001234567"
   b.daviplata_phone = "+573001234567"
   b.bancolombia_account = "12345678901"
@@ -500,6 +500,91 @@ next_business_day += 1 while next_business_day.wday == 0
 end
 
 puts "  ✅ 3 payment_sent appointments"
+
+# --- Historical appointments (12 months) for demand analysis ---
+puts "  📈 Generating 12-month historical data for demand analysis..."
+
+historical_count = 0
+employees_arr = barberia_elite.employees.active.to_a
+services_arr = barberia_elite.services.to_a
+customers_arr = Customer.where(business: barberia_elite).to_a
+
+# Build realistic demand patterns:
+#   - Base: 4-6 appointments/day on weekdays
+#   - Fridays: +40% more
+#   - Saturdays: +60% more
+#   - Sundays: closed (no appointments)
+#   - December: +55% boost (seasonal)
+#   - January: -30% (low season)
+#   - October/November: +20% (pre-holiday)
+12.downto(1) do |months_ago|
+  month_start = months_ago.months.ago.beginning_of_month.to_date
+  month_end = [month_start.end_of_month.to_date, Date.current - 1].min
+  next if month_end < month_start
+
+  month_num = month_start.month
+
+  # Base appointments per day (Mon-Thu)
+  base_per_day = case month_num
+                 when 12 then 22      # December: high season (should hit >70% occupancy)
+                 when 1  then 3       # January: very low (post-fiestas)
+                 when 2  then 6       # February: recovering
+                 when 10, 11 then 10  # Oct-Nov: pre-holiday ramp-up
+                 when 6, 7 then 5     # Mid-year: slightly lower
+                 else 7               # Normal months
+                 end
+
+  (month_start..month_end).each do |date|
+    dow = date.wday
+
+    # Daily volume based on day of week — weekends are busier
+    daily_volume = case dow
+                   when 0 then (base_per_day * 1.2).round  # Sunday: open but moderate
+                   when 5 then (base_per_day * 1.5).round  # Friday: busy
+                   when 6 then (base_per_day * 1.8).round  # Saturday: peak
+                   else base_per_day                        # Mon-Thu: base
+                   end
+
+    # Small random variation (+/- 20%)
+    daily_volume = (daily_volume * rand(0.8..1.2)).round
+    daily_volume = [daily_volume, 1].max
+
+    daily_volume.times do |i|
+      # Distribute across employees round-robin for better slot usage
+      employee = employees_arr[i % employees_arr.size]
+      service = services_arr.sample
+      customer = customers_arr.sample
+      next unless employee && service && customer
+
+      # Spread across the day: employee-specific offset avoids collisions
+      emp_idx = employees_arr.index(employee) || 0
+      slot_offset = (i / employees_arr.size) # which slot for this employee
+      hour = 8 + (slot_offset * (service.duration_minutes / 60.0)).floor
+      hour = [hour, 17].min
+      minute = (slot_offset * service.duration_minutes % 60).to_i
+      minute = minute < 30 ? 0 : 30
+      start_time = format("%02d:%02d", hour, minute)
+
+      # Skip if slot already taken
+      next if Appointment.exists?(employee: employee, appointment_date: date, start_time: start_time)
+
+      seed_appointment!(
+        employee: employee,
+        appointment_date: date,
+        start_time: start_time,
+        end_time: format("%02d:%02d", hour + (service.duration_minutes / 60.0).ceil, minute),
+        business: barberia_elite,
+        service: service,
+        customer: customer,
+        status: :completed,
+        price: service.price
+      )
+      historical_count += 1
+    end
+  end
+end
+
+puts "  ✅ #{historical_count} historical appointments generated (12 months)"
 puts "  📊 Total appointments for Barbería Elite: #{barberia_elite.appointments.count}"
 
 # --- Payments ---
@@ -644,7 +729,7 @@ salon_bella = Business.find_or_create_by!(slug: "salon-bella") do |b|
   b.country = "CO"
   b.timezone = "America/Bogota"
   b.currency = "COP"
-  b.payment_instructions = "Pago por Nequi o en efectivo al llegar."
+  # payment_instructions removed
   b.nequi_phone = "+573012345678"
   b.cancellation_policy_pct = 30
   b.cancellation_deadline_hours = 12
@@ -945,7 +1030,7 @@ barberia_93 = Business.find_or_create_by!(slug: "barberia-la-93") do |b|
   b.country = "CO"
   b.timezone = "America/Bogota"
   b.currency = "COP"
-  b.payment_instructions = "Acepta Nequi, Daviplata o pago en efectivo."
+  # payment_instructions removed
   b.nequi_phone = "+573114567890"
   b.daviplata_phone = "+573114567890"
   b.cancellation_policy_pct = 30
@@ -1134,7 +1219,7 @@ studio_70 = Business.find_or_create_by!(slug: "studio-70") do |b|
   b.country = "CO"
   b.timezone = "America/Bogota"
   b.currency = "COP"
-  b.payment_instructions = "Nequi o efectivo. Transferencia Bancolombia para servicios mayores a $100.000."
+  # payment_instructions removed
   b.nequi_phone = "+573046789012"
   b.bancolombia_account = "98765432109"
   b.cancellation_policy_pct = 50
