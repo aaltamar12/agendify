@@ -27,7 +27,7 @@ class JobConfig < ApplicationRecord
   end
 
   def self.ransackable_attributes(_auth_object = nil)
-    %w[job_class name enabled last_run_at last_run_status created_at]
+    %w[job_class name description enabled schedule last_run_at last_run_status created_at updated_at]
   end
 
   def self.ransackable_associations(_auth_object = nil)
