@@ -30,9 +30,19 @@ module Payments
           metadata: { payment_id: @payment.id, amount: @payment.amount, rejection_reason: @reason }
         )
 
-        # Notify the customer via email about the rejection
-        if appointment.customer&.email.present?
-          AppointmentMailer.payment_rejected(appointment, @reason).deliver_later
+        # Notify the customer via MultiChannel (email + WhatsApp for Pro+)
+        if appointment.customer.present?
+          Notifications::MultiChannelService.call(
+            recipient: appointment.customer,
+            template: :payment_rejected,
+            business: appointment.business,
+            data: {
+              appointment: appointment,
+              business_name: appointment.business.name,
+              service_name: appointment.service&.name,
+              reason: @reason
+            }
+          )
         end
 
         success(@payment)

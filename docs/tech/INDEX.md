@@ -1,6 +1,6 @@
 # Documentación Técnica — Agendity
 
-> Ultima actualizacion: 2026-03-23
+> Ultima actualizacion: 2026-03-23 (actualizado con referidos, checkout, trial 7d, SiteConfig, employee payment_type, error codes)
 > **Fase del proyecto:** Pre-lanzamiento (15 etapas de features completadas)
 
 ## Índice
@@ -30,7 +30,8 @@
 | [features-recientes.md](features-recientes.md) | Multiples servicios, creditos en reserva, banners publicitarios, metas financieras, precios dinamicos, pricing por plan |
 | [env-variables.md](env-variables.md) | Variables de entorno: frontend (4) + backend (25), valores dev/prod, notas de seguridad |
 | [profesional-independiente.md](profesional-independiente.md) | Profesional independiente: modelo Business con `independent: true`, flujo de creacion, diferencias con negocio regular |
-| [alertas-suscripcion.md](alertas-suscripcion.md) | Alertas de expiracion de suscripcion: job diario, 3 etapas, suspension automatica, banner frontend |
+| [alertas-suscripcion.md](alertas-suscripcion.md) | Alertas de expiracion: SubscriptionExpiryAlertJob (5d/0d/+2d) + TrialExpiryAlertJob (7d trial, 3 stages) |
+| [sistema-referidos.md](sistema-referidos.md) | Sistema de referidos (ReferralCode + Referral) + checkout de suscripcion P2P + ApprovePaymentService + SiteConfig |
 | [metas-financieras.md](metas-financieras.md) | Metas financieras (Plan Inteligente): tipos de meta, progreso, sugerencias |
 | [banners-publicitarios.md](banners-publicitarios.md) | Banners publicitarios en Explore: modelo, tracking de impresiones/clicks, gestion desde ActiveAdmin |
 | [whatsapp-plan-gating.md](whatsapp-plan-gating.md) | WhatsApp gated por plan: MultiChannelService, canales por plan, WhatsAppChannel stub |

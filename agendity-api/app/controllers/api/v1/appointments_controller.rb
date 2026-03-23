@@ -145,7 +145,16 @@ module Api
           return render_error("La cita no está pendiente de pago", status: :unprocessable_entity)
         end
 
-        AppointmentMailer.payment_reminder(@appointment).deliver_later
+        Notifications::MultiChannelService.call(
+          recipient: customer,
+          template: :payment_reminder,
+          business: current_business,
+          data: {
+            appointment: @appointment,
+            business_name: current_business.name,
+            service_name: @appointment.service&.name
+          }
+        )
 
         ActivityLog.log(
           business: current_business,

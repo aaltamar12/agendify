@@ -17,6 +17,7 @@ import { useCurrentSubscription } from '@/lib/hooks/use-subscription';
 import { useRealtime } from '@/lib/hooks/use-realtime';
 import { requestNotificationPermission } from '@/lib/utils/browser-notification';
 import { isDemoMode } from '@/lib/demo/is-demo';
+import { SUPPORT_CONFIG } from '@/lib/constants';
 
 const DemoBanner = dynamic(() => import('@/components/shared/demo-banner'), {
   ssr: false,
@@ -65,7 +66,7 @@ export default function DashboardLayout({
             Contacta a soporte para más información.
           </p>
           <a
-            href="mailto:soporte@agendity.co"
+            href={`mailto:${SUPPORT_CONFIG.email}`}
             className="mt-6 inline-flex items-center gap-2 rounded-lg bg-violet-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-violet-700"
           >
             Contactar soporte

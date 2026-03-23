@@ -4,53 +4,41 @@ import { useState, useRef, useEffect } from 'react';
 import { HelpCircle, Mail, Phone, MessageCircle, Lock } from 'lucide-react';
 import { useCurrentSubscription } from '@/lib/hooks/use-subscription';
 import { useCurrentBusiness } from '@/lib/hooks/use-business';
+import { useSiteConfig } from '@/lib/hooks/use-site-config';
 import {
-  SUPPORT_CONFIG,
   SUPPORT_CHANNELS_BY_PLAN,
   PLAN_DISPLAY,
 } from '@/lib/constants';
-
-// Channel definitions with metadata
-const CHANNEL_DEFINITIONS = {
-  email: {
-    key: 'email',
-    label: 'Email',
-    description: 'soporte@agendity.com',
-    icon: Mail,
-    colorClass: 'text-blue-600',
-    bgClass: 'bg-blue-100',
-    href: `mailto:${SUPPORT_CONFIG.email}`,
-    minPlan: 'Básico',
-  },
-  whatsapp: {
-    key: 'whatsapp',
-    label: 'WhatsApp',
-    description: 'Chat directo',
-    icon: Phone,
-    colorClass: 'text-green-600',
-    bgClass: 'bg-green-100',
-    href: SUPPORT_CONFIG.whatsappUrl,
-    minPlan: 'Profesional',
-  },
-  chat: {
-    key: 'chat',
-    label: 'Chat en vivo',
-    description: 'Soporte prioritario',
-    icon: MessageCircle,
-    colorClass: 'text-violet-600',
-    bgClass: 'bg-violet-100',
-    href: null, // Built dynamically with business name
-    minPlan: 'Inteligente',
-  },
-} as const;
 
 const ALL_CHANNELS = ['email', 'whatsapp', 'chat'] as const;
 
 export function HelpButton() {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const { planSlug, planLabel } = useCurrentSubscription();
+  const { planSlug } = useCurrentSubscription();
   const { data: business } = useCurrentBusiness();
+  const { data: siteConfig } = useSiteConfig();
+
+  const supportEmail = siteConfig?.support_email || 'soporte@agendity.com';
+  const whatsappUrl = siteConfig?.support_whatsapp_url || 'https://wa.me/573001234567';
+
+  const CHANNEL_DEFINITIONS = {
+    email: {
+      key: 'email', label: 'Email', description: supportEmail,
+      icon: Mail, colorClass: 'text-blue-600', bgClass: 'bg-blue-100',
+      href: `mailto:${supportEmail}`, minPlan: 'Básico',
+    },
+    whatsapp: {
+      key: 'whatsapp', label: 'WhatsApp', description: 'Chat directo',
+      icon: Phone, colorClass: 'text-green-600', bgClass: 'bg-green-100',
+      href: whatsappUrl, minPlan: 'Profesional',
+    },
+    chat: {
+      key: 'chat', label: 'Chat en vivo', description: 'Soporte prioritario',
+      icon: MessageCircle, colorClass: 'text-violet-600', bgClass: 'bg-violet-100',
+      href: null as string | null, minPlan: 'Inteligente',
+    },
+  };
 
   const availableChannels = SUPPORT_CHANNELS_BY_PLAN[planSlug] ?? ['email'];
   const display = PLAN_DISPLAY[planSlug];
@@ -79,7 +67,7 @@ export function HelpButton() {
     const message = encodeURIComponent(
       `Soporte prioritario - ${businessName}`
     );
-    return `${SUPPORT_CONFIG.whatsappUrl}?text=${message}`;
+    return `${whatsappUrl}?text=${message}`;
   }
 
   function handleChannelClick(channelKey: string) {

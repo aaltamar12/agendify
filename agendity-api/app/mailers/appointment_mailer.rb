@@ -32,15 +32,36 @@ class AppointmentMailer < ApplicationMailer
     )
   end
 
-  # Notify both parties when a booking is cancelled.
+  # Notify the business when a booking is cancelled.
   def booking_cancelled(appointment)
+    set_cancellation_vars(appointment)
+
+    mail(
+      to: @business.owner.email,
+      subject: "Cita cancelada — #{@customer.name} / #{@service.name}"
+    )
+  end
+
+  # Notify the customer when their booking is cancelled (used by MultiChannelService).
+  def booking_cancelled_to_customer(appointment)
+    set_cancellation_vars(appointment)
+    return unless @customer.email.present?
+
+    mail(
+      to: @customer.email,
+      subject: "Cita cancelada — #{@customer.name} / #{@service.name}"
+    )
+  end
+
+  private
+
+  def set_cancellation_vars(appointment)
     @appointment = appointment
     @business    = appointment.business
     @customer    = appointment.customer
     @service     = appointment.service
     @employee    = appointment.employee
 
-    # Calculate penalty and credit info for the email
     @has_paid = %w[payment_sent confirmed checked_in].include?(appointment.status_before_last_save || "")
     @cancelled_by_customer = appointment.cancelled_by == "customer"
     policy_pct = @business.cancellation_policy_pct || 0
@@ -48,15 +69,9 @@ class AppointmentMailer < ApplicationMailer
     @refund_amount = (appointment.price - @penalty_amount).round(0)
     plan = @business.current_plan
     @refund_as_credit = plan&.cashback_enabled? || false
-
-    recipients = [@business.owner.email]
-    recipients << @customer.email if @customer.email.present?
-
-    mail(
-      to: recipients,
-      subject: "Cita cancelada — #{@customer.name} / #{@service.name}"
-    )
   end
+
+  public
 
   # Send a payment reminder to the customer when the business requests it.
   def payment_reminder(appointment)

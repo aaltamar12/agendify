@@ -52,12 +52,13 @@ Emails enviados:
   → Al usuario: confirmacion (1) + recordatorio 24h (1) + rating request (1) = 3
   TOTAL: 5 emails por cita completada
 
-WhatsApp enviados (solo Pro+):
-  → Al usuario: confirmacion (1*) + recordatorio (1*) + rating (1) = 3
-  → Al negocio: 0 (WhatsApp al negocio es solo suscripcion)
-  TOTAL: 1 WhatsApp actual (rating) / 3 cuando se migre todo a MultiChannel
+WhatsApp enviados (SOLO negocios Profesional o Inteligente):
+  → Al usuario: confirmacion (1) + recordatorio (1) + rating (1) = 3 por cita
+  → Al negocio: 0 (WhatsApp al negocio solo aplica para alertas de suscripcion)
+  TOTAL: 3 WhatsApp por cita completada
 
-  * booking_confirmed, reminder y cancelled aun no usan MultiChannel (TODO pendiente)
+  Todos pasan por MultiChannelService (email siempre + WhatsApp si Pro+).
+  Negocios plan Basico: solo email, nunca WhatsApp.
 ```
 
 ### 1.5 Conteo por cita cancelada
@@ -100,9 +101,59 @@ Servicios en Docker Compose:
 | SO Linux | 400 MB | 500 MB | — |
 | **TOTAL** | **~1.4 GB** | **~3-5 GB** | — |
 
-**Headroom:** 7-9 GB libres. Suficiente hasta ~300 negocios activos.
+**RAM:** 7-9 GB libres. Suficiente hasta ~300 negocios activos por CPU/RAM.
 
-**Cuello de botella primero:** Disco (comprobantes de pago). Cada comprobante ~0.5-2 MB.
+**Disco (100 GB) — el cuello de botella real:**
+- SO + Docker images + DB + Redis + logs: ~10-15 GB base
+- Queda ~85 GB utiles para comprobantes y logos
+- Cada comprobante: ~1 MB promedio (foto/captura)
+- Logo por negocio: ~200 KB
+- No todas las citas tienen comprobante (efectivo no sube imagen)
+
+| Negocios | Citas con comprobante/mes | Storage/mes | Meses hasta llenar 85 GB |
+|----------|--------------------------|-------------|--------------------------|
+| 30 | ~5,000 | ~5 GB | 17 meses |
+| 50 | ~8,000 | ~8 GB | 10 meses |
+| 100 | ~16,000 | ~16 GB | 5 meses |
+| 200 | ~32,000 | ~32 GB | 2.5 meses |
+| 300 | ~48,000 | ~48 GB | <2 meses |
+
+**Nota:** Estimando ~70% de citas con comprobante (el resto paga en efectivo). Con 30 negocios tienes mas de 1 ano tranquilo. Con 100+ necesitas plan de storage externo o cleanup.
+
+### 2.1.1 Upgrade futuro — VPS OVH 8 cores / 24 GB / 200 GB (~$24 USD/mes)
+
+**Specs:** 8 vCPU, 24 GB RAM, 200 GB SSD NVMe
+
+**Cuando migrar:** Al acercarse a 200-300 negocios activos o cuando el disco pase de 70 GB usados.
+
+**Que cambia con el upgrade:**
+
+| Recurso | VPS actual ($12) | VPS upgrade ($24) | Mejora |
+|---------|------------------|-------------------|--------|
+| vCPU | 6 | 8 | +33% — mas Puma workers y Sidekiq threads |
+| RAM | 12 GB | 24 GB | +100% — Puma 6 workers, Sidekiq 10 threads, PostgreSQL con mas shared_buffers |
+| Disco | 100 GB | 200 GB | +100% — duplica la vida util del storage |
+
+**Capacidad estimada con el upgrade:**
+
+| Negocios | Citas con comprobante/mes | Storage/mes | Meses hasta llenar 185 GB* |
+|----------|--------------------------|-------------|----------------------------|
+| 100 | ~16,000 | ~16 GB | 11 meses |
+| 200 | ~32,000 | ~32 GB | 5.5 meses |
+| 300 | ~48,000 | ~48 GB | 3.5 meses |
+| 500 | ~80,000 | ~80 GB | 2 meses |
+
+*185 GB = 200 GB - 15 GB base del sistema
+
+**RAM disponible para servicios:**
+
+| Configuracion | RAM usada | RAM libre |
+|---------------|-----------|-----------|
+| Puma 4 workers + Sidekiq 5 threads (actual) | ~3-5 GB | ~19 GB |
+| Puma 6 workers + Sidekiq 10 threads (upgrade) | ~5-8 GB | ~16 GB |
+| Puma 8 workers + Sidekiq 15 threads (maximo) | ~7-11 GB | ~13 GB |
+
+Con 24 GB puedes escalar confortablemente hasta **500-800 negocios** antes de necesitar separar servicios (DB dedicada, segundo servidor). El disco sigue siendo el limite — a 300+ negocios sin cleanup, Supabase Storage es obligatorio.
 
 ### 2.2 Frontend — Vercel
 
@@ -179,21 +230,21 @@ Gratis. Sin limite practico para el uso que le damos (fotos de portada).
 - Rating request = MARKETING (mas caro). El resto = UTILITY
 - Meta cobra por conversacion, no por mensaje. Si 2 mensajes caen en la misma ventana de 24h del mismo usuario, solo se cobra 1
 
-### 3.6 Costo WhatsApp por cita completada (Pro+)
+### 3.6 Costo WhatsApp por cita (Pro+)
+
+Todas las notificaciones al usuario final en negocios Pro+ pasan por MultiChannelService: email + WhatsApp.
 
 ```
-Estado actual (solo rating_request implementado):
-  1 conversacion MARKETING por cita = $0.0164 (Colombia)
-
-Estado futuro (todo migrado a MultiChannel):
-  Al usuario final por cita completada:
-    - booking_confirmed = 1 UTILITY
-    - reminder_24h = 1 UTILITY (misma ventana si <24h? No, es dia anterior)
-    - rating_request = 1 MARKETING
+Por cita completada (negocio Pro+):
+  - booking_confirmed = 1 UTILITY
+  - reminder_24h = 1 UTILITY (es el dia anterior, ventana separada)
+  - rating_request = 1 MARKETING
   Total: 2 UTILITY + 1 MARKETING = $0.0080×2 + $0.0164 = $0.0324 por cita (Colombia)
 
-  Al usuario final por cita cancelada:
-    - booking_cancelled = 1 UTILITY = $0.0080 (Colombia)
+Por cita cancelada (negocio Pro+):
+  - booking_cancelled = 1 UTILITY = $0.0080 (Colombia)
+
+Negocios plan Basico: $0 WhatsApp (solo email)
 ```
 
 ---
@@ -232,19 +283,18 @@ Estado futuro (todo migrado a MultiChannel):
 | Password resets + invitaciones | ~50 |
 | **TOTAL** | **~32,840 emails/mes** |
 
-**WhatsApp/mes (solo Pro+):**
+**WhatsApp/mes (SOLO negocios Profesional e Inteligente = 60%):**
+
+Todos los WhatsApp a usuario final aplican unicamente si el negocio tiene plan Pro+. Plan Basico = solo email, nunca WhatsApp.
+
 | Tipo | Cantidad | Costo unitario | Subtotal |
 |------|----------|----------------|----------|
-| Rating request (MARKETING) × 4,320 | 4,320 | $0.0164 | $70.85 |
-| Suscripcion (UTILITY) × 18 negocios × 1 | 18 | $0.0080 | $0.14 |
-| **TOTAL WhatsApp** | **4,338** | | **$70.99** |
-
-**Nota:** Cuando se migre booking_confirmed + reminder a WhatsApp:
-| Rating (MARKETING) × 4,320 | $70.85 |
-| Confirmed + Reminder (UTILITY) × 4,320 × 2 | $69.12 |
-| Cancelled (UTILITY) × 432 | $3.46 |
-| Suscripcion × 18 | $0.14 |
-| **TOTAL futuro** | **$143.57** |
+| Rating request (MARKETING) | 4,320 | $0.0164 | $70.85 |
+| Confirmed (UTILITY) | 4,320 | $0.0080 | $34.56 |
+| Reminder 24h (UTILITY) | 4,320 | $0.0080 | $34.56 |
+| Cancelled (UTILITY) | 432 | $0.0080 | $3.46 |
+| Suscripcion al negocio (UTILITY) | 18 | $0.0080 | $0.14 |
+| **TOTAL** | **13,410** | | **$143.57** |
 
 **Resumen mensual — Pequena escala:**
 
@@ -254,13 +304,13 @@ Estado futuro (todo migrado a MultiChannel):
 | Vercel Pro | $20 |
 | Dominio | $1 |
 | Email — Resend Pro (32k emails) | $20 |
-| WhatsApp API (actual, solo rating) | $71 |
+| WhatsApp API (todo migrado) | $144 |
 | Supabase Storage | $0 (no necesario) |
-| **TOTAL** | **$124/mes** |
-| **TOTAL 6 meses** | **$744** |
+| **TOTAL** | **$197/mes** |
+| **TOTAL 6 meses** | **$1,182** |
 
 **Ingresos:** 30 × $16.3 = **$489/mes**
-**Margen:** +$365/mes (74.6%)
+**Margen:** +$292/mes (59.7%)
 
 **Sin WhatsApp (mes 1 mientras se configura):** $53/mes
 
@@ -286,35 +336,31 @@ Estado futuro (todo migrado a MultiChannel):
 | Suscripciones + otros | ~500 |
 | **TOTAL** | **~328,100 emails/mes** |
 
-**WhatsApp/mes (actual — solo rating):**
-| Tipo | Cantidad | Costo |
-|------|----------|-------|
-| Rating (MARKETING) | 43,200 | $708.48 |
-| Suscripcion (UTILITY) | ~180 | $1.44 |
-| **TOTAL** | | **$709.92** |
+**WhatsApp/mes (SOLO negocios Pro+, todo migrado a MultiChannel):**
 
-**WhatsApp/mes (futuro — todo migrado):**
-| Rating (MARKETING) | 43,200 | $708.48 |
-| Confirmed + Reminder (UTILITY) × 2 | 86,400 | $691.20 |
-| Cancelled (UTILITY) | 4,320 | $34.56 |
-| Suscripcion (UTILITY) | ~180 | $1.44 |
-| **TOTAL futuro** | | **$1,435.68** |
+| Tipo | Cantidad | Costo unitario | Subtotal |
+|------|----------|----------------|----------|
+| Rating (MARKETING) | 43,200 | $0.0164 | $708.48 |
+| Confirmed (UTILITY) | 43,200 | $0.0080 | $345.60 |
+| Reminder 24h (UTILITY) | 43,200 | $0.0080 | $345.60 |
+| Cancelled (UTILITY) | 4,320 | $0.0080 | $34.56 |
+| Suscripcion al negocio (UTILITY) | ~180 | $0.0080 | $1.44 |
+| **TOTAL** | **134,100** | | **$1,435.68** |
 
 **Resumen mensual — Mediana escala:**
 
-| Concepto | Actual | Futuro (MultiChannel) |
-|----------|--------|----------------------|
-| VPS OVH (upgrade posible) | $12-24 | $12-24 |
-| Vercel Pro | $20 | $20 |
-| Dominio | $1 | $1 |
-| Email — Resend Enterprise (328k) | ~$200 | ~$200 |
-| WhatsApp API | $710 | $1,436 |
-| Supabase Pro (storage) | $25 | $25 |
-| **TOTAL** | **$968-980** | **$1,694-1,706** |
+| Concepto | Costo/mes |
+|----------|-----------|
+| VPS OVH (upgrade posible) | $12-24 |
+| Vercel Pro | $20 |
+| Dominio | $1 |
+| Email — Resend Enterprise (328k) | ~$200 |
+| WhatsApp API (todo migrado) | $1,436 |
+| Supabase Pro (storage) | $25 |
+| **TOTAL** | **$1,694-1,706** |
 
 **Ingresos:** 300 × $16.3 = **$4,890/mes**
-**Margen actual:** +$3,910/mes (80%)
-**Margen futuro:** +$3,184/mes (65%)
+**Margen:** +$3,184/mes (65%)
 
 ---
 
@@ -425,12 +471,13 @@ Calculo por pais (solo negocios Pro+, 60%):
 
 ## 5. Resumen comparativo por escala
 
+Todas las notificaciones al usuario final en Pro+ pasan por MultiChannelService (email + WhatsApp).
+
 | Escala | Negocios | Costo/mes | Ingreso/mes | Margen | Margen % |
 |--------|----------|-----------|-------------|--------|----------|
 | Lanzamiento (sin WA) | 30 | $53 | $489 | $436 | 89% |
-| Lanzamiento (con WA actual) | 30 | $124 | $489 | $365 | 75% |
-| Colombia consolidado | 300 | $980 | $4,890 | $3,910 | 80% |
-| Colombia + WA migrado | 300 | $1,706 | $4,890 | $3,184 | 65% |
+| Lanzamiento (con WA) | 30 | $197 | $489 | $292 | 60% |
+| Colombia consolidado | 300 | $1,706 | $4,890 | $3,184 | 65% |
 | LATAM (5 paises) | 5,000 | $32,500 | $81,500 | $49,000 | 60% |
 | LATAM lider | 20,000 | $130,000 | $326,000 | $196,000 | 60% |
 
@@ -458,14 +505,14 @@ Priorizar solo el reminder 24h (reduce no-shows) y confirmacion. El rating por e
 **E. Free tier de Service conversations:**
 Las primeras 1,000 conversaciones Service (respuestas del usuario) son gratis/mes. No aplica para nuestro caso (solo enviamos, no conversamos).
 
-### 6.2 Escenario optimizado (solo UTILITY, sin rating por WA)
+### 6.2 Escenario optimizado (sin rating por WA, solo UTILITY)
 
-Si se envia WhatsApp solo para confirmed + reminder (2 UTILITY por cita):
+Si se envia el rating_request solo por email y WhatsApp se reserva para confirmed + reminder (2 UTILITY por cita):
 
-| Escala | WhatsApp actual | WhatsApp optimizado | Ahorro |
-|--------|----------------|---------------------|--------|
-| 30 negocios | $71 | $56 | 21% |
-| 300 negocios | $710 | $560 | 21% |
+| Escala | WhatsApp completo | WhatsApp sin rating | Ahorro |
+|--------|-------------------|---------------------|--------|
+| 30 negocios | $144 | $73 | 49% |
+| 300 negocios | $1,436 | $727 | 49% |
 | 5,000 LATAM | $31,797 | $15,423 | 51% |
 | 20,000 LATAM | $127,000 | $61,700 | 51% |
 
@@ -473,31 +520,33 @@ Si se envia WhatsApp solo para confirmed + reminder (2 UTILITY por cita):
 
 ## 7. Hoja de ruta de costos — Primer ano
 
+WhatsApp incluye MultiChannel completo (confirmed + reminder + rating + cancelled) para negocios Pro+.
+
 | Mes | Negocios | Costo fijo | WhatsApp | Email | Total | Ingresos | Margen |
 |-----|----------|------------|----------|-------|-------|----------|--------|
 | 1 | 10 | $33 | $0 (sin WA) | $0 (free tier) | **$33** | $163 | +$130 |
 | 2 | 20 | $33 | $0 | $0 | **$33** | $326 | +$293 |
-| 3 | 30 | $53 | $71 (activa WA) | $20 | **$144** | $489 | +$345 |
-| 4 | 50 | $53 | $118 | $20 | **$191** | $815 | +$624 |
-| 5 | 80 | $53 | $189 | $20 | **$262** | $1,304 | +$1,042 |
-| 6 | 120 | $53 | $284 | $20 | **$357** | $1,956 | +$1,599 |
-| 7-12 | 120→300 | $58-83 | $284→710 | $20→200 | **$362→993** | $1,956→4,890 | +$1,594→3,897 |
+| 3 | 30 | $53 | $144 (activa WA) | $20 | **$217** | $489 | +$272 |
+| 4 | 50 | $53 | $240 | $20 | **$313** | $815 | +$502 |
+| 5 | 80 | $53 | $383 | $20 | **$456** | $1,304 | +$848 |
+| 6 | 120 | $53 | $575 | $20 | **$648** | $1,956 | +$1,308 |
+| 7-12 | 120→300 | $58-83 | $575→1,436 | $20→200 | **$653→1,719** | $1,956→4,890 | +$1,303→3,171 |
 
-**Acumulado mes 6:** ~$1,020 gastados, ~$5,053 facturados = **+$4,033 neto**
-**Acumulado mes 12:** ~$5,500 gastados, ~$24,000 facturados = **+$18,500 neto**
+**Acumulado mes 6:** ~$1,700 gastados, ~$5,053 facturados = **+$3,353 neto**
+**Acumulado mes 12:** ~$8,800 gastados, ~$24,000 facturados = **+$15,200 neto**
 
 ---
 
 ## 8. Infraestructura: cuando escalar
 
-| Umbral | Accion | Costo adicional |
-|--------|--------|-----------------|
-| 100 GB disco usado | Supabase Storage Pro o cleanup policy | +$25/mes |
-| 300 negocios | Upgrade VPS a 16GB RAM | +$12-24/mes |
-| 50,000 emails/mes | Resend Pro o Amazon SES | +$20-50/mes |
-| 1,000 negocios | VPS dedicado (32GB) o separar DB | +$40-70/mes |
-| 5,000 negocios | Segundo servidor + DB dedicada | +$100-200/mes |
-| 20,000 negocios | 3 servidores + DB managed + Redis managed | +$300-500/mes |
+| Umbral | Accion | Costo nuevo | Costo total infra |
+|--------|--------|-------------|-------------------|
+| 70 GB disco o ~200 negocios | Upgrade VPS a 8 cores / 24 GB / 200 GB | $24/mes | $24 |
+| 200 GB disco usado | Supabase Storage Pro o cleanup policy | +$25/mes | $49 |
+| 50,000 emails/mes | Resend Pro o Amazon SES | +$20-50/mes | $69-99 |
+| 500-800 negocios | Separar DB a segundo VPS | +$24-40/mes | $93-139 |
+| 5,000 negocios | 2-3 servidores + DB dedicada | +$100-200/mes | $200-350 |
+| 20,000 negocios | Cluster dedicado + DB managed + Redis managed | +$300-500/mes | $500-850 |
 
 La infra nunca sera el cuello de botella financiero. **WhatsApp siempre sera el costo dominante.**
 

@@ -108,6 +108,9 @@ Gestión vía ActiveAdmin + endpoints API:
 - Crear códigos de descuento
 - Posicionar negocios destacados
 - Ver métricas globales del sistema
+- Gestionar códigos de referido y panel de referidos (mark_as_paid)
+- Aprobar/rechazar comprobantes de pago de suscripción
+- Editar configuración de plataforma (SiteConfig: emails, datos de pago, WhatsApp soporte)
 
 ---
 
@@ -117,7 +120,8 @@ Gestión vía ActiveAdmin + endpoints API:
 - Nombre del negocio
 - Correo
 - Contraseña
-- Tipo de negocio (barbería, salón, spa, consultorio, etc.)
+- Tipo de negocio (barbería, salón, spa, estudio de uñas, consultorio, masajes, cosmetología, etc.)
+- Código de referido (opcional, via `?ref=CODE` en la URL — se guarda en localStorage y se envía al crear la cuenta)
 
 ### Wizard de onboarding (post-registro)
 Después de registrarse, el negocio pasa por un wizard de configuración:
@@ -393,7 +397,7 @@ El sistema debe estar preparado para incluir IA.
 
 ## 19. Planes de suscripción
 
-**Trial:** 30 días gratis con acceso completo al Plan Profesional. Después elige un plan.
+**Trial:** 7 días gratis con acceso completo al Plan Profesional. Después elige un plan y paga via checkout P2P.
 
 **Estrategia de pricing:** El plan Inteligente debe ser el más atractivo. La diferencia de solo $6 USD ($24k COP) con el Profesional incentiva a elegir el plan con IA.
 
@@ -528,6 +532,17 @@ El producto está funcional de punta a punta. Todas las features core están imp
 - [x] Activity Log (modelo ActivityLog con log de cada acción de negocio, ciclo de vida por recurso, request_id para trazabilidad)
 - [x] Órdenes de pago de suscripción (modelo SubscriptionPaymentOrder + 3 jobs automatizados + recurso ActiveAdmin)
 - [x] Upload de comprobantes con ActiveStorage (URLs absolutas, Content-Type correcto para multipart)
+- [x] Sistema de referidos (ReferralCode + Referral con estados pending→activated→paid, link ?ref=CODE, activación al aprobar pago)
+- [x] Checkout de suscripción P2P (/dashboard/subscription/checkout: elegir plan → ver datos de pago → subir comprobante)
+- [x] CheckoutService + ApprovePaymentService (crea Subscription, activa referral, reactiva business)
+- [x] SiteConfig (modelo key/value para datos de contacto y pago; editable desde ActiveAdmin > Configuración)
+- [x] Mailers usan SiteConfig.get() en vez de valores hardcoded
+- [x] Trial de 7 días (antes 30) — Business#trial_ends_at = 7.days.from_now al registrar
+- [x] TrialExpiryAlertJob (diario 8am, 3 stages: aviso 2 días antes, día de fin, suspensión 2 días después)
+- [x] trial_alert_stage en Business para anti-duplicados de alertas de trial
+- [x] Tipo de pago de empleado: payment_type (manual/commission/fixed_daily) + fixed_daily_pay; cierre de caja calcula según tipo; alerta naranja en formulario para empleados manuales
+- [x] Error codes en API: ServiceResult con error_code, render_error con code: param; códigos definidos en appointments, auth, bookings, cash register, credits, invitations
+- [x] Copys industry-agnostic: landing, SEO, registro y explore ya no dicen "barberías y salones" sino "negocios que trabajan con citas"; nuevos tipos de negocio en registro (spa, estudio de uñas, consultorio, masajes, etc.)
 
 ### Infraestructura
 - [x] Docker Compose (7 servicios: PostgreSQL, Redis, NATS, Rails API, Sidekiq, Next.js, Nginx)
@@ -536,7 +551,16 @@ El producto está funcional de punta a punta. Todas las features core están imp
 - [x] Script de deploy (`scripts/deploy.sh`)
 - [x] NATS server config con WebSocket + auth token
 
-### Cambios recientes (marzo 2026)
+### Cambios recientes — nuevas features (marzo 2026)
+- [x] Sistema de referidos (ReferralCode + Referral, link ?ref=CODE → localStorage → registro → activación al aprobar pago, panel ActiveAdmin)
+- [x] Trial reducido a 7 días + TrialExpiryAlertJob con 3 stages + trial_alert_stage en Business
+- [x] Checkout de suscripción P2P (página /dashboard/subscription/checkout, CheckoutService, ApprovePaymentService)
+- [x] SiteConfig: configuración de plataforma en DB (key/value), seeds con datos de contacto y pago, editable desde ActiveAdmin
+- [x] Tipo de pago de empleado (payment_type: manual/commission/fixed_daily, fixed_daily_pay, cierre de caja adaptado)
+- [x] Error codes en API (ServiceResult#error_code, render_error con code:)
+- [x] Copys industry-agnostic en landing, SEO, registro y explore
+
+### Cambios recientes (marzo 2026 — segunda iteración)
 - [x] Sistema de cancelaciones completo (cancelled_by: business/customer, penalización por deadline, pending_penalty en customer, endpoint público, botón en ticket)
 - [x] Filtrado de empleados por servicio (EmployeeSelector filtra según servicio seleccionado, `service_ids` en EmployeeSerializer)
 - [x] Modales mejorados (tamaños md→lg, lg→2xl, nuevo tamaño `xl`, scroll con `max-h-[90vh] overflow-y-auto`)
@@ -570,7 +594,11 @@ El producto está funcional de punta a punta. Todas las features core están imp
 - El `ticket_code` se genera SIEMPRE al crear la cita (no al aprobar el pago). Permite identificar la cita en todo el flujo. La visualización VIP (boarding pass + QR + descarga PNG) es exclusiva del plan Profesional+.
 - Activity Logs y Request Logs están disponibles en el panel de SuperAdmin para auditoría completa.
 - Las órdenes de pago de suscripción se generan automáticamente y el superadmin las confirma manualmente.
+- El trial dura 7 días. Al vencer, el negocio debe pagar via checkout P2P. `ApprovePaymentService` reactiva el negocio y activa el referral si corresponde.
+- `SiteConfig` centraliza todos los datos de contacto y pago de la plataforma; los mailers no tienen valores hardcoded.
+- Los error codes en API permiten que el frontend maneje errores específicos sin depender solo del mensaje de texto.
 - Ver `docs/tech/flujos-completos.md` para diagramas detallados de todos los flujos del sistema.
+- Ver `docs/tech/sistema-referidos.md` para el flujo técnico del sistema de referidos y checkout de suscripción.
 
 ### Pendiente para lanzamiento
 - [ ] CI/CD (GitHub Actions) — nice to have

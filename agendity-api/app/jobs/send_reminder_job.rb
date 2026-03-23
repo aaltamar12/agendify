@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Sends a reminder email to the customer 24 hours before the appointment.
+# Sends appointment reminder to the customer via MultiChannel (email + WhatsApp for Pro+).
 class SendReminderJob < ApplicationJob
   queue_as :default
 
@@ -10,13 +10,30 @@ class SendReminderJob < ApplicationJob
     # Only send reminder if the appointment is still confirmed
     return unless appointment.confirmed?
 
-    AppointmentMailer.reminder(appointment).deliver_now
+    customer = appointment.customer
+    business = appointment.business
+    return unless customer.present?
+
+    # Notify customer via MultiChannel (email always, WhatsApp if Pro+)
+    Notifications::MultiChannelService.call(
+      recipient: customer,
+      template: :appointment_reminder,
+      business: business,
+      data: {
+        appointment: appointment,
+        business_name: business.name,
+        service_name: appointment.service&.name,
+        employee_name: appointment.employee&.name,
+        appointment_date: appointment.appointment_date,
+        start_time: appointment.start_time
+      }
+    )
 
     # Activity log
     ActivityLog.log(
-      business: appointment.business,
+      business: business,
       action: "reminder_sent",
-      description: "Recordatorio enviado a #{appointment.customer&.name}",
+      description: "Recordatorio enviado a #{customer.name}",
       actor_type: "system",
       resource: appointment
     )

@@ -6,10 +6,12 @@ Esta guia presenta TODAS las funcionalidades de Agendity siguiendo el flujo natu
 
 ## Que es Agendity
 
-Agendity es una plataforma SaaS de gestion de citas para barberias y salones de belleza. Permite a los negocios recibir reservas online, gestionar pagos, empleados, clientes y reportes desde un solo lugar. Los usuarios finales (clientes del negocio) reservan sin necesidad de crear cuenta.
+Agendity es una plataforma SaaS de gestion de citas para cualquier negocio que trabaje con reservas: barberias, salones de belleza, spas, estudios de unas, consultorios, masajes, cosmetologia y mas. Permite a los negocios recibir reservas online, gestionar pagos, empleados, clientes y reportes desde un solo lugar. Los usuarios finales (clientes del negocio) reservan sin necesidad de crear cuenta.
+
+Los copys de la plataforma (landing, SEO, registro, explore) son industry-agnostic: no dicen "barberias y salones" sino "negocios que trabajan con citas". Los tipos de negocio disponibles en el registro cubren barberia, salon, spa, estudio de unas, consultorio, masajes, cosmetologia, entre otros.
 
 **Actores principales:**
-- **Cliente** = el negocio (barberia/salon) que paga suscripcion
+- **Cliente** = el negocio (barberia, salon, consultorio, etc.) que paga suscripcion
 - **Usuario final** = la persona que reserva citas (no paga, no necesita cuenta)
 - **Empleado** = staff del negocio con portal propio
 - **SuperAdmin** = equipo Agendity que gestiona la plataforma
@@ -20,10 +22,12 @@ Agendity es una plataforma SaaS de gestion de citas para barberias y salones de 
 
 ### 1.1 Registro
 
-El dueno del negocio entra a la landing page y se registra con su nombre, email, telefono, contrasena y tipo de negocio (barberia o salon). Al registrarse se crea automaticamente:
+El dueno del negocio entra a la landing page y se registra con su nombre, email, telefono, contrasena y tipo de negocio (barberia, salon, spa, estudio de unas, consultorio, masajes, cosmetologia, etc.). Al registrarse se crea automaticamente:
 - Una cuenta de usuario (role: owner)
 - Un negocio con slug unico (ej: `barberia-elite`)
-- Una suscripcion trial de 30 dias
+- Una suscripcion trial de **7 dias**
+
+**Referidos:** Si el usuario llego via `agendity.co/register?ref=CODE`, el codigo se guarda en localStorage y se envia al backend durante el registro. Se crea un `Referral` en estado `pending` asociado al `ReferralCode` del referidor.
 
 ### 1.2 Onboarding (configuracion inicial)
 
@@ -98,8 +102,13 @@ CRUD completo de empleados con:
 - Nombre, telefono, email, foto de perfil
 - Servicios que ofrece (relacion many-to-many)
 - Horario individual por dia de la semana
-- Porcentaje de comision (para cierre de caja)
+- **Tipo de pago** (`payment_type`):
+  - `commission` — se paga un porcentaje de lo que genera (campo `commission_percentage`)
+  - `fixed_daily` — se paga un monto fijo por dia trabajado (campo `fixed_daily_pay`)
+  - `manual` — el negocio decide cuanto pagarle en cada cierre; el formulario muestra una alerta naranja recordando que es manual
 - Opcion de invitar al portal de empleado (ver Parte 5)
+
+El cierre de caja calcula el monto adeudado segun el `payment_type` de cada empleado.
 
 ### 2.6 Gestion de clientes
 
@@ -202,7 +211,7 @@ El negocio puede invitar empleados a tener su propia cuenta:
 
 El empleado ve su rendimiento personal:
 - **Score** (0-100) — basado en calificaciones de clientes (60%) y puntualidad en check-ins (40%)
-- **Calificacion promedio** de reseñas
+- **Calificacion promedio** de resenas
 - **Citas de hoy** y del mes
 - **Ingresos generados**
 
@@ -219,9 +228,9 @@ El empleado puede hacer check-in de sus propios clientes escaneando QR. Si inten
 Al final del dia, el negocio cierra caja desde `/dashboard/cash-register`:
 
 1. Ver resumen del dia: ingresos totales, citas completadas
-2. Desglose por empleado: citas atendidas, monto ganado, comision calculada
+2. Desglose por empleado: citas atendidas, monto ganado, monto a pagar (calculado segun su `payment_type`)
 3. Para cada empleado: confirmar pago (efectivo o transferencia con comprobante)
-4. Si se paga menos que la comision, la diferencia se acumula como deuda para el proximo cierre
+4. Si se paga menos que el monto calculado, la diferencia se acumula como deuda para el proximo cierre
 5. Agregar notas opcionales
 6. "Cerrar caja del dia"
 
@@ -321,18 +330,33 @@ El sistema envia notificaciones por multiples canales:
 
 Las notificaciones llegan en tiempo real via NATS WebSocket — no hay que refrescar la pagina.
 
-### 7.3 Banner de suscripcion
+### 7.3 Banner de suscripcion y trial
 
-Cuando la suscripcion esta por vencer, aparece un banner en la parte superior del dashboard:
+Cuando la suscripcion o el trial esta por vencer, aparece un banner en la parte superior del dashboard:
 
 | Estado | Color | Mensaje |
 |--------|-------|---------|
-| 5 a 1 dias antes | Amarillo | "Tu plan Profesional vence en X dias" |
+| 5 a 1 dias antes de vencer | Amarillo | "Tu plan Profesional vence en X dias" |
 | Dia que vence | Rojo | "Tu plan Profesional vence hoy. Renueva ahora" |
 | Despues de vencer | Rojo oscuro | "Tu plan vencio hace X dias. Renueva para evitar suspension" |
 | 2 dias despues | — | Negocio suspendido automaticamente |
 
-### 7.4 Profesional independiente
+Para negocios en trial, el banner muestra el tiempo restante del periodo de prueba de 7 dias y un CTA para ir al checkout y elegir un plan.
+
+### 7.4 Checkout de suscripcion (P2P)
+
+Cuando el trial termina o el negocio quiere contratar un plan, el flujo es:
+
+1. Ir a `/dashboard/subscription/checkout`
+2. Elegir plan (Basico, Profesional o Inteligente)
+3. Ver datos de pago de Agendity (Nequi, Bancolombia, Daviplata — leidos desde `SiteConfig`)
+4. Subir comprobante de pago (foto de la transferencia)
+5. `CheckoutService` crea una `SubscriptionPaymentOrder` con el comprobante adjunto
+6. El admin revisa el comprobante en ActiveAdmin > Ordenes de Pago
+7. Si aprueba: `ApprovePaymentService` crea la `Subscription`, activa el `Referral` (si hay), reactiva el negocio
+8. Si rechaza: el negocio recibe notificacion con razon y puede volver a intentarlo
+
+### 7.5 Profesional independiente
 
 Agendity tambien soporta profesionales independientes (sin local fisico). Se crean desde el SuperAdmin y funcionan igual que un negocio pero:
 - No tienen seccion de empleados (ellos mismos son el unico empleado)
@@ -365,7 +389,7 @@ El admin puede ver el dashboard exactamente como lo ve un negocio:
 
 Desde ActiveAdmin > "Profesionales Independientes":
 1. Llenar datos: nombre, email, telefono, tipo de documento
-2. Se crea automaticamente: usuario + negocio + empleado + suscripcion trial
+2. Se crea automaticamente: usuario + negocio + empleado + suscripcion trial de 7 dias
 3. Se genera link de acceso con credenciales temporales
 
 ### 8.4 Enviar notificaciones
@@ -380,14 +404,43 @@ Desde "Jobs" el admin puede:
 - Ejecutar un job manualmente ("Run now")
 - Ver logs de ejecucion de las ultimas 24 horas
 
-### 8.6 Renovar suscripcion
+### 8.6 Aprobar comprobante de suscripcion
+
+Desde ActiveAdmin > Ordenes de Pago > detalle > "Aprobar" o "Rechazar":
+- **Aprobar:** ejecuta `ApprovePaymentService` (crea Subscription, activa Referral si hay, reactiva Business, notifica al negocio)
+- **Rechazar:** notifica al negocio con razon del rechazo; el negocio puede subir un nuevo comprobante
+
+### 8.7 Renovar suscripcion manualmente
 
 Desde ActiveAdmin > Subscriptions > detalle de suscripcion > "Renovar":
 - Extiende 30 dias
 - Reactiva el negocio si estaba suspendido
 - Envia notificacion de confirmacion al negocio (email + in-app + WhatsApp)
 
-### 8.7 Sidekiq
+### 8.8 Sistema de referidos
+
+Desde ActiveAdmin > Codigos de Referido:
+- CRUD de `ReferralCode` (codigo unico, nombre/email/celular del referidor, comision %)
+- El admin crea el codigo y entrega al referidor el link `agendity.co/register?ref=CODE`
+- Panel de Referidos: lista de todos los `Referral` con su estado (pending/activated/paid)
+- Accion "Marcar como pagado" para registrar el pago de comision al referidor
+
+**Ciclo del referido:**
+1. Admin crea `ReferralCode` y se lo entrega al referidor
+2. Referidor comparte el link `agendity.co/register?ref=CODE` con potenciales clientes
+3. Nuevo negocio se registra via ese link → codigo se guarda en localStorage → se envia al backend → `Referral` en estado `pending`
+4. Negocio aprueba su primer pago de suscripcion → `ApprovePaymentService` activa el referral → `Referral` pasa a `activated`
+5. Admin marca como pagado manualmente → `Referral` pasa a `paid`
+
+### 8.9 Configuracion de plataforma (SiteConfig)
+
+Desde ActiveAdmin > Configuracion:
+- Editar valores de `SiteConfig` (key/value en DB)
+- Claves disponibles: `support_email`, `support_whatsapp`, `payment_nequi`, `payment_bancolombia`, `payment_daviplata`, `admin_email`
+- Estos valores se usan en todos los mailers y en la pagina de checkout de suscripcion
+- Ningun valor esta hardcodeado en el codigo — todo se lee con `SiteConfig.get(:clave)`
+
+### 8.10 Sidekiq
 
 En `/admin/sidekiq` se monitorean los jobs en background: colas, ejecucion, programados, fallidos. Protegido por autenticacion basica con credenciales de admin.
 
@@ -395,9 +448,21 @@ En `/admin/sidekiq` se monitorean los jobs en background: colas, ejecucion, prog
 
 ## PARTE 9 — Alertas automaticas
 
-### 9.1 Suscripcion por vencer
+### 9.1 Trial por vencer
 
-Job diario (`SubscriptionExpiryAlertJob`) a las 8am:
+Job diario (`TrialExpiryAlertJob`) a las 8am. Aplica a negocios en periodo de prueba:
+
+| Momento | Accion |
+|---------|--------|
+| 2 dias antes de fin del trial | Email + notificacion in-app |
+| Dia que vence el trial | Email + notificacion + banner rojo + CTA a checkout |
+| 2 dias despues | Email + notificacion + **negocio suspendido** |
+
+Anti-duplicados: campo `trial_alert_stage` en `Business` (0→1→2→3). Se resetea al activar una suscripcion paga.
+
+### 9.2 Suscripcion paga por vencer
+
+Job diario (`SubscriptionExpiryAlertJob`) a las 8am. Aplica a negocios con suscripcion activa:
 
 | Momento | Accion |
 |---------|--------|
@@ -407,13 +472,38 @@ Job diario (`SubscriptionExpiryAlertJob`) a las 8am:
 
 Anti-duplicados: campo `expiry_alert_stage` en la suscripcion (0→1→2→3). Se resetea al renovar.
 
-### 9.2 Completar citas
+### 9.3 Completar citas
 
 Job cada 15 min (`CompleteAppointmentsJob`): busca citas en estado `checked_in` cuya hora de fin ya paso y las marca como `completed`. Dispara cashback y solicitud de calificacion.
 
-### 9.3 Sugerencias de tarifa dinamica (Plan Inteligente)
+### 9.4 Sugerencias de tarifa dinamica (Plan Inteligente)
 
 Job quincenal (`Intelligence::PricingSuggestionJob`): analiza datos historicos de citas, detecta periodos de alta demanda y crea sugerencias de tarifa dinamica con estado `suggested`.
+
+---
+
+## PARTE 10 — Convenciones tecnicas de la API
+
+### 10.1 Error codes
+
+La API usa `error_code` en las respuestas de error para que el frontend pueda manejar casos especificos sin depender del texto del mensaje. Formato de respuesta:
+
+```json
+{
+  "error": "El slot ya no esta disponible",
+  "code": "slot_unavailable"
+}
+```
+
+Los error codes estan definidos por dominio:
+- **appointments** — `slot_unavailable`, `outside_business_hours`, `appointment_not_found`, etc.
+- **auth** — `invalid_credentials`, `token_expired`, `account_suspended`, etc.
+- **bookings** — `business_closed`, `past_slot`, `service_inactive`, etc.
+- **cash register** — `already_closed`, `no_appointments`, etc.
+- **credits** — `insufficient_credits`, `invalid_amount`, etc.
+- **invitations** — `invitation_expired`, `already_accepted`, etc.
+
+El frontend puede hacer `if (error.code === 'slot_unavailable')` en vez de comparar strings de mensajes.
 
 ---
 
@@ -434,6 +524,8 @@ Job quincenal (`Intelligence::PricingSuggestionJob`): analiza datos historicos d
 | Sugerencias IA (tarifas) | — | — | Si |
 | Metas financieras | — | — | Si |
 | Reconciliacion contable | — | — | Si |
+
+El trial de 7 dias da acceso completo al Plan Profesional. Al vencer, el negocio debe contratar un plan via checkout P2P.
 
 ---
 
@@ -463,6 +555,6 @@ Job quincenal (`Intelligence::PricingSuggestionJob`): analiza datos historicos d
 12. Pedro deja resena: 5 estrellas, "Excelente servicio"
 13. Al final del dia, negocio cierra caja
     → Ve que Juan atendio 8 citas, gano $200.000
-    → Comision 30% = $60.000 → confirma pago en efectivo
+    → Tipo de pago: commission 30% = $60.000 → confirma pago en efectivo
 14. Siguiente visita, Pedro tiene $1.250 de credito disponible
 ```

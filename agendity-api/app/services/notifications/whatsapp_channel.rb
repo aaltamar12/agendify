@@ -13,6 +13,13 @@ module Notifications
         return false
       end
 
+      # Supported templates:
+      #   :rating_request        (MARKETING) — post-service rating
+      #   :booking_confirmed     (UTILITY)   — payment approved, ticket ready
+      #   :appointment_reminder  (UTILITY)   — 24h before appointment
+      #   :booking_cancelled     (UTILITY)   — appointment cancelled
+      #   :payment_reminder      (UTILITY)   — pending payment reminder
+      #   :payment_rejected      (UTILITY)   — proof of payment rejected
       # TODO: Implement WhatsApp Business API integration
       Rails.logger.info("[WhatsAppChannel] Would send #{template} to #{recipient.phone}")
       false

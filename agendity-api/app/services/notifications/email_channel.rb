@@ -9,6 +9,16 @@ module Notifications
       case template
       when :rating_request
         CustomerMailer.rating_request(recipient, data).deliver_now
+      when :booking_confirmed
+        AppointmentMailer.booking_confirmed(data[:appointment]).deliver_now
+      when :appointment_reminder
+        AppointmentMailer.reminder(data[:appointment]).deliver_now
+      when :booking_cancelled
+        AppointmentMailer.booking_cancelled_to_customer(data[:appointment]).deliver_now
+      when :payment_reminder
+        AppointmentMailer.payment_reminder(data[:appointment]).deliver_now
+      when :payment_rejected
+        AppointmentMailer.payment_rejected(data[:appointment], data[:reason]).deliver_now
       else
         Rails.logger.warn("[EmailChannel] Unknown template: #{template}")
         return false

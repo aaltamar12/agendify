@@ -1,6 +1,6 @@
 # Sistema de Notificaciones — Agendity
 
-> Ultima actualizacion: 2026-03-22
+> Ultima actualizacion: 2026-03-23
 
 ## Principio fundamental
 
@@ -71,24 +71,29 @@ CHANNELS = [:email, :whatsapp].freeze
 
 ### Templates soportados
 
+Todas las notificaciones al usuario final pasan por MultiChannelService. Email siempre se envia. WhatsApp solo si el negocio tiene plan Profesional o Inteligente.
+
 | Template | Descripcion | EmailChannel | WhatsAppChannel |
 |---|---|---|---|
-| `:rating_request` | Solicitud de calificacion post-servicio | CustomerMailer.rating_request | Pendiente |
-
-> **Nota:** A medida que se migren los jobs existentes (booking_confirmed, reminder, cancelled) al MultiChannelService, se agregaran mas templates.
+| `:rating_request` | Solicitud de calificacion post-servicio | CustomerMailer.rating_request | rating_request (MARKETING) |
+| `:booking_confirmed` | Pago aprobado, ticket listo | AppointmentMailer.booking_confirmed | booking_confirmed (UTILITY) |
+| `:appointment_reminder` | Recordatorio 24h antes de la cita | AppointmentMailer.reminder | appointment_reminder (UTILITY) |
+| `:booking_cancelled` | Cita cancelada | AppointmentMailer.booking_cancelled_to_customer | booking_cancelled (UTILITY) |
+| `:payment_reminder` | Recordatorio de pago pendiente | AppointmentMailer.payment_reminder | payment_reminder (UTILITY) |
+| `:payment_rejected` | Comprobante de pago rechazado | AppointmentMailer.payment_rejected | payment_rejected (UTILITY) |
 
 ---
 
 ## Notificaciones al usuario final — Eventos
 
-| Evento | Job actual | Canales actuales | Canales objetivo |
-|---|---|---|---|
-| Cita confirmada (pago aprobado) | SendBookingConfirmedJob | Email | Email + WhatsApp |
-| Recordatorio 24h antes | SendReminderJob | Email | Email + WhatsApp |
-| Cita cancelada | SendBookingCancelledJob | Email | Email + WhatsApp |
-| Solicitud de calificacion | SendRatingRequestJob | Email + WhatsApp (via MultiChannelService) | Email + WhatsApp |
-
-> **TODO:** Migrar SendBookingConfirmedJob, SendReminderJob y SendBookingCancelledJob para que usen MultiChannelService en vez de llamar directamente a AppointmentMailer.
+| Evento | Job/Servicio | Canales (via MultiChannel) |
+|---|---|---|
+| Cita confirmada (pago aprobado) | SendBookingConfirmedJob | Email + WhatsApp (Pro+) |
+| Recordatorio 24h antes | SendReminderJob | Email + WhatsApp (Pro+) |
+| Cita cancelada | SendBookingCancelledJob | Email + WhatsApp (Pro+) |
+| Solicitud de calificacion | SendRatingRequestJob | Email + WhatsApp (Pro+) |
+| Recordatorio de pago (manual) | AppointmentsController#remind_payment | Email + WhatsApp (Pro+) |
+| Comprobante rechazado | Payments::RejectPaymentService | Email + WhatsApp (Pro+) |
 
 ---
 
@@ -132,15 +137,16 @@ POST /api/v1/notifications/mark_all_read  # Marcar todas como leidas
 
 ### Mailers
 
-**`AppointmentMailer`** (al negocio y/o usuario final):
-| Metodo | Destinatario | Evento |
-|---|---|---|
-| `new_booking` | Negocio | Nueva reserva creada |
-| `booking_confirmed` | Usuario final | Pago aprobado + ticket |
-| `booking_cancelled` | Ambos | Cita cancelada |
-| `reminder` | Usuario final | 24h antes de la cita |
-| `payment_reminder` | Usuario final | Recordatorio de pago (manual) |
-| `payment_rejected` | Usuario final | Comprobante rechazado |
+**`AppointmentMailer`**:
+| Metodo | Destinatario | Evento | Invocado por |
+|---|---|---|---|
+| `new_booking` | Negocio | Nueva reserva creada | SendNewBookingNotificationJob (directo) |
+| `booking_confirmed` | Usuario final | Pago aprobado + ticket | EmailChannel via MultiChannel |
+| `booking_cancelled` | Negocio | Cita cancelada (al negocio) | SendBookingCancelledJob (directo) |
+| `booking_cancelled_to_customer` | Usuario final | Cita cancelada (al cliente) | EmailChannel via MultiChannel |
+| `reminder` | Usuario final | 24h antes de la cita | EmailChannel via MultiChannel |
+| `payment_reminder` | Usuario final | Recordatorio de pago (manual) | EmailChannel via MultiChannel |
+| `payment_rejected` | Usuario final | Comprobante rechazado | EmailChannel via MultiChannel |
 
 **`CustomerMailer`** (solo usuario final, via MultiChannelService):
 | Metodo | Destinatario | Evento |
@@ -294,14 +300,14 @@ end
 
 | Job | Trigger | Que hace |
 |---|---|---|
-| `SendNewBookingNotificationJob` | Booking creado | Email al negocio + notificacion in-app |
-| `SendPaymentSubmittedJob` | Comprobante subido | Email al negocio + notificacion in-app |
-| `SendBookingConfirmedJob` | Pago aprobado | Email al usuario final con ticket |
-| `SendBookingCancelledJob` | Cita cancelada | Email a ambos + notificacion in-app |
-| `SendReminderJob` | Scheduler diario | Email recordatorio al usuario final |
+| `SendNewBookingNotificationJob` | Booking creado | Email al negocio + notificacion in-app (directo) |
+| `SendPaymentSubmittedJob` | Comprobante subido | Email al negocio + notificacion in-app (directo) |
+| `SendBookingConfirmedJob` | Pago aprobado | **MultiChannel** al usuario final (email + WA Pro+) |
+| `SendBookingCancelledJob` | Cita cancelada | Email al negocio (directo) + **MultiChannel** al usuario final |
+| `SendReminderJob` | Scheduler diario | **MultiChannel** al usuario final (email + WA Pro+) |
 | `AppointmentReminderSchedulerJob` | Cron 8am diario | Encola reminders para citas de manana |
 | `CompleteAppointmentsJob` | Cron cada 15 min | Marca checked_in como completed + rating request |
-| `SendRatingRequestJob` | Post-completion | MultiChannelService: email + WhatsApp al usuario final |
+| `SendRatingRequestJob` | Post-completion | **MultiChannel** al usuario final (email + WA Pro+) |
 
 ### Scheduled Jobs (`config/recurring.yml`)
 

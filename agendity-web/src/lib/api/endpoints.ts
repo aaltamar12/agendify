@@ -195,6 +195,7 @@ export const ENDPOINTS = {
     explore: `${BASE}/public/explore`,
     pricePreview: (slug: string) => `${BASE}/public/${slug}/price_preview`,
     priceCalendar: (slug: string) => `${BASE}/public/${slug}/price_calendar`,
+    siteConfig: `${BASE}/public/site_config`,
     adBanners: `${BASE}/public/ad_banners`,
     adBannerImpression: (id: number) => `${BASE}/public/ad_banners/${id}/impression`,
     adBannerClick: (id: number) => `${BASE}/public/ad_banners/${id}/click`,

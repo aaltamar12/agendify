@@ -4,7 +4,13 @@
 
 Sistema automatizado de alertas cuando la suscripcion de un negocio esta por vencer. Ejecuta un job diario que envia notificaciones por multiples canales y suspende negocios que no renuevan.
 
-## Flujo de alertas
+Adicionalmente, existe un job separado para el periodo de trial (`TrialExpiryAlertJob`) que gestiona el fin del periodo de prueba gratuita.
+
+---
+
+## 1. Alertas de suscripcion pagada (SubscriptionExpiryAlertJob)
+
+### Flujo de alertas
 
 | Momento | Canales | Accion adicional |
 |---------|---------|------------------|
@@ -14,7 +20,7 @@ Sistema automatizado de alertas cuando la suscripcion de un negocio esta por ven
 
 *WhatsApp solo si el plan lo incluye (`plan.whatsapp_notifications?`)
 
-## Modelo
+### Modelo
 
 Campo `expiry_alert_stage` en `subscriptions`:
 - `0` = ninguna alerta enviada
@@ -24,7 +30,7 @@ Campo `expiry_alert_stage` en `subscriptions`:
 
 Se resetea a `0` cuando se renueva la suscripcion via `process_renewal!`.
 
-## Job
+### Job
 
 ```ruby
 # app/jobs/subscription_expiry_alert_job.rb
@@ -45,14 +51,14 @@ class SubscriptionExpiryAlertJob < ApplicationJob
 end
 ```
 
-## Scopes en Subscription
+### Scopes en Subscription
 
 ```ruby
 scope :expiring_in, ->(days) { active.where(end_date: Date.current + days) }
 scope :expired_since, ->(days) { active.where(end_date: Date.current - days) }
 ```
 
-## Renovacion
+### Renovacion
 
 ```ruby
 subscription.process_renewal!
@@ -64,31 +70,114 @@ subscription.process_renewal!
 
 Disponible desde ActiveAdmin > Subscriptions > "Renovar suscripcion"
 
-## Mailer
+---
+
+## 2. Alertas de fin de trial (TrialExpiryAlertJob)
+
+### Contexto
+
+El trial dura **7 dias** (antes eran 30). Al registrarse, `Business#trial_ends_at` se fija en `7.days.from_now`. Cuando el trial termina, el negocio debe elegir un plan y subir comprobante de pago para continuar.
+
+### Flujo de alertas
+
+| Momento | Stage | Canales | Accion |
+|---------|-------|---------|--------|
+| 2 dias antes del fin del trial | 1 | Email + In-app + WhatsApp* | Aviso: "Tu trial termina en 2 dias, elige tu plan" |
+| Dia que termina el trial | 2 | Email + In-app + WhatsApp* | Email de agradecimiento + enlace a elegir plan |
+| 2 dias despues del fin del trial | 3 | Email + In-app + WhatsApp* | **Negocio suspendido automaticamente** |
+
+*WhatsApp solo si el plan del trial lo incluye.
+
+### Modelo
+
+Campo `trial_alert_stage` en `businesses`:
+- `0` = ninguna alerta enviada
+- `1` = alerta de 2 dias antes enviada
+- `2` = alerta del dia de fin enviada
+- `3` = alerta final + negocio suspendido
+
+Sirve como anti-duplicados: cada stage se envia una sola vez.
+
+### Job
+
+```ruby
+# app/jobs/trial_expiry_alert_job.rb
+# Corre diario a las 8am (config/recurring.yml)
+class TrialExpiryAlertJob < ApplicationJob
+  queue_as :default
+
+  def perform
+    # Stage 1: 2 dias antes
+    Business.on_trial.where(trial_ends_at: 2.days.from_now.beginning_of_day..2.days.from_now.end_of_day)
+             .where(trial_alert_stage: 0)
+
+    # Stage 2: Dia que termina el trial
+    Business.on_trial.where(trial_ends_at: Date.current.beginning_of_day..Date.current.end_of_day)
+             .where(trial_alert_stage: 1)
+
+    # Stage 3: 2 dias despues (suspender)
+    Business.on_trial.where(trial_ends_at: ..2.days.ago.end_of_day)
+             .where(trial_alert_stage: 2)
+  end
+end
+```
+
+### Mailer
+
+```ruby
+# app/mailers/business_mailer.rb
+BusinessMailer.trial_expiry_alert(business, stage)
+# stage 1: aviso anticipado
+# stage 2: dia de fin (email de agradecimiento + CTA elegir plan)
+# stage 3: suspension
+```
+
+### Relacion con checkout
+
+Cuando el negocio elige un plan y sube su comprobante (`POST /api/v1/subscription/checkout`), el admin aprueba el pago desde ActiveAdmin. `ApprovePaymentService` crea la suscripcion, reactiva el negocio y resetea `trial_alert_stage = 0`. Ver [sistema-referidos.md](sistema-referidos.md) para el flujo completo de checkout.
+
+---
+
+## Mailer compartido
 
 ```ruby
 # app/mailers/business_mailer.rb
 BusinessMailer.subscription_expiry_alert(business, subscription, stage)
 BusinessMailer.subscription_renewed(business, subscription)
+BusinessMailer.trial_expiry_alert(business, stage)
 ```
 
-Templates en `app/views/business_mailer/subscription_expiry_alert_stage_{1,2,3}.html.erb`
+Todos los mailers usan `SiteConfig.get(:support_email)` y `SiteConfig.get(:support_whatsapp)` en vez de valores hardcoded.
+
+Templates:
+- `app/views/business_mailer/subscription_expiry_alert_stage_{1,2,3}.html.erb`
+- `app/views/business_mailer/subscription_renewed.html.erb`
+- `app/views/business_mailer/trial_expiry_alert_stage_{1,2,3}.html.erb`
+
+---
 
 ## Banner en Frontend
 
 `SubscriptionBanner` en `src/components/layout/subscription-banner.tsx`:
-- Amarillo: 5 a 1 dias antes
-- Rojo: dia de vencimiento
-- Rojo oscuro: despues de vencer
+- Amarillo: 5 a 1 dias antes (suscripcion)
+- Rojo: dia de vencimiento (suscripcion)
+- Rojo oscuro: despues de vencer (suscripcion)
 
-Se muestra automaticamente basado en `subscription.end_date`.
+Para trial: se muestra banner segun `business.trial_ends_at` mientras el negocio este en periodo de prueba.
+
+Se muestra automaticamente basado en `subscription.end_date` o `business.trial_ends_at`.
+
+---
 
 ## Archivos clave
 
 - `app/jobs/subscription_expiry_alert_job.rb`
+- `app/jobs/trial_expiry_alert_job.rb`
 - `app/mailers/business_mailer.rb`
 - `app/models/subscription.rb` (scopes + `process_renewal!`)
+- `app/models/business.rb` (campo `trial_ends_at` + `trial_alert_stage`)
 - `app/views/business_mailer/subscription_expiry_alert_stage_*.html.erb`
 - `app/views/business_mailer/subscription_renewed.html.erb`
+- `app/views/business_mailer/trial_expiry_alert_stage_*.html.erb`
 - `agendity-web/src/components/layout/subscription-banner.tsx`
 - `config/recurring.yml` (schedule)

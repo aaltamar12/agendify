@@ -180,6 +180,9 @@ Rails.application.routes.draw do
         # Referral code validation
         get "referral_codes/:code/validate", to: "referral_codes#validate"
 
+        # Platform config (contact info, payment data)
+        get "site_config", to: "site_config#show"
+
         # Static routes first (before :slug catch-all)
         get  "ad_banners",                   to: "ad_banners#index"
         post "ad_banners/:id/impression",    to: "ad_banners#impression"

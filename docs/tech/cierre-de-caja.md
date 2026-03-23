@@ -60,7 +60,14 @@ CREATE TABLE employee_payments (
 -- En tabla employees:
 commission_percentage decimal(5,2)  -- % de comision (0 = sin comision)
 pending_balance decimal(12,2) DEFAULT 0  -- deuda acumulada pendiente de pago
+payment_type integer DEFAULT 0        -- 0=manual, 1=commission, 2=fixed_daily
+fixed_daily_pay decimal(12,2)         -- monto fijo por dia (solo para fixed_daily)
 ```
+
+**Tipos de pago de empleado:**
+- `manual` — el negocio decide cuanto pagar en cada cierre. El formulario muestra una alerta naranja recordando que es pago manual sin calculo automatico.
+- `commission` — se calcula automaticamente segun `commission_percentage` sobre los ingresos generados por el empleado en el dia.
+- `fixed_daily` — se usa `fixed_daily_pay` como monto fijo del dia, independientemente de cuanto genero.
 
 ### Relaciones
 
@@ -240,14 +247,19 @@ curl -X DELETE -H "Authorization: Bearer $TOKEN" \
 
 ### UX de pagos por empleado
 
-**Empleado con comision:**
+**Empleado con comision (`commission`):**
 - Boton "Confirmar pago de $X" (monto fijo = comision + pendiente anterior)
 - Link "Editar monto" revela input editable
 - Si paga menos → modal de advertencia: "La diferencia se sumara como pendiente en el proximo cierre"
 - Metodo: efectivo (confirmar) o transferencia (subir comprobante)
 
-**Empleado sin comision:**
+**Empleado pago fijo diario (`fixed_daily`):**
+- Se muestra el monto fijo (`fixed_daily_pay`) como sugerido
+- Mismo flujo de edicion y metodo de pago
+
+**Empleado manual (`manual`):**
 - Input libre para ingresar monto del pago del dia
+- Se muestra una **alerta naranja** indicando que el calculo es manual
 - Mismo flujo de efectivo/transferencia
 
 **Resumen del dia:**
