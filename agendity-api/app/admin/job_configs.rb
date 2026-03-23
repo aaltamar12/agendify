@@ -7,6 +7,10 @@ ActiveAdmin.register JobConfig do
 
   actions :index, :show, :edit, :update
 
+  filter :name
+  filter :enabled
+  filter :last_run_status
+
   index do
     column :name
     column :job_class
