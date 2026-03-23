@@ -1,0 +1,18 @@
+<h2>Ganaste creditos</h2>
+
+<p>Hola, <strong><%= @customer.name %></strong>.</p>
+
+<p>Por tu servicio de <strong><%= @service_name %></strong> en <strong><%= @business_name %></strong>, ganaste <strong><%= number_to_currency(@cashback_amount, unit: "$", precision: 0, delimiter: ".") %></strong> en creditos.</p>
+
+<p>Tu saldo actual es de <strong><%= number_to_currency(@new_balance, unit: "$", precision: 0, delimiter: ".") %></strong>. Puedes usarlos en tu proxima reserva.</p>
+
+<p style="text-align: center; margin: 24px 0;">
+  <a href="<%= @booking_url %>"
+     style="display: inline-block; background-color: #7c3aed; color: #ffffff; padding: 12px 32px; border-radius: 6px; font-size: 16px; font-weight: 600; text-decoration: none;">
+    Reservar ahora
+  </a>
+</p>
+
+<p style="color: #888888; font-size: 14px;">
+  Los creditos se aplican automaticamente al confirmar tu proxima reserva.
+</p>

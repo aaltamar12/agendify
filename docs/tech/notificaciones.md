@@ -82,6 +82,12 @@ Todas las notificaciones al usuario final pasan por MultiChannelService. Email s
 | `:payment_reminder` | Recordatorio de pago pendiente | AppointmentMailer.payment_reminder | payment_reminder (UTILITY) |
 | `:payment_rejected` | Comprobante de pago rechazado | AppointmentMailer.payment_rejected | payment_rejected (UTILITY) |
 
+**Notificaciones solo email (no MultiChannel):**
+
+| Notificacion | Mailer | Razon |
+|---|---|---|
+| Cashback ganado | CustomerMailer.cashback_credited | Ahorro de costos WhatsApp — la info de cashback se puede anadir al template WhatsApp de booking_confirmed |
+
 ---
 
 ## Notificaciones al usuario final — Eventos
@@ -94,6 +100,7 @@ Todas las notificaciones al usuario final pasan por MultiChannelService. Email s
 | Solicitud de calificacion | SendRatingRequestJob | Email + WhatsApp (Pro+) |
 | Recordatorio de pago (manual) | AppointmentsController#remind_payment | Email + WhatsApp (Pro+) |
 | Comprobante rechazado | Payments::RejectPaymentService | Email + WhatsApp (Pro+) |
+| Cashback ganado | SendCashbackNotificationJob | Email solo (no WhatsApp, para no gastar conversaciones extra) |
 
 ---
 
@@ -148,10 +155,11 @@ POST /api/v1/notifications/mark_all_read  # Marcar todas como leidas
 | `payment_reminder` | Usuario final | Recordatorio de pago (manual) | EmailChannel via MultiChannel |
 | `payment_rejected` | Usuario final | Comprobante rechazado | EmailChannel via MultiChannel |
 
-**`CustomerMailer`** (solo usuario final, via MultiChannelService):
-| Metodo | Destinatario | Evento |
-|---|---|---|
-| `rating_request` | Usuario final | Post-servicio completado |
+**`CustomerMailer`** (solo usuario final):
+| Metodo | Destinatario | Evento | Via |
+|---|---|---|---|
+| `rating_request` | Usuario final | Post-servicio completado | MultiChannelService (email + WA Pro+) |
+| `cashback_credited` | Usuario final | Creditos ganados por cashback | Email directo (no WhatsApp) |
 
 **`UserMailer`** (cuenta de usuario):
 | Metodo | Destinatario | Evento |
@@ -306,7 +314,8 @@ end
 | `SendBookingCancelledJob` | Cita cancelada | Email al negocio (directo) + **MultiChannel** al usuario final |
 | `SendReminderJob` | Scheduler diario | **MultiChannel** al usuario final (email + WA Pro+) |
 | `AppointmentReminderSchedulerJob` | Cron 8am diario | Encola reminders para citas de manana |
-| `CompleteAppointmentsJob` | Cron cada 15 min | Marca checked_in como completed + rating request |
+| `CompleteAppointmentsJob` | Cron cada 15 min | Marca checked_in como completed + cashback + rating request |
+| `SendCashbackNotificationJob` | Post-completion (si cashback > 0) | Email al usuario final (solo email, no WhatsApp) |
 | `SendRatingRequestJob` | Post-completion | **MultiChannel** al usuario final (email + WA Pro+) |
 
 ### Scheduled Jobs (`config/recurring.yml`)

@@ -10,14 +10,16 @@
 
 | # | Evento | Email | WhatsApp (Pro+) | Trigger |
 |---|--------|:-----:|:----------------:|---------|
-| 1 | Cita confirmada (pago aprobado) | Si | Si (futuro) | Negocio aprueba comprobante |
-| 2 | Recordatorio 24h antes | Si | Si (futuro) | Job diario 8am |
-| 3 | Cita cancelada | Si | Si (futuro) | Negocio o usuario cancela |
+| 1 | Cita confirmada (pago aprobado) | Si | Si (MultiChannel) | Negocio aprueba comprobante |
+| 2 | Recordatorio 24h antes | Si | Si (MultiChannel) | Job diario 8am |
+| 3 | Cita cancelada | Si | Si (MultiChannel) | Negocio o usuario cancela |
 | 4 | Solicitud de calificacion | Si | Si (MultiChannel) | 15 min despues de completar cita |
-| 5 | Recordatorio de pago (manual) | Si | No | Negocio envia manualmente |
-| 6 | Comprobante rechazado | Si | No | Negocio rechaza comprobante |
+| 5 | Recordatorio de pago (manual) | Si | Si (MultiChannel) | Negocio envia manualmente |
+| 6 | Comprobante rechazado | Si | Si (MultiChannel) | Negocio rechaza comprobante |
+| 7 | Cashback ganado | Si | No (solo email) | Al completar cita con cashback activo |
 
 **WhatsApp al usuario final:** Solo planes Profesional e Inteligente (`plan.whatsapp_notifications?`). Plan Basico solo email.
+**Cashback:** Se notifica solo por email para no gastar conversaciones WhatsApp adicionales. La info de cashback se puede anadir al template WhatsApp de booking_confirmed en el futuro.
 
 ### 1.2 Notificaciones al negocio (cliente de Agendity)
 
@@ -49,8 +51,8 @@ FLUJO: Reserva → Comprobante → Aprobacion → Recordatorio → Check-in → 
 
 Emails (costo externo):
   → Al negocio: nueva reserva (1) + comprobante recibido (1) = 2
-  → Al usuario: confirmacion (1) + recordatorio 24h (1) + rating request (1) = 3
-  TOTAL: 5 emails
+  → Al usuario: confirmacion (1) + recordatorio 24h (1) + rating request (1) + cashback ganado (1) = 4
+  TOTAL: 6 emails
 
 WhatsApp (costo externo, SOLO negocios Pro+):
   → Al usuario: confirmacion (1) + recordatorio (1) + rating (1) = 3

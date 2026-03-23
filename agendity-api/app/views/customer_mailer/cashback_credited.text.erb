@@ -1,0 +1,11 @@
+Ganaste creditos
+
+Hola, <%= @customer.name %>.
+
+Por tu servicio de <%= @service_name %> en <%= @business_name %>, ganaste <%= number_to_currency(@cashback_amount, unit: "$", precision: 0, delimiter: ".") %> en creditos.
+
+Tu saldo actual es de <%= number_to_currency(@new_balance, unit: "$", precision: 0, delimiter: ".") %>. Puedes usarlos en tu proxima reserva.
+
+Reservar: <%= @booking_url %>
+
+Los creditos se aplican automaticamente al confirmar tu proxima reserva.

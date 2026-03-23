@@ -20,6 +20,8 @@ module Notifications
       #   :booking_cancelled     (UTILITY)   — appointment cancelled
       #   :payment_reminder      (UTILITY)   — pending payment reminder
       #   :payment_rejected      (UTILITY)   — proof of payment rejected
+      # Note: cashback_credited goes via email only (not WhatsApp) to save conversation costs.
+      # Cashback info is appended to the booking_confirmed WhatsApp template instead.
       # TODO: Implement WhatsApp Business API integration
       Rails.logger.info("[WhatsAppChannel] Would send #{template} to #{recipient.phone}")
       false

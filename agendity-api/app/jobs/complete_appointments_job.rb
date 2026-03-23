@@ -25,8 +25,11 @@ class CompleteAppointmentsJob < ApplicationJob
         resource: appointment
       )
 
-      # Award cashback credits
-      Credits::CashbackService.call(appointment: appointment)
+      # Award cashback credits and notify customer
+      cashback_result = Credits::CashbackService.call(appointment: appointment)
+      if cashback_result.success? && cashback_result.data.present? && cashback_result.data.positive?
+        SendCashbackNotificationJob.perform_later(appointment.id, cashback_result.data.to_f)
+      end
 
       # Send rating request to customer
       SendRatingRequestJob.perform_later(appointment.id)
