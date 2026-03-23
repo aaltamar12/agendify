@@ -332,7 +332,7 @@ export function BookingConfirmation({
               <div className="mt-1 flex items-baseline justify-between border-t border-gray-100 pt-1">
                 <p className="text-sm font-medium text-gray-700">Total</p>
                 <p className="text-sm font-bold text-violet-700">
-                  {formatCurrency(selectedServices.reduce((sum, s) => sum + s.price, 0))}
+                  {formatCurrency(selectedServices.reduce((sum, s) => sum + Number(s.price), 0))}
                   <span className="ml-1 text-gray-400 font-normal">
                     {formatDuration(selectedServices.reduce((sum, s) => sum + s.duration_minutes, 0))}
                   </span>
