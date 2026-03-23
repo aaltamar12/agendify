@@ -1763,3 +1763,52 @@ notification_events.each do |attrs|
 end
 
 puts "  ✅ #{NotificationEventConfig.count} notification event configs"
+
+# ============================================================================
+# AD BANNERS
+# ============================================================================
+puts "\n📢 Creating ad banners..."
+
+ad_banners = [
+  {
+    name: "Promo Barberia - Resumen",
+    placement: "booking_summary",
+    image_url: "https://placehold.co/728x90/7c3aed/ffffff?text=Agendity+Pro+-+Gestiona+tu+negocio",
+    link_url: "https://agendity.com",
+    alt_text: "Agendity Pro - Gestiona tu negocio con inteligencia",
+    active: true,
+    priority: 10,
+    start_date: Date.current,
+    end_date: Date.current + 90.days
+  },
+  {
+    name: "Descuento Productos - Confirmacion",
+    placement: "booking_confirmation",
+    image_url: "https://placehold.co/728x90/059669/ffffff?text=20%25+OFF+en+productos+de+barberia",
+    link_url: "https://agendity.com",
+    alt_text: "20% de descuento en productos de barberia",
+    active: true,
+    priority: 5,
+    start_date: Date.current,
+    end_date: Date.current + 60.days
+  },
+  {
+    name: "Curso Barberia - Resumen",
+    placement: "booking_summary",
+    image_url: "https://placehold.co/728x90/dc2626/ffffff?text=Curso+de+barberia+profesional",
+    link_url: "https://agendity.com",
+    alt_text: "Curso de barberia profesional - Inscribete ya",
+    active: true,
+    priority: 3,
+    start_date: Date.current,
+    end_date: Date.current + 30.days
+  }
+]
+
+ad_banners.each do |attrs|
+  banner = AdBanner.find_or_initialize_by(name: attrs[:name])
+  banner.assign_attributes(attrs)
+  banner.save!
+end
+
+puts "  ✅ #{AdBanner.count} ad banners"

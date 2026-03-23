@@ -161,6 +161,9 @@ Rails.application.routes.draw do
       # Public endpoints (no auth required)
       namespace :public do
         # Static routes first (before :slug catch-all)
+        get  "ad_banners",                   to: "ad_banners#index"
+        post "ad_banners/:id/impression",    to: "ad_banners#impression"
+        post "ad_banners/:id/click",         to: "ad_banners#click"
         get  "tickets/:code",                to: "tickets#show"
         get  "tickets/:code/cancel_preview",  to: "tickets#cancel_preview"
         post "tickets/:code/cancel",          to: "tickets#cancel"

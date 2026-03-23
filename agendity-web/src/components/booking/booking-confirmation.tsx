@@ -25,6 +25,7 @@ import { formatDate, formatTime } from '@/lib/utils/date';
 import dayjs from 'dayjs';
 import type { Business } from '@/lib/api/types';
 import { saveCustomer } from '@/lib/utils/saved-customer';
+import { AdBanner } from '@/components/shared/ad-banner';
 
 interface BookingConfirmationProps {
   slug: string;
@@ -297,6 +298,9 @@ export function BookingConfirmation({
             </p>
           </Card>
         )}
+
+        {/* Ad banner — booking confirmation */}
+        <AdBanner placement="booking_confirmation" />
 
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
           {ticketCode && (
@@ -580,6 +584,9 @@ export function BookingConfirmation({
           </div>
         );
       })()}
+
+      {/* Ad banner — booking summary */}
+      <AdBanner placement="booking_summary" />
 
       {bookMutation.isError && (
         <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">

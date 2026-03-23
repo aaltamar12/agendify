@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_22_235000) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_23_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "unaccent"
@@ -58,6 +58,23 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_22_235000) do
     t.index ["business_id", "created_at"], name: "index_activity_logs_on_business_id_and_created_at"
     t.index ["business_id"], name: "index_activity_logs_on_business_id"
     t.index ["resource_type", "resource_id"], name: "index_activity_logs_on_resource_type_and_resource_id"
+  end
+
+  create_table "ad_banners", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "placement", null: false
+    t.string "image_url"
+    t.string "link_url"
+    t.string "alt_text"
+    t.boolean "active", default: true
+    t.integer "priority", default: 0
+    t.date "start_date"
+    t.date "end_date"
+    t.integer "impressions_count", default: 0
+    t.integer "clicks_count", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["placement", "active"], name: "index_ad_banners_on_placement_and_active"
   end
 
   create_table "appointment_services", force: :cascade do |t|
