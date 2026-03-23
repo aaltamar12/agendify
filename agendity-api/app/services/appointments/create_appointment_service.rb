@@ -66,10 +66,11 @@ module Appointments
         active_pricing = @business.dynamic_pricings
           .for_date(date)
           .where("service_id = ? OR service_id IS NULL", service.id)
-          .order(Arel.sql("service_id IS NOT NULL DESC")) # specific service first
-          .first
+          .order(Arel.sql("service_id IS NOT NULL DESC"))
+          .to_a
+          .find { |p| p.applies_on_day?(date) }
 
-        if active_pricing&.applies_on_day?(date)
+        if active_pricing
           dynamic_pricing = active_pricing
           final_price = active_pricing.apply_to_price(final_price, date)
         end

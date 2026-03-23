@@ -60,11 +60,12 @@ module Api
             .for_date(date)
             .where("service_id = ? OR service_id IS NULL", service.id)
             .order(Arel.sql("service_id IS NOT NULL DESC"))
-            .first
+            .to_a
+            .find { |p| p.applies_on_day?(date) }
 
           base_price = service.price.to_f
 
-          if pricing&.applies_on_day?(date)
+          if pricing
             adjusted = pricing.apply_to_price(base_price, date)
             pct = pricing.effective_adjustment(date)
             render_success({
@@ -100,17 +101,19 @@ module Api
             bh = business.business_hours.find_by(day_of_week: date.wday)
             closed = bh.nil? || bh.closed?
 
+            # Find the pricing that actually applies to this day (checks days_of_week)
             pricing = business.dynamic_pricings
               .for_date(date)
               .where("service_id = ? OR service_id IS NULL", service.id)
               .order(Arel.sql("service_id IS NOT NULL DESC"))
-              .first
+              .to_a
+              .find { |p| p.applies_on_day?(date) }
 
             adjusted = base_price
             pct = 0.0
             has_pricing = false
 
-            if !closed && pricing&.applies_on_day?(date)
+            if !closed && pricing
               adjusted = pricing.apply_to_price(base_price, date)
               pct = pricing.effective_adjustment(date)
               has_pricing = true
