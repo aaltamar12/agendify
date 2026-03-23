@@ -72,6 +72,8 @@ export function useDailySummary(date?: string) {
         params: date ? { date } : undefined,
       }),
     select: (res) => res.data,
+    staleTime: 0,
+    refetchOnWindowFocus: true,
   });
 }
 
