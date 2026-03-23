@@ -39,6 +39,8 @@ const profileSchema = z.object({
   facebook_url: z.string().optional(),
   website_url: z.string().optional(),
   google_maps_url: z.string().optional(),
+  nit: z.string().optional(),
+  legal_representative_name: z.string().optional(),
 });
 
 type ProfileFormData = z.infer<typeof profileSchema>;
@@ -701,6 +703,8 @@ function ProfileSection({
       facebook_url: business.facebook_url ?? '',
       website_url: business.website_url ?? '',
       google_maps_url: business.google_maps_url ?? '',
+      nit: business.nit ?? '',
+      legal_representative_name: business.legal_representative_name ?? '',
     },
   });
 
@@ -884,6 +888,22 @@ function ProfileSection({
           {...register('google_maps_url')}
         />
         </>
+        )}
+
+        {/* Legal info */}
+        {!isIndependent && (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Input
+              label="NIT"
+              placeholder="900.123.456-7"
+              {...register('nit')}
+            />
+            <Input
+              label="Representante legal"
+              placeholder="Nombre completo"
+              {...register('legal_representative_name')}
+            />
+          </div>
         )}
 
         {/* Social links */}
