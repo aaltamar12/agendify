@@ -104,6 +104,8 @@ export interface Business {
   // Legal fields (admin-managed)
   nit?: string | null;
   legal_representative_name?: string | null;
+  legal_representative_document?: string | null;
+  legal_representative_document_type?: string | null;
   // True when business has Profesional+ plan with featured listing
   featured?: boolean;
   // True when business has a plan with ai_features (verified badge in explore)

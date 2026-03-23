@@ -41,6 +41,8 @@ const profileSchema = z.object({
   google_maps_url: z.string().optional(),
   nit: z.string().optional(),
   legal_representative_name: z.string().optional(),
+  legal_representative_document: z.string().optional(),
+  legal_representative_document_type: z.string().optional(),
 });
 
 type ProfileFormData = z.infer<typeof profileSchema>;
@@ -705,6 +707,8 @@ function ProfileSection({
       google_maps_url: business.google_maps_url ?? '',
       nit: business.nit ?? '',
       legal_representative_name: business.legal_representative_name ?? '',
+      legal_representative_document: business.legal_representative_document ?? '',
+      legal_representative_document_type: business.legal_representative_document_type ?? '',
     },
   });
 
@@ -890,20 +894,57 @@ function ProfileSection({
         </>
         )}
 
-        {/* Legal info */}
-        {!isIndependent && (
+        {/* Legal / identity info */}
+        {isIndependent ? (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Input
-              label="NIT"
-              placeholder="900.123.456-7"
-              {...register('nit')}
+            <Select
+              label="Tipo de documento"
+              options={[
+                { value: '', label: 'Seleccionar...' },
+                { value: 'CC', label: 'Cédula de ciudadanía' },
+                { value: 'CE', label: 'Cédula de extranjería' },
+                { value: 'passport', label: 'Pasaporte' },
+              ]}
+              {...register('legal_representative_document_type')}
             />
             <Input
-              label="Representante legal"
-              placeholder="Nombre completo"
-              {...register('legal_representative_name')}
+              label="Número de documento"
+              placeholder="1.234.567.890"
+              {...register('legal_representative_document')}
             />
           </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <Input
+                label="NIT"
+                placeholder="900.123.456-7"
+                {...register('nit')}
+              />
+              <Input
+                label="Representante legal"
+                placeholder="Nombre completo"
+                {...register('legal_representative_name')}
+              />
+            </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <Select
+                label="Tipo de documento"
+                options={[
+                  { value: '', label: 'Seleccionar...' },
+                  { value: 'CC', label: 'Cédula de ciudadanía' },
+                  { value: 'CE', label: 'Cédula de extranjería' },
+                  { value: 'passport', label: 'Pasaporte' },
+                ]}
+                {...register('legal_representative_document_type')}
+              />
+              <Input
+                label="Número de documento"
+                placeholder="1.234.567.890"
+                {...register('legal_representative_document')}
+              />
+            </div>
+          </>
         )}
 
         {/* Social links */}
