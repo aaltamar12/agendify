@@ -118,7 +118,7 @@ module Api
 
             {
               date: date.to_s,
-              day_name: I18n.l(date, format: "%a") rescue date.strftime("%a"),
+              day_name: (I18n.l(date, format: "%a") rescue date.strftime("%a")),
               closed: closed,
               base_price: base_price,
               adjusted_price: adjusted.round(2),
