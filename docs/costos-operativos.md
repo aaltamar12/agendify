@@ -105,20 +105,30 @@ Servicios en Docker Compose:
 
 **Disco (100 GB) — el cuello de botella real:**
 - SO + Docker images + DB + Redis + logs: ~10-15 GB base
-- Queda ~85 GB utiles para comprobantes y logos
-- Cada comprobante: ~1 MB promedio (foto/captura)
-- Logo por negocio: ~200 KB
-- No todas las citas tienen comprobante (efectivo no sube imagen)
+- Queda ~85 GB utiles para archivos subidos
 
-| Negocios | Citas con comprobante/mes | Storage/mes | Meses hasta llenar 85 GB |
-|----------|--------------------------|-------------|--------------------------|
-| 30 | ~5,000 | ~5 GB | 17 meses |
-| 50 | ~8,000 | ~8 GB | 10 meses |
-| 100 | ~16,000 | ~16 GB | 5 meses |
-| 200 | ~32,000 | ~32 GB | 2.5 meses |
-| 300 | ~48,000 | ~48 GB | <2 meses |
+**Fuentes de storage (ActiveStorage):**
 
-**Nota:** Estimando ~70% de citas con comprobante (el resto paga en efectivo). Con 30 negocios tienes mas de 1 ano tranquilo. Con 100+ necesitas plan de storage externo o cleanup.
+| Tipo de archivo | Tamano promedio | Quien sube | Frecuencia |
+|-----------------|-----------------|------------|------------|
+| Comprobante de pago (cita) | ~1 MB | Usuario final | ~70% de citas (resto es efectivo) |
+| Comprobante de transferencia (cierre de caja) | ~1 MB | Negocio | 1 por empleado pagado por transferencia/dia |
+| Logo del negocio | ~200 KB | Negocio | 1 vez |
+| Portada del negocio (Pexels) | ~300 KB | Negocio | 1 vez |
+
+**Calculo de storage mensual por escala:**
+
+Supuestos: 240 citas/mes por negocio, 70% con comprobante de cita, 3 empleados promedio, 50% pagados por transferencia (15 comprobantes de cierre/mes por negocio)
+
+| Negocios | Comprobantes cita/mes | Comprobantes cierre/mes | Storage total/mes | Meses hasta llenar 85 GB |
+|----------|----------------------|------------------------|-------------------|--------------------------|
+| 30 | ~5,000 | ~450 | ~5.5 GB | 15 meses |
+| 50 | ~8,400 | ~750 | ~9.2 GB | 9 meses |
+| 100 | ~16,800 | ~1,500 | ~18.3 GB | 4.5 meses |
+| 200 | ~33,600 | ~3,000 | ~36.6 GB | 2 meses |
+| 300 | ~50,400 | ~4,500 | ~54.9 GB | <1.5 meses |
+
+**Nota:** Con 30 negocios tienes mas de 1 ano tranquilo. Con 100+ necesitas plan de storage externo o cleanup de comprobantes antiguos (>90 dias).
 
 ### 2.1.1 Upgrade futuro — VPS OVH 8 cores / 24 GB / 200 GB (~$24 USD/mes)
 
@@ -136,12 +146,14 @@ Servicios en Docker Compose:
 
 **Capacidad estimada con el upgrade:**
 
-| Negocios | Citas con comprobante/mes | Storage/mes | Meses hasta llenar 185 GB* |
-|----------|--------------------------|-------------|----------------------------|
-| 100 | ~16,000 | ~16 GB | 11 meses |
-| 200 | ~32,000 | ~32 GB | 5.5 meses |
-| 300 | ~48,000 | ~48 GB | 3.5 meses |
-| 500 | ~80,000 | ~80 GB | 2 meses |
+Incluye comprobantes de citas + comprobantes de cierre de caja (transferencias a empleados).
+
+| Negocios | Storage total/mes | Meses hasta llenar 185 GB* |
+|----------|-------------------|----------------------------|
+| 100 | ~18.3 GB | 10 meses |
+| 200 | ~36.6 GB | 5 meses |
+| 300 | ~54.9 GB | 3 meses |
+| 500 | ~91.5 GB | 2 meses |
 
 *185 GB = 200 GB - 15 GB base del sistema
 
