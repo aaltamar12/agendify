@@ -113,6 +113,16 @@ ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT=dev-salt-change-in-production-32c
 
 ---
 
+## APIs externas
+
+| Variable | Requerida | Descripcion |
+|---|---|---|
+| `PEXELS_API_KEY` | Opcional | API key de Pexels para el banco de imagenes de portada. Gratis en [pexels.com/api](https://www.pexels.com/api/). Si no se configura, la galeria retorna vacio. |
+| `WHATSAPP_API_TOKEN` | Pendiente | Token de WhatsApp Business API de Meta. Para notificaciones al usuario final. |
+| `WHATSAPP_PHONE_NUMBER_ID` | Pendiente | ID del numero de WhatsApp Business. |
+
+---
+
 ## Resumen rapido
 
 | Repo | Criticas | Opcionales | Internas | Total |
