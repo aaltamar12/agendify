@@ -26,7 +26,7 @@ class Employee < ApplicationRecord
 
   # -- Ransack (ActiveAdmin filters) --
   def self.ransackable_attributes(_auth_object = nil)
-    %w[name active business_id created_at updated_at]
+    %w[name active business_id document_number document_type fiscal_address created_at updated_at]
   end
 
   def self.ransackable_associations(_auth_object = nil)

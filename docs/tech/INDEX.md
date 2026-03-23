@@ -29,6 +29,7 @@
 | [reportes-ganancias.md](reportes-ganancias.md) | Ganancias netas, penalty income, validacion de consistencia, ActiveAdmin financiero, dias cerrados |
 | [features-recientes.md](features-recientes.md) | Multiples servicios, creditos en reserva, banners publicitarios, metas financieras, precios dinamicos, pricing por plan |
 | [env-variables.md](env-variables.md) | Variables de entorno: frontend (4) + backend (25), valores dev/prod, notas de seguridad |
+| [profesional-independiente.md](profesional-independiente.md) | Profesional independiente: modelo Business con `independent: true`, flujo de creacion, diferencias con negocio regular |
 | [decisiones/](decisiones/) | ADRs (Architecture Decision Records) |
 
 ### Decisiones técnicas (ADRs)

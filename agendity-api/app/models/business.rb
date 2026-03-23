@@ -62,12 +62,14 @@ class Business < ApplicationRecord
 
   # -- Scopes --
   scope :active, -> { where(status: :active) }
+  scope :independent, -> { where(independent: true) }
+  scope :establishments, -> { where(independent: false) }
   scope :in_trial, -> { where("trial_ends_at > ?", Time.current) }
   scope :nearby, ->(lat, lng, radius_km = 10) { near([lat, lng], radius_km, units: :km) }
 
   # -- Ransack (ActiveAdmin filters) --
   def self.ransackable_attributes(_auth_object = nil)
-    %w[name slug business_type status city onboarding_completed created_at updated_at]
+    %w[name slug business_type status city onboarding_completed independent created_at updated_at]
   end
 
   def self.ransackable_associations(_auth_object = nil)
