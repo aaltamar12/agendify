@@ -38,11 +38,18 @@ export default function CheckinPage() {
     }
   }
 
+  function extractTicketCode(scanned: string): string {
+    // QR contains URL like "https://agendity.co/slug/ticket/CODE" — extract CODE
+    const match = scanned.match(/\/ticket\/([A-Za-z0-9]+)\/?$/);
+    return match ? match[1] : scanned;
+  }
+
   async function handleScan(code: string) {
     setShowScanner(false);
-    setTicketCode(code);
+    const ticketCode = extractTicketCode(code);
+    setTicketCode(ticketCode);
     try {
-      const result = await checkinMutation.mutateAsync(code);
+      const result = await checkinMutation.mutateAsync(ticketCode);
       setCheckedInAppointment(result.data);
     } catch {
       // Error handled by mutation state

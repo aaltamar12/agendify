@@ -34,10 +34,16 @@ export default function EmployeeCheckinPage() {
     }
   };
 
+  function extractTicketCode(scanned: string): string {
+    const match = scanned.match(/\/ticket\/([A-Za-z0-9]+)\/?$/);
+    return match ? match[1] : scanned;
+  }
+
   const handleScan = (code: string) => {
     setShowScanner(false);
-    setTicketCode(code);
-    handleCheckin(code);
+    const ticketCode = extractTicketCode(code);
+    setTicketCode(ticketCode);
+    handleCheckin(ticketCode);
   };
 
   return (
