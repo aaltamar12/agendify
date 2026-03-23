@@ -44,6 +44,7 @@ class Business < ApplicationRecord
   has_many :credit_accounts, dependent: :destroy
   has_many :dynamic_pricings, dependent: :destroy
   has_many :employee_balance_adjustments, dependent: :destroy
+  has_many :business_goals, dependent: :destroy
 
   # -- Validations --
   validates :name, presence: true

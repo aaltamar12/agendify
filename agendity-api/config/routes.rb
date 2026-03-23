@@ -96,6 +96,11 @@ Rails.application.routes.draw do
       resource :business_hours, only: %i[show update]
       resources :blocked_slots, only: %i[index show create update destroy]
 
+      # Goals (Plan Inteligente)
+      resources :goals, except: [:new, :edit] do
+        get :progress, on: :collection
+      end
+
       # Dynamic pricing
       resources :dynamic_pricing, except: [:new, :edit] do
         member do
