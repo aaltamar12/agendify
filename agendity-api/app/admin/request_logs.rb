@@ -54,10 +54,10 @@ ActiveAdmin.register RequestLog do
       row :request_id
       row :resource_type
       row :resource_id
-      row(:request_params) { |log| pre JSON.pretty_generate(log.request_params) }
-      row(:response_body) { |log| pre JSON.pretty_generate(log.response_body) if log.response_body.present? }
-      row :error_message
-      row(:error_backtrace) { |log| pre log.error_backtrace if log.error_backtrace }
+      row(:request_params) { |log| pre(JSON.pretty_generate(log.request_params)) rescue pre(log.request_params.to_s) }
+      row(:response_body) { |log| (pre(JSON.pretty_generate(log.response_body)) rescue pre(log.response_body.to_s)) if log.response_body.present? }
+      row(:error_message) { |log| log.error_message }
+      row(:error_backtrace) { |log| pre(log.error_backtrace.to_s) if log.error_backtrace.present? }
       row :created_at
     end
 
