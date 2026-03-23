@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_23_000001) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_23_000010) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "unaccent"
@@ -386,6 +386,20 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_23_000001) do
     t.decimal "pending_balance", precision: 12, scale: 2, default: "0.0"
     t.index ["business_id"], name: "index_employees_on_business_id"
     t.index ["user_id"], name: "index_employees_on_user_id"
+  end
+
+  create_table "job_configs", force: :cascade do |t|
+    t.string "job_class", null: false
+    t.string "name", null: false
+    t.string "description"
+    t.string "schedule"
+    t.boolean "enabled", default: true
+    t.datetime "last_run_at"
+    t.string "last_run_status"
+    t.text "last_run_message"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["job_class"], name: "index_job_configs_on_job_class", unique: true
   end
 
   create_table "jwt_denylists", force: :cascade do |t|
