@@ -38,7 +38,7 @@ const employeeFormSchema = z.object({
   active: z.boolean(),
   payment_type: z.enum(['none', 'commission', 'fixed_daily']).default('none'),
   commission_percentage: z.coerce.number().min(0).max(100).optional().default(0),
-  fixed_daily_pay: z.coerce.number().min(0).optional().default(0),
+  fixed_daily_pay: z.coerce.number().int('Debe ser un valor entero').min(0).optional().default(0),
   service_ids: z.array(z.number()),
   schedules: z.array(scheduleEntrySchema),
 });
@@ -232,7 +232,7 @@ export function EmployeeForm({ employee, onSubmit, loading }: EmployeeFormProps)
           label="Pago fijo diario ($)"
           type="number"
           min={0}
-          step="any"
+          step={1}
           placeholder="Ej: 50000"
           error={errors.fixed_daily_pay?.message}
           {...register('fixed_daily_pay')}
