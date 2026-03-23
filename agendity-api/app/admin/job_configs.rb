@@ -27,7 +27,7 @@ ActiveAdmin.register JobConfig do
       end
     }
     actions defaults: true do |job|
-      item "Run now", admin_job_config_run_path(job), method: :post, class: "button small"
+      item "Run now", run_admin_job_config_path(job), method: :post, class: "button small"
     end
   end
 
