@@ -232,7 +232,7 @@ export function EmployeeForm({ employee, onSubmit, loading }: EmployeeFormProps)
           label="Pago fijo diario ($)"
           type="number"
           min={0}
-          step={1000}
+          step={500}
           placeholder="Ej: 50000"
           error={errors.fixed_daily_pay?.message}
           {...register('fixed_daily_pay')}
