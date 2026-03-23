@@ -58,10 +58,8 @@ export function seedSecondBusiness(): Business {
       business_id: 2,
       plan_id: 3,
       status: 'active',
-      current_period_start: '2026-03-01T00:00:00Z',
-      current_period_end: '2026-03-31T23:59:59Z',
-      trial_end: null,
-      cancelled_at: null,
+      start_date: '2026-03-01',
+      end_date: '2026-04-30',
       created_at: '2025-10-01T10:00:00Z',
       updated_at: '2026-03-01T00:00:00Z',
       plan: seedIntelligentePlan(),
@@ -153,15 +151,15 @@ export function seedIntelligentePlan(): Plan {
 }
 
 export function seedSubscription(): Subscription {
+  // Subscription expires today to demonstrate the expiry banner
+  const today = new Date().toISOString().slice(0, 10);
   return {
     id: 1,
     business_id: 1,
     plan_id: 2,
     status: 'active',
-    current_period_start: '2026-03-01T00:00:00Z',
-    current_period_end: '2026-03-31T23:59:59Z',
-    trial_end: null,
-    cancelled_at: null,
+    start_date: '2026-02-23',
+    end_date: today,
     created_at: '2025-11-01T10:00:00Z',
     updated_at: '2026-03-01T00:00:00Z',
     plan: seedPlan(),
