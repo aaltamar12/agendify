@@ -8,6 +8,7 @@ import { useGoals, useGoalProgress, useCreateGoal, useDeleteGoal } from '@/lib/h
 import { useCurrentSubscription } from '@/lib/hooks/use-subscription';
 import { useUIStore } from '@/lib/stores/ui-store';
 import { AI_FEATURES_PLANS } from '@/lib/constants';
+import { formatCurrency } from '@/lib/utils/format';
 import type { GoalProgress } from '@/lib/hooks/use-goals';
 
 const GOAL_TYPES = [
@@ -108,8 +109,8 @@ function GoalCard({ goal, onDelete }: { goal: GoalProgress; onDelete: () => void
           {/* Progress bar */}
           <div className="mt-3">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-500">${Number(goal.current_value).toLocaleString()}</span>
-              <span className="font-medium text-gray-700">${Number(goal.target_value).toLocaleString()}</span>
+              <span className="text-gray-500">{formatCurrency(Number(goal.current_value))}</span>
+              <span className="font-medium text-gray-700">{formatCurrency(Number(goal.target_value))}</span>
             </div>
             <div className="mt-1 h-3 w-full overflow-hidden rounded-full bg-gray-200">
               <div

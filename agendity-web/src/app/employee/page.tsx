@@ -65,7 +65,7 @@ export default function EmployeeDashboardPage() {
           <div className="flex items-center gap-3">
             <DollarSign className="h-5 w-5 text-green-600" />
             <div>
-              <p className="text-lg font-bold text-gray-900">${data.stats.month_revenue.toLocaleString()}</p>
+              <p className="text-lg font-bold text-gray-900">{formatCurrency(data.stats.month_revenue)}</p>
               <p className="text-xs text-gray-500">Ingresos (mes)</p>
             </div>
           </div>

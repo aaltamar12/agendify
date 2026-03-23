@@ -16,6 +16,7 @@ import { useBusinessHours } from '@/lib/hooks/use-business';
 import { useCurrentSubscription } from '@/lib/hooks/use-subscription';
 import { useUIStore } from '@/lib/stores/ui-store';
 import { ADVANCED_REPORTS_PLANS, AI_FEATURES_PLANS } from '@/lib/constants';
+import { formatCurrency } from '@/lib/utils/format';
 import type { DynamicPricingPayload } from '@/lib/hooks/use-dynamic-pricing';
 import type { DayOfWeek } from '@/lib/api/types';
 
@@ -360,22 +361,22 @@ function CreatePricingModal({ onClose }: { onClose: () => void }) {
             {!isProgressive ? (
               <p className="text-gray-600">
                 Precio ajustado: <strong>
-                  ${form.price_adjustment_type === 'percentage'
-                    ? (50000 + 50000 * (form.adjustment_value || 0) / 100).toLocaleString()
-                    : (50000 + (form.adjustment_value || 0)).toLocaleString()
+                  {form.price_adjustment_type === 'percentage'
+                    ? formatCurrency(50000 + 50000 * (form.adjustment_value || 0) / 100)
+                    : formatCurrency(50000 + (form.adjustment_value || 0))
                   }
                 </strong>
                 {' '}({(form.adjustment_value || 0) >= 0 ? '+' : ''}{form.adjustment_value}{suffix})
               </p>
             ) : (
               <p className="text-gray-600">
-                Dia 1: ${form.price_adjustment_type === 'percentage'
-                  ? (50000 + 50000 * (form.adjustment_start_value || 0) / 100).toLocaleString()
-                  : (50000 + (form.adjustment_start_value || 0)).toLocaleString()
+                Dia 1: {form.price_adjustment_type === 'percentage'
+                  ? formatCurrency(50000 + 50000 * (form.adjustment_start_value || 0) / 100)
+                  : formatCurrency(50000 + (form.adjustment_start_value || 0))
                 }
-                {' → '}Ultimo dia: ${form.price_adjustment_type === 'percentage'
-                  ? (50000 + 50000 * (form.adjustment_end_value || 0) / 100).toLocaleString()
-                  : (50000 + (form.adjustment_end_value || 0)).toLocaleString()
+                {' → '}Ultimo dia: {form.price_adjustment_type === 'percentage'
+                  ? formatCurrency(50000 + 50000 * (form.adjustment_end_value || 0) / 100)
+                  : formatCurrency(50000 + (form.adjustment_end_value || 0))
                 }
               </p>
             )}

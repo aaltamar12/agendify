@@ -147,7 +147,7 @@ export default function ReportsPage() {
                 <TrendingUp className="h-5 w-5 text-green-600" />
                 <p className="text-xs text-gray-500">Ingresos (servicios)</p>
               </div>
-              <p className="mt-1 text-xl font-bold text-gray-900">${Number(profit.revenue).toLocaleString()}</p>
+              <p className="mt-1 text-xl font-bold text-gray-900">{formatCurrency(Number(profit.revenue))}</p>
             </div>
             {profit.penalty_income > 0 && (
               <div className="rounded-lg border border-orange-200 bg-orange-50 p-4">
@@ -155,7 +155,7 @@ export default function ReportsPage() {
                   <AlertTriangle className="h-5 w-5 text-orange-600" />
                   <p className="text-xs text-orange-700">Penalizaciones</p>
                 </div>
-                <p className="mt-1 text-xl font-bold text-orange-700">+${Number(profit.penalty_income).toLocaleString()}</p>
+                <p className="mt-1 text-xl font-bold text-orange-700">{'+' + formatCurrency(Number(profit.penalty_income))}</p>
                 <p className="text-[10px] text-orange-500">Retencion por cancelaciones</p>
               </div>
             )}
@@ -164,7 +164,7 @@ export default function ReportsPage() {
                 <Wallet className="h-5 w-5 text-red-500" />
                 <p className="text-xs text-gray-500">Pagos empleados</p>
               </div>
-              <p className="mt-1 text-xl font-bold text-red-600">-${Number(profit.employee_payments).toLocaleString()}</p>
+              <p className="mt-1 text-xl font-bold text-red-600">{'-' + formatCurrency(Number(profit.employee_payments))}</p>
             </div>
             <div className="rounded-lg border border-gray-200 p-4">
               <div className="flex items-center gap-2">
@@ -172,7 +172,7 @@ export default function ReportsPage() {
                 <p className="text-xs text-gray-500">Ganancia neta</p>
               </div>
               <p className={`mt-1 text-xl font-bold ${profit.net_profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                ${Number(profit.net_profit).toLocaleString()}
+                {formatCurrency(Number(profit.net_profit))}
               </p>
             </div>
             <div className="rounded-lg border border-gray-200 p-4">
@@ -190,14 +190,14 @@ export default function ReportsPage() {
               <Coins className="h-4 w-4 text-green-600" />
               <div>
                 <p className="text-xs text-gray-500">Creditos en circulacion</p>
-                <p className="text-sm font-semibold text-gray-900">${Number(profit.total_credits_in_circulation).toLocaleString()}</p>
+                <p className="text-sm font-semibold text-gray-900">{formatCurrency(Number(profit.total_credits_in_circulation))}</p>
               </div>
             </div>
             <div className="flex items-center gap-3 rounded-lg bg-gray-50 p-3">
               <DollarSign className="h-4 w-4 text-blue-600" />
               <div>
                 <p className="text-xs text-gray-500">Cashback otorgado</p>
-                <p className="text-sm font-semibold text-gray-900">${Number(profit.credits_issued).toLocaleString()}</p>
+                <p className="text-sm font-semibold text-gray-900">{formatCurrency(Number(profit.credits_issued))}</p>
               </div>
             </div>
             {profit.pending_employee_debt > 0 && (
@@ -205,7 +205,7 @@ export default function ReportsPage() {
                 <AlertTriangle className="h-4 w-4 text-orange-600" />
                 <div>
                   <p className="text-xs text-orange-700">Deuda pendiente empleados</p>
-                  <p className="text-sm font-semibold text-orange-900">${Number(profit.pending_employee_debt).toLocaleString()}</p>
+                  <p className="text-sm font-semibold text-orange-900">{formatCurrency(Number(profit.pending_employee_debt))}</p>
                 </div>
               </div>
             )}

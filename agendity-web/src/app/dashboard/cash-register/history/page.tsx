@@ -5,6 +5,7 @@ import { ArrowLeft, Calendar, DollarSign } from 'lucide-react';
 import Link from 'next/link';
 import { Button, Card, Spinner, Badge, Modal } from '@/components/ui';
 import { useCashRegisterHistory } from '@/lib/hooks/use-cash-register';
+import { formatCurrency } from '@/lib/utils/format';
 import type { CashRegisterClose } from '@/lib/hooks/use-cash-register';
 
 export default function CashRegisterHistoryPage() {
@@ -59,7 +60,7 @@ export default function CashRegisterHistoryPage() {
               <DollarSign className="h-5 w-5 text-green-600" />
               <div>
                 <p className="text-sm text-gray-500">Total ingresos</p>
-                <p className="text-xl font-bold text-gray-900">${totalRevenue.toLocaleString()}</p>
+                <p className="text-xl font-bold text-gray-900">{formatCurrency(totalRevenue)}</p>
               </div>
             </div>
           </Card>
@@ -99,7 +100,7 @@ export default function CashRegisterHistoryPage() {
                 {closes.map((close) => (
                   <tr key={close.id} className="border-b border-gray-100">
                     <td className="py-3 font-medium text-gray-900">{close.date}</td>
-                    <td className="py-3 text-gray-600">${close.total_revenue.toLocaleString()}</td>
+                    <td className="py-3 text-gray-600">{formatCurrency(close.total_revenue)}</td>
                     <td className="py-3 text-gray-600">{close.total_appointments}</td>
                     <td className="py-3">
                       <Badge variant={close.status === 'closed' ? 'success' : 'default'}>
@@ -135,7 +136,7 @@ export default function CashRegisterHistoryPage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-gray-500">Ingresos</p>
-                <p className="text-lg font-bold">${selectedClose.total_revenue.toLocaleString()}</p>
+                <p className="text-lg font-bold">{formatCurrency(selectedClose.total_revenue)}</p>
               </div>
               <div>
                 <p className="text-sm text-gray-500">Citas</p>
@@ -161,9 +162,9 @@ export default function CashRegisterHistoryPage() {
                       {selectedClose.employee_payments.map((ep) => (
                         <tr key={ep.employee_id} className="border-b border-gray-50">
                           <td className="py-2 font-medium">{ep.employee_name}</td>
-                          <td className="py-2">${ep.total_earned.toLocaleString()}</td>
-                          <td className="py-2">${ep.commission_amount.toLocaleString()}</td>
-                          <td className="py-2">${ep.amount_paid.toLocaleString()}</td>
+                          <td className="py-2">{formatCurrency(ep.total_earned)}</td>
+                          <td className="py-2">{formatCurrency(ep.commission_amount)}</td>
+                          <td className="py-2">{formatCurrency(ep.amount_paid)}</td>
                           <td className="py-2 capitalize">{ep.payment_method === 'cash' ? 'Efectivo' : 'Transferencia'}</td>
                         </tr>
                       ))}

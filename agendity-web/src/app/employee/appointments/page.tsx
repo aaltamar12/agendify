@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Card, Spinner } from '@/components/ui';
 import { useEmployeeAppointments } from '@/lib/hooks/use-employee-dashboard';
+import { formatCurrency } from '@/lib/utils/format';
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   pending_payment: { label: 'Pendiente pago', color: 'bg-orange-100 text-orange-700' },
@@ -52,7 +53,7 @@ export default function EmployeeAppointmentsPage() {
                     </p>
                     <p className="text-xs text-gray-500">
                       {appt.appointment_date} · {appt.start_time?.toString().slice(0, 5)}
-                      {appt.price && ` · $${Number(appt.price).toLocaleString()}`}
+                      {appt.price && ` · ${formatCurrency(Number(appt.price))}`}
                     </p>
                   </div>
                   <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${statusInfo.color}`}>

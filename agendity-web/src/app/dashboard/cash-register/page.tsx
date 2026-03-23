@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { Button, Card, Spinner } from '@/components/ui';
 import { UpgradeBanner } from '@/components/shared/upgrade-banner';
 import { useDailySummary, useCloseCashRegister } from '@/lib/hooks/use-cash-register';
+import { formatCurrency } from '@/lib/utils/format';
 import { useCurrentSubscription } from '@/lib/hooks/use-subscription';
 import { useUIStore } from '@/lib/stores/ui-store';
 import { ADVANCED_REPORTS_PLANS } from '@/lib/constants';
@@ -158,7 +159,7 @@ function CashRegisterContent() {
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Ingresos</p>
-                  <p className="text-xl font-bold text-gray-900">${summary.total_revenue.toLocaleString()}</p>
+                  <p className="text-xl font-bold text-gray-900">{formatCurrency(summary.total_revenue)}</p>
                 </div>
               </div>
             </Card>
@@ -220,16 +221,16 @@ function CashRegisterContent() {
                     <div className="grid grid-cols-3 gap-8">
                       <div>
                         <p className="text-xs text-gray-500">Ingresos del dia</p>
-                        <p className="text-lg font-bold text-gray-900">${summary.total_revenue.toLocaleString()}</p>
+                        <p className="text-lg font-bold text-gray-900">{formatCurrency(summary.total_revenue)}</p>
                       </div>
                       <div>
                         <p className="text-xs text-gray-500">Total pagos empleados</p>
-                        <p className="text-lg font-bold text-red-600">-${totalPaid.toLocaleString()}</p>
+                        <p className="text-lg font-bold text-red-600">{'-' + formatCurrency(totalPaid)}</p>
                       </div>
                       <div>
                         <p className="text-xs text-gray-500">Ganancia neta</p>
                         <p className={`text-lg font-bold ${netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          ${netProfit.toLocaleString()}
+                          {formatCurrency(netProfit)}
                         </p>
                       </div>
                     </div>
@@ -325,7 +326,7 @@ function EmployeeRow({
         <div className="min-w-0 flex-1">
           <p className="text-sm font-medium text-gray-900">{emp.employee_name}</p>
           <p className="text-xs text-gray-500">
-            {emp.appointments_count} cita{emp.appointments_count !== 1 && 's'} · ${emp.total_earned.toLocaleString()} ingresos
+            {emp.appointments_count} cita{emp.appointments_count !== 1 && 's'} · {formatCurrency(emp.total_earned)} ingresos
           </p>
         </div>
 
@@ -333,12 +334,12 @@ function EmployeeRow({
         <div className="text-right">
           {hasCommission ? (
             <>
-              <p className="text-sm font-medium text-gray-900">${emp.commission_amount.toLocaleString()}</p>
+              <p className="text-sm font-medium text-gray-900">{formatCurrency(emp.commission_amount)}</p>
               <p className="text-xs text-gray-500">Comision ({emp.commission_pct}%)</p>
             </>
           ) : hasFixedDaily ? (
             <>
-              <p className="text-sm font-medium text-gray-900">${(emp.fixed_daily_pay ?? 0).toLocaleString()}</p>
+              <p className="text-sm font-medium text-gray-900">{formatCurrency(emp.fixed_daily_pay ?? 0)}</p>
               <p className="text-xs text-gray-500">Pago fijo diario</p>
             </>
           ) : (
@@ -351,7 +352,7 @@ function EmployeeRow({
           <div className="flex items-center gap-1 rounded-full bg-orange-100 px-2 py-0.5">
             <AlertTriangle className="h-3 w-3 text-orange-600" />
             <span className="text-xs font-medium text-orange-700">
-              +${emp.pending_from_previous.toLocaleString()} pendiente
+              {'+' + formatCurrency(emp.pending_from_previous)} pendiente
             </span>
           </div>
         )}
@@ -359,12 +360,12 @@ function EmployeeRow({
         {/* Total owed */}
         {(hasCommission || hasPending) ? (
           <div className="text-right">
-            <p className="text-sm font-bold text-violet-700">${emp.total_owed.toLocaleString()}</p>
+            <p className="text-sm font-bold text-violet-700">{formatCurrency(emp.total_owed)}</p>
             <p className="text-xs text-gray-500">Total a pagar</p>
           </div>
         ) : paymentState.amount_paid > 0 && paymentState.confirmed ? (
           <div className="text-right">
-            <p className="text-sm font-bold text-violet-700">${paymentState.amount_paid.toLocaleString()}</p>
+            <p className="text-sm font-bold text-violet-700">{formatCurrency(paymentState.amount_paid)}</p>
             <p className="text-xs text-gray-500">Pago del dia</p>
           </div>
         ) : null}
@@ -405,7 +406,7 @@ function EmployeeRow({
                       <td className="py-1.5 text-gray-600">{appt.start_time}</td>
                       <td className="py-1.5 text-gray-700">{appt.customer_name}</td>
                       <td className="py-1.5 text-gray-600">{appt.service_name}</td>
-                      <td className="py-1.5 text-right font-medium text-gray-900">${appt.price.toLocaleString()}</td>
+                      <td className="py-1.5 text-right font-medium text-gray-900">{formatCurrency(appt.price)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -453,7 +454,7 @@ function EmployeeRow({
                     <div className="flex items-center gap-2">
                       <Check className="h-4 w-4 text-green-600" />
                       <span className="text-sm text-green-700">
-                        Pago confirmado: ${paymentState.amount_paid.toLocaleString()}
+                        Pago confirmado: {formatCurrency(paymentState.amount_paid)}
                       </span>
                     </div>
                     <button
@@ -469,7 +470,7 @@ function EmployeeRow({
                     {paymentState.method === 'cash' ? (
                       <Button size="sm" onClick={handleCashConfirm}>
                         <Check className="mr-1.5 h-4 w-4" />
-                        Confirmar pago de ${emp.total_owed.toLocaleString()}
+                        Confirmar pago de {formatCurrency(emp.total_owed)}
                       </Button>
                     ) : paymentState.proofPreview ? (
                       <div className="flex-1 space-y-2">
@@ -477,7 +478,7 @@ function EmployeeRow({
                           <Paperclip className="h-4 w-4 text-violet-600" />
                           <span className="text-sm text-gray-700">Comprobante adjunto</span>
                           <span className="text-xs font-medium text-green-600">
-                            Pago: ${paymentState.amount_paid.toLocaleString()}
+                            Pago: {formatCurrency(paymentState.amount_paid)}
                           </span>
                         </div>
                         <img src={paymentState.proofPreview} alt="Comprobante" className="max-h-32 rounded-lg border border-gray-200 object-contain" />
@@ -489,7 +490,7 @@ function EmployeeRow({
                       <div>
                         <Button size="sm" variant="outline" onClick={() => fileInputRef.current?.click()}>
                           <Upload className="mr-1.5 h-4 w-4" />
-                          Subir comprobante (${emp.total_owed.toLocaleString()})
+                          Subir comprobante ({formatCurrency(emp.total_owed)})
                         </Button>
                         <input ref={fileInputRef} type="file" accept="image/*" onChange={handleProofUpload} className="hidden" />
                       </div>
@@ -535,7 +536,7 @@ function EmployeeRow({
                     <div className="flex items-center gap-2">
                       <Check className="h-4 w-4 text-green-600" />
                       <span className="text-sm text-green-700">
-                        Pago confirmado: ${paymentState.amount_paid.toLocaleString()}
+                        Pago confirmado: {formatCurrency(paymentState.amount_paid)}
                       </span>
                     </div>
                     <button type="button" onClick={handleCashUnconfirm} className="cursor-pointer text-xs text-gray-500 hover:text-red-600">
@@ -556,7 +557,7 @@ function EmployeeRow({
                   >
                     <Check className="mr-1.5 h-4 w-4" />
                     {paymentState.amount_paid > 0
-                      ? `Confirmar pago de $${paymentState.amount_paid.toLocaleString()}`
+                      ? `Confirmar pago de ${formatCurrency(paymentState.amount_paid)}`
                       : 'Ingresa el monto'}
                   </Button>
                 ) : paymentState.proofPreview ? (
@@ -605,10 +606,10 @@ function EmployeeRow({
                   <h3 className="text-lg font-semibold text-gray-900">Pago parcial</h3>
                 </div>
                 <p className="mb-2 text-sm text-gray-600">
-                  Le debes <strong>${emp.total_owed.toLocaleString()}</strong> a {emp.employee_name} y vas a pagar <strong>${paymentState.amount_paid.toLocaleString()}</strong>.
+                  Le debes <strong>{formatCurrency(emp.total_owed)}</strong> a {emp.employee_name} y vas a pagar <strong>{formatCurrency(paymentState.amount_paid)}</strong>.
                 </p>
                 <p className="mb-6 text-sm text-orange-700 font-medium">
-                  La diferencia de ${(emp.total_owed - paymentState.amount_paid).toLocaleString()} se sumara como pendiente en el proximo cierre de caja.
+                  La diferencia de {formatCurrency(emp.total_owed - paymentState.amount_paid)} se sumara como pendiente en el proximo cierre de caja.
                 </p>
                 <div className="flex justify-end gap-3">
                   <Button variant="ghost" size="sm" onClick={() => setShowDebtModal(false)}>

@@ -7,6 +7,7 @@ import { Button, Card, Spinner, Modal, Input } from '@/components/ui';
 import { get } from '@/lib/api/client';
 import { ENDPOINTS } from '@/lib/api/endpoints';
 import { useCreditsSummary, useCustomerCredits, useAdjustCredits, useBulkAdjustCredits } from '@/lib/hooks/use-credits';
+import { formatCurrency } from '@/lib/utils/format';
 import { useUIStore } from '@/lib/stores/ui-store';
 import type { ApiResponse, Customer } from '@/lib/api/types';
 import type { CreditAccount } from '@/lib/hooks/use-credits';
@@ -45,7 +46,7 @@ export default function CreditsPage() {
           </div>
           <div>
             <p className="text-sm text-gray-500">Total creditos en circulacion</p>
-            <p className="text-xl font-bold text-gray-900">${totalCredits.toLocaleString()}</p>
+            <p className="text-xl font-bold text-gray-900">{formatCurrency(totalCredits)}</p>
           </div>
         </div>
       </Card>
@@ -74,7 +75,7 @@ export default function CreditsPage() {
                   <tr key={account.id} className="border-b border-gray-100">
                     <td className="py-3 font-medium text-gray-900">{account.customer_name}</td>
                     <td className="py-3 text-gray-500">{account.customer_email || '—'}</td>
-                    <td className="py-3 pl-4 text-right font-bold text-green-600">${Number(account.balance).toLocaleString()}</td>
+                    <td className="py-3 pl-4 text-right font-bold text-green-600">{formatCurrency(Number(account.balance))}</td>
                     <td className="py-3 pl-4">
                       <div className="flex gap-2">
                         <button
@@ -134,7 +135,7 @@ function TransactionHistoryModal({ account, onClose }: { account: CreditAccount;
   return (
     <Modal open onClose={onClose} title={`Creditos — ${account.customer_name}`} size="lg">
       <div className="mb-4 text-center">
-        <p className="text-2xl font-bold text-green-600">${Number(account.balance).toLocaleString()}</p>
+        <p className="text-2xl font-bold text-green-600">{formatCurrency(Number(account.balance))}</p>
         <p className="text-xs text-gray-500">Balance actual</p>
       </div>
 
@@ -164,7 +165,7 @@ function TransactionHistoryModal({ account, onClose }: { account: CreditAccount;
                     </td>
                     <td className="py-2 text-xs text-gray-600">{tx.description}</td>
                     <td className={`py-2 text-right text-sm font-bold ${tx.amount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {tx.amount >= 0 ? '+' : ''}{tx.amount.toLocaleString()}
+                      {tx.amount >= 0 ? '+' + formatCurrency(tx.amount) : formatCurrency(tx.amount)}
                     </td>
                   </tr>
                 );
@@ -202,7 +203,7 @@ function AdjustCreditsModal({ account, onClose }: { account: CreditAccount; onCl
   return (
     <Modal open onClose={onClose} title={`Ajustar creditos — ${account.customer_name}`}>
       <p className="mb-4 text-sm text-gray-500">
-        Balance actual: <strong>${account.balance.toLocaleString()}</strong>
+        Balance actual: <strong>{formatCurrency(Number(account.balance))}</strong>
       </p>
       <div className="space-y-3">
         <div>
@@ -449,8 +450,8 @@ function OpenCreditModal({ onClose }: { onClose: () => void }) {
             <Button onClick={handleSubmit} loading={isLoading} disabled={!canSubmit}>
               <Plus className="mr-1.5 h-4 w-4" />
               {applyToAll
-                ? `Dar $${parseFloat(amount || '0').toLocaleString()} a todos`
-                : `Dar $${parseFloat(amount || '0').toLocaleString()} a ${selectedCustomers.length} cliente${selectedCustomers.length !== 1 ? 's' : ''}`}
+                ? `Dar ${formatCurrency(parseFloat(amount || '0'))} a todos`
+                : `Dar ${formatCurrency(parseFloat(amount || '0'))} a ${selectedCustomers.length} cliente${selectedCustomers.length !== 1 ? 's' : ''}`}
             </Button>
           </div>
         </div>

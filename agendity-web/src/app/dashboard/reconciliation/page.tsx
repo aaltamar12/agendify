@@ -9,6 +9,7 @@ import { useEmployees } from '@/lib/hooks/use-employees';
 import { useCurrentSubscription } from '@/lib/hooks/use-subscription';
 import { useUIStore } from '@/lib/stores/ui-store';
 import { AI_FEATURES_PLANS } from '@/lib/constants';
+import { formatCurrency } from '@/lib/utils/format';
 import type { ReconciliationResult, Discrepancy } from '@/lib/hooks/use-reconciliation';
 
 export default function ReconciliationPage() {
@@ -129,7 +130,7 @@ function ReconciliationContent() {
                 >
                   {emp.name}
                   {(emp.pending_balance ?? 0) > 0 && (
-                    <span className="ml-2 text-xs text-orange-600">${Number(emp.pending_balance ?? 0).toLocaleString()}</span>
+                    <span className="ml-2 text-xs text-orange-600">{formatCurrency(Number(emp.pending_balance ?? 0))}</span>
                   )}
                 </button>
               ))}
@@ -166,10 +167,10 @@ function DiscrepancyTable({ items, type, onAdjust }: { items: Discrepancy[]; typ
           {items.map((d, idx) => (
             <tr key={d.id || d.employee_id || d.credit_account_id || idx} className="border-b border-gray-100">
               <td className="py-2 font-medium text-gray-900">{d.employee_name || d.customer_name || d.name || '—'}</td>
-              <td className="py-2 text-right text-gray-600">${d.expected.toLocaleString()}</td>
-              <td className="py-2 text-right text-gray-600">${d.actual.toLocaleString()}</td>
+              <td className="py-2 text-right text-gray-600">{formatCurrency(d.expected)}</td>
+              <td className="py-2 text-right text-gray-600">{formatCurrency(d.actual)}</td>
               <td className={`py-2 text-right font-bold ${d.difference > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                {d.difference > 0 ? '+' : ''}{d.difference.toLocaleString()}
+                {d.difference > 0 ? '+' + formatCurrency(d.difference) : formatCurrency(d.difference)}
               </td>
               {onAdjust && (
                 <td className="py-2 pl-4">
