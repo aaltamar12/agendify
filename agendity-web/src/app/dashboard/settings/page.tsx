@@ -678,6 +678,10 @@ function ProfileSection({
     website_url?: string | null;
     google_maps_url?: string | null;
     independent?: boolean;
+    nit?: string | null;
+    legal_representative_name?: string | null;
+    legal_representative_document?: string | null;
+    legal_representative_document_type?: string | null;
   };
   onSave: (data: ProfileFormData) => Promise<void>;
   onSaveCoords: (lat: number, lng: number) => Promise<void>;
@@ -724,7 +728,7 @@ function ProfileSection({
   const watchedCountry = watch('country');
   const watchedState = watch('state');
   const { data: countriesData } = useCountries();
-  const { data: statesData } = useStates(watchedCountry);
+  const { data: statesData } = useStates(watchedCountry ?? '');
   const { data: citiesData } = useCities(watchedCountry ?? '', watchedState ?? '');
 
   const handleSaveWithCoords = async (data: ProfileFormData) => {
