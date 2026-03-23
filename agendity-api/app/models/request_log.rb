@@ -5,6 +5,10 @@
 class RequestLog < ApplicationRecord
   belongs_to :business, optional: true
 
+  def display_name
+    "#{method} #{path} (#{status_code})"
+  end
+
   scope :errors, -> { where("status_code >= 400") }
   scope :server_errors, -> { where("status_code >= 500") }
   scope :recent, -> { order(created_at: :desc) }
