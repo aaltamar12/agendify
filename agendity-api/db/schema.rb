@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_22_233901) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_22_234000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "unaccent"
@@ -58,6 +58,18 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_22_233901) do
     t.index ["business_id", "created_at"], name: "index_activity_logs_on_business_id_and_created_at"
     t.index ["business_id"], name: "index_activity_logs_on_business_id"
     t.index ["resource_type", "resource_id"], name: "index_activity_logs_on_resource_type_and_resource_id"
+  end
+
+  create_table "appointment_services", force: :cascade do |t|
+    t.bigint "appointment_id", null: false
+    t.bigint "service_id", null: false
+    t.decimal "price", precision: 12, scale: 2
+    t.integer "duration_minutes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["appointment_id", "service_id"], name: "index_appointment_services_on_appointment_id_and_service_id", unique: true
+    t.index ["appointment_id"], name: "index_appointment_services_on_appointment_id"
+    t.index ["service_id"], name: "index_appointment_services_on_service_id"
   end
 
   create_table "appointments", force: :cascade do |t|
@@ -526,6 +538,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_22_233901) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "activity_logs", "businesses"
+  add_foreign_key "appointment_services", "appointments"
+  add_foreign_key "appointment_services", "services"
   add_foreign_key "appointments", "businesses"
   add_foreign_key "appointments", "customers"
   add_foreign_key "appointments", "dynamic_pricings"

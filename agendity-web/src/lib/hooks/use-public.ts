@@ -71,6 +71,22 @@ interface CancelBookingResponse {
   appointment: Appointment;
   penalty_applied: boolean;
   penalty_amount: number;
+  credit_amount?: number;
+}
+
+interface CancelPreviewResponse {
+  has_paid: boolean;
+  deadline_passed: boolean;
+  penalty_pct: number;
+  penalty_amount: number;
+  refund_amount: number;
+  price: number;
+  business_contact: {
+    name: string;
+    phone: string | null;
+    email: string | null;
+    address: string | null;
+  };
 }
 
 interface SubmitPaymentPayload {
@@ -142,6 +158,16 @@ export function usePublicTicket(code: string) {
       get<ApiResponse<TicketResponse>>(ENDPOINTS.PUBLIC.ticket(code)),
     select: (res) => res.data,
     enabled: !!code,
+  });
+}
+
+export function useCancelPreview(code: string, enabled: boolean) {
+  return useQuery({
+    queryKey: ['public', 'cancel_preview', code],
+    queryFn: () =>
+      get<ApiResponse<CancelPreviewResponse>>(ENDPOINTS.PUBLIC.cancelPreview(code)),
+    select: (res) => res.data,
+    enabled: !!code && enabled,
   });
 }
 

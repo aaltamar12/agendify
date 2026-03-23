@@ -22,10 +22,14 @@ import {
   AlertTriangle,
   Upload,
   ImageIcon,
+  Phone,
+  Mail,
+  ShieldCheck,
+  Info,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { Button, Badge, Spinner, Card, Input } from '@/components/ui';
-import { usePublicTicket, useCancelBooking, useSubmitTicketPayment } from '@/lib/hooks/use-public';
+import { usePublicTicket, useCancelBooking, useCancelPreview, useSubmitTicketPayment } from '@/lib/hooks/use-public';
 import { getSavedCustomer } from '@/lib/utils/saved-customer';
 import { formatDate, formatTime } from '@/lib/utils/date';
 import { formatCurrency } from '@/lib/utils/format';
@@ -51,6 +55,7 @@ export default function TicketPage() {
   const { data, isLoading, error } = usePublicTicket(code);
   const cancelMutation = useCancelBooking();
   const paymentMutation = useSubmitTicketPayment();
+  const cancelPreview = useCancelPreview(code, showCancelDialog);
 
   const ticketUrl =
     typeof window !== 'undefined'
@@ -172,27 +177,8 @@ export default function TicketPage() {
     status === 'payment_sent' ||
     status === 'confirmed';
 
-  // Calculate if cancellation would incur penalty
-  function wouldIncurPenalty(): boolean {
-    if (!business.cancellation_policy_pct || business.cancellation_policy_pct === 0) {
-      return false;
-    }
-    const deadlineHours = business.cancellation_deadline_hours ?? 24;
-    const appointmentDateTime = new Date(
-      `${appointment.date}T${appointment.start_time}:00`
-    );
-    const now = new Date();
-    const hoursUntil =
-      (appointmentDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
-    return hoursUntil < deadlineHours;
-  }
-
-  function getPenaltyAmount(): number {
-    if (!wouldIncurPenalty()) return 0;
-    return Math.round(
-      appointment.price * (business.cancellation_policy_pct / 100)
-    );
-  }
+  // Preview data from backend (loaded when cancel dialog opens)
+  const preview = cancelPreview.data;
 
   // Render payment instructions card (reusable across statuses)
   function renderPaymentInstructions() {

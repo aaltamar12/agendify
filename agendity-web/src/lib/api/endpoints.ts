@@ -175,6 +175,7 @@ export const ENDPOINTS = {
     book: (slug: string) => `${BASE}/public/${slug}/book`,
     ticket: (code: string) => `${BASE}/public/tickets/${code}`,
     cancelTicket: (code: string) => `${BASE}/public/tickets/${code}/cancel`,
+    cancelPreview: (code: string) => `${BASE}/public/tickets/${code}/cancel_preview`,
     submitTicketPayment: (code: string) => `${BASE}/public/tickets/${code}/payment`,
     explore: `${BASE}/public/explore`,
   },
