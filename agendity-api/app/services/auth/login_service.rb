@@ -11,7 +11,7 @@ module Auth
 
     def call
       user = User.find_by(email: @email)
-      return failure("Credenciales invalidas") unless user&.valid_password?(@password)
+      return failure("Credenciales invalidas", code: "INVALID_CREDENTIALS") unless user&.valid_password?(@password)
 
       token         = TokenGenerator.encode(user)
       refresh_token = create_refresh_token(user)

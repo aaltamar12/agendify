@@ -12,7 +12,7 @@ module Credits
     end
 
     def call
-      return failure("El monto no puede ser cero") if @amount.zero?
+      return failure("El monto no puede ser cero", code: "ZERO_AMOUNT") if @amount.zero?
 
       account = CreditAccount.find_or_create_by!(customer: @customer, business: @business)
 

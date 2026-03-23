@@ -9,7 +9,7 @@ module Appointments
 
     def call
       unless @appointment.pending_payment? || @appointment.payment_sent?
-        return failure("Appointment cannot be confirmed (status: #{@appointment.status})")
+        return failure("Appointment cannot be confirmed (status: #{@appointment.status})", code: "INVALID_STATUS_FOR_CONFIRM")
       end
 
       business = @appointment.business

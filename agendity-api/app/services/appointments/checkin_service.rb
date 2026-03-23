@@ -23,13 +23,13 @@ module Appointments
 
     def call
       unless @appointment.confirmed?
-        return failure("Only confirmed appointments can be checked in (status: #{@appointment.status})")
+        return failure("Only confirmed appointments can be checked in (status: #{@appointment.status})", code: "INVALID_STATUS_FOR_CHECKIN")
       end
 
       # Validate check-in window: only allow from 30 min before start_time
       if too_early?
         minutes_until = minutes_until_appointment
-        return failure("Check-in disponible #{CHECKIN_WINDOW_MINUTES} minutos antes de la cita. Faltan #{minutes_until} minutos.")
+        return failure("Check-in disponible #{CHECKIN_WINDOW_MINUTES} minutos antes de la cita. Faltan #{minutes_until} minutos.", code: "CHECKIN_TOO_EARLY")
       end
 
       actor_type = determine_actor_type

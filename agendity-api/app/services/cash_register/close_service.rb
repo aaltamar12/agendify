@@ -12,16 +12,19 @@ module CashRegister
     end
 
     def call
-      return failure("No se puede cerrar caja de un día futuro") if @date > Date.current
+      return failure("No se puede cerrar caja de un día futuro", code: "FUTURE_DATE") if @date > Date.current
 
       existing = @business.cash_register_closes.find_by(date: @date)
-      return failure("Ya se cerró caja de este día") if existing&.closed?
+      return failure("Ya se cerró caja de este día", code: "ALREADY_CLOSED") if existing&.closed?
 
       # Validate consistency before closing
       recon = CashRegister::ReconciliationService.call(business: @business)
       if recon.success? && recon.data.any?
         names = recon.data.map { |d| d[:employee_name] }.join(", ")
-        return failure("Hay inconsistencias en saldos de empleados (#{names}). Ejecuta una reconciliacion antes de cerrar caja.")
+        return failure(
+          "Hay inconsistencias en saldos de empleados (#{names}). Ejecuta una reconciliacion antes de cerrar caja.",
+          code: "RECONCILIATION_REQUIRED"
+        )
       end
 
       appointments = @business.appointments

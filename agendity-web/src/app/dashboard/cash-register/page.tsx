@@ -6,13 +6,14 @@ import {
   ChevronDown, ChevronRight, Upload, Check, X, AlertTriangle, Paperclip,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Button, Card, Spinner } from '@/components/ui';
 import { UpgradeBanner } from '@/components/shared/upgrade-banner';
 import { useDailySummary, useCloseCashRegister } from '@/lib/hooks/use-cash-register';
 import { formatCurrency } from '@/lib/utils/format';
 import { useCurrentSubscription } from '@/lib/hooks/use-subscription';
 import { useUIStore } from '@/lib/stores/ui-store';
-import { ADVANCED_REPORTS_PLANS } from '@/lib/constants';
+import { ADVANCED_REPORTS_PLANS, AI_FEATURES_PLANS } from '@/lib/constants';
 import type { EmployeePaymentData, EmployeeSummary } from '@/lib/hooks/use-cash-register';
 
 export default function CashRegisterPage() {
@@ -41,6 +42,9 @@ interface PaymentState {
 }
 
 function CashRegisterContent() {
+  const { planSlug } = useCurrentSubscription();
+  const hasRecon = AI_FEATURES_PLANS.includes(planSlug);
+  const router = useRouter();
   const today = new Date().toISOString().split('T')[0];
   const [selectedDate, setSelectedDate] = useState(today);
   const { data: summary, isLoading } = useDailySummary(selectedDate);
@@ -106,8 +110,20 @@ function CashRegisterContent() {
         notes,
       });
       addToast({ type: 'success', message: 'Caja cerrada exitosamente' });
-    } catch {
-      addToast({ type: 'error', message: 'Error al cerrar caja' });
+    } catch (err: any) {
+      const errorCode = err?.response?.data?.error_code;
+      const msg = err?.response?.data?.error || 'Error al cerrar caja';
+
+      if (errorCode === 'RECONCILIATION_REQUIRED') {
+        if (hasRecon) {
+          addToast({ type: 'error', message: 'Hay inconsistencias en saldos. Redirigiendo a reconciliacion...' });
+          setTimeout(() => router.push('/dashboard/reconciliation'), 1500);
+        } else {
+          addToast({ type: 'error', message: 'Hay inconsistencias en saldos de empleados. Contacta a soporte para resolverlo.' });
+        }
+      } else {
+        addToast({ type: 'error', message: msg });
+      }
     }
   };
 

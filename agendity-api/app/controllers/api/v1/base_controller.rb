@@ -77,8 +77,9 @@ module Api
         render json: { data: data }, status: status
       end
 
-      def render_error(message, status: :bad_request, details: nil)
+      def render_error(message, status: :bad_request, details: nil, code: nil)
         body = { error: message }
+        body[:error_code] = code if code.present?
         body[:details] = details if details.present?
         render json: body, status: status
       end

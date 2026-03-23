@@ -13,8 +13,8 @@ module Bookings
 
     def call
       business = Business.friendly.find_by(slug: @slug)
-      return failure("Business not found") unless business
-      return failure("Business is not active") unless business.active?
+      return failure("Business not found", code: "BUSINESS_NOT_FOUND") unless business
+      return failure("Business is not active", code: "BUSINESS_INACTIVE") unless business.active?
 
       result = Appointments::CreateAppointmentService.call(
         business: business, params: @params, lock_token: @lock_token

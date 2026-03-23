@@ -19,21 +19,21 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Agendity — Agenda de citas para barberías y salones",
+    default: "Agendity — Agenda de citas para tu negocio",
     template: "%s | Agendity",
   },
   description:
-    "Gestiona las citas de tu barbería o salón de belleza. Reservas online 24/7, agenda digital, control de ingresos y reportes. Empieza gratis.",
+    "Gestiona las citas de tu negocio. Reservas online 24/7, agenda digital, control de ingresos y reportes. Empieza gratis.",
   manifest: "/manifest.json",
   keywords: [
     "agenda de citas",
-    "reservas online barbería",
-    "software para salón de belleza",
+    "reservas online negocios",
+    "software gestión de citas",
     "gestión de citas",
-    "agenda digital barbería",
+    "agenda digital para negocios",
     "sistema de reservas",
-    "barbería Colombia",
-    "salón de belleza Colombia",
+    "agenda de citas Colombia",
+    "reservas online Colombia",
     "Agendity",
   ],
   authors: [{ name: "Agendity", url: SITE_URL }],
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "es_CO",
     siteName: "Agendity",
-    title: "Agendity — Agenda de citas para barberías y salones",
+    title: "Agendity — Agenda de citas para tu negocio",
     description:
       "Tus clientes reservan en segundos, tú te enfocas en lo que mejor haces. Reservas online 24/7, control de ingresos y reportes.",
     url: SITE_URL,
@@ -57,7 +57,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Agendity — Agenda de citas para barberías y salones",
+    title: "Agendity — Agenda de citas para tu negocio",
     description:
       "Tus clientes reservan en segundos, tú te enfocas en lo que mejor haces. Empieza gratis.",
     images: ["/og-image.png"],

@@ -10,6 +10,11 @@ import { useRegister } from '@/lib/hooks/use-auth';
 const businessTypeOptions = [
   { value: 'barberia', label: 'Barbería' },
   { value: 'salon', label: 'Salón de belleza' },
+  { value: 'spa', label: 'Spa' },
+  { value: 'nails', label: 'Estudio de uñas' },
+  { value: 'estetica', label: 'Centro de estética' },
+  { value: 'consultorio', label: 'Consultorio' },
+  { value: 'other', label: 'Otro tipo de negocio' },
 ];
 
 export default function RegisterPage() {

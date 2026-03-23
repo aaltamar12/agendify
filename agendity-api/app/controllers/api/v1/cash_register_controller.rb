@@ -35,7 +35,7 @@ module Api
             status: :created
           )
         else
-          render_error(result.error, status: :unprocessable_entity)
+          render_error(result.error, status: :unprocessable_entity, code: result.error_code)
         end
       end
 

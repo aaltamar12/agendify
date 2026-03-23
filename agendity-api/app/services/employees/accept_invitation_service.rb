@@ -11,12 +11,12 @@ module Employees
 
     def call
       invitation = EmployeeInvitation.find_by(token: @token)
-      return failure("Invitacion no encontrada") unless invitation
-      return failure("La invitacion ha expirado") if invitation.expired?
-      return failure("La invitacion ya fue aceptada") if invitation.accepted?
+      return failure("Invitacion no encontrada", code: "INVITATION_NOT_FOUND") unless invitation
+      return failure("La invitacion ha expirado", code: "INVITATION_EXPIRED") if invitation.expired?
+      return failure("La invitacion ya fue aceptada", code: "INVITATION_ALREADY_ACCEPTED") if invitation.accepted?
 
       employee = invitation.employee
-      return failure("El empleado ya tiene una cuenta") if employee.user_id.present?
+      return failure("El empleado ya tiene una cuenta", code: "EMPLOYEE_HAS_ACCOUNT") if employee.user_id.present?
 
       user = User.new(
         name: employee.name,

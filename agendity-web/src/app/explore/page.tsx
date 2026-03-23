@@ -132,7 +132,7 @@ export default function ExplorePage() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Explorar negocios</h1>
         <p className="mt-2 text-gray-500">
-          Encuentra la mejor barbería o salón cerca de ti y reserva en segundos.
+          Encuentra el negocio que necesitas cerca de ti y reserva en segundos.
         </p>
       </div>
 

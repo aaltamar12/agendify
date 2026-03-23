@@ -78,7 +78,7 @@ Enfoque por `business_id` en cada tabla. Cada negocio solo accede a sus propios 
 ## 4. Terminología y tipos de usuarios
 
 > **Importante:** En Agendity distinguimos claramente entre:
-> - **Cliente** = el negocio que paga la suscripción (barbería, salón, spa). Es el cliente de Agendity.
+> - **Cliente** = el negocio que paga la suscripción (barbería, salón, consultorio, estudio, etc.). Es el cliente de Agendity.
 > - **Usuario final** = la persona que reserva citas en un negocio. No paga suscripción, no necesita cuenta.
 
 ### 4.1 Usuario final (quien reserva)
@@ -91,7 +91,7 @@ Enfoque por `business_id` en cada tabla. Cada negocio solo accede a sus propios 
 
 **Identificación:** El usuario reserva con email + nombre + teléfono. No necesita cuenta. El sistema lo reconoce por email en visitas futuras y precarga sus datos.
 
-### 4.2 Cliente (negocio: barbería o salón)
+### 4.2 Cliente (negocio: cualquier negocio con citas)
 - Administrar agenda
 - Crear servicios y empleados
 - Ver reservas
@@ -117,7 +117,7 @@ Gestión vía ActiveAdmin + endpoints API:
 - Nombre del negocio
 - Correo
 - Contraseña
-- Tipo de negocio (barbería o salón)
+- Tipo de negocio (barbería, salón, spa, consultorio, etc.)
 
 ### Wizard de onboarding (post-registro)
 Después de registrarse, el negocio pasa por un wizard de configuración:

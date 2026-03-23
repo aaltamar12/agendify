@@ -13,26 +13,26 @@ module Appointments
     def call
       # Reject bookings for past times
       if booking_in_the_past?
-        return failure("No puedes agendar en un horario que ya pasó.")
+        return failure("No puedes agendar en un horario que ya pasó.", code: "SLOT_IN_PAST")
       end
 
       # Reject bookings on closed days
       if day_closed?
-        return failure("El negocio no opera este dia. Selecciona otra fecha.")
+        return failure("El negocio no opera este dia. Selecciona otra fecha.", code: "BUSINESS_CLOSED")
       end
 
       service  = find_service
-      return failure("Service not found or does not belong to this business") unless service
+      return failure("Service not found or does not belong to this business", code: "SERVICE_NOT_FOUND") unless service
 
       additional_services = find_additional_services
       total_duration = service.duration_minutes + additional_services.sum(&:duration_minutes)
 
       employee = find_employee
-      return failure("No hay profesionales disponibles para este horario. Intenta con otra hora.") unless employee
+      return failure("No hay profesionales disponibles para este horario. Intenta con otra hora.", code: "NO_EMPLOYEE_AVAILABLE") unless employee
 
       # Skip service check if employee was auto-assigned (already filtered by service)
       unless @params[:employee_id].blank?
-        return failure("Este profesional no puede realizar este servicio") unless employee_performs_service?(employee, service)
+        return failure("Este profesional no puede realizar este servicio", code: "EMPLOYEE_SERVICE_MISMATCH") unless employee_performs_service?(employee, service)
       end
 
       end_time = calculate_end_time(@params[:start_time], total_duration)
@@ -45,11 +45,11 @@ module Appointments
           .load
 
         if overlapping_appointment?(employee, @params[:appointment_date], @params[:start_time], end_time)
-          return failure("Este horario ya no está disponible. Selecciona otro horario.")
+          return failure("Este horario ya no está disponible. Selecciona otro horario.", code: "SLOT_TAKEN")
         end
 
         if blocked_slot?(employee, @params[:appointment_date], @params[:start_time], end_time)
-          return failure("Este horario está bloqueado.")
+          return failure("Este horario está bloqueado.", code: "SLOT_BLOCKED")
         end
 
         customer = find_or_create_customer

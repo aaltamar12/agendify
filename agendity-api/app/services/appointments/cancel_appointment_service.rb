@@ -13,7 +13,7 @@ module Appointments
 
     def call
       if @appointment.cancelled? || @appointment.completed?
-        return failure("Appointment cannot be cancelled (status: #{@appointment.status})")
+        return failure("Appointment cannot be cancelled (status: #{@appointment.status})", code: "INVALID_STATUS_FOR_CANCEL")
       end
 
       ActiveRecord::Base.transaction do

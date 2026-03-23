@@ -14,7 +14,7 @@ class BaseService
     ServiceResult.new(success: true, data: data)
   end
 
-  def failure(error, details: nil)
-    ServiceResult.new(success: false, error: error, details: details)
+  def failure(error, code: nil, details: nil)
+    ServiceResult.new(success: false, error: error, error_code: code, details: details)
   end
 end

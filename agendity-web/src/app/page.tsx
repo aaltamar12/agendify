@@ -22,18 +22,18 @@ import {
 import { Button } from '@/components/ui/button';
 
 export const metadata: Metadata = {
-  title: 'Agendity — Agenda de citas para barberías y salones | Reservas online 24/7',
+  title: 'Agendity — Agenda de citas para tu negocio | Reservas online 24/7',
   description:
-    'Software de gestión de citas para barberías, salones de belleza y spas. Reservas online 24/7, agenda digital, control de ingresos, recordatorios automáticos y reportes. 30 días gratis.',
+    'Software de gestión de citas para barberías, salones, consultorios y cualquier negocio que trabaje con reservas. Reservas online 24/7, agenda digital, control de ingresos, recordatorios automáticos y reportes. 30 días gratis.',
   keywords: [
-    'agenda de citas barbería',
-    'reservas online salón de belleza',
-    'software barbería',
+    'agenda de citas para negocios',
+    'reservas online barbería',
+    'software gestión de citas',
     'sistema de citas online',
     'agenda digital para negocios',
-    'gestión barbería Colombia',
-    'reservar cita barbería',
-    'app para salón de belleza',
+    'gestión de citas Colombia',
+    'reservar cita online',
+    'app reservas negocios',
   ],
   alternates: {
     canonical: '/',
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Agendity — Tu negocio, siempre lleno',
     description:
-      'Gestiona las citas de tu barbería o salón. Tus clientes reservan en segundos, tú te enfocas en lo que mejor haces. Empieza gratis.',
+      'Gestiona las citas de tu negocio. Tus clientes reservan en segundos, tú te enfocas en lo que mejor haces. Empieza gratis.',
     url: '/',
   },
 };
@@ -75,7 +75,7 @@ const FEATURES = [
     icon: MessageCircle,
     title: 'WhatsApp automático',
     description:
-      'Confirmaciones y recordatorios por WhatsApp para tus clientes. Menos citas olvidadas, más sillas llenas. Disponible en Plan Profesional.',
+      'Confirmaciones y recordatorios por WhatsApp para tus clientes. Menos citas olvidadas, más agenda llena. Disponible en Plan Profesional.',
   },
   {
     icon: Bell,
@@ -168,7 +168,7 @@ const jsonLd = {
   applicationCategory: 'BusinessApplication',
   operatingSystem: 'Web',
   description:
-    'Software de gestión de citas para barberías, salones de belleza y spas. Reservas online 24/7, agenda digital, control de ingresos y reportes.',
+    'Software de gestión de citas para negocios que trabajan con reservas. Reservas online 24/7, agenda digital, control de ingresos y reportes.',
   url: 'https://agendity.co',
   offers: {
     '@type': 'Offer',
@@ -230,7 +230,7 @@ export default function Home() {
             <span className="text-violet-600">siempre lleno</span>
           </h1>
           <p className="max-w-xl text-lg leading-relaxed text-gray-500 sm:text-xl">
-            Agendity gestiona las citas de tu barbería o salón.
+            Agendity gestiona las citas de tu negocio.
             Tus clientes reservan en segundos, tú te enfocas en lo que mejor haces.
           </p>
           <div className="flex flex-col gap-4 sm:flex-row">
@@ -247,7 +247,7 @@ export default function Home() {
             </Link>
           </div>
           <p className="text-sm text-gray-400">
-            Ya lo usan barberías y salones en Barranquilla
+            Ya lo usan negocios de citas en Barranquilla
           </p>
         </section>
 
@@ -292,7 +292,7 @@ export default function Home() {
                     <Store className="h-6 w-6 text-violet-600" />
                   </div>
                   <h2 className="mb-3 text-3xl font-bold text-gray-900">
-                    ¿Tienes una barbería, salón o negocio de citas?
+                    ¿Tienes un negocio que trabaja con citas?
                   </h2>
                   <p className="mb-6 text-lg leading-relaxed text-gray-500">
                     Deja de perder clientes por WhatsApp saturado y agendas en papel.

@@ -17,7 +17,7 @@ Esto genera pérdidas constantes de dinero y tiempo.
 
 Agendity no es solo una agenda digital.
 
-Es una plataforma de gestión y crecimiento para negocios de servicios, diseñada específicamente para barberías, salones y negocios similares que necesitan organizar su operación y aumentar sus ingresos.
+Es una plataforma de gestión y crecimiento para negocios de servicios, diseñada para cualquier negocio que trabaje con citas y necesite organizar su operación y aumentar sus ingresos.
 
 💡 La diferencia clave: no es una agenda
 
@@ -144,7 +144,7 @@ marketing digital
 
 vendedores en terreno
 
-alianzas con barberías y salones
+alianzas con negocios del sector
 
 presencia en eventos del sector
 

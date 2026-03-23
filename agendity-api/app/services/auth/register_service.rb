@@ -17,10 +17,10 @@ module Auth
     def call
       ActiveRecord::Base.transaction do
         user = build_user
-        return failure("Validation failed", details: user.errors.full_messages) unless user.save
+        return failure("Validation failed", code: "USER_VALIDATION_FAILED", details: user.errors.full_messages) unless user.save
 
         business = create_default_business(user)
-        return failure("Business creation failed", details: business.errors.full_messages) unless business.persisted?
+        return failure("Business creation failed", code: "BUSINESS_CREATION_FAILED", details: business.errors.full_messages) unless business.persisted?
 
         token         = TokenGenerator.encode(user)
         refresh_token = create_refresh_token(user)
