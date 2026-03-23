@@ -17,11 +17,11 @@ module CashRegister
       existing = @business.cash_register_closes.find_by(date: @date)
       return failure("Ya se cerró caja de este día") if existing&.closed?
 
-      # Auto-fix any balance inconsistencies before closing
-      recon = CashRegister::ReconciliationService.call(business: @business, fix: true)
+      # Validate consistency before closing
+      recon = CashRegister::ReconciliationService.call(business: @business)
       if recon.success? && recon.data.any?
         names = recon.data.map { |d| d[:employee_name] }.join(", ")
-        Rails.logger.info("[CashRegister] Auto-fixed #{recon.data.size} balance inconsistencies (#{names}) before close")
+        return failure("Hay inconsistencias en saldos de empleados (#{names}). Ejecuta una reconciliacion antes de cerrar caja.")
       end
 
       appointments = @business.appointments
