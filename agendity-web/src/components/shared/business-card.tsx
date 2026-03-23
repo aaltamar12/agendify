@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { MapPin } from 'lucide-react';
+import { BadgeCheck, MapPin } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { StarRating } from '@/components/shared/star-rating';
 import type { Business } from '@/lib/api/types';
@@ -55,6 +55,9 @@ export function BusinessCard({ business }: BusinessCardProps) {
             <h3 className="text-lg font-semibold text-gray-900 group-hover:text-violet-600 transition-colors truncate">
               {business.name}
             </h3>
+            {business.verified && (
+              <BadgeCheck className="h-5 w-5 shrink-0 text-blue-500" aria-label="Verificado" />
+            )}
             {business.featured && (
               <span className="shrink-0 inline-flex items-center rounded-full bg-violet-100 px-2 py-0.5 text-xs font-medium text-violet-700">
                 Destacado

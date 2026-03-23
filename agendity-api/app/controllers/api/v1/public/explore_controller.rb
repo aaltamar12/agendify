@@ -33,11 +33,12 @@ module Api
           businesses = businesses.where(city: params[:city]) if params[:city].present?
           businesses = businesses.where(business_type: params[:type]) if params[:type].present?
 
-          # Featured businesses (Profesional+ plan) first, then by rating
+          # Order: verified (ai_features) first, then featured, then by rating
           render_paginated(
             businesses
               .left_joins(subscriptions: :plan)
               .order(
+                Arel.sql("COALESCE(plans.ai_features, false) DESC"),
                 Arel.sql("COALESCE(plans.featured_listing, false) DESC"),
                 rating_average: :desc,
                 name: :asc

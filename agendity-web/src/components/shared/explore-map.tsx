@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useMemo } from 'react';
-import { Navigation, Star, MapPin } from 'lucide-react';
+import { BadgeCheck, Navigation, Star, MapPin } from 'lucide-react';
 import { BUSINESS_TYPES } from '@/lib/constants';
 import { formatPhone } from '@/lib/utils/format';
 import type { Business, BusinessType } from '@/lib/api/types';
@@ -291,6 +291,9 @@ export function ExploreMapCard({
             <h3 className="text-sm font-semibold text-gray-900 truncate">
               {business.name}
             </h3>
+            {business.verified && (
+              <BadgeCheck className="h-4 w-4 shrink-0 text-blue-500" aria-label="Verificado" />
+            )}
             {business.featured && (
               <span className="shrink-0 inline-flex items-center rounded-full bg-violet-100 px-1.5 py-0.5 text-[10px] font-medium text-violet-700">
                 Destacado

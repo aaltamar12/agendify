@@ -18,8 +18,9 @@ import { QRCodeSVG } from 'qrcode.react';
 import { Button, Card } from '@/components/ui';
 import { useBookingStore } from '@/lib/stores/booking-store';
 import { useBookAppointment } from '@/lib/hooks/use-public';
-import { formatCurrency } from '@/lib/utils/format';
+import { formatCurrency, formatDuration } from '@/lib/utils/format';
 import { formatDate, formatTime } from '@/lib/utils/date';
+import dayjs from 'dayjs';
 import type { Business } from '@/lib/api/types';
 import { saveCustomer } from '@/lib/utils/saved-customer';
 
@@ -321,7 +322,7 @@ export function BookingConfirmation({
             <p className="text-sm text-violet-600 font-semibold">
               {selectedService && formatCurrency(selectedService.price)}
               <span className="ml-2 text-gray-400 font-normal">
-                {selectedService?.duration_minutes} min
+                {selectedService && formatDuration(selectedService.duration_minutes)}
               </span>
             </p>
           </div>
@@ -347,6 +348,23 @@ export function BookingConfirmation({
             <p className="text-sm text-gray-600">
               {selectedTime && formatTime(selectedTime)}
             </p>
+            {selectedService && selectedTime && (
+              <>
+                <p className="mt-1 text-sm text-gray-500">
+                  Duración estimada: {formatDuration(selectedService.duration_minutes)}
+                </p>
+                <p className="text-sm text-gray-500">
+                  Tu cita terminaría aproximadamente a las{' '}
+                  <span className="font-medium text-gray-700">
+                    {formatTime(
+                      dayjs(selectedTime, 'HH:mm')
+                        .add(selectedService.duration_minutes, 'minute')
+                        .format('HH:mm')
+                    )}
+                  </span>
+                </p>
+              </>
+            )}
           </div>
         </div>
 

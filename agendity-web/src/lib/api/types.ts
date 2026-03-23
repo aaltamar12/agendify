@@ -101,6 +101,8 @@ export interface Business {
   updated_at: string;
   // True when business has Profesional+ plan with featured listing
   featured?: boolean;
+  // True when business has a plan with ai_features (verified badge in explore)
+  verified?: boolean;
   // Included via serializer association
   current_subscription?: Subscription | null;
 }

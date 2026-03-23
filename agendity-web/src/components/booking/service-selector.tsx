@@ -3,7 +3,7 @@
 import { Clock, Tag } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { Card } from '@/components/ui';
-import { formatCurrency } from '@/lib/utils/format';
+import { formatCurrency, formatDuration } from '@/lib/utils/format';
 import { useBookingStore } from '@/lib/stores/booking-store';
 import type { Service } from '@/lib/api/types';
 
@@ -101,7 +101,7 @@ export function ServiceSelector({ services }: ServiceSelectorProps) {
                     </span>
                     <span className="flex items-center gap-1 text-gray-500">
                       <Clock className="h-3.5 w-3.5" />
-                      {service.duration_minutes} min
+                      {formatDuration(service.duration_minutes)}
                     </span>
                   </div>
                 </Card>
@@ -118,7 +118,7 @@ export function ServiceSelector({ services }: ServiceSelectorProps) {
             {selectedServices.length} servicio{selectedServices.length > 1 ? 's' : ''} seleccionado{selectedServices.length > 1 ? 's' : ''}
           </p>
           <p className="text-xs text-violet-600">
-            {formatCurrency(selectedServices.reduce((sum, s) => sum + Number(s.price), 0))} — {selectedServices.reduce((sum, s) => sum + s.duration_minutes, 0)} min
+            {formatCurrency(selectedServices.reduce((sum, s) => sum + Number(s.price), 0))} — {formatDuration(selectedServices.reduce((sum, s) => sum + s.duration_minutes, 0))}
           </p>
         </div>
       )}
