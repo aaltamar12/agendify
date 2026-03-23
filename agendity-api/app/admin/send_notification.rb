@@ -99,6 +99,7 @@ ActiveAdmin.register_page "Send Notification" do
       when "booking_cancelled" then "Reserva cancelada"
       when "reminder" then "Recordatorio"
       when "ai_suggestion" then "Sugerencia de Agendity"
+      when "subscription_expiry" then "Tu suscripción está por vencer"
       else "Notificacion"
       end
     end
@@ -111,6 +112,7 @@ ActiveAdmin.register_page "Send Notification" do
       when "booking_cancelled" then "Una reserva ha sido cancelada."
       when "reminder" then "Este es un recordatorio del equipo de Agendity."
       when "ai_suggestion" then "Tenemos una sugerencia para mejorar tu negocio."
+      when "subscription_expiry" then "Tu plan está próximo a vencer. Renueva para mantener acceso a todas las funcionalidades."
       else ""
       end
     end

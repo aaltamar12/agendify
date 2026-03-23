@@ -290,10 +290,12 @@ export interface Subscription {
   business_id: number;
   plan_id: number;
   status: SubscriptionStatus;
-  current_period_start: string;
-  current_period_end: string;
-  trial_end: string | null;
-  cancelled_at: string | null;
+  start_date: string;
+  end_date: string;
+  current_period_start?: string;
+  current_period_end?: string;
+  trial_end?: string | null;
+  cancelled_at?: string | null;
   created_at: string;
   updated_at: string;
   plan?: Plan;

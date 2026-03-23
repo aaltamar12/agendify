@@ -8,10 +8,12 @@ import { Sidebar } from '@/components/layout/sidebar';
 import { Topbar } from '@/components/layout/topbar';
 import { MobileNav } from '@/components/layout/mobile-nav';
 import { ImpersonationBanner } from '@/components/layout/impersonation-banner';
+import { SubscriptionBanner } from '@/components/layout/subscription-banner';
 import { ToastContainer } from '@/components/ui';
 import { useUIStore } from '@/lib/stores/ui-store';
 import { useImpersonationStore } from '@/lib/stores/impersonation-store';
 import { useCurrentBusiness } from '@/lib/hooks/use-business';
+import { useCurrentSubscription } from '@/lib/hooks/use-subscription';
 import { useRealtime } from '@/lib/hooks/use-realtime';
 import { requestNotificationPermission } from '@/lib/utils/browser-notification';
 import { isDemoMode } from '@/lib/demo/is-demo';
@@ -29,10 +31,12 @@ export default function DashboardLayout({
   const { sidebarOpen, setSidebarOpen } = useUIStore();
   const { isImpersonating } = useImpersonationStore();
   const { data: business } = useCurrentBusiness();
+  const { daysUntilExpiry } = useCurrentSubscription();
   const isBusinessSuspended = business?.status === 'suspended';
   const isBusinessInactive = business?.status === 'inactive';
   const isBusinessHidden = isBusinessSuspended;
   const isDemo = isDemoMode();
+  const showSubscriptionBanner = daysUntilExpiry !== null && daysUntilExpiry <= 5;
 
   // Real-time updates via NATS WebSocket
   useRealtime();
@@ -74,7 +78,7 @@ export default function DashboardLayout({
   // Calculate pixel offset for fixed elements based on active banners
   // Each banner is 40px tall (h-10 = 2.5rem)
   const BANNER_HEIGHT = 40;
-  const bannerCount = [isDemo, isImpersonating, isBusinessHidden].filter(Boolean).length;
+  const bannerCount = [isDemo, isImpersonating, isBusinessHidden, showSubscriptionBanner].filter(Boolean).length;
   const bannerOffset = bannerCount * BANNER_HEIGHT;
 
   return (
@@ -99,6 +103,15 @@ export default function DashboardLayout({
         >
           <EyeOff className="h-4 w-4" />
           Tu negocio está oculto y no aparece para usuarios. El dashboard funciona normal.
+        </div>
+      )}
+
+      {showSubscriptionBanner && (
+        <div
+          className="fixed left-0 right-0 z-[57]"
+          style={{ top: [isDemo, isImpersonating, isBusinessHidden].filter(Boolean).length * BANNER_HEIGHT }}
+        >
+          <SubscriptionBanner />
         </div>
       )}
 

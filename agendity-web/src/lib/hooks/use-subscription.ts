@@ -11,6 +11,7 @@ export interface SubscriptionInfo {
   planLabel: string;
   isTrialing: boolean;
   isLoading: boolean;
+  daysUntilExpiry: number | null;
 }
 
 /**
@@ -41,6 +42,15 @@ export function useCurrentSubscription(): SubscriptionInfo {
 
     const planLabel = PLAN_DISPLAY[planSlug]?.label ?? 'Trial';
 
+    // Calculate days until subscription expires
+    const endDate = subscription?.end_date;
+    let daysUntilExpiry: number | null = null;
+    if (endDate) {
+      const end = new Date(endDate + 'T23:59:59');
+      const now = new Date();
+      daysUntilExpiry = Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    }
+
     return {
       subscription,
       plan,
@@ -48,6 +58,7 @@ export function useCurrentSubscription(): SubscriptionInfo {
       planLabel,
       isTrialing,
       isLoading,
+      daysUntilExpiry,
     };
   }, [business, isLoading]);
 }
