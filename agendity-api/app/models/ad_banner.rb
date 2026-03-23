@@ -1,7 +1,10 @@
 # frozen_string_literal: true
 
 class AdBanner < ApplicationRecord
+  include AttachmentValidations
+
   has_one_attached :image
+  validate_attachment :image, max_size: 5.megabytes
 
   # --- Validations ---
   validates :name, presence: true
@@ -26,10 +29,13 @@ class AdBanner < ApplicationRecord
 
   # --- Helpers ---
 
-  # Returns the display image URL: attached image takes priority, falls back to image_url field
+  # Returns the display image URL: attached image takes priority, falls back to image_url field.
+  # Uses absolute URL with API_HOST so the frontend can load it correctly.
   def display_image_url
     if image.attached?
-      Rails.application.routes.url_helpers.rails_blob_url(image, only_path: true)
+      api_host = ENV.fetch("API_HOST", "http://localhost:3001")
+      path = Rails.application.routes.url_helpers.rails_blob_path(image, only_path: true)
+      "#{api_host}#{path}"
     else
       image_url
     end

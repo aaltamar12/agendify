@@ -4,11 +4,13 @@
 # Tracks whether the business has paid for the next billing period.
 class SubscriptionPaymentOrder < ApplicationRecord
   include BusinessScoped
+  include AttachmentValidations
 
   # -- Associations --
   belongs_to :subscription, optional: true
   belongs_to :plan, optional: true
   has_one_attached :proof
+  validate_attachment :proof, max_size: 2.megabytes
 
   # -- Validations --
   validates :amount, presence: true, numericality: { greater_than: 0 }

@@ -3,9 +3,11 @@
 # A professional (barber, stylist) who works at a business.
 class Employee < ApplicationRecord
   include BusinessScoped
+  include AttachmentValidations
 
   # -- Attachments --
   has_one_attached :avatar
+  validate_attachment :avatar, max_size: 5.megabytes
 
   # -- Associations --
   belongs_to :user, optional: true

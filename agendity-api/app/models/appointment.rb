@@ -3,6 +3,7 @@
 # A booked appointment linking a customer, employee, and service.
 class Appointment < ApplicationRecord
   include BusinessScoped
+  include AttachmentValidations
 
   # -- Enums --
   enum :status, {
@@ -22,6 +23,9 @@ class Appointment < ApplicationRecord
   has_one_attached :proof_image
   has_many :appointment_services, dependent: :destroy
   has_many :additional_services, through: :appointment_services, source: :service
+
+  # -- Attachment validations --
+  validate_attachment :proof_image, max_size: 2.megabytes
 
   # -- Validations --
   validates :appointment_date, presence: true

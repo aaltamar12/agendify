@@ -23,8 +23,11 @@ class Business < ApplicationRecord
   enum :status, { active: 0, suspended: 1, inactive: 2 }
 
   # -- Attachments --
+  include AttachmentValidations
   has_one_attached :logo
   has_one_attached :cover_image
+  validate_attachment :logo, max_size: 5.megabytes
+  validate_attachment :cover_image, max_size: 5.megabytes
 
   # -- Associations --
   belongs_to :owner, class_name: "User", inverse_of: :businesses

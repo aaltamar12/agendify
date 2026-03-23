@@ -47,38 +47,77 @@
 ```
 FLUJO: Reserva → Comprobante → Aprobacion → Recordatorio → Check-in → Completada → Rating
 
-Emails enviados:
+Emails (costo externo):
   → Al negocio: nueva reserva (1) + comprobante recibido (1) = 2
   → Al usuario: confirmacion (1) + recordatorio 24h (1) + rating request (1) = 3
-  TOTAL: 5 emails por cita completada
+  TOTAL: 5 emails
 
-WhatsApp enviados (SOLO negocios Profesional o Inteligente):
-  → Al usuario: confirmacion (1) + recordatorio (1) + rating (1) = 3 por cita
-  → Al negocio: 0 (WhatsApp al negocio solo aplica para alertas de suscripcion)
-  TOTAL: 3 WhatsApp por cita completada
+WhatsApp (costo externo, SOLO negocios Pro+):
+  → Al usuario: confirmacion (1) + recordatorio (1) + rating (1) = 3
+  TOTAL: 3 WhatsApp (plan Basico = 0)
 
-  Todos pasan por MultiChannelService (email siempre + WhatsApp si Pro+).
-  Negocios plan Basico: solo email, nunca WhatsApp.
+In-app + NATS (costo interno — consume CPU/RAM/DB del VPS):
+  → nueva reserva: 1 insert Notification + 1 publish NATS
+  → comprobante recibido: 1 insert Notification + 1 publish NATS
+  → confirmacion: 1 publish NATS
+  → cita completada: 1 publish NATS
+  TOTAL: 2 inserts DB + 4 publishes NATS por cita
 ```
 
 ### 1.5 Conteo por cita cancelada
 
+Solo cuenta lo que ocurre al momento de cancelar (la nueva reserva ya se envio antes).
+
 ```
-Emails: nueva reserva (1) + cancelacion a ambos (2) = 3 emails
-WhatsApp (Pro+): cancelacion al usuario (1*) = 0 actual / 1 futuro
+Emails (costo externo):
+  → Al negocio: cancelacion (1)
+  → Al usuario: cancelacion via MultiChannel (1)
+  TOTAL: 2 emails
+
+WhatsApp (costo externo, SOLO Pro+):
+  → Al usuario: cancelacion (1)
+  TOTAL: 1 WhatsApp
+
+In-app + NATS (costo interno):
+  → 1 insert Notification + 1 publish NATS
 ```
 
 ### 1.6 Conteo por ciclo de suscripcion (mensual, por negocio)
 
 ```
 Happy path (paga a tiempo):
-  Emails: aviso renovacion (0, solo in-app) + renovada (1) = 1 email
+  Emails: renovada (1) = 1 email
   WhatsApp (Pro+): renovada (1) = 1
+  In-app: aviso renovacion 7d (1) + renovada (1) = 2 inserts + 1 NATS
 
 Pago tardio (pasa por las 3 alertas):
   Emails: recordatorio 3d (1) + alerta 5d (1) + alerta dia 0 (1) + alerta +2d (1) + expirada (1) = 5 emails
   WhatsApp (Pro+): alerta 5d (1) + alerta dia 0 (1) + alerta +2d (1) = 3
+  In-app: 5 inserts + 3 NATS publishes
 ```
+
+### 1.7 Carga interna del VPS por notificaciones (in-app + NATS)
+
+Las notificaciones in-app y NATS no tienen costo externo pero consumen recursos del servidor:
+
+- **Notification insert:** 1 write a PostgreSQL por notificacion in-app
+- **NATS publish:** 1 mensaje WebSocket al navegador del negocio (~pocos KB)
+- **Polling frontend:** Cada sesion activa hace GET /notifications/unread_count cada 30s
+
+**Carga estimada por escala:**
+
+| Negocios | Citas/mes | Inserts Notification/mes | NATS publishes/mes | Sesiones activas (polling) |
+|----------|-----------|--------------------------|--------------------|-----------------------------|
+| 30 | 7,200 | ~16,000 | ~30,000 | ~15-30 simultaneas |
+| 100 | 24,000 | ~53,000 | ~100,000 | ~50-100 simultaneas |
+| 300 | 72,000 | ~160,000 | ~300,000 | ~150-300 simultaneas |
+| 1,000 | 240,000 | ~530,000 | ~1,000,000 | ~500-1,000 simultaneas |
+
+**Impacto en recursos:**
+- PostgreSQL: ~530 inserts/dia (30 negocios) es trivial. A 1,000 negocios (~17,600/dia) sigue siendo bajo
+- NATS: Extremadamente liviano, soporta millones de mensajes/s con <100 MB RAM
+- Polling: Cada sesion = 1 query SELECT COUNT cada 30s. 300 sesiones = 10 queries/s → negligible
+- **Cuello de botella real:** No son las notificaciones — es el volumen de ActiveStorage (disco) y WhatsApp (costo)
 
 ---
 
@@ -107,28 +146,49 @@ Servicios en Docker Compose:
 - SO + Docker images + DB + Redis + logs: ~10-15 GB base
 - Queda ~85 GB utiles para archivos subidos
 
-**Fuentes de storage (ActiveStorage):**
+**Inventario completo de archivos en ActiveStorage (con limites enforced):**
 
-| Tipo de archivo | Tamano promedio | Quien sube | Frecuencia |
-|-----------------|-----------------|------------|------------|
-| Comprobante de pago (cita) | ~1 MB | Usuario final | ~70% de citas (resto es efectivo) |
-| Comprobante de transferencia (cierre de caja) | ~1 MB | Negocio | 1 por empleado pagado por transferencia/dia |
-| Logo del negocio | ~200 KB | Negocio | 1 vez |
-| Portada del negocio (Pexels) | ~300 KB | Negocio | 1 vez |
+Todos los attachments tienen validacion de tamano maximo y content type (solo JPG, PNG, WebP) via `AttachmentValidations` concern.
 
-**Calculo de storage mensual por escala:**
+| Modelo | Attachment | Limite maximo | Tamano promedio | Quien sube | Frecuencia | Acumulativo |
+|--------|-----------|---------------|-----------------|------------|------------|-------------|
+| `Appointment` | `proof_image` | **2 MB** | ~1 MB | Usuario final | ~70% de citas | Si |
+| `EmployeePayment` | `proof` | **2 MB** | ~1 MB | Negocio (cierre caja) | ~50% de pagos a empleados | Si |
+| `SubscriptionPaymentOrder` | `proof` | **2 MB** | ~1 MB | Negocio | 1 por renovacion mensual | Si |
+| `Employee` | `avatar` | **5 MB** | ~1-3 MB | Negocio | 1 por empleado (se reemplaza) | No |
+| `Business` | `logo` | **5 MB** | ~1-3 MB | Negocio | 1 por negocio (se reemplaza) | No |
+| `Business` | `cover_image` | **5 MB** | ~1-3 MB | Negocio o Pexels | 1 por negocio (se reemplaza) | No |
+| `AdBanner` | `image` | **5 MB** | ~1-3 MB | SuperAdmin | Pocos banners | No |
 
-Supuestos: 240 citas/mes por negocio, 70% con comprobante de cita, 3 empleados promedio, 50% pagados por transferencia (15 comprobantes de cierre/mes por negocio)
+**Storage fijo (no crece) por negocio:**
+- Logo (~3 MB) + portada (~3 MB) + ~3 avatares empleados (~9 MB) = **~15 MB por negocio**
+- 300 negocios = ~4.5 GB
 
-| Negocios | Comprobantes cita/mes | Comprobantes cierre/mes | Storage total/mes | Meses hasta llenar 85 GB |
-|----------|----------------------|------------------------|-------------------|--------------------------|
-| 30 | ~5,000 | ~450 | ~5.5 GB | 15 meses |
-| 50 | ~8,400 | ~750 | ~9.2 GB | 9 meses |
-| 100 | ~16,800 | ~1,500 | ~18.3 GB | 4.5 meses |
-| 200 | ~33,600 | ~3,000 | ~36.6 GB | 2 meses |
-| 300 | ~50,400 | ~4,500 | ~54.9 GB | <1.5 meses |
+**Storage acumulativo (crece cada mes):**
 
-**Nota:** Con 30 negocios tienes mas de 1 ano tranquilo. Con 100+ necesitas plan de storage externo o cleanup de comprobantes antiguos (>90 dias).
+Supuestos por negocio/mes (peor caso con archivos al limite de 2 MB):
+- 240 citas × 70% con comprobante = 168 comprobantes × 2 MB = **336 MB maximo**
+- ~3 empleados × 50% transferencia × 26 dias = 39 comprobantes cierre × 2 MB = **78 MB maximo**
+- 1 comprobante de suscripcion × 2 MB = **2 MB**
+- **Maximo por negocio/mes: ~416 MB**
+
+Supuestos por negocio/mes (caso realista, promedio ~1 MB):
+- 168 comprobantes cita × 1 MB = **168 MB**
+- 39 comprobantes cierre × 1 MB = **39 MB**
+- 1 comprobante suscripcion × 1 MB = **1 MB**
+- **Promedio por negocio/mes: ~208 MB**
+
+**Calculo de storage por escala:**
+
+| Negocios | Storage acumulativo/mes | Storage fijo (unico) | Meses hasta llenar 85 GB |
+|----------|------------------------|---------------------|--------------------------|
+| 30 | ~6.1 GB | ~60 MB | 14 meses |
+| 50 | ~10.2 GB | ~100 MB | 8 meses |
+| 100 | ~20.3 GB | ~200 MB | 4 meses |
+| 200 | ~40.6 GB | ~400 MB | 2 meses |
+| 300 | ~60.9 GB | ~600 MB | <1.5 meses |
+
+**Nota:** Con 30 negocios tienes mas de 1 ano tranquilo. Con 100+ necesitas storage externo (Supabase S3-compatible) o cleanup job de comprobantes antiguos (>90 dias).
 
 ### 2.1.1 Upgrade futuro — VPS OVH 8 cores / 24 GB / 200 GB (~$24 USD/mes)
 
@@ -146,14 +206,14 @@ Supuestos: 240 citas/mes por negocio, 70% con comprobante de cita, 3 empleados p
 
 **Capacidad estimada con el upgrade:**
 
-Incluye comprobantes de citas + comprobantes de cierre de caja (transferencias a empleados).
+Incluye todas las fuentes: comprobantes de citas, cierre de caja, suscripciones, avatares, logos, portadas.
 
-| Negocios | Storage total/mes | Meses hasta llenar 185 GB* |
-|----------|-------------------|----------------------------|
-| 100 | ~18.3 GB | 10 meses |
-| 200 | ~36.6 GB | 5 meses |
-| 300 | ~54.9 GB | 3 meses |
-| 500 | ~91.5 GB | 2 meses |
+| Negocios | Storage acumulativo/mes | Meses hasta llenar 185 GB* |
+|----------|------------------------|----------------------------|
+| 100 | ~20.3 GB | 9 meses |
+| 200 | ~40.6 GB | 4.5 meses |
+| 300 | ~60.9 GB | 3 meses |
+| 500 | ~101.5 GB | <2 meses |
 
 *185 GB = 200 GB - 15 GB base del sistema
 
@@ -167,29 +227,70 @@ Incluye comprobantes de citas + comprobantes de cierre de caja (transferencias a
 
 Con 24 GB puedes escalar confortablemente hasta **500-800 negocios** antes de necesitar separar servicios (DB dedicada, segundo servidor). El disco sigue siendo el limite — a 300+ negocios sin cleanup, Supabase Storage es obligatorio.
 
-### 2.2 Frontend — Vercel
+### 2.2 Frontend — Opciones de hosting
 
-| Tier | Costo/mes | Limite bandwidth | Nota |
-|------|-----------|-----------------|------|
-| Hobby | $0 | 100 GB | NO permite uso comercial |
-| **Pro** | **$20** | 1 TB | Necesario para produccion |
+**3 opciones para servir el frontend Next.js:**
 
-### 2.3 Almacenamiento adicional — Supabase Storage
+| Opcion | Costo/mes | Bandwidth | Pros | Contras |
+|--------|-----------|-----------|------|---------|
+| **A. Self-hosted en VPS** | $0 | Ilimitado (BW del VPS) | Sin costo extra, sin limites, control total | Consume RAM (~300-500 MB), sin CDN global |
+| **B. Vercel Hobby (free)** | $0 | 100 GB/mes | CDN global, deploys automaticos | TOS prohibe uso comercial, limites bajos (ver abajo) |
+| **C. Vercel Pro** | $20 + uso | 1 TB/mes | CDN global, analytics, sin riesgo TOS | Costo fijo + excedentes posibles |
 
-Si los comprobantes + logos exceden los 100 GB del VPS:
+**Analisis del proyecto real (agendity-web):**
 
-| Tier | Costo/mes | Storage | Bandwidth |
-|------|-----------|---------|-----------|
+| Caracteristica | Estado actual | Impacto en Vercel |
+|----------------|---------------|-------------------|
+| Paginas `'use client'` (CSR) | 30 de 31 | Bajo consumo serverless — el navegador hace todo |
+| Paginas SSG/ISR | 1 (landing + sitemap ISR 1h) | Minimo |
+| `next/image` | **0 usos** | 0 Image Transformations — no aplica |
+| API Route Handlers | **0** | 0 Function Invocations |
+| Middleware | 1 (auth cookies) | 1 Edge Request por request |
+| Fetch server-side | Solo sitemap.ts (1 vez/hora) | Active CPU despreciable |
+| Assets en public/ | ~4.5 KB total | Despreciable |
+
+**El frontend es casi 100% CSR.** TanStack Query hace todos los fetches al backend Rails desde el navegador. Vercel solo sirve el HTML shell + JS bundles.
+
+**Limites de Vercel Hobby vs uso real de Agendity:**
+
+| Recurso | Limite Hobby | Uso real de Agendity | Veredicto |
+|---------|-------------|---------------------|-----------|
+| Fast Data Transfer | 100 GB/mes | Unico limite relevante. ~3,300 visitas/dia si ~1 MB por pagina | Aguanta hasta ~50-80 negocios |
+| Edge Requests | 1M/mes | 1 por request (middleware auth). ~33k/dia disponibles | OK hasta escala media |
+| Function Invocations | 1M/mes | **0** — no hay Route Handlers | No aplica |
+| Active CPU | 4 horas/mes | **~minutos** — solo sitemap ISR 1 vez/hora | No aplica |
+| Image Transformations | 5,000/mes | **0** — no usa next/image, imagenes desde Rails | No aplica |
+| Developer Seats | 1 | Solo 1 dev | OK |
+| **Uso comercial** | **NO permitido** | **Agendity es comercial** | **Riesgo de suspension** |
+
+**Self-hosted ya esta configurado:** El `docker-compose.yml` incluye el servicio `web` (Next.js) con Nginx como reverse proxy. No requiere configuracion adicional.
+
+**Estrategia recomendada:**
+1. **Lanzamiento:** Self-hosted en VPS como produccion principal. Vercel Hobby como entorno de preview/staging (gratis, sin riesgo TOS porque no es produccion)
+2. **Crecimiento:** Seguir self-hosted. El VPS de 12 GB aguanta Next.js + API + DB hasta 300 negocios
+3. **Escala LATAM:** Self-hosted + Cloudflare free (CDN global gratis). Vercel Pro solo si se necesita algo especifico de Vercel
+
+### 2.3 Almacenamiento adicional — Supabase Storage (solo si 200 GB no alcanza)
+
+**Comparacion: upgrade VPS vs agregar Supabase al VPS actual:**
+
+| Opcion | Costo/mes | Storage total | CPU/RAM | Veredicto |
+|--------|-----------|---------------|---------|-----------|
+| VPS $12 + Supabase Pro | $37 | 100 GB local + 100 GB externo | 6 CPU / 12 GB | Mas caro, mas complejo |
+| **VPS upgrade $24** | **$24** | **200 GB local** | **8 CPU / 24 GB** | **Mas barato, mas simple, mas potente** |
+
+**Recomendacion:** Siempre hacer upgrade del VPS primero. Supabase solo tiene sentido cuando los 200 GB del VPS upgrade tambien se queden cortos (~200+ negocios sin cleanup).
+
+| Tier Supabase | Costo/mes | Storage | Bandwidth |
+|---------------|-----------|---------|-----------|
 | Free | $0 | 1 GB | 2 GB |
 | Pro | $25 | 100 GB | 250 GB |
 
-**Calculo de storage:**
-- Logo por negocio: ~200 KB
-- Comprobante por cita: ~1 MB promedio
-- 100 negocios × 240 citas/mes = 24,000 comprobantes = ~24 GB/mes (acumulativo)
-- **A los 4 meses** con 100 negocios se llena el disco de 100 GB
+**Cuando necesitar Supabase (con VPS de 200 GB):**
+- A ~200 negocios sin cleanup de comprobantes antiguos
+- O si se decide no implementar cleanup y se acumulan >185 GB
 
-**Recomendacion:** Configurar ActiveStorage con Supabase S3-compatible o limpiar comprobantes antiguos (>90 dias) con un job.
+**Alternativa mas barata:** Implementar un job de cleanup de comprobantes >90 dias. Los comprobantes de citas ya no se necesitan despues de ser aprobados/rechazados. Esto puede extender la vida util del disco indefinidamente sin costo adicional.
 
 ---
 
@@ -197,22 +298,55 @@ Si los comprobantes + logos exceden los 100 GB del VPS:
 
 ### 3.1 Dominio
 
-| Concepto | Costo/ano | Costo/mes |
-|----------|-----------|-----------|
-| agendity.com (.com) | ~$12 | ~$1 |
+| Concepto | Costo/ano (COP) | Costo/ano (USD) | Costo/mes (USD) |
+|----------|-----------------|-----------------|-----------------|
+| agendity.co (GoDaddy) — Ano 1 | $69,999 | ~$16 | ~$1.3 |
+| agendity.co (GoDaddy) — Renovacion | $179,999 | ~$42 | ~$3.5 |
 
 ### 3.2 SSL — Let's Encrypt
 
 Gratis. Certbot renueva automaticamente.
 
-### 3.3 Email transaccional — Resend
+### 3.3 Email transaccional — Spacemail SMTP (principal) + Resend (escala grande)
 
-| Tier | Costo/mes | Emails/mes | Emails/dia |
-|------|-----------|------------|------------|
-| Free | $0 | 3,000 | 100 |
-| Pro | $20 | 50,000 | — |
-| Business | $75 | 150,000 | — |
-| Enterprise | A medida | Ilimitado | — |
+**Fase 1: Spacemail SMTP (ya contratado)**
+
+Spacemail de Spaceship, plan Pro: $9.88 USD/ano (~$1/mes). Contratacion aparte del dominio.
+
+| Limite | Valor |
+|--------|-------|
+| Emails por hora (por buzon) | 500 |
+| Emails por dia (por buzon) | ~12,000 |
+| Emails por mes (por buzon) | ~360,000 |
+| Buzones (plan Pro) | 1 |
+| Aliases | 10 (comparten cuota del buzon) |
+| Costo | $10/ano (~$1/mes) |
+
+**Capacidad por escala:**
+
+| Negocios | Emails/mes necesarios | Spacemail (360k/mes) | Veredicto |
+|----------|----------------------|----------------------|-----------|
+| 10 | ~10,700 | 3% de capacidad | OK |
+| 30 | ~32,120 | 9% de capacidad | OK |
+| 100 | ~107,000 | 30% de capacidad | OK |
+| 200 | ~214,000 | 59% de capacidad | OK |
+| 300 | ~320,900 | 89% de capacidad | Limite, migrar a Resend |
+
+**Riesgo:** Spaceship podria bloquear la cuenta si detecta envio masivo programatico. Monitorear deliverability y tener Resend como plan B.
+
+**Fase 2: Resend (cuando Spacemail no alcance o bloquee)**
+
+| Tier | Costo/mes | Emails/mes |
+|------|-----------|------------|
+| Free | $0 | 3,000 |
+| Pro | $20 | 50,000 |
+| Business | $75 | 150,000 |
+| Enterprise | A medida | Ilimitado |
+
+**Cuando migrar a Resend:**
+- Si Spacemail bloquea la cuenta por envio programatico
+- Al superar 300 negocios (~320k emails/mes)
+- Si la tasa de entrega (deliverability) baja significativamente
 
 ### 3.4 Pexels API
 
@@ -290,10 +424,10 @@ Negocios plan Basico: $0 WhatsApp (solo email)
 | Tipo | Cantidad |
 |------|----------|
 | Citas completadas × 5 emails | 30,600 |
-| Citas canceladas × 3 emails | 2,160 |
+| Citas canceladas × 2 emails | 1,440 |
 | Suscripciones (30 negocios × 1) | 30 |
 | Password resets + invitaciones | ~50 |
-| **TOTAL** | **~32,840 emails/mes** |
+| **TOTAL** | **~32,120 emails/mes** |
 
 **WhatsApp/mes (SOLO negocios Profesional e Inteligente = 60%):**
 
@@ -308,23 +442,24 @@ Todos los WhatsApp a usuario final aplican unicamente si el negocio tiene plan P
 | Suscripcion al negocio (UTILITY) | 18 | $0.0080 | $0.14 |
 | **TOTAL** | **13,410** | | **$143.57** |
 
-**Resumen mensual — Pequena escala:**
+**Resumen mensual — Pequena escala (30 negocios):**
 
-| Concepto | Costo/mes |
-|----------|-----------|
-| VPS OVH | $12 |
-| Vercel Pro | $20 |
-| Dominio | $1 |
-| Email — Resend Pro (32k emails) | $20 |
-| WhatsApp API (todo migrado) | $144 |
-| Supabase Storage | $0 (no necesario) |
-| **TOTAL** | **$197/mes** |
-| **TOTAL 6 meses** | **$1,182** |
+| Concepto | Self-hosted | Vercel Hobby | Vercel Pro |
+|----------|------------|--------------|------------|
+| VPS OVH | $12 | $12 | $12 |
+| Frontend | $0 (en VPS) | $0 (free) | $20 |
+| Dominio agendity.co | $4 | $4 | $4 |
+| Email (Spacemail SMTP) | $1 | $1 | $1 |
+| WhatsApp API | $144 | $144 | $144 |
+| **TOTAL/mes** | **$161** | **$161** | **$181** |
+| **TOTAL 6 meses** | **$966** | **$966** | **$1,086** |
 
-**Ingresos:** 30 × $16.3 = **$489/mes**
-**Margen:** +$292/mes (59.7%)
+| | Self-hosted | Vercel Hobby | Vercel Pro |
+|---|------------|--------------|------------|
+| Ingresos | $489/mes | $489/mes | $489/mes |
+| Margen | +$328 (67%) | +$328 (67%) | +$308 (63%) |
 
-**Sin WhatsApp (mes 1 mientras se configura):** $53/mes
+**Sin WhatsApp (mes 1):** $17 (self-hosted) / $17 (Hobby) / $37 (Pro)
 
 ---
 
@@ -344,9 +479,9 @@ Todos los WhatsApp a usuario final aplican unicamente si el negocio tiene plan P
 | Tipo | Cantidad |
 |------|----------|
 | Citas completadas × 5 | 306,000 |
-| Citas canceladas × 3 | 21,600 |
+| Citas canceladas × 2 | 14,400 |
 | Suscripciones + otros | ~500 |
-| **TOTAL** | **~328,100 emails/mes** |
+| **TOTAL** | **~320,900 emails/mes** |
 
 **WhatsApp/mes (SOLO negocios Pro+, todo migrado a MultiChannel):**
 
@@ -359,20 +494,23 @@ Todos los WhatsApp a usuario final aplican unicamente si el negocio tiene plan P
 | Suscripcion al negocio (UTILITY) | ~180 | $0.0080 | $1.44 |
 | **TOTAL** | **134,100** | | **$1,435.68** |
 
-**Resumen mensual — Mediana escala:**
+**Resumen mensual — Mediana escala (300 negocios):**
 
-| Concepto | Costo/mes |
-|----------|-----------|
-| VPS OVH (upgrade posible) | $12-24 |
-| Vercel Pro | $20 |
-| Dominio | $1 |
-| Email — Resend Enterprise (328k) | ~$200 |
-| WhatsApp API (todo migrado) | $1,436 |
-| Supabase Pro (storage) | $25 |
-| **TOTAL** | **$1,694-1,706** |
+A esta escala Vercel Hobby es riesgoso por trafico alto. Self-hosted es la opcion mas rentable.
 
-**Ingresos:** 300 × $16.3 = **$4,890/mes**
-**Margen:** +$3,184/mes (65%)
+| Concepto | Self-hosted | Vercel Pro |
+|----------|------------|------------|
+| VPS OVH (upgrade 200GB) | $24 | $24 |
+| Frontend | $0 (en VPS) | $20 |
+| Dominio agendity.co | $4 | $4 |
+| Email (Spacemail $1, o Resend $75 si al limite) | $1 - $75 | $1 - $75 |
+| WhatsApp API | $1,436 | $1,436 |
+| **TOTAL/mes** | **$1,465 - $1,539** | **$1,485 - $1,559** |
+
+| | Self-hosted | Vercel Pro |
+|---|------------|------------|
+| Ingresos | $4,890/mes | $4,890/mes |
+| Margen | +$3,351 - $3,425 (69-70%) | +$3,331 - $3,405 (68-70%) |
 
 ---
 
@@ -405,11 +543,11 @@ Todos los WhatsApp a usuario final aplican unicamente si el negocio tiene plan P
 | Tipo | Cantidad |
 |------|----------|
 | Citas completadas × 5 | 5,100,000 |
-| Citas canceladas × 3 | 360,000 |
+| Citas canceladas × 2 | 240,000 |
 | Suscripciones + otros | ~10,000 |
-| **TOTAL** | **~5,470,000 emails/mes** |
+| **TOTAL** | **~5,350,000 emails/mes** |
 
-**WhatsApp/mes (futuro — MultiChannel completo):**
+**WhatsApp/mes (MultiChannel completo):**
 
 Calculo por pais (solo negocios Pro+, 60%):
 
@@ -424,16 +562,16 @@ Calculo por pais (solo negocios Pro+, 60%):
 
 **Infraestructura a esta escala:**
 
-| Componente | Necesidad | Solucion | Costo/mes |
-|------------|-----------|----------|-----------|
-| Servidor principal | 5M+ emails, 1.2M citas | VPS dedicado OVH (32GB RAM, 8 CPU) | $50-80 |
-| Base de datos | PostgreSQL con millones de registros | Mismo VPS o separado | (incluido) |
-| Frontend | Alto trafico multi-pais | Vercel Pro (1TB BW) | $20 |
-| Email | 5.4M emails/mes | Resend Enterprise o Amazon SES | $200-400 |
-| Storage | ~1.2TB/ano en comprobantes | Supabase Pro + cleanup policy | $25-50 |
-| CDN/Cache | Paginas publicas SSG | Vercel (incluido) | $0 |
-| Monitoreo | Uptime, errores, metricas | Mejor Uptime (free) + Sentry (free tier) | $0-30 |
-| **Subtotal infra** | | | **$295-580** |
+| Componente | Self-hosted | Con Vercel Pro |
+|------------|------------|----------------|
+| Servidor principal (VPS dedicado 32GB) | $50-80 | $50-80 |
+| Frontend | $0 (en servidor, Nginx + cache) | $20 (Vercel Pro, CDN global) |
+| Dominio agendity.co | $4 | $4 |
+| Email — Amazon SES (~5.35M) | $535 | $535 |
+| WhatsApp API | $31,797 | $31,797 |
+| Storage (Supabase Pro + cleanup) | $25-50 | $25-50 |
+| Monitoreo | $0-30 | $0-30 |
+| **TOTAL** | **$32,411 - $32,496** | **$32,431 - $32,516** |
 
 **Alternativa email a escala: Amazon SES**
 
@@ -442,22 +580,11 @@ Calculo por pais (solo negocios Pro+, 60%):
 | 5M emails/mes | ~$500 (0.10/1000) | Mas barato que Enterprise |
 | 10M emails/mes | ~$1,000 | Mucho mas barato |
 
-**Resumen mensual — Gran escala LATAM:**
-
-| Concepto | Costo/mes |
-|----------|-----------|
-| VPS dedicado OVH | $50-80 |
-| Vercel Pro | $20 |
-| Dominio | $1 |
-| Email — Amazon SES (~5.5M) | $550 |
-| WhatsApp API (todo migrado) | $31,797 |
-| Supabase Pro (storage) | $25-50 |
-| Monitoreo | $0-30 |
-| **TOTAL** | **$32,443 - $32,528** |
-| **TOTAL 6 meses** | **$194,658 - $195,168** |
+**A esta escala Vercel Pro ($20) es irrelevante** — representa <0.1% del costo total. La decision es puramente tecnica: CDN global multi-pais (Vercel) vs control total (self-hosted con Nginx + Cloudflare free).
 
 **Ingresos:** 5,000 × $16.3 = **$81,500/mes**
-**Margen:** +$48,972 - $49,057/mes (60%)
+**Margen self-hosted:** +$49,004 - $49,089/mes (60%)
+**Margen Vercel Pro:** +$48,984 - $49,069/mes (60%)
 
 ---
 
@@ -467,17 +594,19 @@ Calculo por pais (solo negocios Pro+, 60%):
 
 | Concepto | Costo/mes |
 |----------|-----------|
-| Infra (2-3 servidores + DB dedicada) | $200-400 |
-| Vercel Pro | $20 |
-| Dominio | $1 |
-| Email — Amazon SES (~22M) | $2,200 |
-| WhatsApp API (×4 de gran escala) | ~$127,000 |
-| Storage (S3/Supabase) | $50-100 |
-| Monitoreo + CDN | $50-100 |
-| **TOTAL** | **~$129,521 - $129,821** |
+| Concepto | Self-hosted | Con Vercel Pro |
+|----------|------------|----------------|
+| Infra (2-3 servidores + DB dedicada) | $200-400 | $200-400 |
+| Frontend | $0 (Nginx + Cloudflare free) | $20 |
+| Dominio agendity.co | $4 | $4 |
+| Email — Amazon SES (~22M) | $2,200 | $2,200 |
+| WhatsApp API (×4 de gran escala) | ~$127,000 | ~$127,000 |
+| Storage (S3/Supabase) | $50-100 | $50-100 |
+| Monitoreo + CDN | $50-100 | $50-100 |
+| **TOTAL** | **$129,504 - $129,804** | **$129,524 - $129,824** |
 
 **Ingresos:** 20,000 × $16.3 = **$326,000/mes**
-**Margen:** ~$196,000/mes (60%)
+**Margen self-hosted:** ~$196,200 - $196,500/mes (60%)
 
 ---
 
@@ -485,13 +614,19 @@ Calculo por pais (solo negocios Pro+, 60%):
 
 Todas las notificaciones al usuario final en Pro+ pasan por MultiChannelService (email + WhatsApp).
 
-| Escala | Negocios | Costo/mes | Ingreso/mes | Margen | Margen % |
-|--------|----------|-----------|-------------|--------|----------|
-| Lanzamiento (sin WA) | 30 | $53 | $489 | $436 | 89% |
-| Lanzamiento (con WA) | 30 | $197 | $489 | $292 | 60% |
-| Colombia consolidado | 300 | $1,706 | $4,890 | $3,184 | 65% |
-| LATAM (5 paises) | 5,000 | $32,500 | $81,500 | $49,000 | 60% |
-| LATAM lider | 20,000 | $130,000 | $326,000 | $196,000 | 60% |
+**Escenario mas rentable: Self-hosted (front en VPS) + Spacemail SMTP**
+
+Frontend, email y dominio ya estan pagos/incluidos. Los unicos costos variables son VPS y WhatsApp.
+
+| Escala | Negocios | Self-hosted | +Vercel Pro | Ingreso/mes | Margen (self) | % |
+|--------|----------|------------|-------------|-------------|---------------|---|
+| Lanzamiento (sin WA) | 30 | **$17** | $37 | $489 | +$472 | 97% |
+| Lanzamiento (con WA) | 30 | **$161** | $181 | $489 | +$328 | 67% |
+| Colombia consolidado | 300 | **$1,465** | $1,485 | $4,890 | +$3,425 | 70% |
+| LATAM (5 paises) | 5,000 | **$32,412** | $32,432 | $81,500 | +$49,088 | 60% |
+| LATAM lider | 20,000 | **$129,505** | $129,525 | $326,000 | +$196,495 | 60% |
+
+Vercel Hobby (free) se puede usar como entorno de preview/staging sin costo adicional. No como produccion (TOS comercial).
 
 ---
 
@@ -533,32 +668,47 @@ Si se envia el rating_request solo por email y WhatsApp se reserva para confirme
 ## 7. Hoja de ruta de costos — Primer ano
 
 WhatsApp incluye MultiChannel completo (confirmed + reminder + rating + cancelled) para negocios Pro+.
+Email via Spacemail SMTP ($1/mes = $10/ano) durante todo el primer ano.
 
-| Mes | Negocios | Costo fijo | WhatsApp | Email | Total | Ingresos | Margen |
-|-----|----------|------------|----------|-------|-------|----------|--------|
-| 1 | 10 | $33 | $0 (sin WA) | $0 (free tier) | **$33** | $163 | +$130 |
-| 2 | 20 | $33 | $0 | $0 | **$33** | $326 | +$293 |
-| 3 | 30 | $53 | $144 (activa WA) | $20 | **$217** | $489 | +$272 |
-| 4 | 50 | $53 | $240 | $20 | **$313** | $815 | +$502 |
-| 5 | 80 | $53 | $383 | $20 | **$456** | $1,304 | +$848 |
-| 6 | 120 | $53 | $575 | $20 | **$648** | $1,956 | +$1,308 |
-| 7-12 | 120→300 | $58-83 | $575→1,436 | $20→200 | **$653→1,719** | $1,956→4,890 | +$1,303→3,171 |
+**Escenario optimo: Self-hosted (front en VPS) + Spacemail SMTP**
 
-**Acumulado mes 6:** ~$1,700 gastados, ~$5,053 facturados = **+$3,353 neto**
-**Acumulado mes 12:** ~$8,800 gastados, ~$24,000 facturados = **+$15,200 neto**
+Costo fijo = VPS ($12) + Dominio ($4) + Spacemail ($1) = $17/mes. Sin Vercel, sin Resend.
+
+| Mes | Negocios | Costo fijo | WhatsApp | Total | Ingresos | Margen |
+|-----|----------|------------|----------|-------|----------|--------|
+| 1 | 10 | $17 | $0 (sin WA) | **$17** | $163 | +$146 |
+| 2 | 20 | $17 | $0 | **$17** | $326 | +$309 |
+| 3 | 30 | $17 | $144 (activa WA) | **$161** | $489 | +$328 |
+| 4 | 50 | $17 | $240 | **$257** | $815 | +$558 |
+| 5 | 80 | $17 | $383 | **$400** | $1,304 | +$904 |
+| 6 | 120 | $17 | $575 | **$592** | $1,956 | +$1,364 |
+| 7-12 | 120→300 | $29* | $575→1,436 | **$604→1,465** | $1,956→4,890 | +$1,352→3,425 |
+
+*Meses 7-12: upgrade VPS a $24 si disco >70 GB. Costo fijo = $24 + $4 + $1 = $29/mes.
+
+**Acumulado mes 6:** ~$1,444 gastados, ~$5,053 facturados = **+$3,609 neto**
+**Acumulado mes 12:** ~$7,250 gastados, ~$24,000 facturados = **+$16,750 neto**
+
+**Escenario con Vercel Hobby (free):** Mismos numeros ($0 adicional). Util como entorno de preview/staging sin costo.
+
+**Escenario con Vercel Pro:** Sumar $20/mes a cada fila. Acumulado ano 1: ~$9,650 gastados → +$14,350 neto.
 
 ---
 
 ## 8. Infraestructura: cuando escalar
 
+Base: VPS $12 + Dominio $4 + Spacemail $1 = $17/mes (self-hosted). Sin Vercel.
+
 | Umbral | Accion | Costo nuevo | Costo total infra |
 |--------|--------|-------------|-------------------|
-| 70 GB disco o ~200 negocios | Upgrade VPS a 8 cores / 24 GB / 200 GB | $24/mes | $24 |
-| 200 GB disco usado | Supabase Storage Pro o cleanup policy | +$25/mes | $49 |
-| 50,000 emails/mes | Resend Pro o Amazon SES | +$20-50/mes | $69-99 |
-| 500-800 negocios | Separar DB a segundo VPS | +$24-40/mes | $93-139 |
-| 5,000 negocios | 2-3 servidores + DB dedicada | +$100-200/mes | $200-350 |
-| 20,000 negocios | Cluster dedicado + DB managed + Redis managed | +$300-500/mes | $500-850 |
+| 70 GB disco o ~200 negocios | Upgrade VPS a 8 cores / 24 GB / 200 GB | $24/mes | $29 |
+| 200 GB disco usado | Supabase Storage Pro o cleanup policy | +$25/mes | $53 |
+| ~300 negocios (320k emails/mes) | Migrar email a Resend Business | +$75/mes | $128 |
+| 500-800 negocios | Separar DB a segundo VPS | +$24-40/mes | $152-168 |
+| 5,000 negocios | 2-3 servidores + DB dedicada + Amazon SES | +$100-200/mes | $300-450 |
+| 20,000 negocios | Cluster dedicado + DB managed + Redis managed | +$300-500/mes | $600-950 |
+
+Vercel Pro ($20/mes) es opcional en cualquier etapa. Solo agrega CDN global — no es necesario para Colombia.
 
 La infra nunca sera el cuello de botella financiero. **WhatsApp siempre sera el costo dominante.**
 

@@ -1,10 +1,13 @@
 # frozen_string_literal: true
 
 class EmployeePayment < ApplicationRecord
+  include AttachmentValidations
+
   belongs_to :cash_register_close
   belongs_to :employee
 
   has_one_attached :proof
+  validate_attachment :proof, max_size: 2.megabytes
 
   enum :payment_method, { cash: 0, transfer: 1 }
 
