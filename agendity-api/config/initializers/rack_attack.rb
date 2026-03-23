@@ -14,6 +14,16 @@ class Rack::Attack
     req.ip if req.path.match?(%r{/api/v1/public/businesses/.+/book}) && req.post?
   end
 
+  # Throttle check-in: 5 attempts per minute per IP (prevents QR brute force)
+  throttle("checkin", limit: 5, period: 1.minute) do |req|
+    req.ip if req.path.match?(%r{/checkin}) && req.post?
+  end
+
+  # Throttle password reset: 3 requests per minute per IP
+  throttle("auth/forgot_password", limit: 3, period: 1.minute) do |req|
+    req.ip if req.path == "/api/v1/auth/forgot_password" && req.post?
+  end
+
   # Throttle general API: 300 requests per 5 minutes per IP
   throttle("api/general", limit: 300, period: 5.minutes) do |req|
     req.ip if req.path.start_with?("/api/")

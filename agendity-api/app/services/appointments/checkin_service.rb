@@ -19,9 +19,17 @@ module Appointments
       @substitute_reason = substitute_reason
     end
 
+    CHECKIN_WINDOW_MINUTES = 30  # Allow check-in up to 30 min before appointment
+
     def call
       unless @appointment.confirmed?
         return failure("Only confirmed appointments can be checked in (status: #{@appointment.status})")
+      end
+
+      # Validate check-in window: only allow from 30 min before start_time
+      if too_early?
+        minutes_until = minutes_until_appointment
+        return failure("Check-in disponible #{CHECKIN_WINDOW_MINUTES} minutos antes de la cita. Faltan #{minutes_until} minutos.")
       end
 
       actor_type = determine_actor_type
@@ -60,6 +68,32 @@ module Appointments
     end
 
     private
+
+    def too_early?
+      business = @appointment.business
+      tz = business.timezone || "America/Bogota"
+      now = Time.current.in_time_zone(tz)
+
+      appointment_time = Time.zone.parse(
+        "#{@appointment.appointment_date} #{@appointment.start_time.strftime('%H:%M')}"
+      ).in_time_zone(tz)
+
+      # Allow check-in from CHECKIN_WINDOW_MINUTES before start_time
+      earliest_checkin = appointment_time - CHECKIN_WINDOW_MINUTES.minutes
+      now < earliest_checkin
+    end
+
+    def minutes_until_appointment
+      business = @appointment.business
+      tz = business.timezone || "America/Bogota"
+      now = Time.current.in_time_zone(tz)
+
+      appointment_time = Time.zone.parse(
+        "#{@appointment.appointment_date} #{@appointment.start_time.strftime('%H:%M')}"
+      ).in_time_zone(tz)
+
+      ((appointment_time - now) / 60).round(0)
+    end
 
     def determine_actor_type
       return "business" unless @actor
