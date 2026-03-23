@@ -324,7 +324,6 @@ export function BookingConfirmation({
                 <p className="font-medium text-gray-900">{svc.name}</p>
                 <p className="text-sm text-violet-600 font-semibold whitespace-nowrap">
                   {formatCurrency(svc.price)}
-                  <span className="ml-1 text-gray-400 font-normal">{formatDuration(svc.duration_minutes)}</span>
                 </p>
               </div>
             ))}
@@ -333,9 +332,6 @@ export function BookingConfirmation({
                 <p className="text-sm font-medium text-gray-700">Total</p>
                 <p className="text-sm font-bold text-violet-700">
                   {formatCurrency(selectedServices.reduce((sum, s) => sum + Number(s.price), 0))}
-                  <span className="ml-1 text-gray-400 font-normal">
-                    {formatDuration(selectedServices.reduce((sum, s) => sum + s.duration_minutes, 0))}
-                  </span>
                 </p>
               </div>
             )}
@@ -367,7 +363,7 @@ export function BookingConfirmation({
               return (
                 <>
                   <p className="mt-1 text-sm text-gray-500">
-                    Duración total estimada: {formatDuration(totalMinutes)}
+                    Duración total estimada: <span className="font-semibold text-gray-700">{formatDuration(totalMinutes)}</span>
                   </p>
                   <p className="text-sm text-gray-500">
                     Tu cita terminaría aproximadamente a las{' '}
