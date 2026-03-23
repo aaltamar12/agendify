@@ -1334,10 +1334,11 @@ function SchedulingSection({
 }
 
 function CancellationSection({
+  business,
   onSave,
   loading,
 }: {
-  business: unknown;
+  business: { cancellation_policy_pct: number; cancellation_deadline_hours: number };
   onSave: (data: CancellationFormData) => Promise<void>;
   loading: boolean;
 }) {
@@ -1348,8 +1349,8 @@ function CancellationSection({
   } = useForm<CancellationFormData>({
     resolver: zodResolver(cancellationSchema),
     defaultValues: {
-      cancellation_policy_pct: '0',
-      cancellation_deadline_hours: 24,
+      cancellation_policy_pct: String(business.cancellation_policy_pct ?? 0),
+      cancellation_deadline_hours: business.cancellation_deadline_hours ?? 24,
     },
   });
 
