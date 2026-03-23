@@ -248,22 +248,23 @@ puts "  ✅ Employee schedules: Mon-Sat for all employees"
 puts "  👤 Creating customers..."
 
 customers_data = [
-  { name: "Juan Herrera", phone: "+573101112233", email: "juan.herrera@gmail.com" },
-  { name: "Pedro Martínez", phone: "+573102223344", email: "pedro.martinez@gmail.com" },
-  { name: "Luis Rodríguez", phone: "+573103334455", email: "luis.rodriguez@hotmail.com" },
-  { name: "Diego Ramírez", phone: "+573104445566", email: "diego.ramirez@gmail.com" },
+  { name: "Juan Herrera", phone: "+573101112233", email: "juan.herrera@gmail.com", birth_date: Date.new(1995, Date.current.month, Date.current.day) },
+  { name: "Pedro Martínez", phone: "+573102223344", email: "pedro.martinez@gmail.com", birth_date: Date.new(1990, 3, 15) },
+  { name: "Luis Rodríguez", phone: "+573103334455", email: "luis.rodriguez@hotmail.com", birth_date: Date.new(1988, 7, 22) },
+  { name: "Diego Ramírez", phone: "+573104445566", email: "diego.ramirez@gmail.com", birth_date: Date.new(1993, 11, 8) },
   { name: "Sebastián Díaz", phone: "+573105556677", email: "sebastian.diaz@outlook.com" },
-  { name: "Alejandro Gómez", phone: "+573106667788", email: "alejandro.gomez@gmail.com" },
+  { name: "Alejandro Gómez", phone: "+573106667788", email: "alejandro.gomez@gmail.com", birth_date: Date.new(1997, 1, 30) },
   { name: "Daniel Morales", phone: "+573107778899", email: "daniel.morales@hotmail.com" },
-  { name: "Santiago Vargas", phone: "+573108889900", email: "santiago.vargas@gmail.com" },
+  { name: "Santiago Vargas", phone: "+573108889900", email: "santiago.vargas@gmail.com", birth_date: Date.new(1992, 5, 14) },
   { name: "Mateo Castillo", phone: "+573109990011", email: "mateo.castillo@gmail.com" },
-  { name: "Nicolás Jiménez", phone: "+573100001122", email: "nicolas.jimenez@outlook.com" }
+  { name: "Nicolás Jiménez", phone: "+573100001122", email: "nicolas.jimenez@outlook.com", birth_date: Date.new(1994, 9, 3) }
 ]
 
 elite_customers = customers_data.map do |cdata|
   Customer.find_or_create_by!(business: barberia_elite, email: cdata[:email]) do |c|
     c.name = cdata[:name]
     c.phone = cdata[:phone]
+    c.birth_date = cdata[:birth_date] if cdata[:birth_date].present?
   end
 end
 
@@ -1852,6 +1853,7 @@ puts "\n⚙️  Creating job configs..."
   { job_class: "SendSubscriptionReminderJob", name: "Recordatorio de pago suscripcion", description: "Envia recordatorio de pago a negocios con suscripcion proxima a vencer.", schedule: "Diario a las 9am" },
   { job_class: "CleanupOldRequestLogsJob", name: "Limpieza de request logs", description: "Elimina request logs antiguos para mantener la BD limpia.", schedule: "Domingos a las 4am" },
   { job_class: "Intelligence::PricingSuggestionJob", name: "Sugerencias de tarifas IA", description: "Analiza demanda historica y genera sugerencias de tarifas dinamicas para negocios con Plan Inteligente.", schedule: "1ro y 15 de cada mes a las 8am" },
+  { job_class: "BirthdayCampaignJob", name: "Campana de cumpleanos", description: "Envia felicitaciones y codigos de descuento a clientes que cumplen anos hoy.", schedule: "Diario a las 8am" },
 ].each do |attrs|
   jc = JobConfig.find_or_initialize_by(job_class: attrs[:job_class])
   jc.update!(attrs.merge(enabled: jc.persisted? ? jc.enabled : true))

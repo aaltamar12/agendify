@@ -64,10 +64,12 @@ interface BookAppointmentPayload {
     name: string;
     email: string;
     phone: string;
+    birth_date?: string;
   };
   notes?: string;
   additional_service_ids?: number[];
   apply_credits?: number;
+  discount_code?: string;
 }
 
 interface BookAppointmentResponse {
@@ -261,6 +263,25 @@ export function useSubmitTicketPayment() {
         queryKey: ['public', 'ticket', variables.code],
       });
     },
+  });
+}
+
+// --- Discount code validation ---
+
+export interface ValidateCodeResponse {
+  valid: boolean;
+  discount_type: string;
+  discount_value: number;
+  name: string;
+}
+
+export function useValidateDiscountCode(slug: string) {
+  return useMutation({
+    mutationFn: (code: string) =>
+      get<ApiResponse<ValidateCodeResponse>>(
+        ENDPOINTS.PUBLIC.validateCode(slug),
+        { params: { code } },
+      ),
   });
 }
 

@@ -15,6 +15,7 @@ class BusinessSerializer < Blueprinter::Base
          :slot_interval_minutes, :gap_between_appointments_minutes,
          :nequi_phone, :daviplata_phone, :bancolombia_account,
          :nit, :legal_representative_name, :legal_representative_document, :legal_representative_document_type, :independent,
+         :birthday_campaign_enabled, :birthday_discount_pct, :birthday_discount_days_valid,
          :created_at, :updated_at
 
   # Serve logo from ActiveStorage attachment, fallback to legacy logo_url column
@@ -62,6 +63,7 @@ class BusinessSerializer < Blueprinter::Base
              :slot_interval_minutes, :gap_between_appointments_minutes,
              :nequi_phone, :daviplata_phone, :bancolombia_account,
              :nit, :legal_representative_name,
+             :birthday_campaign_enabled, :birthday_discount_pct, :birthday_discount_days_valid,
              :created_at, :updated_at
   end
 
@@ -78,6 +80,7 @@ class BusinessSerializer < Blueprinter::Base
              :primary_color, :secondary_color,
              :email, :timezone, :currency,
              :instagram_url, :facebook_url, :website_url, :google_maps_url,
+             :birthday_campaign_enabled, :birthday_discount_pct, :birthday_discount_days_valid,
              :created_at, :updated_at
 
     field :verified do |business, _options|

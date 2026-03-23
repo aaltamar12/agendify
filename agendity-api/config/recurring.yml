@@ -63,3 +63,8 @@ production:
     class: TrialExpiryAlertJob
     queue: default
     schedule: every day at 8am
+
+  birthday_campaign:
+    class: BirthdayCampaignJob
+    queue: default
+    schedule: every day at 8am

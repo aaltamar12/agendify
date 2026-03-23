@@ -1,0 +1,18 @@
+<h2>Feliz cumpleanos!</h2>
+
+<p>Hola, <strong><%= @customer.name %></strong>.</p>
+
+<p><strong><%= @business_name %></strong> te desea un feliz cumpleanos y te regala un <strong><%= @discount_pct %>%</strong> de descuento en tu proximo servicio.</p>
+
+<p>Usa el codigo <strong style="font-size: 18px; color: #7c3aed;"><%= @code %></strong> antes del <strong><%= l(@valid_until, format: :long) %></strong>.</p>
+
+<p style="text-align: center; margin: 24px 0;">
+  <a href="<%= @booking_url %>"
+     style="display: inline-block; background-color: #7c3aed; color: #ffffff; padding: 12px 32px; border-radius: 6px; font-size: 16px; font-weight: 600; text-decoration: none;">
+    Reservar ahora
+  </a>
+</p>
+
+<p style="color: #888888; font-size: 14px;">
+  Este codigo es de un solo uso y aplica sobre el precio total de tu servicio.
+</p>

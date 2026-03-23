@@ -15,10 +15,14 @@ class Customer < ApplicationRecord
 
   # -- Scopes --
   scope :with_email, -> { where.not(email: [nil, ""]) }
+  scope :with_birthday_on, ->(month, day) { where("EXTRACT(MONTH FROM birth_date) = ? AND EXTRACT(DAY FROM birth_date) = ?", month, day) }
+  scope :with_birthday_in_range, ->(from, to) {
+    where("TO_CHAR(birth_date, 'MM-DD') BETWEEN ? AND ?", from.strftime("%m-%d"), to.strftime("%m-%d"))
+  }
 
   # -- Ransack (ActiveAdmin filters) --
   def self.ransackable_attributes(_auth_object = nil)
-    %w[name email phone business_id created_at updated_at]
+    %w[name email phone birth_date business_id created_at updated_at]
   end
 
   def self.ransackable_associations(_auth_object = nil)

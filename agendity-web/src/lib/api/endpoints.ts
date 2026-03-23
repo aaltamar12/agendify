@@ -166,6 +166,14 @@ export const ENDPOINTS = {
     list: `${BASE}/notification_config`,
   },
 
+  DISCOUNT_CODES: {
+    list: `${BASE}/discount_codes`,
+    create: `${BASE}/discount_codes`,
+    show: (id: number) => `${BASE}/discount_codes/${id}`,
+    update: (id: number) => `${BASE}/discount_codes/${id}`,
+    delete: (id: number) => `${BASE}/discount_codes/${id}`,
+  },
+
   ADMIN: {
     businesses: `${BASE}/admin/businesses`,
     impersonate: `${BASE}/admin/impersonate`,
@@ -200,5 +208,6 @@ export const ENDPOINTS = {
     adBanners: `${BASE}/public/ad_banners`,
     adBannerImpression: (id: number) => `${BASE}/public/ad_banners/${id}/impression`,
     adBannerClick: (id: number) => `${BASE}/public/ad_banners/${id}/click`,
+    validateCode: (slug: string) => `${BASE}/public/${slug}/validate_code`,
   },
 } as const;

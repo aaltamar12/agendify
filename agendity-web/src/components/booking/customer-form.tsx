@@ -92,6 +92,7 @@ export function CustomerForm({ slug }: CustomerFormProps) {
       name: data.name,
       email: data.email,
       phone: data.phone,
+      birth_date: data.birth_date || undefined,
     });
     nextStep();
   }
@@ -263,6 +264,13 @@ export function CustomerForm({ slug }: CustomerFormProps) {
           placeholder="Ej: juan@email.com"
           error={errors.email?.message}
           {...register('email')}
+        />
+
+        <Input
+          label="Fecha de nacimiento (opcional)"
+          type="date"
+          error={errors.birth_date?.message}
+          {...register('birth_date')}
         />
 
         <Input

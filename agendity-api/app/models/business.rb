@@ -50,6 +50,7 @@ class Business < ApplicationRecord
   has_many :dynamic_pricings, dependent: :destroy
   has_many :employee_balance_adjustments, dependent: :destroy
   has_many :business_goals, dependent: :destroy
+  has_many :discount_codes, dependent: :destroy
 
   # -- Validations --
   validates :name, presence: true

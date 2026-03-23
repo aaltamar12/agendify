@@ -173,6 +173,7 @@ export interface Customer {
   phone: string;
   email: string | null;
   notes: string | null;
+  birth_date?: string | null;
   total_visits: number;
   last_visit_at: string | null;
   created_at: string;
@@ -199,6 +200,8 @@ export interface Appointment {
   updated_at: string;
   original_price?: number;
   credits_applied?: number;
+  discount_code_id?: number | null;
+  discount_amount?: number;
   dynamic_pricing_id?: number | null;
   checked_in_by_type?: string | null;
   checked_in_by_id?: number | null;

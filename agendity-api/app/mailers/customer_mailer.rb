@@ -28,6 +28,20 @@ class CustomerMailer < ApplicationMailer
     )
   end
 
+  def birthday_greeting(customer, data)
+    @customer = customer
+    @business_name = data[:business_name]
+    @discount_pct = data[:discount_pct]
+    @code = data[:code]
+    @valid_until = data[:valid_until]
+    @booking_url = data[:booking_url]
+
+    mail(
+      to: @customer.email,
+      subject: "Feliz cumpleanos #{@customer.name}! #{@business_name} te tiene un regalo"
+    )
+  end
+
   def credits_adjusted(customer, data)
     @customer = customer
     @business_name = data[:business_name]

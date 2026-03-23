@@ -1,0 +1,9 @@
+Feliz cumpleanos, <%= @customer.name %>!
+
+<%= @business_name %> te desea un feliz cumpleanos y te regala un <%= @discount_pct %>% de descuento en tu proximo servicio.
+
+Usa el codigo <%= @code %> antes del <%= l(@valid_until, format: :long) %>.
+
+Reserva aqui: <%= @booking_url %>
+
+Este codigo es de un solo uso y aplica sobre el precio total de tu servicio.

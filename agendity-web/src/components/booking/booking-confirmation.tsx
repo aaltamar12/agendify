@@ -14,12 +14,13 @@ import {
   Check,
   AlertTriangle,
   Zap,
+  Tag,
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { cn } from '@/lib/utils/cn';
 import { Button, Card } from '@/components/ui';
 import { useBookingStore } from '@/lib/stores/booking-store';
-import { useBookAppointment } from '@/lib/hooks/use-public';
+import { useBookAppointment, useValidateDiscountCode } from '@/lib/hooks/use-public';
 import { formatCurrency, formatDuration } from '@/lib/utils/format';
 import { formatDate, formatTime } from '@/lib/utils/date';
 import dayjs from 'dayjs';
@@ -45,16 +46,24 @@ export function BookingConfirmation({
     customerInfo,
     dynamicPricing,
     creditBalance,
+    discountCode,
+    discountAmount,
+    discountName,
+    setDiscount,
+    clearDiscount,
     reset,
   } = useBookingStore();
 
   const bookMutation = useBookAppointment();
+  const validateCodeMutation = useValidateDiscountCode(slug);
   const [ticketCode, setTicketCode] = useState<string | null>(null);
   const [booked, setBooked] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [penaltyApplied, setPenaltyApplied] = useState<number>(0);
   const [applyCredits, setApplyCredits] = useState(false);
   const [creditsToApply, setCreditsToApply] = useState(creditBalance);
+  const [codeInput, setCodeInput] = useState('');
+  const [codeError, setCodeError] = useState<string | null>(null);
   // After booking, use the business from the API response (includes payment data via :with_payment view)
   // instead of the prop (which uses :public view and excludes payment fields).
   const [bookedBusiness, setBookedBusiness] = useState<Business | null>(null);
@@ -68,6 +77,41 @@ export function BookingConfirmation({
     navigator.clipboard.writeText(text);
     setCopiedField(field);
     setTimeout(() => setCopiedField(null), 2000);
+  }
+
+  async function handleValidateCode() {
+    if (!codeInput.trim()) return;
+    setCodeError(null);
+    try {
+      const result = await validateCodeMutation.mutateAsync(codeInput.trim());
+      const data = result.data;
+      if (data.valid) {
+        // Calculate the subtotal after dynamic pricing to compute discount amount
+        const subtotalAfterDynamic =
+          dynamicPricing?.has_dynamic_pricing && dynamicPricing.adjustment_pct !== 0
+            ? dynamicPricing.adjusted_price +
+              selectedServices.slice(1).reduce((sum, s) => sum + Number(s.price), 0)
+            : selectedServices.reduce((sum, s) => sum + Number(s.price), 0);
+
+        let discountAmt: number;
+        if (data.discount_type === 'percentage') {
+          discountAmt = Math.round(subtotalAfterDynamic * (data.discount_value / 100));
+        } else {
+          discountAmt = Math.min(data.discount_value, subtotalAfterDynamic);
+        }
+        setDiscount(codeInput.trim(), discountAmt, data.name);
+      } else {
+        setCodeError('Código no válido o expirado');
+      }
+    } catch {
+      setCodeError('Código no válido o expirado');
+    }
+  }
+
+  function handleRemoveDiscount() {
+    clearDiscount();
+    setCodeInput('');
+    setCodeError(null);
   }
 
   async function handleConfirm() {
@@ -91,6 +135,7 @@ export function BookingConfirmation({
           name: customerInfo.name,
           email: customerInfo.email || '',
           phone: customerInfo.phone,
+          ...(customerInfo.birth_date && { birth_date: customerInfo.birth_date }),
         },
         ...(additionalServiceIds.length > 0 && {
           additional_service_ids: additionalServiceIds,
@@ -98,6 +143,7 @@ export function BookingConfirmation({
         ...(applyCredits && creditsToApply > 0 && {
           apply_credits: creditsToApply,
         }),
+        ...(discountCode && { discount_code: discountCode }),
       });
 
       // Save customer data for future bookings
@@ -473,6 +519,53 @@ export function BookingConfirmation({
         )}
       </Card>
 
+      {/* Discount code */}
+      <div className="space-y-3">
+        {discountCode ? (
+          <div className="flex items-center justify-between rounded-xl border border-green-200 bg-green-50 px-4 py-3">
+            <div className="flex items-center gap-2">
+              <Tag className="h-4 w-4 text-green-600" />
+              <span className="text-sm font-medium text-green-800">
+                Descuento: -{formatCurrency(discountAmount)}{' '}
+                <span className="font-normal text-green-600">({discountName})</span>
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={handleRemoveDiscount}
+              className="text-xs text-green-700 hover:text-green-900 transition-colors"
+            >
+              Quitar
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={codeInput}
+              onChange={(e) => {
+                setCodeInput(e.target.value);
+                setCodeError(null);
+              }}
+              placeholder="Código de descuento"
+              className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-violet-500 focus:outline-none"
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleValidateCode}
+              loading={validateCodeMutation.isPending}
+              disabled={!codeInput.trim()}
+            >
+              Aplicar
+            </Button>
+          </div>
+        )}
+        {codeError && (
+          <p className="text-sm text-red-600">{codeError}</p>
+        )}
+      </div>
+
       {/* Payment instructions */}
       {(business.nequi_phone ||
         business.daviplata_phone ||
@@ -509,9 +602,14 @@ export function BookingConfirmation({
 
       {/* Credits + Total a pagar */}
       {selectedServices.length > 0 && (() => {
-        const subtotal = dynamicPricing?.has_dynamic_pricing && dynamicPricing.adjustment_pct !== 0
+        // 1. Subtotal after dynamic pricing
+        const subtotalAfterDynamic = dynamicPricing?.has_dynamic_pricing && dynamicPricing.adjustment_pct !== 0
           ? dynamicPricing.adjusted_price + selectedServices.slice(1).reduce((sum, s) => sum + Number(s.price), 0)
           : selectedServices.reduce((sum, s) => sum + Number(s.price), 0);
+        // 2. Discount code applied after dynamic pricing
+        const effectiveDiscount = discountCode ? Math.min(discountAmount, subtotalAfterDynamic) : 0;
+        const subtotal = subtotalAfterDynamic - effectiveDiscount;
+        // 3. Credits applied after discount
         const effectiveCredits = applyCredits ? Math.min(creditsToApply, subtotal) : 0;
         const total = subtotal - effectiveCredits;
 
@@ -560,10 +658,16 @@ export function BookingConfirmation({
 
             {/* Total */}
             <div className="rounded-xl border border-violet-200 bg-violet-50 px-5 py-4">
-              {effectiveCredits > 0 && (
+              {(effectiveDiscount > 0 || effectiveCredits > 0) && (
                 <div className="mb-2 flex items-center justify-between text-sm">
                   <span className="text-gray-600">Subtotal</span>
-                  <span className="text-gray-700">{formatCurrency(subtotal)}</span>
+                  <span className="text-gray-700">{formatCurrency(subtotalAfterDynamic)}</span>
+                </div>
+              )}
+              {effectiveDiscount > 0 && (
+                <div className="mb-2 flex items-center justify-between text-sm">
+                  <span className="text-green-700">Descuento ({discountName})</span>
+                  <span className="font-medium text-green-700">-{formatCurrency(effectiveDiscount)}</span>
                 </div>
               )}
               {effectiveCredits > 0 && (

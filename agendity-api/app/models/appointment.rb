@@ -19,6 +19,7 @@ class Appointment < ApplicationRecord
   belongs_to :employee
   belongs_to :service
   belongs_to :customer
+  belongs_to :discount_code, optional: true
   has_one :payment, dependent: :destroy
   has_one_attached :proof_image
   has_many :appointment_services, dependent: :destroy

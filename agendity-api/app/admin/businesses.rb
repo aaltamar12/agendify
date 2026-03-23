@@ -18,7 +18,8 @@ ActiveAdmin.register Business do
                 :cancellation_policy_pct, :cancellation_deadline_hours,
                 :trial_ends_at, :onboarding_completed, :primary_color, :secondary_color,
                 :nit, :legal_representative_name, :legal_representative_document,
-                :legal_representative_document_type, :independent
+                :legal_representative_document_type, :independent,
+                :birthday_campaign_enabled, :birthday_discount_pct, :birthday_discount_days_valid
 
   # -- Index --
   includes :owner
@@ -279,6 +280,11 @@ ActiveAdmin.register Business do
       f.input :legal_representative_document_type, as: :select,
         collection: [["CC", "CC"], ["CE", "CE"], ["NIT", "NIT"], ["Pasaporte", "passport"]],
         include_blank: "Seleccionar..."
+    end
+    f.inputs "Birthday Campaign" do
+      f.input :birthday_campaign_enabled, label: "Enabled"
+      f.input :birthday_discount_pct, label: "Discount %"
+      f.input :birthday_discount_days_valid, label: "Days valid"
     end
     f.inputs "Trial" do
       f.input :trial_ends_at, as: :datepicker

@@ -89,6 +89,24 @@ module Api
           render_success({ available: available })
         end
 
+        # GET /api/v1/public/:slug/validate_code?code=X
+        # Validates a discount code for a business and returns its details.
+        def validate_code
+          business = Business.friendly.find_by!(slug: params[:slug])
+          code = business.discount_codes.available.find_by(code: params[:code].to_s.upcase)
+
+          if code
+            render_success({
+              valid: true,
+              discount_type: code.discount_type,
+              discount_value: code.discount_value,
+              name: code.name
+            })
+          else
+            render_success({ valid: false })
+          end
+        end
+
         # GET /api/v1/public/customer_lookup?email=...&slug=...
         # Looks up a customer by email within a business so the booking form can pre-fill data.
         def customer_lookup
@@ -119,15 +137,17 @@ module Api
           raw = if params.key?(:booking)
                   params.require(:booking).permit(
                     :service_id, :employee_id, :date, :appointment_date, :start_time, :notes,
-                    :customer_name, :customer_email, :customer_phone, :apply_credits,
-                    customer: %i[name email phone],
+                    :customer_name, :customer_email, :customer_phone, :customer_birth_date,
+                    :apply_credits, :discount_code,
+                    customer: %i[name email phone birth_date],
                     additional_service_ids: []
                   )
                 else
                   params.permit(
                     :service_id, :employee_id, :date, :appointment_date, :start_time, :notes,
-                    :customer_name, :customer_email, :customer_phone, :apply_credits,
-                    customer: %i[name email phone],
+                    :customer_name, :customer_email, :customer_phone, :customer_birth_date,
+                    :apply_credits, :discount_code,
+                    customer: %i[name email phone birth_date],
                     additional_service_ids: []
                   )
                 end
@@ -137,6 +157,7 @@ module Api
             raw[:customer_name]  = raw[:customer][:name]
             raw[:customer_email] = raw[:customer][:email]
             raw[:customer_phone] = raw[:customer][:phone]
+            raw[:customer_birth_date] = raw[:customer][:birth_date] if raw[:customer][:birth_date].present?
             raw.delete(:customer)
           end
 

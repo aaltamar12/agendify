@@ -75,6 +75,23 @@ module Appointments
           final_price = active_pricing.apply_to_price(final_price, date)
         end
 
+        # Apply discount code if provided
+        discount_code = nil
+        discount_amount = 0
+        if @params[:discount_code].present?
+          discount_code = @business.discount_codes.available.find_by(code: @params[:discount_code].upcase)
+          if discount_code
+            # If code is customer-specific, verify it belongs to this customer
+            if discount_code.customer_id.present? && discount_code.customer_id != customer.id
+              discount_code = nil
+            else
+              discount_amount = discount_code.apply_to(final_price)
+              final_price -= discount_amount
+              discount_code.record_use!
+            end
+          end
+        end
+
         if customer.pending_penalty.positive?
           penalty_applied = customer.pending_penalty
           final_price += penalty_applied
@@ -105,8 +122,10 @@ module Appointments
           start_time:       @params[:start_time],
           end_time:         end_time,
           price:            final_price,
-          original_price:   dynamic_pricing ? original_price : nil,
+          original_price:   dynamic_pricing || discount_amount.positive? ? original_price : nil,
           dynamic_pricing_id: dynamic_pricing&.id,
+          discount_code_id: discount_code&.id,
+          discount_amount:  discount_amount,
           credits_applied:  credits_applied,
           notes:            @params[:notes],
           status:           credits_applied >= final_price + credits_applied ? :confirmed : :pending_payment,
@@ -220,14 +239,21 @@ module Appointments
 
     def find_or_create_customer
       if @params[:customer_email].present?
-        @business.customers.find_or_create_by!(email: @params[:customer_email]) do |c|
+        customer = @business.customers.find_or_create_by!(email: @params[:customer_email]) do |c|
           c.name  = @params[:customer_name]
           c.phone = @params[:customer_phone]
+          c.birth_date = @params[:customer_birth_date] if @params[:customer_birth_date].present?
         end
+        # Update birth_date if provided and not yet set
+        if @params[:customer_birth_date].present? && customer.birth_date.blank?
+          customer.update!(birth_date: @params[:customer_birth_date])
+        end
+        customer
       else
         @business.customers.create!(
           name:  @params[:customer_name],
-          phone: @params[:customer_phone]
+          phone: @params[:customer_phone],
+          birth_date: @params[:customer_birth_date]
         )
       end
     end

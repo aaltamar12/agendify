@@ -113,6 +113,9 @@ Rails.application.routes.draw do
         get :progress, on: :collection
       end
 
+      # Discount codes
+      resources :discount_codes, only: [:index, :create, :destroy]
+
       # Dynamic pricing
       resources :dynamic_pricing, except: [:new, :edit] do
         member do
@@ -203,6 +206,7 @@ Rails.application.routes.draw do
         get  ":slug/availability",    to: "businesses#availability"
         get  ":slug/price_preview",   to: "businesses#price_preview"
         get  ":slug/price_calendar",  to: "businesses#price_calendar"
+        get  ":slug/validate_code", to: "bookings#validate_code"
         get  ":slug/check_slot",   to: "bookings#check_slot"
         post ":slug/book",         to: "bookings#create"
         post ":slug/lock_slot",    to: "bookings#lock_slot"

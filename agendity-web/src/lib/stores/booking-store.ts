@@ -10,6 +10,7 @@ export interface CustomerInfo {
   phone: string;
   email?: string;
   notes?: string;
+  birth_date?: string;
 }
 
 export interface DynamicPricingInfo {
@@ -31,6 +32,9 @@ interface BookingState {
   customerInfo: CustomerInfo | null;
   dynamicPricing: DynamicPricingInfo | null;
   creditBalance: number;
+  discountCode: string | null;
+  discountAmount: number;
+  discountName: string | null;
 
   // Actions
   toggleService: (service: Service) => void;
@@ -39,6 +43,8 @@ interface BookingState {
   setCustomerInfo: (info: CustomerInfo) => void;
   setDynamicPricing: (info: DynamicPricingInfo | null) => void;
   setCreditBalance: (balance: number) => void;
+  setDiscount: (code: string, amount: number, name: string) => void;
+  clearDiscount: () => void;
   setStep: (step: number) => void;
   nextStep: () => void;
   prevStep: () => void;
@@ -55,6 +61,9 @@ const INITIAL_STATE = {
   customerInfo: null,
   dynamicPricing: null,
   creditBalance: 0,
+  discountCode: null,
+  discountAmount: 0,
+  discountName: null,
 };
 
 export const useBookingStore = create<BookingState>()((set, get) => ({
@@ -89,6 +98,10 @@ export const useBookingStore = create<BookingState>()((set, get) => ({
 
   setDynamicPricing: (info) => set({ dynamicPricing: info }),
   setCreditBalance: (balance) => set({ creditBalance: balance }),
+  setDiscount: (code, amount, name) =>
+    set({ discountCode: code, discountAmount: amount, discountName: name }),
+  clearDiscount: () =>
+    set({ discountCode: null, discountAmount: 0, discountName: null }),
 
   setStep: (step) => set({ currentStep: step }),
 

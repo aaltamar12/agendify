@@ -177,7 +177,8 @@ module Api
       def appointment_params
         params.require(:appointment).permit(
           :service_id, :employee_id, :customer_name, :customer_email,
-          :customer_phone, :appointment_date, :start_time, :notes,
+          :customer_phone, :customer_birth_date, :appointment_date, :start_time,
+          :notes, :discount_code,
           additional_service_ids: []
         )
       end

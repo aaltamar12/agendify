@@ -4,7 +4,7 @@ class CustomerSerializer < Blueprinter::Base
   identifier :id
 
   fields :business_id, :name, :phone, :email, :notes,
-         :created_at, :updated_at
+         :birth_date, :created_at, :updated_at
 
   # Frontend expects total_visits
   field :total_visits do |customer, _options|

@@ -19,6 +19,8 @@ module Notifications
         AppointmentMailer.payment_reminder(data[:appointment]).deliver_now
       when :payment_rejected
         AppointmentMailer.payment_rejected(data[:appointment], data[:reason]).deliver_now
+      when :birthday_greeting
+        CustomerMailer.birthday_greeting(recipient, data).deliver_now
       else
         Rails.logger.warn("[EmailChannel] Unknown template: #{template}")
         return false

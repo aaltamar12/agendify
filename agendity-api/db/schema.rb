@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_23_200005) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_23_221759) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "unaccent"
@@ -114,9 +114,12 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_23_200005) do
     t.decimal "credits_applied", precision: 12, scale: 2, default: "0.0"
     t.bigint "dynamic_pricing_id"
     t.decimal "original_price", precision: 12, scale: 2
+    t.bigint "discount_code_id"
+    t.decimal "discount_amount", precision: 10, scale: 2, default: "0.0"
     t.index ["business_id", "appointment_date", "status"], name: "idx_appointments_biz_date_status"
     t.index ["business_id"], name: "index_appointments_on_business_id"
     t.index ["customer_id"], name: "index_appointments_on_customer_id"
+    t.index ["discount_code_id"], name: "index_appointments_on_discount_code_id"
     t.index ["employee_id", "appointment_date", "start_time"], name: "idx_appointments_unique_slot", unique: true, where: "(status <> 4)"
     t.index ["employee_id", "appointment_date"], name: "idx_appointments_employee_date"
     t.index ["employee_id"], name: "index_appointments_on_employee_id"
@@ -219,6 +222,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_23_200005) do
     t.boolean "independent", default: false, null: false
     t.bigint "referral_code_id"
     t.integer "trial_alert_stage", default: 0, null: false
+    t.boolean "birthday_campaign_enabled", default: false, null: false
+    t.decimal "birthday_discount_pct", precision: 5, scale: 2, default: "10.0"
+    t.integer "birthday_discount_days_valid", default: 7
     t.index ["city"], name: "index_businesses_on_city"
     t.index ["independent"], name: "index_businesses_on_independent"
     t.index ["latitude", "longitude"], name: "index_businesses_on_latitude_and_longitude"
@@ -281,9 +287,30 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_23_200005) do
     t.datetime "updated_at", null: false
     t.text "notes"
     t.decimal "pending_penalty", precision: 10, scale: 2, default: "0.0", null: false
+    t.date "birth_date"
     t.index ["business_id", "email"], name: "index_customers_on_business_id_and_email", unique: true
     t.index ["business_id"], name: "index_customers_on_business_id"
     t.index ["email"], name: "index_customers_on_email"
+  end
+
+  create_table "discount_codes", force: :cascade do |t|
+    t.bigint "business_id", null: false
+    t.string "code", null: false
+    t.string "name"
+    t.string "discount_type", default: "percentage"
+    t.decimal "discount_value", precision: 10, scale: 2, null: false
+    t.integer "max_uses"
+    t.integer "current_uses", default: 0, null: false
+    t.date "valid_from"
+    t.date "valid_until"
+    t.boolean "active", default: true, null: false
+    t.string "source"
+    t.bigint "customer_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["business_id", "code"], name: "index_discount_codes_on_business_id_and_code", unique: true
+    t.index ["business_id"], name: "index_discount_codes_on_business_id"
+    t.index ["customer_id"], name: "index_discount_codes_on_customer_id"
   end
 
   create_table "dynamic_pricings", force: :cascade do |t|
@@ -648,6 +675,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_23_200005) do
   add_foreign_key "appointment_services", "services"
   add_foreign_key "appointments", "businesses"
   add_foreign_key "appointments", "customers"
+  add_foreign_key "appointments", "discount_codes"
   add_foreign_key "appointments", "dynamic_pricings"
   add_foreign_key "appointments", "employees"
   add_foreign_key "appointments", "services"
@@ -665,6 +693,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_23_200005) do
   add_foreign_key "credit_transactions", "credit_accounts"
   add_foreign_key "credit_transactions", "users", column: "performed_by_user_id"
   add_foreign_key "customers", "businesses"
+  add_foreign_key "discount_codes", "businesses"
+  add_foreign_key "discount_codes", "customers"
   add_foreign_key "dynamic_pricings", "businesses"
   add_foreign_key "dynamic_pricings", "services"
   add_foreign_key "employee_balance_adjustments", "businesses"
