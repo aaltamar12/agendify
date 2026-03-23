@@ -504,7 +504,7 @@ function PaymentCard({
       {payment?.proof_url && tab !== 'waiting' && (
         <button
           onClick={() => onViewProof(payment.proof_url!)}
-          className="mb-3 flex w-full items-center gap-2 rounded-lg border border-gray-200 p-2 text-xs text-violet-600 transition-colors hover:bg-violet-50"
+          className="mt-auto mb-3 flex w-full items-center gap-2 rounded-lg border border-gray-200 p-2 text-xs text-violet-600 transition-colors hover:bg-violet-50"
         >
           <ImageIcon className="h-4 w-4" />
           <span>Ver comprobante</span>
@@ -543,7 +543,7 @@ function PaymentCard({
 
       {/* Action buttons — only for "Pendientes" tab (payment_sent — has proof) */}
       {tab === 'proofs' && (
-        <div className="mt-auto flex gap-2 border-t border-gray-100 pt-3">
+        <div className="flex gap-2 border-t border-gray-100 pt-3">
           <Button
             size="sm"
             onClick={onApprove}
