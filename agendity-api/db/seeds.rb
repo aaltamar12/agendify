@@ -1417,6 +1417,37 @@ puts "  ✅ Reconciliation discrepancies created for Studio 70"
 
 # ============================================================================
 # SUSPENDED & INACTIVE BUSINESSES (status examples)
+# --- Dynamic pricing for Barbería Elite (active, testable now) ---
+puts "\n⚡ Creating dynamic pricing for Barbería Elite..."
+
+# Descuento: -15% entre semana (lunes a jueves) por las próximas 2 semanas
+DynamicPricing.find_or_create_by!(business: barberia_elite, name: "Descuento entre semana") do |dp|
+  dp.service = nil
+  dp.start_date = Date.current
+  dp.end_date = Date.current + 14.days
+  dp.price_adjustment_type = :percentage
+  dp.adjustment_mode = :fixed_mode
+  dp.adjustment_value = -15
+  dp.days_of_week = [1, 2, 3, 4]
+  dp.status = :active
+  dp.suggested_by = "manual"
+end
+puts "  ✅ Descuento -15% Lun-Jue (#{Date.current} → #{Date.current + 14.days})"
+
+# Incremento: +20% viernes y sábado por las próximas 2 semanas
+DynamicPricing.find_or_create_by!(business: barberia_elite, name: "Premium fin de semana") do |dp|
+  dp.service = nil
+  dp.start_date = Date.current
+  dp.end_date = Date.current + 14.days
+  dp.price_adjustment_type = :percentage
+  dp.adjustment_mode = :fixed_mode
+  dp.adjustment_value = 20
+  dp.days_of_week = [5, 6]
+  dp.status = :active
+  dp.suggested_by = "manual"
+end
+puts "  ✅ Premium +20% Vie-Sab (#{Date.current} → #{Date.current + 14.days})"
+
 # ============================================================================
 puts "\n🔒 Creating suspended & inactive businesses..."
 
