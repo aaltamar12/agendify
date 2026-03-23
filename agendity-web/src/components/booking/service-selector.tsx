@@ -1,6 +1,6 @@
 'use client';
 
-import { Clock, Tag } from 'lucide-react';
+import { Clock, Tag, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { Card } from '@/components/ui';
 import { formatCurrency, formatDuration } from '@/lib/utils/format';
@@ -9,9 +9,10 @@ import type { Service } from '@/lib/api/types';
 
 interface ServiceSelectorProps {
   services: Service[];
+  hasDynamicPricing?: boolean;
 }
 
-export function ServiceSelector({ services }: ServiceSelectorProps) {
+export function ServiceSelector({ services, hasDynamicPricing }: ServiceSelectorProps) {
   const { selectedServices, toggleService } = useBookingStore();
 
   const activeServices = services.filter((s) => s.active);
@@ -104,6 +105,12 @@ export function ServiceSelector({ services }: ServiceSelectorProps) {
                       {formatDuration(service.duration_minutes)}
                     </span>
                   </div>
+                  {hasDynamicPricing && (
+                    <p className="mt-2 flex items-center gap-1 text-xs text-amber-600">
+                      <Zap className="h-3 w-3" />
+                      El precio puede variar según el día
+                    </p>
+                  )}
                 </Card>
               );
             })}

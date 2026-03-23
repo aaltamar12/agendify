@@ -11,6 +11,26 @@ import type {
   Appointment,
 } from '@/lib/api/types';
 
+// --- Price preview / calendar types ---
+
+export interface PricePreviewData {
+  base_price: number;
+  adjusted_price: number;
+  adjustment_pct: number;
+  dynamic_pricing_name: string | null;
+  is_discount: boolean;
+  has_dynamic_pricing: boolean;
+}
+
+export interface PriceCalendarDay {
+  date: string;
+  base_price: number;
+  adjusted_price: number;
+  adjustment_pct: number;
+  has_dynamic_pricing: boolean;
+  closed?: boolean;
+}
+
 // --- Response types for public endpoints ---
 
 interface PublicBusinessResponse {
@@ -240,5 +260,43 @@ export function useSubmitTicketPayment() {
         queryKey: ['public', 'ticket', variables.code],
       });
     },
+  });
+}
+
+// --- Dynamic pricing public hooks ---
+
+export function usePricePreview(
+  slug: string,
+  serviceId: number,
+  date: string | null,
+) {
+  return useQuery({
+    queryKey: ['public', 'price_preview', slug, serviceId, date],
+    queryFn: () =>
+      get<ApiResponse<PricePreviewData>>(ENDPOINTS.PUBLIC.pricePreview(slug), {
+        params: { service_id: serviceId, date },
+      }),
+    select: (res) => res.data,
+    enabled: !!slug && !!serviceId && !!date,
+  });
+}
+
+export function usePriceCalendar(
+  slug: string,
+  serviceId: number,
+  from: string | null,
+  days: number = 14,
+) {
+  return useQuery({
+    queryKey: ['public', 'price_calendar', slug, serviceId, from, days],
+    queryFn: () =>
+      get<ApiResponse<PriceCalendarDay[]>>(
+        ENDPOINTS.PUBLIC.priceCalendar(slug),
+        {
+          params: { service_id: serviceId, from, days },
+        },
+      ),
+    select: (res) => res.data,
+    enabled: !!slug && !!serviceId && !!from,
   });
 }

@@ -48,6 +48,9 @@ export default function TicketPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [verifyEmail, setVerifyEmail] = useState('');
   const [downloading, setDownloading] = useState(false);
+  const [cancellationResult, setCancellationResult] = useState<{
+    creditAmount: number;
+  } | null>(null);
 
   const savedCustomer = getSavedCustomer();
   const customerEmail = savedCustomer?.email || verifyEmail;
@@ -102,8 +105,13 @@ export default function TicketPage() {
 
   async function handleCancel() {
     try {
+      // Capture preview info before cancellation clears the query
+      const creditAmount = preview?.has_paid ? preview.refund_amount : 0;
       await cancelMutation.mutateAsync({ code });
       setShowCancelDialog(false);
+      if (creditAmount > 0) {
+        setCancellationResult({ creditAmount });
+      }
     } catch {
       // Error handled by mutation state
     }
@@ -329,12 +337,145 @@ export default function TicketPage() {
     );
   }
 
+  // Render business contact info for refund (when user has paid)
+  function renderBusinessContact(dark: boolean) {
+    if (!preview?.has_paid) return null;
+    const contact = preview.business_contact;
+    const hasContactInfo = contact.phone || contact.email || contact.address;
+    if (!hasContactInfo) return null;
+
+    return (
+      <div className={cn(
+        'mt-4 rounded-lg border px-4 py-3',
+        dark
+          ? 'bg-gray-800/50 border-gray-700'
+          : 'bg-gray-50 border-gray-200'
+      )}>
+        <p className={cn('text-xs font-semibold mb-2', dark ? 'text-gray-300' : 'text-gray-700')}>
+          Para solicitar devolucion de dinero, contacta al negocio:
+        </p>
+        <div className="space-y-1.5">
+          {contact.phone && (
+            <div className="flex items-center gap-2">
+              <Phone className={cn('h-3.5 w-3.5', dark ? 'text-violet-400' : 'text-violet-600')} />
+              <a href={`tel:${contact.phone}`} className={cn('text-sm', dark ? 'text-gray-300' : 'text-gray-700')}>
+                {contact.phone}
+              </a>
+            </div>
+          )}
+          {contact.email && (
+            <div className="flex items-center gap-2">
+              <Mail className={cn('h-3.5 w-3.5', dark ? 'text-violet-400' : 'text-violet-600')} />
+              <a href={`mailto:${contact.email}`} className={cn('text-sm', dark ? 'text-gray-300' : 'text-gray-700')}>
+                {contact.email}
+              </a>
+            </div>
+          )}
+          {contact.address && (
+            <div className="flex items-center gap-2">
+              <MapPin className={cn('h-3.5 w-3.5', dark ? 'text-violet-400' : 'text-violet-600')} />
+              <span className={cn('text-sm', dark ? 'text-gray-300' : 'text-gray-700')}>
+                {contact.address}
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Render cancel preview modal content (shared between dark/light themes)
+  function renderCancelPreviewContent(dark: boolean) {
+    // Loading state
+    if (cancelPreview.isLoading) {
+      return (
+        <div className="flex items-center justify-center py-6">
+          <Spinner size="md" color={dark ? 'text-violet-400' : 'text-violet-600'} />
+        </div>
+      );
+    }
+
+    // Error state
+    if (cancelPreview.isError || !preview) {
+      return (
+        <p className={cn('text-sm', dark ? 'text-gray-300' : 'text-gray-600')}>
+          No se pudo cargar la informacion de cancelacion. Intenta de nuevo.
+        </p>
+      );
+    }
+
+    // Case 1: User has NOT paid
+    if (!preview.has_paid) {
+      return (
+        <p className={cn('text-sm', dark ? 'text-gray-300' : 'text-gray-600')}>
+          ¿Estas seguro de que deseas cancelar esta cita? Esta accion no se puede deshacer.
+        </p>
+      );
+    }
+
+    // Case 2: User HAS paid, deadline NOT passed (no penalty)
+    if (!preview.deadline_passed) {
+      return (
+        <div className="space-y-3">
+          <div className={cn(
+            'flex items-start gap-2 rounded-lg border px-4 py-3',
+            dark
+              ? 'bg-green-500/10 border-green-500/20'
+              : 'bg-green-50 border-green-200'
+          )}>
+            <ShieldCheck className={cn('h-5 w-5 shrink-0 mt-0.5', dark ? 'text-green-400' : 'text-green-600')} />
+            <div>
+              <p className={cn('text-sm font-medium', dark ? 'text-green-400' : 'text-green-700')}>
+                Puedes cancelar sin penalizacion
+              </p>
+              <p className={cn('text-sm mt-1', dark ? 'text-gray-300' : 'text-gray-600')}>
+                Tu pago sera reembolsado como credito:{' '}
+                <span className="font-bold">{formatCurrency(preview.refund_amount)}</span>
+              </p>
+            </div>
+          </div>
+          {renderBusinessContact(dark)}
+        </div>
+      );
+    }
+
+    // Case 3: User HAS paid, deadline HAS passed (penalty applies)
+    return (
+      <div className="space-y-3">
+        <div className={cn(
+          'flex items-start gap-2 rounded-lg border px-4 py-3',
+          dark
+            ? 'bg-red-500/10 border-red-500/20'
+            : 'bg-red-50 border-red-200'
+        )}>
+          <AlertTriangle className={cn('h-5 w-5 shrink-0 mt-0.5', dark ? 'text-red-400' : 'text-red-600')} />
+          <div>
+            <p className={cn('text-sm font-medium', dark ? 'text-red-400' : 'text-red-600')}>
+              Se aplicara una penalizacion del {preview.penalty_pct}% ({formatCurrency(preview.penalty_amount)})
+            </p>
+            <p className={cn('text-sm mt-1', dark ? 'text-gray-300' : 'text-gray-600')}>
+              Recibiras{' '}
+              <span className="font-bold">{formatCurrency(preview.refund_amount)}</span>
+              {' '}como credito para tu proxima reserva
+            </p>
+          </div>
+        </div>
+        {renderBusinessContact(dark)}
+      </div>
+    );
+  }
+
+  // Button label based on preview state
+  function getCancelButtonLabel(): string {
+    if (!preview) return 'Cancelar cita';
+    if (!preview.has_paid) return 'Si, cancelar';
+    if (preview.deadline_passed && preview.penalty_amount > 0) return 'Cancelar con penalizacion';
+    return 'Cancelar cita';
+  }
+
   // Render cancel button and dialog
   function renderCancelSection() {
     if (!canCancel) return null;
-
-    const penalty = wouldIncurPenalty();
-    const penaltyAmount = getPenaltyAmount();
 
     return (
       <>
@@ -353,7 +494,7 @@ export default function TicketPage() {
         {/* Cancel confirmation dialog */}
         {showCancelDialog && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-            <div className="w-full max-w-sm rounded-2xl bg-gray-900 border border-gray-800 px-6 py-6">
+            <div className="w-full max-w-sm rounded-2xl bg-gray-900 border border-gray-800 px-6 py-6 max-h-[90vh] overflow-y-auto">
               <div className="flex items-center gap-3 mb-4">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-500/10">
                   <AlertTriangle className="h-5 w-5 text-red-400" />
@@ -363,32 +504,7 @@ export default function TicketPage() {
                 </h3>
               </div>
 
-              {penalty ? (
-                <div className="space-y-3">
-                  <p className="text-sm text-gray-300">
-                    Estás cancelando con menos de{' '}
-                    <span className="font-semibold text-white">
-                      {business.cancellation_deadline_hours} horas
-                    </span>{' '}
-                    de anticipación.
-                  </p>
-                  <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3">
-                    <p className="text-sm font-medium text-red-400">
-                      Se aplicará una penalización de{' '}
-                      <span className="font-bold">
-                        {formatCurrency(penaltyAmount)}
-                      </span>{' '}
-                      ({business.cancellation_policy_pct}% del servicio) que se
-                      sumará al precio de tu próxima reserva.
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <p className="text-sm text-gray-300">
-                  ¿Estás seguro de que deseas cancelar esta cita? Esta acción no
-                  se puede deshacer.
-                </p>
-              )}
+              {renderCancelPreviewContent(true)}
 
               {cancelMutation.isError && (
                 <div className="mt-3 rounded-lg bg-red-500/10 px-4 py-2 text-sm text-red-400">
@@ -401,7 +517,7 @@ export default function TicketPage() {
                   fullWidth
                   variant="outline"
                   className="border-gray-700 text-gray-300 hover:bg-gray-800"
-                  onClick={() => setShowCancelDialog(false)}
+                  onClick={() => { setShowCancelDialog(false); cancelMutation.reset(); }}
                   disabled={cancelMutation.isPending}
                 >
                   Volver
@@ -411,8 +527,9 @@ export default function TicketPage() {
                   variant="destructive"
                   onClick={handleCancel}
                   loading={cancelMutation.isPending}
+                  disabled={cancelPreview.isLoading || cancelPreview.isError}
                 >
-                  {penalty ? 'Cancelar con penalización' : 'Sí, cancelar'}
+                  {getCancelButtonLabel()}
                 </Button>
               </div>
             </div>
@@ -437,9 +554,22 @@ export default function TicketPage() {
             {appointment.cancelled_by === 'customer'
               ? 'Cancelaste esta cita.'
               : appointment.cancelled_by === 'business'
-                ? `${business.name} canceló esta cita.`
-                : 'Esta cita ha sido cancelada y ya no es válida.'}
+                ? `${business.name} cancelo esta cita.`
+                : 'Esta cita ha sido cancelada y ya no es valida.'}
           </p>
+
+          {/* Credit info after cancellation */}
+          {cancellationResult && cancellationResult.creditAmount > 0 && (
+            <div className="mt-4 rounded-lg bg-violet-500/10 border border-violet-500/20 px-4 py-3">
+              <div className="flex items-center justify-center gap-2">
+                <Info className="h-4 w-4 text-violet-400" />
+                <p className="text-sm font-medium text-violet-300">
+                  Tu credito de {formatCurrency(cancellationResult.creditAmount)} esta disponible para tu proxima reserva
+                </p>
+              </div>
+            </div>
+          )}
+
           <div className="mt-6">
             {renderAppointmentDetails()}
           </div>
@@ -811,10 +941,10 @@ export default function TicketPage() {
           </div>
         )}
 
-        {/* Cancel dialog — reuse same logic but with light theme */}
+        {/* Cancel dialog — light theme with preview */}
         {showCancelDialog && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <div className="w-full max-w-sm rounded-2xl bg-white border border-gray-200 px-6 py-6">
+            <div className="w-full max-w-sm rounded-2xl bg-white border border-gray-200 px-6 py-6 max-h-[90vh] overflow-y-auto">
               <div className="flex items-center gap-3 mb-4">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-50">
                   <AlertTriangle className="h-5 w-5 text-red-500" />
@@ -824,32 +954,7 @@ export default function TicketPage() {
                 </h3>
               </div>
 
-              {wouldIncurPenalty() ? (
-                <div className="space-y-3">
-                  <p className="text-sm text-gray-600">
-                    Estas cancelando con menos de{' '}
-                    <span className="font-semibold text-gray-900">
-                      {business.cancellation_deadline_hours} horas
-                    </span>{' '}
-                    de anticipacion.
-                  </p>
-                  <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3">
-                    <p className="text-sm font-medium text-red-600">
-                      Se aplicara una penalizacion de{' '}
-                      <span className="font-bold">
-                        {formatCurrency(getPenaltyAmount())}
-                      </span>{' '}
-                      ({business.cancellation_policy_pct}% del servicio) que se
-                      sumara al precio de tu proxima reserva.
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <p className="text-sm text-gray-600">
-                  Estas seguro de que deseas cancelar esta cita? Esta accion no
-                  se puede deshacer.
-                </p>
-              )}
+              {renderCancelPreviewContent(false)}
 
               {cancelMutation.isError && (
                 <div className="mt-3 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-600">
@@ -862,7 +967,7 @@ export default function TicketPage() {
                   fullWidth
                   variant="outline"
                   className="border-gray-300 text-gray-600 hover:bg-gray-50"
-                  onClick={() => setShowCancelDialog(false)}
+                  onClick={() => { setShowCancelDialog(false); cancelMutation.reset(); }}
                   disabled={cancelMutation.isPending}
                 >
                   Volver
@@ -872,8 +977,9 @@ export default function TicketPage() {
                   variant="destructive"
                   onClick={handleCancel}
                   loading={cancelMutation.isPending}
+                  disabled={cancelPreview.isLoading || cancelPreview.isError}
                 >
-                  {wouldIncurPenalty() ? 'Cancelar con penalizacion' : 'Si, cancelar'}
+                  {getCancelButtonLabel()}
                 </Button>
               </div>
             </div>

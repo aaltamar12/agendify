@@ -12,6 +12,15 @@ export interface CustomerInfo {
   notes?: string;
 }
 
+export interface DynamicPricingInfo {
+  base_price: number;
+  adjusted_price: number;
+  adjustment_pct: number;
+  dynamic_pricing_name: string | null;
+  is_discount: boolean;
+  has_dynamic_pricing: boolean;
+}
+
 interface BookingState {
   currentStep: number;
   selectedServices: Service[];
@@ -20,12 +29,14 @@ interface BookingState {
   selectedDate: string | null;
   selectedTime: string | null;
   customerInfo: CustomerInfo | null;
+  dynamicPricing: DynamicPricingInfo | null;
 
   // Actions
   toggleService: (service: Service) => void;
   setEmployee: (employee: Employee | null) => void;
   setDateTime: (date: string, time: string) => void;
   setCustomerInfo: (info: CustomerInfo) => void;
+  setDynamicPricing: (info: DynamicPricingInfo | null) => void;
   setStep: (step: number) => void;
   nextStep: () => void;
   prevStep: () => void;
@@ -40,6 +51,7 @@ const INITIAL_STATE = {
   selectedDate: null,
   selectedTime: null,
   customerInfo: null,
+  dynamicPricing: null,
 };
 
 export const useBookingStore = create<BookingState>()((set, get) => ({
@@ -71,6 +83,8 @@ export const useBookingStore = create<BookingState>()((set, get) => ({
     set({ selectedDate: date, selectedTime: time }),
 
   setCustomerInfo: (info) => set({ customerInfo: info }),
+
+  setDynamicPricing: (info) => set({ dynamicPricing: info }),
 
   setStep: (step) => set({ currentStep: step }),
 

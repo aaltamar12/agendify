@@ -1,13 +1,14 @@
 'use client';
 
-import { useRef } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useRef, useEffect } from 'react';
+import { ChevronLeft, ChevronRight, Zap } from 'lucide-react';
 import dayjs from 'dayjs';
 import { cn } from '@/lib/utils/cn';
 import { Spinner } from '@/components/ui';
 import { getNextDays, parseDate, formatTime } from '@/lib/utils/date';
+import { formatCurrency } from '@/lib/utils/format';
 import { useBookingStore } from '@/lib/stores/booking-store';
-import { useAvailability } from '@/lib/hooks/use-public';
+import { useAvailability, usePriceCalendar, usePricePreview } from '@/lib/hooks/use-public';
 
 interface DateTimePickerProps {
   slug: string;
@@ -21,6 +22,7 @@ export function DateTimePicker({ slug }: DateTimePickerProps) {
     selectedDate,
     selectedTime,
     setDateTime,
+    setDynamicPricing,
   } = useBookingStore();
   const setStep = useBookingStore((s) => s.setStep);
 
@@ -39,6 +41,47 @@ export function DateTimePicker({ slug }: DateTimePickerProps) {
   );
 
   const slots = availability?.slots ?? [];
+
+  // Fetch price calendar for next 14 days
+  const { data: priceCalendar } = usePriceCalendar(
+    slug,
+    selectedService?.id ?? 0,
+    days[0],
+    14,
+  );
+
+  // Fetch price preview for the currently selected date
+  const { data: pricePreview } = usePricePreview(
+    slug,
+    selectedService?.id ?? 0,
+    currentDate,
+  );
+
+  // Sync price preview data to the store when it changes
+  useEffect(() => {
+    if (pricePreview) {
+      setDynamicPricing({
+        base_price: pricePreview.base_price,
+        adjusted_price: pricePreview.adjusted_price,
+        adjustment_pct: pricePreview.adjustment_pct,
+        dynamic_pricing_name: pricePreview.dynamic_pricing_name,
+        is_discount: pricePreview.is_discount,
+        has_dynamic_pricing: pricePreview.has_dynamic_pricing,
+      });
+    } else {
+      setDynamicPricing(null);
+    }
+  }, [pricePreview, setDynamicPricing]);
+
+  // Build a map of date -> price data for quick lookup
+  const priceMap = new Map(
+    (priceCalendar ?? []).map((d) => [d.date, d]),
+  );
+
+  // Find the cheapest day (with discount)
+  const cheapestDay = (priceCalendar ?? [])
+    .filter((d) => d.has_dynamic_pricing && d.adjustment_pct < 0 && !d.closed)
+    .sort((a, b) => a.adjustment_pct - b.adjustment_pct)[0] ?? null;
 
   function handleDateSelect(date: string) {
     // Update the store date but keep on step 3
@@ -66,7 +109,23 @@ export function DateTimePicker({ slug }: DateTimePickerProps) {
         </p>
       </div>
 
-      {/* Date selector */}
+      {/* Cheapest day highlight */}
+      {cheapestDay && (
+        <div className="flex items-center gap-2 rounded-lg bg-green-50 border border-green-200 px-3 py-2">
+          <Zap className="h-4 w-4 text-green-600 fill-green-600" />
+          <p className="text-sm text-green-800">
+            <span className="font-semibold">
+              Día más económico:{' '}
+              {parseDate(cheapestDay.date).format('dddd D [de] MMM')}
+            </span>{' '}
+            <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
+              {cheapestDay.adjustment_pct}%
+            </span>
+          </p>
+        </div>
+      )}
+
+      {/* Date selector with price badges */}
       <div className="space-y-3">
         <h3 className="text-sm font-medium text-gray-700">Fecha</h3>
         <div className="relative">
@@ -88,17 +147,24 @@ export function DateTimePicker({ slug }: DateTimePickerProps) {
               const dayName = d.format('ddd');
               const dayNum = d.format('D');
               const monthName = d.format('MMM');
+              const priceData = priceMap.get(date);
+              const isClosed = priceData?.closed;
+              const hasDynamic = priceData?.has_dynamic_pricing;
+              const pct = priceData?.adjustment_pct ?? 0;
 
               return (
                 <button
                   key={date}
                   type="button"
-                  onClick={() => handleDateSelect(date)}
+                  onClick={() => !isClosed && handleDateSelect(date)}
+                  disabled={isClosed}
                   className={cn(
-                    'flex shrink-0 flex-col items-center rounded-xl px-3 py-2 text-sm transition-all min-w-[60px]',
-                    isSelected
-                      ? 'bg-violet-600 text-white shadow-md'
-                      : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200',
+                    'flex shrink-0 flex-col items-center rounded-xl px-3 py-2 text-sm transition-all min-w-[60px] relative',
+                    isClosed
+                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                      : isSelected
+                        ? 'bg-violet-600 text-white shadow-md'
+                        : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200',
                   )}
                 >
                   <span className="text-xs font-medium uppercase">
@@ -106,6 +172,29 @@ export function DateTimePicker({ slug }: DateTimePickerProps) {
                   </span>
                   <span className="text-lg font-bold">{dayNum}</span>
                   <span className="text-xs">{monthName}</span>
+
+                  {/* Price badge */}
+                  {isClosed ? (
+                    <span className="mt-1 text-[10px] font-medium text-gray-400">
+                      Cerrado
+                    </span>
+                  ) : hasDynamic && pct !== 0 ? (
+                    <span
+                      className={cn(
+                        'mt-1 flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-semibold',
+                        pct < 0
+                          ? isSelected
+                            ? 'bg-green-200 text-green-800'
+                            : 'bg-green-100 text-green-700'
+                          : isSelected
+                            ? 'bg-orange-200 text-orange-800'
+                            : 'bg-orange-100 text-orange-700',
+                      )}
+                    >
+                      <Zap className="h-2.5 w-2.5" />
+                      {pct > 0 ? '+' : ''}{pct}%
+                    </span>
+                  ) : null}
                 </button>
               );
             })}
@@ -120,6 +209,57 @@ export function DateTimePicker({ slug }: DateTimePickerProps) {
           </button>
         </div>
       </div>
+
+      {/* Dynamic price display for selected date */}
+      {pricePreview?.has_dynamic_pricing && pricePreview.adjustment_pct !== 0 && (
+        <div
+          className={cn(
+            'flex items-center justify-between rounded-lg border px-4 py-3',
+            pricePreview.is_discount
+              ? 'bg-green-50 border-green-200'
+              : 'bg-orange-50 border-orange-200',
+          )}
+        >
+          <div className="flex items-center gap-2">
+            <Zap
+              className={cn(
+                'h-4 w-4',
+                pricePreview.is_discount
+                  ? 'text-green-600 fill-green-600'
+                  : 'text-orange-600 fill-orange-600',
+              )}
+            />
+            <div>
+              <p className="text-sm font-medium text-gray-900">
+                <span className="line-through text-gray-400 mr-2">
+                  {formatCurrency(pricePreview.base_price)}
+                </span>
+                {formatCurrency(pricePreview.adjusted_price)}
+              </p>
+              <p
+                className={cn(
+                  'text-xs',
+                  pricePreview.is_discount ? 'text-green-700' : 'text-orange-700',
+                )}
+              >
+                {pricePreview.dynamic_pricing_name}
+              </p>
+            </div>
+          </div>
+          <span
+            className={cn(
+              'rounded-full px-2.5 py-1 text-xs font-semibold',
+              pricePreview.is_discount
+                ? 'bg-green-100 text-green-700'
+                : 'bg-orange-100 text-orange-700',
+            )}
+          >
+            {pricePreview.adjustment_pct > 0 ? '+' : ''}
+            {pricePreview.adjustment_pct}%{' '}
+            {pricePreview.is_discount ? 'Descuento' : 'Tarifa de temporada'}
+          </span>
+        </div>
+      )}
 
       {/* Time slots */}
       <div className="space-y-3">

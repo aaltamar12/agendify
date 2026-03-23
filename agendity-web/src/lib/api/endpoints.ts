@@ -178,5 +178,7 @@ export const ENDPOINTS = {
     cancelPreview: (code: string) => `${BASE}/public/tickets/${code}/cancel_preview`,
     submitTicketPayment: (code: string) => `${BASE}/public/tickets/${code}/payment`,
     explore: `${BASE}/public/explore`,
+    pricePreview: (slug: string) => `${BASE}/public/${slug}/price_preview`,
+    priceCalendar: (slug: string) => `${BASE}/public/${slug}/price_calendar`,
   },
 } as const;

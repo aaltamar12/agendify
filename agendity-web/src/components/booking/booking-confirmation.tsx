@@ -13,8 +13,10 @@ import {
   Copy,
   Check,
   AlertTriangle,
+  Zap,
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
+import { cn } from '@/lib/utils/cn';
 import { Button, Card } from '@/components/ui';
 import { useBookingStore } from '@/lib/stores/booking-store';
 import { useBookAppointment } from '@/lib/hooks/use-public';
@@ -40,6 +42,7 @@ export function BookingConfirmation({
     selectedDate,
     selectedTime,
     customerInfo,
+    dynamicPricing,
     reset,
   } = useBookingStore();
 
@@ -335,11 +338,51 @@ export function BookingConfirmation({
                 </p>
               </div>
             ))}
-            {selectedServices.length > 1 && (
+            {/* Dynamic pricing breakdown */}
+            {dynamicPricing?.has_dynamic_pricing && dynamicPricing.adjustment_pct !== 0 && selectedService && (
+              <div className="mt-2 space-y-1 border-t border-gray-100 pt-2">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="flex items-center gap-1 text-sm text-gray-600">
+                    <Zap
+                      className={cn(
+                        'h-3.5 w-3.5',
+                        dynamicPricing.is_discount
+                          ? 'text-green-600 fill-green-600'
+                          : 'text-orange-600 fill-orange-600',
+                      )}
+                    />
+                    {dynamicPricing.is_discount ? 'Descuento' : 'Tarifa dinámica'}
+                  </p>
+                  <p
+                    className={cn(
+                      'text-sm font-semibold whitespace-nowrap',
+                      dynamicPricing.is_discount ? 'text-green-600' : 'text-orange-600',
+                    )}
+                  >
+                    {dynamicPricing.is_discount ? '' : '+'}
+                    {formatCurrency(dynamicPricing.adjusted_price - dynamicPricing.base_price)}
+                    {' '}
+                    <span className="font-normal text-xs">
+                      ({dynamicPricing.adjustment_pct > 0 ? '+' : ''}{dynamicPricing.adjustment_pct}%)
+                    </span>
+                  </p>
+                </div>
+                {dynamicPricing.dynamic_pricing_name && (
+                  <p className="text-xs text-gray-400">{dynamicPricing.dynamic_pricing_name}</p>
+                )}
+              </div>
+            )}
+            {/* Total row */}
+            {(selectedServices.length > 1 || (dynamicPricing?.has_dynamic_pricing && dynamicPricing.adjustment_pct !== 0)) && (
               <div className="mt-1 flex items-baseline justify-between border-t border-gray-100 pt-1">
                 <p className="text-sm font-medium text-gray-700">Total</p>
                 <p className="text-sm font-bold text-violet-700">
-                  {formatCurrency(selectedServices.reduce((sum, s) => sum + Number(s.price), 0))}
+                  {formatCurrency(
+                    dynamicPricing?.has_dynamic_pricing && dynamicPricing.adjustment_pct !== 0
+                      ? dynamicPricing.adjusted_price +
+                        selectedServices.slice(1).reduce((sum, s) => sum + Number(s.price), 0)
+                      : selectedServices.reduce((sum, s) => sum + Number(s.price), 0)
+                  )}
                 </p>
               </div>
             )}

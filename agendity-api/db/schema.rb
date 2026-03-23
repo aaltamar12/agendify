@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_22_234000) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_22_235000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "unaccent"
@@ -120,6 +120,21 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_22_234000) do
     t.index ["business_id", "date"], name: "idx_blocked_slots_biz_date"
     t.index ["business_id"], name: "index_blocked_slots_on_business_id"
     t.index ["employee_id"], name: "index_blocked_slots_on_employee_id"
+  end
+
+  create_table "business_goals", force: :cascade do |t|
+    t.bigint "business_id", null: false
+    t.string "goal_type", null: false
+    t.string "name"
+    t.decimal "target_value", precision: 12, scale: 2, null: false
+    t.string "period", default: "monthly"
+    t.decimal "fixed_costs", precision: 12, scale: 2
+    t.jsonb "metadata", default: {}
+    t.boolean "active", default: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["business_id", "goal_type"], name: "index_business_goals_on_business_id_and_goal_type"
+    t.index ["business_id"], name: "index_business_goals_on_business_id"
   end
 
   create_table "business_hours", force: :cascade do |t|
@@ -547,6 +562,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_22_234000) do
   add_foreign_key "appointments", "services"
   add_foreign_key "blocked_slots", "businesses"
   add_foreign_key "blocked_slots", "employees"
+  add_foreign_key "business_goals", "businesses"
   add_foreign_key "business_hours", "businesses"
   add_foreign_key "businesses", "users", column: "owner_id"
   add_foreign_key "cash_register_closes", "businesses"
