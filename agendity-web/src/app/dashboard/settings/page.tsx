@@ -115,7 +115,9 @@ export default function SettingsPage() {
         )}
 
         {/* Cover image */}
-        {!loadingBusiness && business && (
+        {loadingBusiness ? (
+          <Skeleton className="h-48 w-full" />
+        ) : business && (
           <CoverSection
             coverUrl={business.cover_url}
             coverSource={business.cover_source}
