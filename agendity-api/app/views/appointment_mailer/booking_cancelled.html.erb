@@ -1,11 +1,11 @@
 <h2>Cita cancelada</h2>
 
-<p>La siguiente cita ha sido cancelada:</p>
+<p>¡Hola, <%= @customer.name %>! Tu cita en <strong><%= @business.name %></strong> ha sido cancelada.</p>
 
 <table class="detail-table">
   <tr>
-    <td>Cliente</td>
-    <td><%= @customer.name %></td>
+    <td>Negocio</td>
+    <td><%= @business.name %></td>
   </tr>
   <tr>
     <td>Servicio</td>

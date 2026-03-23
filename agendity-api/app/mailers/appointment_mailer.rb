@@ -70,7 +70,8 @@ class AppointmentMailer < ApplicationMailer
     @service     = appointment.service
     @employee    = appointment.employee
 
-    @has_paid = %w[payment_sent confirmed checked_in].include?(appointment.status_before_last_save || "")
+    # Check if customer had paid (payment exists with approved/submitted status)
+    @has_paid = appointment.payment.present? && %w[approved submitted].include?(appointment.payment.status)
     @cancelled_by_customer = appointment.cancelled_by == "customer"
     policy_pct = @business.cancellation_policy_pct || 0
     @penalty_amount = (appointment.price * policy_pct / 100.0).round(0)
