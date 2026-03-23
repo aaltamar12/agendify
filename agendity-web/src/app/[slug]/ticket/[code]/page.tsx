@@ -399,19 +399,19 @@ export default function TicketPage() {
   // Render cancel preview modal content (shared between dark/light themes)
   function renderCancelPreviewContent(dark: boolean) {
     // Loading state
-    if (cancelPreview.isLoading) {
+    if (cancelPreview.isLoading || cancelPreview.isFetching || (!preview && !cancelPreview.isError)) {
       return (
         <div className="flex items-center justify-center py-6">
-          <Spinner size="md" color={dark ? 'text-violet-400' : 'text-violet-600'} />
+          <div className="h-5 w-5 animate-spin rounded-full border-2 border-violet-500 border-t-transparent" />
         </div>
       );
     }
 
-    // Error state
-    if (cancelPreview.isError || !preview) {
+    // No preview data — fallback
+    if (!preview) {
       return (
         <p className={cn('text-sm', dark ? 'text-gray-300' : 'text-gray-600')}>
-          No se pudo cargar la informacion de cancelacion. Intenta de nuevo.
+          ¿Estas seguro de que deseas cancelar esta cita? Esta accion no se puede deshacer.
         </p>
       );
     }
@@ -420,7 +420,7 @@ export default function TicketPage() {
     if (!preview.has_paid) {
       return (
         <p className={cn('text-sm', dark ? 'text-gray-300' : 'text-gray-600')}>
-          ¿Estas seguro de que deseas cancelar esta cita? Esta accion no se puede deshacer.
+          ¿Estas seguro de que deseas cancelar? No se aplicara penalizacion.
         </p>
       );
     }
