@@ -83,13 +83,14 @@ module Api
         render json: body, status: status
       end
 
-      def render_paginated(collection, serializer)
+      def render_paginated(collection, serializer, view: nil)
         page = (params[:page] || 1).to_i
         per_page = [(params[:per_page] || 10).to_i, 100].min
         pagy = Pagy::Offset.new(count: collection.count, page: page, limit: per_page)
         records = collection.offset(pagy.offset).limit(pagy.limit)
+        serializer_opts = view ? { view: view } : {}
         render json: {
-          data: serializer.render_as_hash(records),
+          data: serializer.render_as_hash(records, **serializer_opts),
           meta: {
             current_page: pagy.page,
             total_pages: pagy.pages,

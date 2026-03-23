@@ -42,7 +42,8 @@ module Api
                 rating_average: :desc,
                 name: :asc
               ),
-            BusinessSerializer
+            BusinessSerializer,
+            view: :explore
           )
         end
       end

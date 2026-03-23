@@ -55,12 +55,32 @@ class BusinessSerializer < Blueprinter::Base
 
   view :public do
     excludes :owner_id, :status, :onboarding_completed,
-             :current_subscription,
+             :current_subscription, :cover_source,
              :cancellation_policy_pct, :cancellation_deadline_hours,
              :lunch_start_time, :lunch_end_time, :lunch_enabled,
              :slot_interval_minutes, :gap_between_appointments_minutes,
              :nequi_phone, :daviplata_phone, :bancolombia_account,
              :created_at, :updated_at
+  end
+
+  # Minimal view for the public explore/directory page.
+  # Only exposes what is needed to render a business card.
+  view :explore do
+    excludes :owner_id, :status, :onboarding_completed,
+             :current_subscription, :cover_source,
+             :cancellation_policy_pct, :cancellation_deadline_hours,
+             :lunch_start_time, :lunch_end_time, :lunch_enabled,
+             :slot_interval_minutes, :gap_between_appointments_minutes,
+             :nequi_phone, :daviplata_phone, :bancolombia_account,
+             :primary_color, :secondary_color,
+             :email, :timezone, :currency,
+             :instagram_url, :facebook_url, :website_url, :google_maps_url,
+             :created_at, :updated_at
+
+    field :verified do |business, _options|
+      plan = business.subscriptions.where(status: :active).order(end_date: :desc).first&.plan
+      plan&.ai_features || false
+    end
   end
 
   # Include full (decrypted) payment data — used for ticket pages and booking
