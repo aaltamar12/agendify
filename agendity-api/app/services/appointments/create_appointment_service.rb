@@ -24,6 +24,9 @@ module Appointments
       service  = find_service
       return failure("Service not found or does not belong to this business") unless service
 
+      additional_services = find_additional_services
+      total_duration = service.duration_minutes + additional_services.sum(&:duration_minutes)
+
       employee = find_employee
       return failure("No hay profesionales disponibles para este horario. Intenta con otra hora.") unless employee
 
@@ -32,7 +35,7 @@ module Appointments
         return failure("Este profesional no puede realizar este servicio") unless employee_performs_service?(employee, service)
       end
 
-      end_time = calculate_end_time(@params[:start_time], service.duration_minutes)
+      end_time = calculate_end_time(@params[:start_time], total_duration)
 
       ActiveRecord::Base.transaction do
         # Lock existing appointments for this employee+date to prevent race conditions
@@ -52,8 +55,9 @@ module Appointments
         customer = find_or_create_customer
 
         # Apply pending penalty from previous cancellations
-        final_price = service.price
-        original_price = service.price
+        additional_services_price = additional_services.sum(&:price)
+        final_price = service.price + additional_services_price
+        original_price = final_price
         penalty_applied = 0
         dynamic_pricing = nil
 
@@ -91,6 +95,15 @@ module Appointments
           ticket_code:      generate_ticket_code
         )
 
+        # Create records for additional services
+        additional_services.each do |extra_service|
+          appointment.appointment_services.create!(
+            service: extra_service,
+            price: extra_service.price,
+            duration_minutes: extra_service.duration_minutes
+          )
+        end
+
         # Release the temporary slot lock now that the appointment is persisted
         release_slot_lock(appointment)
 
@@ -127,14 +140,24 @@ module Appointments
       end
     end
 
+    def find_additional_services
+      ids = Array(@params[:additional_service_ids]).map(&:to_i).reject(&:zero?)
+      return [] if ids.blank?
+
+      @business.services.where(id: ids).to_a
+    end
+
     def assign_available_employee
       service = @business.services.find_by(id: @params[:service_id])
       return nil unless service
 
+      additional = find_additional_services
+      total_duration = service.duration_minutes + additional.sum(&:duration_minutes)
+
       date = @params[:appointment_date]
       parsed_date = date.is_a?(String) ? Date.parse(date) : date
       start_time = @params[:start_time]
-      end_time = calculate_end_time(start_time, service.duration_minutes)
+      end_time = calculate_end_time(start_time, total_duration)
 
       start_str = start_time.is_a?(String) ? start_time : start_time.strftime("%H:%M")
       end_str   = end_time.is_a?(String) ? end_time : end_time.strftime("%H:%M")

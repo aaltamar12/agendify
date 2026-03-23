@@ -118,13 +118,15 @@ module Api
                   params.require(:booking).permit(
                     :service_id, :employee_id, :date, :appointment_date, :start_time, :notes,
                     :customer_name, :customer_email, :customer_phone,
-                    customer: %i[name email phone]
+                    customer: %i[name email phone],
+                    additional_service_ids: []
                   )
                 else
                   params.permit(
                     :service_id, :employee_id, :date, :appointment_date, :start_time, :notes,
                     :customer_name, :customer_email, :customer_phone,
-                    customer: %i[name email phone]
+                    customer: %i[name email phone],
+                    additional_service_ids: []
                   )
                 end
 

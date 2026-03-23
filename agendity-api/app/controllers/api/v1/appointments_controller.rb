@@ -9,7 +9,7 @@ module Api
 
       # GET /api/v1/appointments
       def index
-        appointments = current_business.appointments.includes(:service, :employee, :customer, :payment)
+        appointments = current_business.appointments.includes(:service, :employee, :customer, :payment, appointment_services: :service)
         appointments = appointments.where(appointment_date: params[:date]) if params[:date].present?
         appointments = appointments.where(employee_id: params[:employee_id]) if params[:employee_id].present?
         appointments = appointments.where(status: params[:status]) if params[:status].present?
@@ -168,7 +168,8 @@ module Api
       def appointment_params
         params.require(:appointment).permit(
           :service_id, :employee_id, :customer_name, :customer_email,
-          :customer_phone, :appointment_date, :start_time, :notes
+          :customer_phone, :appointment_date, :start_time, :notes,
+          additional_service_ids: []
         )
       end
     end

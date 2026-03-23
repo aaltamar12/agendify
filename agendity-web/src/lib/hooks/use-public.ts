@@ -46,6 +46,7 @@ interface BookAppointmentPayload {
     phone: string;
   };
   notes?: string;
+  additional_service_ids?: number[];
 }
 
 interface BookAppointmentResponse {

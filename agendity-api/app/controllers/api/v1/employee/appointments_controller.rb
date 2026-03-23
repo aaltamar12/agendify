@@ -7,7 +7,7 @@ module Api
         # GET /api/v1/employee/appointments
         def index
           appointments = current_employee.appointments
-            .includes(:service, :customer, :business)
+            .includes(:service, :customer, :business, appointment_services: :service)
           appointments = appointments.where(appointment_date: params[:date]) if params[:date].present?
           appointments = appointments.where(status: params[:status]) if params[:status].present?
           appointments = appointments.order(appointment_date: :desc, start_time: :desc)

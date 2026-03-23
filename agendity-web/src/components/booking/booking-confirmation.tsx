@@ -69,6 +69,11 @@ export function BookingConfirmation({
     }
 
     try {
+      // Additional services = all selected services except the primary (first) one
+      const additionalServiceIds = selectedServices
+        .slice(1)
+        .map((s) => s.id);
+
       const result = await bookMutation.mutateAsync({
         slug,
         service_id: selectedService.id,
@@ -80,6 +85,9 @@ export function BookingConfirmation({
           email: customerInfo.email || '',
           phone: customerInfo.phone,
         },
+        ...(additionalServiceIds.length > 0 && {
+          additional_service_ids: additionalServiceIds,
+        }),
       });
 
       // Save customer data for future bookings

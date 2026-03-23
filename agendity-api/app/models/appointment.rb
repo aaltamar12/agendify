@@ -20,6 +20,8 @@ class Appointment < ApplicationRecord
   belongs_to :customer
   has_one :payment, dependent: :destroy
   has_one_attached :proof_image
+  has_many :appointment_services, dependent: :destroy
+  has_many :additional_services, through: :appointment_services, source: :service
 
   # -- Validations --
   validates :appointment_date, presence: true

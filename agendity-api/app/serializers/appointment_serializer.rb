@@ -26,6 +26,7 @@ class AppointmentSerializer < Blueprinter::Base
     association :employee, blueprint: EmployeeSerializer, view: :minimal
     association :customer, blueprint: CustomerSerializer
     association :payment, blueprint: PaymentSerializer
+    association :appointment_services, blueprint: AppointmentServiceSerializer
   end
 
   view :calendar do
