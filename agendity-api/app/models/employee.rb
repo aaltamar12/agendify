@@ -19,7 +19,7 @@ class Employee < ApplicationRecord
   has_many :employee_balance_adjustments, dependent: :destroy
 
   # -- Enums --
-  enum :payment_type, { none: "none", commission: "commission", fixed_daily: "fixed_daily" }, default: :none
+  enum :payment_type, { manual: "none", commission: "commission", fixed_daily: "fixed_daily" }, default: :manual
 
   # -- Validations --
   validates :name, presence: true
