@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Sends a rating request to the customer after appointment completion.
-# Agendity sends notifications as intermediary — always via email + WhatsApp.
+# Agendity sends notifications as intermediary — email always, WhatsApp only for Profesional+ plans.
 class SendRatingRequestJob < ApplicationJob
   queue_as :notifications
 
@@ -15,6 +15,7 @@ class SendRatingRequestJob < ApplicationJob
     Notifications::MultiChannelService.call(
       recipient: customer,
       template: :rating_request,
+      business: business,
       data: {
         business_name: business.name,
         service_name: appointment.service.name,

@@ -35,7 +35,8 @@ plan_basico.update!(
   advanced_reports: false,
   brand_customization: false,
   featured_listing: false,
-  priority_support: false
+  priority_support: false,
+  whatsapp_notifications: false
 )
 
 plan_profesional = Plan.find_or_initialize_by(name: "Profesional")
@@ -53,7 +54,8 @@ plan_profesional.update!(
   featured_listing: true,
   priority_support: false,
   cashback_enabled: true,
-  cashback_percentage: 5
+  cashback_percentage: 5,
+  whatsapp_notifications: true
 )
 
 plan_inteligente = Plan.find_or_initialize_by(name: "Inteligente")
@@ -71,7 +73,8 @@ plan_inteligente.update!(
   featured_listing: true,
   priority_support: true,
   cashback_enabled: true,
-  cashback_percentage: 5
+  cashback_percentage: 5,
+  whatsapp_notifications: true
 )
 
 puts "  ✅ Plans: #{Plan.count} (Básico, Profesional, Inteligente)"

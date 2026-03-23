@@ -5,18 +5,17 @@ module Notifications
   # Agendity is the intermediary — always sends via all available channels
   # (email + WhatsApp). The business does NOT configure this.
   class MultiChannelService < BaseService
-    CHANNELS = [:email, :whatsapp].freeze
-
-    def initialize(recipient:, template:, data:)
+    def initialize(recipient:, template:, data:, business:)
       @recipient = recipient
       @template = template
       @data = data
+      @business = business
     end
 
     def call
       results = {}
 
-      CHANNELS.each do |channel|
+      channels.each do |channel|
         results[channel] = send_via(channel)
       rescue StandardError => e
         Rails.logger.error("[MultiChannelService] Error sending #{@template} via #{channel}: #{e.message}")
@@ -27,6 +26,12 @@ module Notifications
     end
 
     private
+
+    def channels
+      chs = [:email]
+      chs << :whatsapp if @business.current_plan&.whatsapp_notifications?
+      chs
+    end
 
     def send_via(channel)
       case channel
