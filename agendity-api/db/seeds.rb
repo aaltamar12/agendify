@@ -1728,6 +1728,26 @@ puts "  Glamour Studio:  inactive@example.com / password123       (Barranquilla,
 puts ""
 
 # ============================================================================
+# JOB CONFIGS
+# ============================================================================
+puts "\n⚙️  Creating job configs..."
+
+[
+  { job_class: "CompleteAppointmentsJob", name: "Completar citas", description: "Marca citas checked_in como completed cuando end_time pasa. Dispara cashback y solicitud de calificacion.", schedule: "Cada 15 minutos" },
+  { job_class: "AppointmentReminderSchedulerJob", name: "Recordatorios de citas", description: "Envia recordatorios por email a clientes con citas del dia siguiente.", schedule: "Diario a las 8am" },
+  { job_class: "CleanupExpiredTokensJob", name: "Limpieza de tokens", description: "Elimina refresh tokens expirados de la base de datos.", schedule: "Domingos a las 3am" },
+  { job_class: "GenerateSubscriptionPaymentOrdersJob", name: "Ordenes de pago suscripcion", description: "Genera ordenes de pago mensuales para negocios con suscripcion activa.", schedule: "Diario a la 1am" },
+  { job_class: "CheckExpiredSubscriptionsJob", name: "Verificar suscripciones vencidas", description: "Marca suscripciones como vencidas si no se pagaron.", schedule: "Diario a las 12:05am" },
+  { job_class: "SendSubscriptionReminderJob", name: "Recordatorio de pago suscripcion", description: "Envia recordatorio de pago a negocios con suscripcion proxima a vencer.", schedule: "Diario a las 9am" },
+  { job_class: "CleanupOldRequestLogsJob", name: "Limpieza de request logs", description: "Elimina request logs antiguos para mantener la BD limpia.", schedule: "Domingos a las 4am" },
+  { job_class: "Intelligence::PricingSuggestionJob", name: "Sugerencias de tarifas IA", description: "Analiza demanda historica y genera sugerencias de tarifas dinamicas para negocios con Plan Inteligente.", schedule: "1ro y 15 de cada mes a las 8am" },
+].each do |attrs|
+  jc = JobConfig.find_or_initialize_by(job_class: attrs[:job_class])
+  jc.update!(attrs.merge(enabled: jc.persisted? ? jc.enabled : true))
+end
+puts "  ✅ #{JobConfig.count} job configs"
+
+# ============================================================================
 # NOTIFICATION EVENT CONFIGS
 # ============================================================================
 puts "\n📋 Creating notification event configs..."

@@ -3,9 +3,12 @@
 # Scheduled job that marks checked-in appointments as completed
 # when their end_time has passed, then triggers a rating request.
 class CompleteAppointmentsJob < ApplicationJob
+  include ConfigurableJob
   queue_as :default
 
   def perform
+    return record_success!("Skipped — disabled") unless job_enabled?
+
     appointments = Appointment
       .includes(:business, :service, :employee, :customer)
       .where(status: :checked_in)
@@ -41,6 +44,9 @@ class CompleteAppointmentsJob < ApplicationJob
       )
     end
 
-    Rails.logger.info("[CompleteAppointmentsJob] Completed #{appointments.count} appointments")
+    record_success!("Completed #{appointments.count} appointments")
+  rescue StandardError => e
+    record_error!(e.message)
+    raise
   end
 end
