@@ -45,8 +45,15 @@ module CashRegister
           employee = @business.employees.find(ep[:employee_id])
           pending_prev = employee.pending_balance || 0
           commission = (ep[:commission_amount] || 0).to_d
-          total_owed = commission + pending_prev
           amount_paid = (ep[:amount_paid] || 0).to_d
+
+          # For manual payment type: total_owed = what they paid (trust the owner)
+          # This prevents reconciliation discrepancies from overpayments
+          total_owed = if employee.manual?
+                        [amount_paid, pending_prev].max
+                      else
+                        commission + pending_prev
+                      end
 
           payment = close.employee_payments.find_or_initialize_by(employee_id: ep[:employee_id])
           payment.update!(
