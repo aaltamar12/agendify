@@ -85,6 +85,16 @@ class DynamicPricing < ApplicationRecord
       .where("start_date <= ? AND end_date >= ?", end_date, start_date)
     scope = scope.where(service_id: service_id) if service_id
     scope = scope.where.not(id: id) if persisted?
-    errors.add(:base, "Ya existe una tarifa activa para este periodo") if scope.exists?
+
+    # Allow overlap if days_of_week are different (e.g., weekday discount + weekend premium)
+    if days_of_week.present? && days_of_week.any?
+      scope.each do |existing|
+        next if existing.days_of_week.present? && (existing.days_of_week & days_of_week).empty?
+        errors.add(:base, "Ya existe una tarifa activa para este periodo y dias")
+        return
+      end
+    else
+      errors.add(:base, "Ya existe una tarifa activa para este periodo") if scope.exists?
+    end
   end
 end

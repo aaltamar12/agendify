@@ -1421,31 +1421,33 @@ puts "  ✅ Reconciliation discrepancies created for Studio 70"
 puts "\n⚡ Creating dynamic pricing for Barbería Elite..."
 
 # Descuento: -15% entre semana (lunes a jueves) por las próximas 2 semanas
-DynamicPricing.find_or_create_by!(business: barberia_elite, name: "Descuento entre semana") do |dp|
-  dp.service = nil
-  dp.start_date = Date.current
-  dp.end_date = Date.current + 14.days
-  dp.price_adjustment_type = :percentage
-  dp.adjustment_mode = :fixed_mode
-  dp.adjustment_value = -15
-  dp.days_of_week = [1, 2, 3, 4]
-  dp.status = :active
-  dp.suggested_by = "manual"
-end
+dp1 = DynamicPricing.find_or_initialize_by(business: barberia_elite, name: "Descuento entre semana Elite")
+dp1.update!(
+  service: nil,
+  start_date: Date.current,
+  end_date: Date.current + 14.days,
+  price_adjustment_type: :percentage,
+  adjustment_mode: :fixed_mode,
+  adjustment_value: -15,
+  days_of_week: [1, 2, 3, 4],
+  status: :active,
+  suggested_by: "manual"
+)
 puts "  ✅ Descuento -15% Lun-Jue (#{Date.current} → #{Date.current + 14.days})"
 
 # Incremento: +20% viernes y sábado por las próximas 2 semanas
-DynamicPricing.find_or_create_by!(business: barberia_elite, name: "Premium fin de semana") do |dp|
-  dp.service = nil
-  dp.start_date = Date.current
-  dp.end_date = Date.current + 14.days
-  dp.price_adjustment_type = :percentage
-  dp.adjustment_mode = :fixed_mode
-  dp.adjustment_value = 20
-  dp.days_of_week = [5, 6]
-  dp.status = :active
-  dp.suggested_by = "manual"
-end
+dp2 = DynamicPricing.find_or_initialize_by(business: barberia_elite, name: "Premium fin de semana Elite")
+dp2.update!(
+  service: nil,
+  start_date: Date.current,
+  end_date: Date.current + 14.days,
+  price_adjustment_type: :percentage,
+  adjustment_mode: :fixed_mode,
+  adjustment_value: 20,
+  days_of_week: [5, 6],
+  status: :active,
+  suggested_by: "manual"
+)
 puts "  ✅ Premium +20% Vie-Sab (#{Date.current} → #{Date.current + 14.days})"
 
 # ============================================================================
