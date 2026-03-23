@@ -5,7 +5,7 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Camera } from 'lucide-react';
-import { Button, Input, Avatar } from '@/components/ui';
+import { Button, Input, Select, Avatar } from '@/components/ui';
 import { useServices } from '@/lib/hooks/use-services';
 import { useUploadEmployeeAvatar } from '@/lib/hooks/use-employees';
 import { DAYS_OF_WEEK } from '@/lib/constants';
@@ -36,7 +36,9 @@ const employeeFormSchema = z.object({
     .optional()
     .or(z.literal('')),
   active: z.boolean(),
+  payment_type: z.enum(['none', 'commission', 'fixed_daily']).default('none'),
   commission_percentage: z.coerce.number().min(0).max(100).optional().default(0),
+  fixed_daily_pay: z.coerce.number().min(0).optional().default(0),
   service_ids: z.array(z.number()),
   schedules: z.array(scheduleEntrySchema),
 });
@@ -101,11 +103,15 @@ export function EmployeeForm({ employee, onSubmit, loading }: EmployeeFormProps)
       phone: employee?.phone ?? '',
       email: employee?.email ?? '',
       active: employee?.active ?? true,
+      payment_type: employee?.payment_type ?? 'none',
       commission_percentage: employee?.commission_percentage ?? 0,
+      fixed_daily_pay: employee?.fixed_daily_pay ?? 0,
       service_ids: employee?.service_ids ?? [],
       schedules: buildDefaultSchedules(employee?.schedules),
     },
   });
+
+  const watchPaymentType = watch('payment_type');
 
   const { fields } = useFieldArray({
     control,
@@ -197,20 +203,41 @@ export function EmployeeForm({ employee, onSubmit, loading }: EmployeeFormProps)
         <span className="text-sm text-gray-700">Empleado activo</span>
       </div>
 
-      {/* Commission */}
-      <Input
-        label="Comisión (%)"
-        type="number"
-        min={0}
-        max={100}
-        step={1}
-        placeholder="0 = sin comisión"
-        error={errors.commission_percentage?.message}
-        {...register('commission_percentage')}
+      {/* Payment type */}
+      <Select
+        label="Tipo de pago"
+        options={[
+          { value: 'none', label: 'Sin pago configurado (manual)' },
+          { value: 'commission', label: 'Comisión (% sobre servicios)' },
+          { value: 'fixed_daily', label: 'Pago fijo diario ($)' },
+        ]}
+        {...register('payment_type')}
       />
-      <p className="!mt-1 text-xs text-gray-500">
-        Porcentaje de comisión sobre los servicios realizados. Déjalo en 0 si no aplica.
-      </p>
+
+      {watchPaymentType === 'commission' && (
+        <Input
+          label="Comisión (%)"
+          type="number"
+          min={0}
+          max={100}
+          step={1}
+          placeholder="Ej: 30"
+          error={errors.commission_percentage?.message}
+          {...register('commission_percentage')}
+        />
+      )}
+
+      {watchPaymentType === 'fixed_daily' && (
+        <Input
+          label="Pago fijo diario ($)"
+          type="number"
+          min={0}
+          step={1000}
+          placeholder="Ej: 50000"
+          error={errors.fixed_daily_pay?.message}
+          {...register('fixed_daily_pay')}
+        />
+      )}
 
       {/* Service assignment */}
       {services && services.length > 0 && (

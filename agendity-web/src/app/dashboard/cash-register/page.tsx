@@ -279,8 +279,10 @@ function EmployeeRow({
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const hasPending = emp.pending_from_previous > 0;
-  const hasCommission = emp.commission_pct > 0;
-  const hasFixedAmount = hasCommission || hasPending;
+  const paymentType = emp.payment_type || (emp.commission_pct > 0 ? 'commission' : 'none');
+  const hasCommission = paymentType === 'commission' && emp.commission_pct > 0;
+  const hasFixedDaily = paymentType === 'fixed_daily' && (emp.fixed_daily_pay ?? 0) > 0;
+  const hasFixedAmount = hasCommission || hasFixedDaily || hasPending;
   const [editingAmount, setEditingAmount] = useState(false);
   const [showDebtModal, setShowDebtModal] = useState(false);
 
@@ -327,15 +329,20 @@ function EmployeeRow({
           </p>
         </div>
 
-        {/* Commission info */}
+        {/* Payment info */}
         <div className="text-right">
           {hasCommission ? (
             <>
               <p className="text-sm font-medium text-gray-900">${emp.commission_amount.toLocaleString()}</p>
               <p className="text-xs text-gray-500">Comision ({emp.commission_pct}%)</p>
             </>
+          ) : hasFixedDaily ? (
+            <>
+              <p className="text-sm font-medium text-gray-900">${(emp.fixed_daily_pay ?? 0).toLocaleString()}</p>
+              <p className="text-xs text-gray-500">Pago fijo diario</p>
+            </>
           ) : (
-            <p className="text-xs text-gray-400">Sin comision</p>
+            <p className="text-xs text-gray-400">Sin pago configurado</p>
           )}
         </div>
 

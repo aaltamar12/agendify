@@ -16,20 +16,30 @@ module CashRegister
 
       employee_breakdown = appointments.group_by(&:employee).map do |employee, appts|
         revenue = appts.sum(&:price)
-        commission_pct = employee.commission_percentage || 0
-        commission = (revenue * commission_pct / 100).round(2)
-
         pending = employee.pending_balance || 0
+
+        # Calculate daily pay based on payment_type
+        daily_pay = case employee.payment_type
+                    when "commission"
+                      pct = employee.commission_percentage || 0
+                      (revenue * pct / 100).round(2)
+                    when "fixed_daily"
+                      employee.fixed_daily_pay || 0
+                    else
+                      0
+                    end
 
         {
           employee_id: employee.id,
           employee_name: employee.name,
+          payment_type: employee.payment_type,
           appointments_count: appts.size,
           total_earned: revenue.to_f,
-          commission_pct: commission_pct.to_f,
-          commission_amount: commission.to_f,
+          commission_pct: (employee.commission? ? employee.commission_percentage : 0).to_f,
+          commission_amount: daily_pay.to_f,
+          fixed_daily_pay: (employee.fixed_daily? ? employee.fixed_daily_pay : 0).to_f,
           pending_from_previous: pending.to_f,
-          total_owed: (commission + pending).to_f,
+          total_owed: (daily_pay + pending).to_f,
           appointments: appts.map do |a|
             {
               id: a.id,

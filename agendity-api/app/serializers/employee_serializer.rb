@@ -5,6 +5,7 @@ class EmployeeSerializer < Blueprinter::Base
 
   fields :business_id, :user_id, :name, :phone, :email,
          :bio, :active, :commission_percentage,
+         :payment_type, :fixed_daily_pay,
          :document_number, :document_type, :fiscal_address,
          :created_at, :updated_at
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_23_160000) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_23_170837) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "unaccent"
@@ -393,6 +393,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_23_160000) do
     t.string "document_number"
     t.string "document_type"
     t.string "fiscal_address"
+    t.string "payment_type", default: "none", null: false
+    t.decimal "fixed_daily_pay", precision: 12, scale: 2, default: "0.0"
     t.index ["business_id"], name: "index_employees_on_business_id"
     t.index ["user_id"], name: "index_employees_on_user_id"
   end

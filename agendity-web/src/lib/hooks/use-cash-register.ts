@@ -15,10 +15,12 @@ interface AppointmentDetail {
 interface EmployeeSummary {
   employee_id: number;
   employee_name: string;
+  payment_type?: 'none' | 'commission' | 'fixed_daily';
   appointments_count: number;
   total_earned: number;
   commission_pct: number;
   commission_amount: number;
+  fixed_daily_pay?: number;
   pending_from_previous: number;
   total_owed: number;
   appointments: AppointmentDetail[];

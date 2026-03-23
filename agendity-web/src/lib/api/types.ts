@@ -128,7 +128,9 @@ export interface Employee {
   avatar_url: string | null;
   bio: string | null;
   active: boolean;
+  payment_type?: 'none' | 'commission' | 'fixed_daily';
   commission_percentage: number | null;
+  fixed_daily_pay?: number | null;
   document_number?: string | null;
   document_type?: string | null;
   fiscal_address?: string | null;

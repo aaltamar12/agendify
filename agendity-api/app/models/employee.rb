@@ -18,8 +18,14 @@ class Employee < ApplicationRecord
   has_many :employee_payments, dependent: :restrict_with_error
   has_many :employee_balance_adjustments, dependent: :destroy
 
+  # -- Enums --
+  enum :payment_type, { none: "none", commission: "commission", fixed_daily: "fixed_daily" }, default: :none
+
   # -- Validations --
   validates :name, presence: true
+  validates :payment_type, inclusion: { in: payment_types.keys }
+  validates :commission_percentage, numericality: { greater_than: 0, less_than_or_equal_to: 100 }, if: -> { commission? }
+  validates :fixed_daily_pay, numericality: { greater_than: 0 }, if: -> { fixed_daily? }
 
   # -- Scopes --
   scope :active, -> { where(active: true) }
