@@ -69,6 +69,56 @@ module Api
           end
         end
 
+        # GET /api/v1/public/tickets/:code/cancel_preview
+        def cancel_preview
+          appointment = find_appointment
+          business = appointment.business
+
+          has_paid = %w[payment_sent confirmed checked_in].include?(appointment.status)
+          deadline_hours = business.cancellation_deadline_hours
+          policy_pct = business.cancellation_policy_pct
+
+          # Calculate if past deadline
+          appointment_time = Time.zone.parse(
+            "#{appointment.appointment_date} #{appointment.start_time.strftime('%H:%M')}"
+          ).in_time_zone(business.timezone || "America/Bogota")
+          now = Time.current.in_time_zone(business.timezone || "America/Bogota")
+          hours_until = (appointment_time - now) / 1.hour
+          deadline_passed = hours_until < deadline_hours
+
+          penalty_amount = 0
+          refund_amount = 0
+
+          if deadline_passed && policy_pct.positive?
+            penalty_amount = (appointment.price * policy_pct / 100.0).round(2)
+          end
+
+          if has_paid
+            refund_amount = (appointment.price - penalty_amount).round(2)
+          end
+
+          plan = business.current_plan
+          refund_as_credit = plan&.cashback_enabled? || false
+
+          render_success({
+            can_cancel: !appointment.cancelled? && !appointment.completed?,
+            has_paid: has_paid,
+            deadline_hours: deadline_hours,
+            deadline_passed: deadline_passed,
+            hours_until_appointment: hours_until.round(1),
+            penalty_pct: deadline_passed ? policy_pct : 0,
+            penalty_amount: penalty_amount,
+            refund_amount: refund_amount,
+            refund_as_credit: refund_as_credit,
+            business_contact: {
+              name: business.name,
+              phone: business.phone,
+              email: business.email,
+              address: [business.address, business.city].compact.join(", ")
+            }
+          })
+        end
+
         # POST /api/v1/public/tickets/:code/cancel
         def cancel
           appointment = find_appointment

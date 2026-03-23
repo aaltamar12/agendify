@@ -156,9 +156,10 @@ Rails.application.routes.draw do
       # Public endpoints (no auth required)
       namespace :public do
         # Static routes first (before :slug catch-all)
-        get  "tickets/:code",        to: "tickets#show"
-        post "tickets/:code/cancel",  to: "tickets#cancel"
-        post "tickets/:code/payment", to: "tickets#submit_payment"
+        get  "tickets/:code",                to: "tickets#show"
+        get  "tickets/:code/cancel_preview",  to: "tickets#cancel_preview"
+        post "tickets/:code/cancel",          to: "tickets#cancel"
+        post "tickets/:code/payment",         to: "tickets#submit_payment"
         get  "explore",            to: "explore#index"
         # Slug-based routes (frontend uses /api/v1/public/:slug)
         get  "customer_lookup",    to: "bookings#customer_lookup"
