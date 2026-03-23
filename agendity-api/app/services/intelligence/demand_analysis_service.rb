@@ -9,6 +9,9 @@ module Intelligence
     ABOVE_AVG_THRESHOLD = 1.3     # 30% above average = above-average month
     WEEKEND_DIFF_THRESHOLD = 1.3  # 30% more on weekends
 
+    MONTH_NAMES_ES = [nil, "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+                      "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"].freeze
+
     def initialize(business:)
       @business = business
     end
@@ -43,7 +46,7 @@ module Intelligence
         next unless occupancy >= HIGH_DEMAND_THRESHOLD
 
         month_int = month.to_i
-        month_name = Date::MONTHNAMES[month_int] || "Mes #{month_int}"
+        month_name = MONTH_NAMES_ES[month_int] || "Mes #{month_int}"
         adj = suggested_adjustment(occupancy)
 
         suggestions << {
@@ -77,7 +80,7 @@ module Intelligence
       monthly_data.each do |month, count|
         month_int = month.to_i
         ratio = count / avg
-        month_name = Date::MONTHNAMES[month_int] || "Mes #{month_int}"
+        month_name = MONTH_NAMES_ES[month_int] || "Mes #{month_int}"
         target_year = month_int >= Date.current.month ? Date.current.year : Date.current.year + 1
 
         if ratio <= LOW_DEMAND_THRESHOLD
