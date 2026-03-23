@@ -409,7 +409,7 @@ function PaymentCard({
   const paymentMethod = payment?.payment_method ?? 'No especificado';
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md">
+    <div className="flex h-full flex-col rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md">
       {/* Ticket code header */}
       {(
         <div className="mb-2 flex items-center gap-2 border-b border-gray-100 pb-2">
@@ -463,10 +463,10 @@ function PaymentCard({
         {Number(appointment.credits_applied) > 0 && (
           <div className="ml-6 space-y-0.5">
             <p className="text-xs text-gray-500">
-              Precio original: {formatCurrency(Number(appointment.original_price || 0) + Number(appointment.credits_applied))}
+              Precio original: {formatCurrency(Number(appointment.price) + Number(appointment.credits_applied))}
             </p>
             <p className="text-xs font-medium text-green-600">
-              Creditos aplicados: -{formatCurrency(Number(appointment.credits_applied))}
+              Creditos: -{formatCurrency(Number(appointment.credits_applied))}
             </p>
           </div>
         )}
@@ -543,7 +543,7 @@ function PaymentCard({
 
       {/* Action buttons — only for "Pendientes" tab (payment_sent — has proof) */}
       {tab === 'proofs' && (
-        <div className="flex gap-2 border-t border-gray-100 pt-3">
+        <div className="mt-auto flex gap-2 border-t border-gray-100 pt-3">
           <Button
             size="sm"
             onClick={onApprove}
