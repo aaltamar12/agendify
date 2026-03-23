@@ -113,13 +113,18 @@ export function CustomerForm({ slug }: CustomerFormProps) {
     // Search in backend
     setLookupLoading(true);
     try {
-      const res = await get<{ data: { name: string; email: string; phone: string } }>(
+      const res = await get<{ data: { name: string; email: string; phone: string; credit_balance?: number } }>(
         `/api/v1/public/customer_lookup?email=${encodeURIComponent(data.email)}&slug=${encodeURIComponent(slug)}`
       );
       const customer = res.data;
       // Save to localStorage for next time
       saveCustomer({ name: customer.name, email: customer.email, phone: customer.phone });
       setSaved({ name: customer.name, email: customer.email, phone: customer.phone });
+      // Store credit balance for use in confirmation step
+      if (customer.credit_balance && customer.credit_balance > 0) {
+        const { setCreditBalance } = await import('@/lib/stores/booking-store').then(m => ({ setCreditBalance: m.useBookingStore.getState().setCreditBalance }));
+        setCreditBalance(customer.credit_balance);
+      }
       setMode('saved');
     } catch {
       // Not found — pre-fill email and show form

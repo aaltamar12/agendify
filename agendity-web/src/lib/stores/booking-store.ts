@@ -30,6 +30,7 @@ interface BookingState {
   selectedTime: string | null;
   customerInfo: CustomerInfo | null;
   dynamicPricing: DynamicPricingInfo | null;
+  creditBalance: number;
 
   // Actions
   toggleService: (service: Service) => void;
@@ -37,6 +38,7 @@ interface BookingState {
   setDateTime: (date: string, time: string) => void;
   setCustomerInfo: (info: CustomerInfo) => void;
   setDynamicPricing: (info: DynamicPricingInfo | null) => void;
+  setCreditBalance: (balance: number) => void;
   setStep: (step: number) => void;
   nextStep: () => void;
   prevStep: () => void;
@@ -52,6 +54,7 @@ const INITIAL_STATE = {
   selectedTime: null,
   customerInfo: null,
   dynamicPricing: null,
+  creditBalance: 0,
 };
 
 export const useBookingStore = create<BookingState>()((set, get) => ({
@@ -85,6 +88,7 @@ export const useBookingStore = create<BookingState>()((set, get) => ({
   setCustomerInfo: (info) => set({ customerInfo: info }),
 
   setDynamicPricing: (info) => set({ dynamicPricing: info }),
+  setCreditBalance: (balance) => set({ creditBalance: balance }),
 
   setStep: (step) => set({ currentStep: step }),
 

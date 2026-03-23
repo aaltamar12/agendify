@@ -80,6 +80,22 @@ module Appointments
           customer.update!(pending_penalty: 0)
         end
 
+        # Apply credits if requested
+        credits_applied = 0
+        if @params[:apply_credits].present? && @params[:apply_credits].to_d > 0
+          credit_account = CreditAccount.find_by(customer: customer, business: @business)
+          if credit_account && credit_account.balance > 0
+            credits_to_use = [@params[:apply_credits].to_d, credit_account.balance, final_price].min
+            credit_account.debit!(
+              credits_to_use,
+              transaction_type: :redemption,
+              description: "Creditos aplicados a reserva"
+            )
+            credits_applied = credits_to_use
+            final_price -= credits_to_use
+          end
+        end
+
         appointment = @business.appointments.create!(
           service:          service,
           employee:         employee,
@@ -90,8 +106,9 @@ module Appointments
           price:            final_price,
           original_price:   dynamic_pricing ? original_price : nil,
           dynamic_pricing_id: dynamic_pricing&.id,
+          credits_applied:  credits_applied,
           notes:            @params[:notes],
-          status:           :pending_payment,
+          status:           credits_applied >= final_price + credits_applied ? :confirmed : :pending_payment,
           ticket_code:      generate_ticket_code
         )
 

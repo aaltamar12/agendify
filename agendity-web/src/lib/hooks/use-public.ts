@@ -67,6 +67,7 @@ interface BookAppointmentPayload {
   };
   notes?: string;
   additional_service_ids?: number[];
+  apply_credits?: number;
 }
 
 interface BookAppointmentResponse {

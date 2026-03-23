@@ -96,10 +96,12 @@ module Api
           customer = business.customers.find_by("LOWER(email) = ?", params[:email].to_s.downcase.strip)
 
           if customer
+            credit_account = CreditAccount.find_by(customer: customer, business: business)
             render_success({
               name: customer.name,
               email: customer.email,
-              phone: customer.phone
+              phone: customer.phone,
+              credit_balance: credit_account&.balance.to_f || 0
             })
           else
             render_error("No encontramos una reserva anterior con ese correo.", status: :not_found)
@@ -117,14 +119,14 @@ module Api
           raw = if params.key?(:booking)
                   params.require(:booking).permit(
                     :service_id, :employee_id, :date, :appointment_date, :start_time, :notes,
-                    :customer_name, :customer_email, :customer_phone,
+                    :customer_name, :customer_email, :customer_phone, :apply_credits,
                     customer: %i[name email phone],
                     additional_service_ids: []
                   )
                 else
                   params.permit(
                     :service_id, :employee_id, :date, :appointment_date, :start_time, :notes,
-                    :customer_name, :customer_email, :customer_phone,
+                    :customer_name, :customer_email, :customer_phone, :apply_credits,
                     customer: %i[name email phone],
                     additional_service_ids: []
                   )

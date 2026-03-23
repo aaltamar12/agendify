@@ -43,6 +43,7 @@ export function BookingConfirmation({
     selectedTime,
     customerInfo,
     dynamicPricing,
+    creditBalance,
     reset,
   } = useBookingStore();
 
@@ -51,6 +52,8 @@ export function BookingConfirmation({
   const [booked, setBooked] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [penaltyApplied, setPenaltyApplied] = useState<number>(0);
+  const [applyCredits, setApplyCredits] = useState(false);
+  const [creditsToApply, setCreditsToApply] = useState(creditBalance);
   // After booking, use the business from the API response (includes payment data via :with_payment view)
   // instead of the prop (which uses :public view and excludes payment fields).
   const [bookedBusiness, setBookedBusiness] = useState<Business | null>(null);
@@ -90,6 +93,9 @@ export function BookingConfirmation({
         },
         ...(additionalServiceIds.length > 0 && {
           additional_service_ids: additionalServiceIds,
+        }),
+        ...(applyCredits && creditsToApply > 0 && {
+          apply_credits: creditsToApply,
         }),
       });
 
@@ -497,20 +503,83 @@ export function BookingConfirmation({
         </Card>
       )}
 
-      {/* Total a pagar — always visible */}
-      {selectedServices.length > 0 && (
-        <div className="rounded-xl bg-violet-50 border border-violet-200 px-5 py-4 flex items-center justify-between">
-          <p className="text-base font-semibold text-violet-900">Total a pagar</p>
-          <p className="text-xl font-bold text-violet-700">
-            {formatCurrency(
-              dynamicPricing?.has_dynamic_pricing && dynamicPricing.adjustment_pct !== 0
-                ? dynamicPricing.adjusted_price +
-                  selectedServices.slice(1).reduce((sum, s) => sum + Number(s.price), 0)
-                : selectedServices.reduce((sum, s) => sum + Number(s.price), 0)
+      {/* Credits + Total a pagar */}
+      {selectedServices.length > 0 && (() => {
+        const subtotal = dynamicPricing?.has_dynamic_pricing && dynamicPricing.adjustment_pct !== 0
+          ? dynamicPricing.adjusted_price + selectedServices.slice(1).reduce((sum, s) => sum + Number(s.price), 0)
+          : selectedServices.reduce((sum, s) => sum + Number(s.price), 0);
+        const effectiveCredits = applyCredits ? Math.min(creditsToApply, subtotal) : 0;
+        const total = subtotal - effectiveCredits;
+
+        return (
+          <div className="space-y-3">
+            {/* Credits section */}
+            {creditBalance > 0 && (
+              <div className="rounded-xl border border-green-200 bg-green-50 px-5 py-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-green-800">Tienes creditos disponibles</p>
+                    <p className="text-xs text-green-600">Balance: {formatCurrency(creditBalance)}</p>
+                  </div>
+                  <label className="relative inline-flex cursor-pointer items-center">
+                    <input
+                      type="checkbox"
+                      className="peer sr-only"
+                      checked={applyCredits}
+                      onChange={(e) => setApplyCredits(e.target.checked)}
+                    />
+                    <div className="h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:bg-green-600 peer-checked:after:translate-x-full" />
+                  </label>
+                </div>
+                {applyCredits && (
+                  <div className="mt-3">
+                    <label className="mb-1 block text-xs text-green-700">Monto a aplicar</label>
+                    <input
+                      type="number"
+                      min={0}
+                      max={Math.min(creditBalance, subtotal)}
+                      value={creditsToApply}
+                      onChange={(e) => setCreditsToApply(Math.min(parseFloat(e.target.value) || 0, creditBalance, subtotal))}
+                      className="w-32 rounded-lg border border-green-300 px-3 py-1.5 text-sm focus:border-green-500 focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setCreditsToApply(Math.min(creditBalance, subtotal))}
+                      className="ml-2 cursor-pointer text-xs font-medium text-green-700 hover:text-green-800"
+                    >
+                      Aplicar todo
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
-          </p>
-        </div>
-      )}
+
+            {/* Total */}
+            <div className="rounded-xl border border-violet-200 bg-violet-50 px-5 py-4">
+              {effectiveCredits > 0 && (
+                <div className="mb-2 flex items-center justify-between text-sm">
+                  <span className="text-gray-600">Subtotal</span>
+                  <span className="text-gray-700">{formatCurrency(subtotal)}</span>
+                </div>
+              )}
+              {effectiveCredits > 0 && (
+                <div className="mb-2 flex items-center justify-between text-sm">
+                  <span className="text-green-700">Creditos aplicados</span>
+                  <span className="font-medium text-green-700">-{formatCurrency(effectiveCredits)}</span>
+                </div>
+              )}
+              <div className="flex items-center justify-between">
+                <p className="text-base font-semibold text-violet-900">
+                  {total <= 0 ? 'Cubierto con creditos' : 'Total a pagar'}
+                </p>
+                <p className="text-xl font-bold text-violet-700">
+                  {total <= 0 ? '$0' : formatCurrency(total)}
+                </p>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {bookMutation.isError && (
         <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
