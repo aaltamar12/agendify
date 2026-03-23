@@ -12,7 +12,7 @@ module Api
         # GET /api/v1/public/cities
         # Returns distinct cities with active businesses for the city dropdown.
         def cities
-          cities = Business.active
+          cities = Business.active.establishments
                            .where.not(city: [nil, ""])
                            .group(:city)
                            .order(:city)
@@ -23,7 +23,7 @@ module Api
 
         # GET /api/v1/public/explore
         def index
-          businesses = Business.where(status: :active)
+          businesses = Business.where(status: :active).establishments
           if params[:search].present?
             businesses = businesses.where(
               "unaccent(businesses.name) ILIKE unaccent(:q) OR unaccent(businesses.description) ILIKE unaccent(:q)",

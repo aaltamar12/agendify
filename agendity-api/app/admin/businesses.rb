@@ -16,7 +16,9 @@ ActiveAdmin.register Business do
                 :timezone, :currency,
                 :nequi_phone, :daviplata_phone, :bancolombia_account,
                 :cancellation_policy_pct, :cancellation_deadline_hours,
-                :trial_ends_at, :onboarding_completed, :primary_color, :secondary_color
+                :trial_ends_at, :onboarding_completed, :primary_color, :secondary_color,
+                :nit, :legal_representative_name, :legal_representative_document,
+                :legal_representative_document_type, :independent
 
   # -- Index --
   includes :owner
@@ -27,6 +29,13 @@ ActiveAdmin.register Business do
     column :name
     column :slug
     column :business_type
+    column(:independent) do |b|
+      if b.independent?
+        status_tag("Independiente", class: "", style: "background: #8b5cf6; color: white; border-radius: 9999px; padding: 2px 10px; font-size: 11px;")
+      else
+        status_tag("Establecimiento", class: "", style: "background: #6b7280; color: white; border-radius: 9999px; padding: 2px 10px; font-size: 11px;")
+      end
+    end
     column(:status) do |b|
       color = case b.status
               when "active" then "#22c55e"
@@ -52,6 +61,7 @@ ActiveAdmin.register Business do
   filter :name
   filter :status, as: :select, collection: -> { Business.statuses.keys }
   filter :business_type, as: :select, collection: -> { Business.business_types.keys }
+  filter :independent
   filter :city
   filter :onboarding_completed
   filter :created_at
@@ -101,6 +111,17 @@ ActiveAdmin.register Business do
       row :cancellation_deadline_hours
       row :primary_color
       row :secondary_color
+      row(:independent) do |b|
+        if b.independent?
+          status_tag("Si - Profesional Independiente", class: "", style: "background: #8b5cf6; color: white; border-radius: 9999px; padding: 2px 10px; font-size: 11px;")
+        else
+          "No"
+        end
+      end
+      row :nit
+      row :legal_representative_name
+      row :legal_representative_document
+      row :legal_representative_document_type
       row :created_at
       row :updated_at
     end
@@ -249,6 +270,15 @@ ActiveAdmin.register Business do
     f.inputs "Cancellation Policy" do
       f.input :cancellation_policy_pct, label: "Cancellation penalty %"
       f.input :cancellation_deadline_hours
+    end
+    f.inputs "Legal / Independiente" do
+      f.input :independent
+      f.input :nit
+      f.input :legal_representative_name
+      f.input :legal_representative_document
+      f.input :legal_representative_document_type, as: :select,
+        collection: [["CC", "CC"], ["CE", "CE"], ["NIT", "NIT"], ["Pasaporte", "passport"]],
+        include_blank: "Seleccionar..."
     end
     f.inputs "Trial" do
       f.input :trial_ends_at, as: :datepicker

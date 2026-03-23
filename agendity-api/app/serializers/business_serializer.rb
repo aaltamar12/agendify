@@ -14,6 +14,7 @@ class BusinessSerializer < Blueprinter::Base
          :lunch_start_time, :lunch_end_time, :lunch_enabled,
          :slot_interval_minutes, :gap_between_appointments_minutes,
          :nequi_phone, :daviplata_phone, :bancolombia_account,
+         :nit, :legal_representative_name, :independent,
          :created_at, :updated_at
 
   # Serve logo from ActiveStorage attachment, fallback to legacy logo_url column
@@ -60,6 +61,7 @@ class BusinessSerializer < Blueprinter::Base
              :lunch_start_time, :lunch_end_time, :lunch_enabled,
              :slot_interval_minutes, :gap_between_appointments_minutes,
              :nequi_phone, :daviplata_phone, :bancolombia_account,
+             :nit, :legal_representative_name,
              :created_at, :updated_at
   end
 
@@ -72,6 +74,7 @@ class BusinessSerializer < Blueprinter::Base
              :lunch_start_time, :lunch_end_time, :lunch_enabled,
              :slot_interval_minutes, :gap_between_appointments_minutes,
              :nequi_phone, :daviplata_phone, :bancolombia_account,
+             :nit, :legal_representative_name, :independent,
              :primary_color, :secondary_color,
              :email, :timezone, :currency,
              :instagram_url, :facebook_url, :website_url, :google_maps_url,
@@ -88,6 +91,7 @@ class BusinessSerializer < Blueprinter::Base
   view :with_payment do
     excludes :owner_id, :status, :onboarding_completed,
              :current_subscription,
+             :nit, :legal_representative_name,
              :created_at, :updated_at
   end
 
