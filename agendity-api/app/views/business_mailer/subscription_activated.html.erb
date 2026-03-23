@@ -1,0 +1,18 @@
+<h2>Bienvenido a Agendity, <%= @business.name %></h2>
+
+<p>Tu suscripcion ha sido activada exitosamente.</p>
+
+<table class="detail-table">
+  <tr>
+    <td>Plan</td>
+    <td><%= @plan_name %></td>
+  </tr>
+  <tr>
+    <td>Activo hasta</td>
+    <td><%= @end_date.strftime('%d/%m/%Y') %></td>
+  </tr>
+</table>
+
+<p>Ya puedes disfrutar de todas las funcionalidades de tu plan. Si necesitas ayuda, no dudes en contactarnos.</p>
+
+<p>— El equipo de Agendity</p>

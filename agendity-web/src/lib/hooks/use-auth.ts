@@ -32,7 +32,7 @@ export function useRegister() {
   const setAuth = useAuthStore((s) => s.setAuth);
 
   return useMutation({
-    mutationFn: (data: RegisterFormData) =>
+    mutationFn: (data: RegisterFormData & { referralCode?: string }) =>
       post<ApiResponse<AuthResponse>>(ENDPOINTS.AUTH.register, {
         name: data.name,
         email: data.email,
@@ -40,10 +40,12 @@ export function useRegister() {
         password_confirmation: data.passwordConfirmation,
         business_name: data.businessName,
         business_type: data.businessType,
+        referral_code: data.referralCode,
       }),
     onSuccess: (response) => {
       const { token, refresh_token, user } = response.data;
       setAuth(token, refresh_token, user);
+      localStorage.removeItem('agendity_ref_code');
       router.push('/dashboard/onboarding');
     },
   });
@@ -89,6 +91,7 @@ export function useLogout() {
 
   return () => {
     clearAuth();
+    localStorage.removeItem('agendity_ref_code');
     queryClient.clear();
     router.push('/login');
   };

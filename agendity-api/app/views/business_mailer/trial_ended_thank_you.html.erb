@@ -1,0 +1,55 @@
+<h2>Gracias por probar Agendity, <%= @business.name %></h2>
+
+<p>Tu periodo de prueba gratuito termina hoy. Esperamos que hayas podido conocer todo lo que Agendity puede hacer por tu negocio.</p>
+
+<p>Para continuar usando la plataforma, elige el plan que mejor se ajuste a tus necesidades:</p>
+
+<table class="detail-table">
+  <tr>
+    <td><strong>Plan</strong></td>
+    <td><strong>Precio mensual</strong></td>
+  </tr>
+  <% @plans.each do |plan| %>
+    <tr>
+      <td><%= plan.name %></td>
+      <td>$<%= plan.price_monthly.to_f.round(0) %> COP</td>
+    </tr>
+  <% end %>
+</table>
+
+<h3>Como pagar</h3>
+
+<p>Realiza una transferencia o pago por cualquiera de estos medios:</p>
+
+<table class="detail-table">
+  <% if @payment_nequi.present? %>
+    <tr>
+      <td>Nequi</td>
+      <td><%= @payment_nequi %></td>
+    </tr>
+  <% end %>
+  <% if @payment_bancolombia.present? %>
+    <tr>
+      <td>Bancolombia</td>
+      <td><%= @payment_bancolombia %></td>
+    </tr>
+  <% end %>
+  <% if @payment_daviplata.present? %>
+    <tr>
+      <td>Daviplata</td>
+      <td><%= @payment_daviplata %></td>
+    </tr>
+  <% end %>
+</table>
+
+<p>Luego, sube tu comprobante desde la app y en minutos activamos tu plan.</p>
+
+<% if @app_url.present? %>
+  <p><a href="<%= @app_url %>/dashboard/subscription" style="display: inline-block; background-color: #7c3aed; color: #ffffff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600;">Activar mi plan</a></p>
+<% end %>
+
+<% if @support_whatsapp.present? %>
+  <p>Si tienes dudas, escribenos por WhatsApp al <strong><%= @support_whatsapp %></strong>.</p>
+<% end %>
+
+<p>— El equipo de Agendity</p>

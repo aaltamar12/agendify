@@ -171,6 +171,13 @@ export const ENDPOINTS = {
     stopImpersonation: `${BASE}/admin/stop_impersonation`,
   },
 
+  SUBSCRIPTION: {
+    plans: `${BASE}/subscription/plans`,
+    paymentInfo: `${BASE}/subscription/payment_info`,
+    checkout: `${BASE}/subscription/checkout`,
+    status: `${BASE}/subscription/status`,
+  },
+
   LOCATIONS: {
     countries: `${BASE}/locations/countries`,
     states: `${BASE}/locations/states`,

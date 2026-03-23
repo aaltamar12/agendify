@@ -118,6 +118,14 @@ Rails.application.routes.draw do
         end
       end
 
+      # Subscription checkout
+      scope :subscription, controller: "subscription_checkout" do
+        get :plans
+        get :payment_info
+        post :checkout
+        get :status
+      end
+
       # Employee portal
       namespace :employee do
         get :dashboard, to: "dashboard#show"
@@ -169,6 +177,9 @@ Rails.application.routes.draw do
 
       # Public endpoints (no auth required)
       namespace :public do
+        # Referral code validation
+        get "referral_codes/:code/validate", to: "referral_codes#validate"
+
         # Static routes first (before :slug catch-all)
         get  "ad_banners",                   to: "ad_banners#index"
         post "ad_banners/:id/impression",    to: "ad_banners#impression"

@@ -27,6 +27,7 @@ export const registerSchema = z
     businessType: z.enum(['barberia', 'salon'], {
       error: 'Selecciona el tipo de negocio',
     }),
+    referralCode: z.string().optional(),
   })
   .refine((data) => data.password === data.passwordConfirmation, {
     message: 'Las contraseñas no coinciden',

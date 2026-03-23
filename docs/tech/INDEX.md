@@ -34,6 +34,7 @@
 | [metas-financieras.md](metas-financieras.md) | Metas financieras (Plan Inteligente): tipos de meta, progreso, sugerencias |
 | [banners-publicitarios.md](banners-publicitarios.md) | Banners publicitarios en Explore: modelo, tracking de impresiones/clicks, gestion desde ActiveAdmin |
 | [whatsapp-plan-gating.md](whatsapp-plan-gating.md) | WhatsApp gated por plan: MultiChannelService, canales por plan, WhatsAppChannel stub |
+| [../costos-operativos.md](../costos-operativos.md) | Costos operativos: notificaciones, infra, WhatsApp, email, escalas LATAM |
 | [decisiones/](decisiones/) | ADRs (Architecture Decision Records) |
 
 ### Decisiones técnicas (ADRs)

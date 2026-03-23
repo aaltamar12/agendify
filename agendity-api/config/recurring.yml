@@ -58,3 +58,8 @@ production:
     class: CleanupOldRequestLogsJob
     queue: low
     schedule: every sunday at 4am
+
+  trial_expiry_alerts:
+    class: TrialExpiryAlertJob
+    queue: default
+    schedule: every day at 8am

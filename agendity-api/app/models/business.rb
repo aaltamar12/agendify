@@ -28,6 +28,8 @@ class Business < ApplicationRecord
 
   # -- Associations --
   belongs_to :owner, class_name: "User", inverse_of: :businesses
+  belongs_to :referral_code, optional: true
+  has_one :referral, dependent: :destroy
 
   has_many :employees, dependent: :destroy
   has_many :services, dependent: :destroy
@@ -65,6 +67,14 @@ class Business < ApplicationRecord
   scope :independent, -> { where(independent: true) }
   scope :establishments, -> { where(independent: false) }
   scope :in_trial, -> { where("trial_ends_at > ?", Time.current) }
+  scope :trial_expiring_in, ->(days) {
+    target = Date.current + days
+    where("trial_ends_at::date = ?", target).where("trial_ends_at IS NOT NULL")
+  }
+  scope :trial_expired_since, ->(days) {
+    target = Date.current - days
+    where("trial_ends_at::date = ?", target).where("trial_ends_at IS NOT NULL")
+  }
   scope :nearby, ->(lat, lng, radius_km = 10) { near([lat, lng], radius_km, units: :km) }
 
   # -- Ransack (ActiveAdmin filters) --

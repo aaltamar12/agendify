@@ -1,0 +1,20 @@
+<h2>Hola, <%= @business.name %></h2>
+
+<p>Te escribimos para recordarte que tu <strong>periodo de prueba gratuito</strong> termina el <strong><%= @trial_ends_at&.strftime('%d/%m/%Y') %></strong> (en 2 dias).</p>
+
+<p>Para seguir usando todas las funcionalidades de Agendity sin interrupciones, te recomendamos activar tu suscripcion antes de esa fecha.</p>
+
+<table class="detail-table">
+  <tr>
+    <td>Periodo de prueba</td>
+    <td>Termina el <%= @trial_ends_at&.strftime('%d/%m/%Y') %></td>
+  </tr>
+</table>
+
+<p>Activar tu plan es muy facil: elige el plan que mejor se ajuste a tu negocio, transfiere el monto y sube tu comprobante desde la app.</p>
+
+<% if @support_whatsapp.present? %>
+  <p>Si tienes alguna pregunta, escribenos por WhatsApp al <strong><%= @support_whatsapp %></strong>.</p>
+<% end %>
+
+<p>— El equipo de Agendity</p>

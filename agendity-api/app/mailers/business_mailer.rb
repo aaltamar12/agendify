@@ -63,6 +63,56 @@ class BusinessMailer < ApplicationMailer
     )
   end
 
+  # Alert the business about trial expiry (stages 1 and 3).
+  def trial_expiry_alert(business, stage)
+    @business = business
+    @stage    = stage
+    @trial_ends_at = business.trial_ends_at
+    @support_whatsapp = SiteConfig.get("support_whatsapp")
+    @support_email = SiteConfig.get("support_email")
+
+    subject = case stage
+              when 1 then "Tu periodo de prueba termina en 2 dias — Agendity"
+              when 3 then "Tu cuenta ha sido suspendida — Agendity"
+              end
+
+    mail(
+      to: @business.owner.email,
+      subject: subject,
+      template_name: "trial_expiry_alert_stage_#{stage}"
+    )
+  end
+
+  # Special thank-you message when trial ends (stage 2) — includes plans + CTA.
+  def trial_ended_thank_you(business)
+    @business = business
+    @plans = Plan.order(:price_monthly)
+    @support_whatsapp = SiteConfig.get("support_whatsapp")
+    @support_email = SiteConfig.get("support_email")
+    @app_url = SiteConfig.get("app_url")
+    @payment_nequi = SiteConfig.get("payment_nequi")
+    @payment_bancolombia = SiteConfig.get("payment_bancolombia")
+    @payment_daviplata = SiteConfig.get("payment_daviplata")
+
+    mail(
+      to: @business.owner.email,
+      subject: "Gracias por probar Agendity — Elige tu plan"
+    )
+  end
+
+  # Confirm subscription activation after payment approval.
+  def subscription_activated(business, subscription)
+    @business     = business
+    @subscription = subscription
+    @plan_name    = subscription.plan.name
+    @end_date     = subscription.end_date
+
+    mail(
+      to: @business.owner.email,
+      subject: "Suscripcion activada — #{@plan_name} — Agendity"
+    )
+  end
+
   # Remind the business about an upcoming subscription payment.
   def subscription_payment_reminder(payment_order)
     @order    = payment_order

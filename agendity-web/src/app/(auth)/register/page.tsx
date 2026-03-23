@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -18,6 +20,8 @@ const businessTypeOptions = [
 ];
 
 export default function RegisterPage() {
+  const searchParams = useSearchParams();
+
   const {
     register,
     handleSubmit,
@@ -29,10 +33,19 @@ export default function RegisterPage() {
     },
   });
 
+  // Capture referral code from URL and persist in localStorage
+  useEffect(() => {
+    const ref = searchParams.get('ref');
+    if (ref) {
+      localStorage.setItem('agendity_ref_code', ref);
+    }
+  }, [searchParams]);
+
   const registerMutation = useRegister();
 
   const onSubmit = (data: RegisterFormData) => {
-    registerMutation.mutate(data);
+    const referralCode = localStorage.getItem('agendity_ref_code') || undefined;
+    registerMutation.mutate({ ...data, referralCode });
   };
 
   return (

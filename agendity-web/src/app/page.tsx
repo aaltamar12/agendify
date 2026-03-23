@@ -24,7 +24,7 @@ import { Button } from '@/components/ui/button';
 export const metadata: Metadata = {
   title: 'Agendity — Agenda de citas para tu negocio | Reservas online 24/7',
   description:
-    'Software de gestión de citas para barberías, salones, consultorios y cualquier negocio que trabaje con reservas. Reservas online 24/7, agenda digital, control de ingresos, recordatorios automáticos y reportes. 30 días gratis.',
+    'Software de gestión de citas para barberías, salones, consultorios y cualquier negocio que trabaje con reservas. Reservas online 24/7, agenda digital, control de ingresos, recordatorios automáticos y reportes. 7 días gratis.',
   keywords: [
     'agenda de citas para negocios',
     'reservas online barbería',
@@ -124,7 +124,7 @@ const TESTIMONIALS = [
 const FAQ = [
   {
     question: '¿Agendity es gratis?',
-    answer: 'Sí. Tienes 30 días gratis con acceso completo al Plan Profesional, sin necesidad de tarjeta de crédito. Después eliges el plan que mejor se ajuste a tu negocio.',
+    answer: 'Sí. Tienes 7 días gratis con acceso completo al Plan Profesional, sin necesidad de tarjeta de crédito. Después eliges el plan que mejor se ajuste a tu negocio.',
   },
   {
     question: '¿Mis clientes necesitan descargar una app?',
@@ -174,7 +174,7 @@ const jsonLd = {
     '@type': 'Offer',
     price: '0',
     priceCurrency: 'COP',
-    description: '30 días de prueba gratis',
+    description: '7 días de prueba gratis',
   },
   aggregateRating: {
     '@type': 'AggregateRating',
@@ -223,7 +223,7 @@ export default function Home() {
         <section className="flex flex-col items-center justify-center gap-8 px-6 py-20 text-center sm:py-28">
           <span className="inline-flex items-center gap-2 rounded-full bg-violet-50 px-4 py-1.5 text-sm font-medium text-violet-700">
             <Zap className="h-4 w-4" />
-            30 días gratis — Sin tarjeta de crédito
+            7 días gratis — Sin tarjeta de crédito
           </span>
           <h1 className="max-w-3xl text-5xl font-bold tracking-tight text-gray-900 sm:text-6xl">
             Tu negocio,{' '}
@@ -325,7 +325,7 @@ export default function Home() {
                     </Link>
                   </div>
                   <p className="mt-3 text-xs text-gray-400">
-                    30 días gratis. Sin tarjeta de crédito.
+                    7 días gratis. Sin tarjeta de crédito.
                   </p>
                 </div>
 
@@ -435,7 +435,7 @@ export default function Home() {
               Planes simples, sin sorpresas
             </h2>
             <p className="mx-auto mb-12 max-w-xl text-center text-gray-500">
-              30 días gratis con acceso completo al Plan Profesional. Sin tarjeta de crédito.
+              7 días gratis con acceso completo al Plan Profesional. Sin tarjeta de crédito.
             </p>
 
             <div className="grid gap-6 sm:grid-cols-3">
@@ -549,7 +549,7 @@ export default function Home() {
         <section className="bg-violet-600 px-6 py-20 text-center">
           <div className="mx-auto max-w-2xl">
             <h2 className="mb-4 text-3xl font-bold text-white">
-              Empieza tu prueba gratis de 30 días
+              Empieza tu prueba gratis de 7 días
             </h2>
             <p className="mb-8 text-lg text-violet-200">
               Sin tarjeta de crédito. Sin compromisos. Cancela cuando quieras.

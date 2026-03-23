@@ -1,0 +1,34 @@
+<h2>Nuevo comprobante de pago recibido</h2>
+
+<p>El negocio <strong><%= @business.name %></strong> ha enviado un comprobante de pago para activar su suscripcion.</p>
+
+<table class="detail-table">
+  <tr>
+    <td>Negocio</td>
+    <td><%= @business.name %></td>
+  </tr>
+  <tr>
+    <td>Propietario</td>
+    <td><%= @business.owner.name %> (<%= @business.owner.email %>)</td>
+  </tr>
+  <% if @plan %>
+    <tr>
+      <td>Plan</td>
+      <td><%= @plan.name %></td>
+    </tr>
+  <% end %>
+  <tr>
+    <td>Monto</td>
+    <td>$<%= @order.amount.to_f.round(0) %> COP</td>
+  </tr>
+  <tr>
+    <td>Fecha</td>
+    <td><%= @order.proof_submitted_at&.strftime('%d/%m/%Y %H:%M') %></td>
+  </tr>
+</table>
+
+<% if @admin_url.present? %>
+  <p><a href="<%= @admin_url %>/admin/subscription_payment_orders/<%= @order.id %>" style="display: inline-block; background-color: #7c3aed; color: #ffffff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600;">Revisar en el panel</a></p>
+<% end %>
+
+<p>— Agendity System</p>

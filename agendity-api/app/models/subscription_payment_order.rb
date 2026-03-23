@@ -6,19 +6,22 @@ class SubscriptionPaymentOrder < ApplicationRecord
   include BusinessScoped
 
   # -- Associations --
-  belongs_to :subscription
+  belongs_to :subscription, optional: true
+  belongs_to :plan, optional: true
+  has_one_attached :proof
 
   # -- Validations --
   validates :amount, presence: true, numericality: { greater_than: 0 }
   validates :due_date, presence: true
   validates :period_start, presence: true
   validates :period_end, presence: true
-  validates :status, presence: true, inclusion: { in: %w[pending paid overdue cancelled] }
+  validates :status, presence: true, inclusion: { in: %w[pending paid overdue cancelled proof_submitted rejected] }
 
   # -- Scopes --
   scope :pending, -> { where(status: "pending") }
   scope :paid, -> { where(status: "paid") }
   scope :overdue, -> { where(status: "overdue") }
+  scope :proof_submitted, -> { where(status: "proof_submitted") }
   scope :due_within, ->(days) { where(due_date: ..days.days.from_now.to_date) }
 
   # -- Ransack (ActiveAdmin filters) --

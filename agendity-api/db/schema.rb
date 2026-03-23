@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_23_170837) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_23_200005) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "unaccent"
@@ -217,10 +217,13 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_23_170837) do
     t.string "legal_representative_document"
     t.string "legal_representative_document_type"
     t.boolean "independent", default: false, null: false
+    t.bigint "referral_code_id"
+    t.integer "trial_alert_stage", default: 0, null: false
     t.index ["city"], name: "index_businesses_on_city"
     t.index ["independent"], name: "index_businesses_on_independent"
     t.index ["latitude", "longitude"], name: "index_businesses_on_latitude_and_longitude"
     t.index ["owner_id"], name: "index_businesses_on_owner_id"
+    t.index ["referral_code_id"], name: "index_businesses_on_referral_code_id"
     t.index ["slug"], name: "index_businesses_on_slug", unique: true
     t.index ["status"], name: "index_businesses_on_status"
   end
@@ -483,6 +486,36 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_23_170837) do
     t.boolean "whatsapp_notifications", default: false, null: false
   end
 
+  create_table "referral_codes", force: :cascade do |t|
+    t.string "code", null: false
+    t.string "referrer_name", null: false
+    t.string "referrer_email"
+    t.string "referrer_phone"
+    t.decimal "commission_percentage", precision: 5, scale: 2, default: "10.0"
+    t.integer "status", default: 0, null: false
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["code"], name: "index_referral_codes_on_code", unique: true
+  end
+
+  create_table "referrals", force: :cascade do |t|
+    t.bigint "referral_code_id", null: false
+    t.bigint "business_id", null: false
+    t.bigint "subscription_id"
+    t.integer "status", default: 0, null: false
+    t.decimal "commission_amount", precision: 10, scale: 2
+    t.date "activated_at"
+    t.date "paid_at"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["business_id"], name: "index_referrals_on_business_id"
+    t.index ["referral_code_id", "business_id"], name: "index_referrals_on_referral_code_id_and_business_id", unique: true
+    t.index ["referral_code_id"], name: "index_referrals_on_referral_code_id"
+    t.index ["subscription_id"], name: "index_referrals_on_subscription_id"
+  end
+
   create_table "refresh_tokens", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.string "token", null: false
@@ -549,8 +582,17 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_23_170837) do
     t.index ["business_id"], name: "index_services_on_business_id"
   end
 
+  create_table "site_configs", force: :cascade do |t|
+    t.string "key", null: false
+    t.text "value", null: false
+    t.string "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["key"], name: "index_site_configs_on_key", unique: true
+  end
+
   create_table "subscription_payment_orders", force: :cascade do |t|
-    t.bigint "subscription_id", null: false
+    t.bigint "subscription_id"
     t.bigint "business_id", null: false
     t.decimal "amount", precision: 10, scale: 2, null: false
     t.date "due_date", null: false
@@ -560,9 +602,14 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_23_170837) do
     t.text "notes"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "plan_id"
+    t.datetime "proof_submitted_at"
+    t.string "reviewed_by"
+    t.datetime "reviewed_at"
     t.index ["business_id", "status"], name: "index_subscription_payment_orders_on_business_id_and_status"
     t.index ["business_id"], name: "index_subscription_payment_orders_on_business_id"
     t.index ["due_date"], name: "index_subscription_payment_orders_on_due_date"
+    t.index ["plan_id"], name: "index_subscription_payment_orders_on_plan_id"
     t.index ["subscription_id"], name: "index_subscription_payment_orders_on_subscription_id"
   end
 
@@ -608,6 +655,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_23_170837) do
   add_foreign_key "blocked_slots", "employees"
   add_foreign_key "business_goals", "businesses"
   add_foreign_key "business_hours", "businesses"
+  add_foreign_key "businesses", "referral_codes"
   add_foreign_key "businesses", "users", column: "owner_id"
   add_foreign_key "cash_register_closes", "businesses"
   add_foreign_key "cash_register_closes", "users", column: "closed_by_user_id"
@@ -633,6 +681,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_23_170837) do
   add_foreign_key "employees", "users"
   add_foreign_key "notifications", "businesses"
   add_foreign_key "payments", "appointments"
+  add_foreign_key "referrals", "businesses"
+  add_foreign_key "referrals", "referral_codes"
+  add_foreign_key "referrals", "subscriptions"
   add_foreign_key "refresh_tokens", "users"
   add_foreign_key "request_logs", "businesses"
   add_foreign_key "reviews", "appointments"
@@ -641,6 +692,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_23_170837) do
   add_foreign_key "reviews", "employees"
   add_foreign_key "services", "businesses"
   add_foreign_key "subscription_payment_orders", "businesses"
+  add_foreign_key "subscription_payment_orders", "plans"
   add_foreign_key "subscription_payment_orders", "subscriptions"
   add_foreign_key "subscriptions", "businesses"
   add_foreign_key "subscriptions", "plans"

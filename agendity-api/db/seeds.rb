@@ -2073,3 +2073,43 @@ end
 puts "  ✅ Miguel Barrero (independent) created — slug: miguel-barrero"
 puts "     Services: #{miguel_services.map(&:name).join(', ')}"
 puts "     Plan: Básico (trial)"
+
+# ============================================================================
+# SITE CONFIGS
+# ============================================================================
+puts "\n⚙️  Creating site configs..."
+
+site_configs = {
+  "support_email" => { value: "soporte@agendity.com", description: "Email de soporte al cliente" },
+  "support_whatsapp" => { value: "+573001234567", description: "WhatsApp de soporte al cliente" },
+  "payment_nequi" => { value: "300-123-4567", description: "Numero Nequi para pagos" },
+  "payment_bancolombia" => { value: "Ahorros 123-456789-00", description: "Cuenta Bancolombia para pagos" },
+  "payment_daviplata" => { value: "300-123-4567", description: "Numero Daviplata para pagos" },
+  "admin_email" => { value: "admin@agendity.com", description: "Email del administrador de la plataforma" },
+  "admin_whatsapp" => { value: "+573001234567", description: "WhatsApp del administrador" },
+  "app_url" => { value: "https://app.agendity.com", description: "URL de la aplicacion web" },
+  "admin_url" => { value: "https://api.agendity.com", description: "URL del panel de administracion" }
+}
+
+site_configs.each do |key, attrs|
+  SiteConfig.find_or_create_by!(key: key) do |config|
+    config.value = attrs[:value]
+    config.description = attrs[:description]
+  end
+end
+
+puts "  ✅ #{site_configs.size} site configs created"
+
+# ============================================================================
+# JOB CONFIG for TrialExpiryAlertJob
+# ============================================================================
+puts "\n⏰ Creating job config for TrialExpiryAlertJob..."
+
+JobConfig.find_or_create_by!(job_class: "TrialExpiryAlertJob") do |jc|
+  jc.name = "Trial Expiry Alerts"
+  jc.description = "Sends trial expiry alerts (2 days before, day of, 2 days after) and suspends expired businesses"
+  jc.enabled = true
+  jc.schedule = "every day at 8am"
+end
+
+puts "  ✅ TrialExpiryAlertJob config created"
