@@ -27,4 +27,18 @@ class CustomerMailer < ApplicationMailer
       subject: "Ganaste créditos en #{@business_name}"
     )
   end
+
+  def credits_adjusted(customer, data)
+    @customer = customer
+    @business_name = data[:business_name]
+    @amount = data[:amount]
+    @new_balance = data[:new_balance]
+    @description = data[:description]
+    @booking_url = data[:booking_url]
+
+    mail(
+      to: @customer.email,
+      subject: "Recibiste créditos de #{@business_name}"
+    )
+  end
 end

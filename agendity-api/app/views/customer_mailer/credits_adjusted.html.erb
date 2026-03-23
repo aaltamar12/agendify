@@ -1,0 +1,18 @@
+<h2>Recibiste creditos</h2>
+
+<p>Hola, <strong><%= @customer.name %></strong>.</p>
+
+<p><strong><%= @business_name %></strong> te ha dado <strong><%= number_to_currency(@amount, unit: "$", precision: 0, delimiter: ".") %></strong> en creditos.</p>
+
+<% if @description.present? %>
+<p>Motivo: <%= @description %></p>
+<% end %>
+
+<p>Tu saldo actual es de <strong><%= number_to_currency(@new_balance, unit: "$", precision: 0, delimiter: ".") %></strong>. Puedes usarlos en tu proxima reserva.</p>
+
+<p style="text-align: center; margin: 24px 0;">
+  <a href="<%= @booking_url %>"
+     style="display: inline-block; background-color: #7c3aed; color: #ffffff; padding: 12px 32px; border-radius: 6px; font-size: 16px; font-weight: 600; text-decoration: none;">
+    Reservar ahora
+  </a>
+</p>

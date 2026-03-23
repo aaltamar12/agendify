@@ -13,6 +13,9 @@ Rails.application.routes.draw do
   end
   mount Sidekiq::Web => "/admin/sidekiq"
 
+  # Letter Opener Web — email preview in development
+  mount LetterOpenerWeb::Engine, at: "/letter_opener" if Rails.env.development?
+
   # Admin session-based authentication (separate from API JWT auth)
   get  "admin/login",  to: "admin/sessions#new",     as: :admin_login
   post "admin/login",  to: "admin/sessions#create",  as: :admin_create_session

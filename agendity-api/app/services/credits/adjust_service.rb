@@ -32,7 +32,23 @@ module Credits
         )
       end
 
-      success(account.reload)
+      account.reload
+
+      # Notify customer via email when they receive credits (not for debits)
+      if @amount.positive? && @customer.email.present?
+        CustomerMailer.credits_adjusted(
+          @customer,
+          {
+            business_name: @business.name,
+            amount: @amount,
+            new_balance: account.balance,
+            description: @description,
+            booking_url: "#{ENV.fetch('FRONTEND_URL', 'http://localhost:3000')}/#{@business.slug}"
+          }
+        ).deliver_later
+      end
+
+      success(account)
     end
   end
 end

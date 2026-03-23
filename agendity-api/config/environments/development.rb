@@ -54,8 +54,8 @@ Rails.application.configure do
   # Default URL options for route helpers (ActiveStorage, etc.)
   Rails.application.routes.default_url_options = { host: "localhost", port: 3001 }
 
-  # Action Mailer: use test delivery (logs to console) in development
-  config.action_mailer.delivery_method = :test
+  # Action Mailer: letter_opener_web — emails visible at /letter_opener
+  config.action_mailer.delivery_method = :letter_opener_web
   config.action_mailer.default_url_options = { host: "localhost", port: 3001 }
 
   # Raise error when a before_action's only/except options reference missing actions.

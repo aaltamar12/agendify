@@ -26,6 +26,14 @@ class AppointmentMailer < ApplicationMailer
 
     return unless @customer.email.present?
 
+    # Attach QR code inline
+    if @appointment.ticket_code.present?
+      attachments.inline["qr-ticket.png"] = {
+        mime_type: "image/png",
+        content: QrCodeHelper.ticket_qr_png(@appointment)
+      }
+    end
+
     mail(
       to: @customer.email,
       subject: "Tu cita en #{@business.name} está confirmada — #{@appointment.ticket_code}"

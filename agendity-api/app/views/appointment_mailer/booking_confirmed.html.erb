@@ -23,12 +23,41 @@
     <td>Precio</td>
     <td>$<%= number_with_delimiter(@appointment.price.to_i) %> COP</td>
   </tr>
+  <% if @appointment.credits_applied.to_f > 0 %>
+  <tr>
+    <td>Créditos aplicados</td>
+    <td style="color: #22c55e;">-$<%= number_with_delimiter(@appointment.credits_applied.to_i) %> COP</td>
+  </tr>
+  <tr>
+    <td><strong>Total a pagar</strong></td>
+    <td><strong>$<%= number_with_delimiter((@appointment.price - @appointment.credits_applied).to_i) %> COP</strong></td>
+  </tr>
+  <% end %>
 </table>
 
 <% if @appointment.ticket_code.present? %>
   <p><strong>Tu código de ticket:</strong></p>
   <div class="ticket-code"><%= @appointment.ticket_code %></div>
-  <p>Presenta este código al llegar al negocio.</p>
+
+  <% if attachments['qr-ticket.png'] %>
+    <div style="text-align: center; margin: 20px 0;">
+      <div style="display: inline-block; background: #ffffff; padding: 12px; border-radius: 12px; border: 1px solid #e5e7eb;">
+        <%= image_tag attachments['qr-ticket.png'].url, alt: 'QR Ticket', style: 'width: 200px; height: 200px;' %>
+      </div>
+      <p style="margin-top: 8px; font-size: 13px; color: #6b7280;">Escanea este QR al llegar al negocio</p>
+    </div>
+  <% end %>
 <% end %>
+
+<p style="text-align: center; margin: 24px 0;">
+  <a href="<%= "#{ENV.fetch('FRONTEND_URL', 'http://localhost:3000')}/#{@business.slug}/ticket/#{@appointment.ticket_code}" %>"
+     style="display: inline-block; background-color: #7c3aed; color: #ffffff; padding: 12px 32px; border-radius: 6px; font-size: 16px; font-weight: 600; text-decoration: none;">
+    Ver mi ticket
+  </a>
+</p>
+
+<p style="color: #888888; font-size: 13px; text-align: center;">
+  Desde ahi puedes ver el estado de tu cita o cancelarla.
+</p>
 
 <p>¡Te esperamos!</p>

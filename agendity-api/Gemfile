@@ -43,6 +43,9 @@ gem "blueprinter"
 # File uploads
 gem "aws-sdk-s3", require: false
 
+# QR code generation for emails
+gem "rqrcode"
+
 # Rate limiting
 gem "rack-attack"
 
@@ -61,6 +64,10 @@ gem "redcarpet"
 
 # Environment variables
 gem "dotenv-rails"
+
+group :development do
+  gem "letter_opener_web"
+end
 
 group :development, :test do
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
