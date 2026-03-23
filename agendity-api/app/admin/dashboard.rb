@@ -87,7 +87,7 @@ ActiveAdmin.register_page "Dashboard" do
     # -- Charts row 3: Registros & Suscripciones --
     columns do
       column do
-        panel "Registros por semana (últimos 3 meses)" do
+        panel "Nuevos negocios por semana (últimos 3 meses)" do
           data = Business.where("created_at > ?", 3.months.ago)
             .group_by_week(:created_at)
             .count
