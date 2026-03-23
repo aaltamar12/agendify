@@ -1,8 +1,17 @@
 # frozen_string_literal: true
 
+require "sidekiq/web"
+
 Rails.application.routes.draw do
   # ActiveAdmin panel
   ActiveAdmin.routes(self)
+
+  # Sidekiq Web UI — authenticated behind ActiveAdmin session
+  Sidekiq::Web.use(Rack::Auth::Basic) do |username, password|
+    admin = AdminUser.find_by(email: username)
+    admin&.valid_password?(password)
+  end
+  mount Sidekiq::Web => "/admin/sidekiq"
 
   # Admin session-based authentication (separate from API JWT auth)
   get  "admin/login",  to: "admin/sessions#new",     as: :admin_login
