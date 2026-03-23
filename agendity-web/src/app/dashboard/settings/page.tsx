@@ -261,7 +261,11 @@ export default function SettingsPage() {
 
 
         {/* Notification preferences */}
-        <NotificationSection />
+        {loadingBusiness ? (
+          <Skeleton className="h-48 w-full" />
+        ) : (
+          <NotificationSection />
+        )}
 
         {/* Brand customization (colors) — Profesional+ only */}
         {loadingBusiness ? (
