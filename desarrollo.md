@@ -404,25 +404,38 @@ El sistema debe estar preparado para incluir IA.
 | Agenda y calendario | Si | Si | Si |
 | Servicios | Hasta 5 | Ilimitados | Ilimitados |
 | Empleados | Hasta 3 | Hasta 10 | Ilimitados |
+| Múltiples servicios por cita | Si | Si | Si |
 | Reservas online | Si | Si | Si |
 | Clientes en BD | Ilimitados | Ilimitados | Ilimitados |
 | Página pública del negocio | Si | Si | Si |
-| QR de reservas | Si | Si | Si |
+| Portada del negocio (upload/Pexels) | Si | Si | Si |
+| QR de reservas + scanner cámara | Si | Si | Si |
+| Duración visible al usuario | Si | Si | Si |
 | Notificaciones Email | Si | Si | Si |
 | Notificaciones WhatsApp | No | Si | Si |
 | Ticket digital VIP | No | Si | Si |
 | Reportes básicos | Si | Si | Si |
-| Reportes avanzados | No | Si | Si |
-| Cierre de caja | No | Si | Si |
+| Reportes avanzados + ganancias netas | No | Si | Si |
+| Cierre de caja (comisiones, deuda) | No | Si | Si |
+| Créditos / Cashback | No | Si (configurable por SuperAdmin) | Si (configurable por SuperAdmin) |
+| Aplicar créditos en reserva | No | Si | Si |
 | Personalización de marca | No | Si (logo, colores) | Si (logo, colores) |
-| Mapa de negocios | Listado | Listado + destacado | Listado + destacado |
+| Mapa de negocios | Listado | Listado + destacado | Listado + destacado + verificado |
+| Badge verificado (azul) en Explore | No | No | Si |
 | Bloqueo de slots | Si | Si | Si |
+| Bloqueo de días cerrados | Si | Si | Si |
 | Políticas de cancelación | Básica | Configurable | Configurable |
-| Tarifas dinámicas | No | Manual | Manual + sugerencias IA |
+| Preview de cancelación con penalización | Si | Si | Si |
+| Tarifas dinámicas | No | Manual (fijo/progresivo) | Manual + sugerencias IA |
+| Precios dinámicos visibles al usuario | No | Si | Si |
+| Metas financieras | No | No | Si |
+| Reconciliación contable | No | No | Si |
 | Análisis inteligente (IA) | No | No | Si |
-| Predicción de ingresos | No | No | Si |
+| Predicción de ingresos | No | No | Si (futuro) |
 | Recomendaciones de precios | No | No | Si |
-| Alertas de clientes inactivos | No | No | Si |
+| Alertas de clientes inactivos | No | No | Si (futuro) |
+| Portal del empleado | Si | Si | Si |
+| Banners publicitarios en reserva | Si | Si | Si |
 | Soporte | Email | Email + WhatsApp | Email + WhatsApp + prioritario |
 
 El superusuario puede modificar precios, límites y características desde ActiveAdmin.

@@ -1,8 +1,7 @@
 # Documentación Técnica — Agendity
 
-> Última actualización: 2026-03-17
-> Documentación final pre-lanzamiento
-> **Fase del proyecto:** Pre-lanzamiento
+> Ultima actualizacion: 2026-03-23
+> **Fase del proyecto:** Pre-lanzamiento (15 etapas de features completadas)
 
 ## Índice
 
@@ -28,6 +27,7 @@
 | [sistema-creditos-cashback.md](sistema-creditos-cashback.md) | Creditos y cashback: modelos, servicios, endpoints, bulk adjust, integracion con cancelaciones (Profesional+) |
 | [tarifas-dinamicas.md](tarifas-dinamicas.md) | Tarifas dinamicas: modos fijo/progresivo, incremento/descuento, IA, escalamiento a Claude API |
 | [reportes-ganancias.md](reportes-ganancias.md) | Ganancias netas, penalty income, validacion de consistencia, ActiveAdmin financiero, dias cerrados |
+| [features-recientes.md](features-recientes.md) | Multiples servicios, creditos en reserva, banners publicitarios, metas financieras, precios dinamicos, pricing por plan |
 | [env-variables.md](env-variables.md) | Variables de entorno: frontend (4) + backend (25), valores dev/prod, notas de seguridad |
 | [decisiones/](decisiones/) | ADRs (Architecture Decision Records) |
 
