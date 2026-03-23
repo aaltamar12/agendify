@@ -89,6 +89,16 @@ ActiveAdmin.register_page "Documentation" do
         end
       end
 
+      # Onboarding / Testing Guide
+      onboarding_file = docs_base.join("onboarding-testing-guide.md")
+      if File.exist?(onboarding_file)
+        tab "Onboarding & Testing" do
+          div class: "doc-content" do
+            text_node md.render(File.read(onboarding_file)).html_safe
+          end
+        end
+      end
+
       # Desarrollo
       if File.exist?(desarrollo_file)
         tab "Plan de Desarrollo" do

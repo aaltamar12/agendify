@@ -30,6 +30,10 @@
 | [features-recientes.md](features-recientes.md) | Multiples servicios, creditos en reserva, banners publicitarios, metas financieras, precios dinamicos, pricing por plan |
 | [env-variables.md](env-variables.md) | Variables de entorno: frontend (4) + backend (25), valores dev/prod, notas de seguridad |
 | [profesional-independiente.md](profesional-independiente.md) | Profesional independiente: modelo Business con `independent: true`, flujo de creacion, diferencias con negocio regular |
+| [alertas-suscripcion.md](alertas-suscripcion.md) | Alertas de expiracion de suscripcion: job diario, 3 etapas, suspension automatica, banner frontend |
+| [metas-financieras.md](metas-financieras.md) | Metas financieras (Plan Inteligente): tipos de meta, progreso, sugerencias |
+| [banners-publicitarios.md](banners-publicitarios.md) | Banners publicitarios en Explore: modelo, tracking de impresiones/clicks, gestion desde ActiveAdmin |
+| [whatsapp-plan-gating.md](whatsapp-plan-gating.md) | WhatsApp gated por plan: MultiChannelService, canales por plan, WhatsAppChannel stub |
 | [decisiones/](decisiones/) | ADRs (Architecture Decision Records) |
 
 ### Decisiones técnicas (ADRs)
