@@ -4,7 +4,7 @@ class AppointmentSerializer < Blueprinter::Base
   identifier :id
 
   fields :business_id, :employee_id, :service_id, :customer_id,
-         :price, :status, :ticket_code,
+         :price, :original_price, :credits_applied, :status, :ticket_code,
          :notes, :cancellation_reason, :cancelled_by,
          :created_at, :updated_at
 

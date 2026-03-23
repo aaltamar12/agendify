@@ -32,19 +32,32 @@ interface CustomerFormProps {
 }
 
 export function CustomerForm({ slug }: CustomerFormProps) {
-  const { customerInfo, setCustomerInfo, nextStep } = useBookingStore();
+  const { customerInfo, setCustomerInfo, setCreditBalance, nextStep } = useBookingStore();
 
   const [saved, setSaved] = useState<SavedCustomer | null>(null);
   const [mode, setMode] = useState<FormMode>('form');
   const [wasCleared, setWasCleared] = useState(false);
   const [lookupLoading, setLookupLoading] = useState(false);
 
-  // Load saved customer on mount
+  // Load saved customer on mount + fetch credits
   useEffect(() => {
     const data = getSavedCustomer();
     if (data) {
       setSaved(data);
       setMode('saved');
+      // Fetch fresh credit balance
+      if (data.email) {
+        (async () => {
+          try {
+            const res = await get<{ data: { credit_balance?: number } }>(
+              `/api/v1/public/customer_lookup?email=${encodeURIComponent(data.email)}&slug=${encodeURIComponent(slug)}`
+            );
+            setCreditBalance(res.data?.credit_balance ?? 0);
+          } catch {
+            setCreditBalance(0);
+          }
+        })();
+      }
     }
   }, []);
 
@@ -120,11 +133,7 @@ export function CustomerForm({ slug }: CustomerFormProps) {
       // Save to localStorage for next time
       saveCustomer({ name: customer.name, email: customer.email, phone: customer.phone });
       setSaved({ name: customer.name, email: customer.email, phone: customer.phone });
-      // Store credit balance for use in confirmation step
-      if (customer.credit_balance && customer.credit_balance > 0) {
-        const { setCreditBalance } = await import('@/lib/stores/booking-store').then(m => ({ setCreditBalance: m.useBookingStore.getState().setCreditBalance }));
-        setCreditBalance(customer.credit_balance);
-      }
+      setCreditBalance(customer.credit_balance ?? 0);
       setMode('saved');
     } catch {
       // Not found — pre-fill email and show form
