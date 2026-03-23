@@ -460,6 +460,16 @@ function PaymentCard({
           <DollarSign className="h-4 w-4 text-gray-400" />
           <span>{formatCurrency(appointment.price)}</span>
         </div>
+        {Number(appointment.credits_applied) > 0 && (
+          <div className="ml-6 space-y-0.5">
+            <p className="text-xs text-gray-500">
+              Precio original: {formatCurrency(Number(appointment.original_price || 0) + Number(appointment.credits_applied))}
+            </p>
+            <p className="text-xs font-medium text-green-600">
+              Creditos aplicados: -{formatCurrency(Number(appointment.credits_applied))}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Date and time */}
