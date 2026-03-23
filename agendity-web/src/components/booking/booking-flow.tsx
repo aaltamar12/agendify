@@ -5,6 +5,8 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { Button } from '@/components/ui';
 import { useBookingStore } from '@/lib/stores/booking-store';
+import { usePriceCalendar } from '@/lib/hooks/use-public';
+import { getNextDays } from '@/lib/utils/date';
 import { ServiceSelector } from './service-selector';
 import { EmployeeSelector } from './employee-selector';
 import { DateTimePicker } from './date-time-picker';
@@ -46,6 +48,19 @@ export function BookingFlow({
     selectedTime,
   } = useBookingStore();
 
+  // Check if business has any active dynamic pricings using first service
+  const firstService = services.find((s) => s.active);
+  const days = getNextDays(14);
+  const { data: priceCalendarCheck } = usePriceCalendar(
+    slug,
+    firstService?.id ?? 0,
+    days[0],
+    14,
+  );
+  const hasDynamicPricing = (priceCalendarCheck ?? []).some(
+    (d) => d.has_dynamic_pricing,
+  );
+
   // Reset store when component unmounts
   useEffect(() => {
     return () => {
@@ -83,7 +98,7 @@ export function BookingFlow({
 
       {/* Step content */}
       <div className="min-h-[300px]">
-        {currentStep === 1 && <ServiceSelector services={services} />}
+        {currentStep === 1 && <ServiceSelector services={services} hasDynamicPricing={hasDynamicPricing} />}
         {currentStep === 2 && <EmployeeSelector employees={employees} />}
         {currentStep === 3 && <DateTimePicker slug={slug} />}
         {currentStep === 4 && <CustomerForm slug={slug} />}

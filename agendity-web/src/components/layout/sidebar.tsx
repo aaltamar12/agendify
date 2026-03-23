@@ -20,6 +20,7 @@ import {
   Wallet,
   Coins,
   TrendingUp,
+  Target,
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { cn } from '@/lib/utils/cn';
@@ -48,6 +49,7 @@ const navItems: NavItem[] = [
   { href: '/dashboard/credits', label: 'Creditos', icon: Coins },
   { href: '/dashboard/dynamic-pricing', label: 'Tarifas dinamicas', icon: TrendingUp },
   { href: '/dashboard/cash-register', label: 'Cierre de caja', icon: Wallet },
+  { href: '/dashboard/goals', label: 'Metas', icon: Target },
   { href: '/dashboard/reconciliation', label: 'Reconciliacion', icon: Sparkles },
   { href: '/dashboard/reports', label: 'Reportes', icon: BarChart3 },
   { href: '/dashboard/reviews', label: 'Reseñas', icon: Star },

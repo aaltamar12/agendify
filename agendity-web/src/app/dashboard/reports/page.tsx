@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { DollarSign, CalendarDays, Users, Star, TrendingUp, TrendingDown, Wallet, Coins, AlertTriangle, CheckCircle } from 'lucide-react';
+import { DollarSign, CalendarDays, Users, Star, TrendingUp, TrendingDown, Wallet, Coins, AlertTriangle, CheckCircle, Target } from 'lucide-react';
+import Link from 'next/link';
 import { Card, Skeleton } from '@/components/ui';
 import { SummaryCard } from '@/components/reports/summary-card';
 import { RevenueChart } from '@/components/reports/revenue-chart';

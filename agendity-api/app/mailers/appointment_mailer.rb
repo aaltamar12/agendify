@@ -40,6 +40,15 @@ class AppointmentMailer < ApplicationMailer
     @service     = appointment.service
     @employee    = appointment.employee
 
+    # Calculate penalty and credit info for the email
+    @has_paid = %w[payment_sent confirmed checked_in].include?(appointment.status_before_last_save || "")
+    @cancelled_by_customer = appointment.cancelled_by == "customer"
+    policy_pct = @business.cancellation_policy_pct || 0
+    @penalty_amount = (appointment.price * policy_pct / 100.0).round(0)
+    @refund_amount = (appointment.price - @penalty_amount).round(0)
+    plan = @business.current_plan
+    @refund_as_credit = plan&.cashback_enabled? || false
+
     recipients = [@business.owner.email]
     recipients << @customer.email if @customer.email.present?
 

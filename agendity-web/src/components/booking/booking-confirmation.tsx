@@ -490,6 +490,21 @@ export function BookingConfirmation({
         </Card>
       )}
 
+      {/* Total a pagar — always visible */}
+      {selectedServices.length > 0 && (
+        <div className="rounded-xl bg-violet-50 border border-violet-200 px-5 py-4 flex items-center justify-between">
+          <p className="text-base font-semibold text-violet-900">Total a pagar</p>
+          <p className="text-xl font-bold text-violet-700">
+            {formatCurrency(
+              dynamicPricing?.has_dynamic_pricing && dynamicPricing.adjustment_pct !== 0
+                ? dynamicPricing.adjusted_price +
+                  selectedServices.slice(1).reduce((sum, s) => sum + Number(s.price), 0)
+                : selectedServices.reduce((sum, s) => sum + Number(s.price), 0)
+            )}
+          </p>
+        </div>
+      )}
+
       {bookMutation.isError && (
         <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
           Ocurrió un error al realizar la reserva. Intenta de nuevo.

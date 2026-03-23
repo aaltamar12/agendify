@@ -5,7 +5,11 @@ import type { ApiResponse } from '@/lib/api/types';
 
 interface Discrepancy {
   id: number;
-  name: string;
+  employee_id?: number;
+  employee_name?: string;
+  customer_name?: string;
+  credit_account_id?: number;
+  name?: string;
   expected: number;
   actual: number;
   difference: number;

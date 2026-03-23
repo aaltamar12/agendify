@@ -141,6 +141,10 @@ export const PLAN_FEATURE_LOCKS: Record<string, { requiredPlans: PlanSlug[]; too
     requiredPlans: ['inteligente'],
     tooltip: 'Disponible en Plan Inteligente',
   },
+  '/dashboard/goals': {
+    requiredPlans: ['inteligente'],
+    tooltip: 'Disponible en Plan Inteligente',
+  },
 };
 
 // Advanced reports lock (Básico gets basic reports, but advanced are locked)

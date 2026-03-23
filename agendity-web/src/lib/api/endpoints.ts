@@ -79,6 +79,14 @@ export const ENDPOINTS = {
     history: (id: number) => `${BASE}/employees/${id}/balance_history`,
   },
 
+  GOALS: {
+    list: `${BASE}/goals`,
+    create: `${BASE}/goals`,
+    update: (id: number) => `${BASE}/goals/${id}`,
+    delete: (id: number) => `${BASE}/goals/${id}`,
+    progress: `${BASE}/goals/progress`,
+  },
+
   DYNAMIC_PRICING: {
     list: `${BASE}/dynamic_pricing`,
     create: `${BASE}/dynamic_pricing`,

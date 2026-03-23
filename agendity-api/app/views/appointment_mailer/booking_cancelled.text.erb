@@ -12,5 +12,18 @@ Precio: $<%= @appointment.price.to_i %> COP
 <% if @appointment.cancellation_reason.present? %>
 Motivo: <%= @appointment.cancellation_reason %>
 <% end %>
+<% if @has_paid && @cancelled_by_customer %>
+<% if @penalty_amount > 0 %>
+PENALIZACION: <%= @business.cancellation_policy_pct %>% ($<%= @penalty_amount %> COP)
+<% end %>
+<% if @refund_as_credit && @refund_amount > 0 %>
+CREDITO DISPONIBLE: $<%= @refund_amount %> COP para tu proxima reserva en <%= @business.name %>.
+<% end %>
 
+Para solicitar devolucion de dinero, contacta al negocio:
+<% if @business.phone.present? %>Telefono: <%= @business.phone %><% end %>
+<% if @business.email.present? %>Email: <%= @business.email %><% end %>
+<% if @business.address.present? %>Direccion: <%= @business.address %>, <%= @business.city %><% end %>
+<% else %>
 Si tienes preguntas, contacta al negocio directamente.
+<% end %>

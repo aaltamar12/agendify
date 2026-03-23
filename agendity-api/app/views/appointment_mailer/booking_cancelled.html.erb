@@ -17,7 +17,7 @@
   </tr>
   <tr>
     <td>Fecha</td>
-    <td><%= I18n.l(@appointment.appointment_date, format: :long, locale: :es) rescue @appointment.appointment_date.strftime("%d/%m/%Y") %></td>
+    <td><%= (I18n.l(@appointment.appointment_date, format: :long, locale: :es) rescue @appointment.appointment_date.strftime("%d/%m/%Y")) %></td>
   </tr>
   <tr>
     <td>Hora</td>
@@ -33,4 +33,35 @@
   <p><strong>Motivo:</strong> <%= @appointment.cancellation_reason %></p>
 <% end %>
 
-<p>Si tienes preguntas, contacta al negocio directamente.</p>
+<% if @has_paid && @cancelled_by_customer %>
+  <div style="background-color: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 16px; margin: 16px 0;">
+    <% if @penalty_amount > 0 %>
+      <p style="margin: 0 0 8px 0; font-weight: 600; color: #92400e;">
+        Se aplico una penalizacion del <%= @business.cancellation_policy_pct %>% ($<%= number_with_delimiter(@penalty_amount) %> COP)
+      </p>
+    <% end %>
+
+    <% if @refund_as_credit && @refund_amount > 0 %>
+      <p style="margin: 0 0 8px 0; color: #1e40af;">
+        <strong>Tu credito de $<%= number_with_delimiter(@refund_amount) %> COP esta disponible</strong> para tu proxima reserva en <%= @business.name %>.
+      </p>
+    <% end %>
+
+    <p style="margin: 0; font-size: 14px; color: #6b7280;">
+      Si necesitas la devolucion de tu dinero en efectivo o transferencia, contacta directamente al negocio:
+    </p>
+    <table style="margin-top: 8px; font-size: 14px;">
+      <% if @business.phone.present? %>
+        <tr><td style="padding: 2px 8px 2px 0; color: #6b7280;">Telefono:</td><td><strong><%= @business.phone %></strong></td></tr>
+      <% end %>
+      <% if @business.email.present? %>
+        <tr><td style="padding: 2px 8px 2px 0; color: #6b7280;">Email:</td><td><strong><%= @business.email %></strong></td></tr>
+      <% end %>
+      <% if @business.address.present? %>
+        <tr><td style="padding: 2px 8px 2px 0; color: #6b7280;">Direccion:</td><td><strong><%= @business.address %>, <%= @business.city %></strong></td></tr>
+      <% end %>
+    </table>
+  </div>
+<% else %>
+  <p>Si tienes preguntas, contacta al negocio directamente.</p>
+<% end %>

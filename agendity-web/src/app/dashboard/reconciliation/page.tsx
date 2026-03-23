@@ -87,7 +87,7 @@ function ReconciliationContent() {
               <DiscrepancyTable
                 items={result.cash_register.discrepancies}
                 type="employee"
-                onAdjust={(d) => setAdjustModal({ id: d.id, name: d.name })}
+                onAdjust={(d) => setAdjustModal({ id: d.employee_id || d.id, name: d.employee_name || d.name || '—' })}
               />
             )}
           </Card>
@@ -164,8 +164,8 @@ function DiscrepancyTable({ items, type, onAdjust }: { items: Discrepancy[]; typ
         </thead>
         <tbody>
           {items.map((d, idx) => (
-            <tr key={d.id || `${d.name}-${idx}`} className="border-b border-gray-100">
-              <td className="py-2 font-medium text-gray-900">{d.name}</td>
+            <tr key={d.id || d.employee_id || d.credit_account_id || idx} className="border-b border-gray-100">
+              <td className="py-2 font-medium text-gray-900">{d.employee_name || d.customer_name || d.name || '—'}</td>
               <td className="py-2 text-right text-gray-600">${d.expected.toLocaleString()}</td>
               <td className="py-2 text-right text-gray-600">${d.actual.toLocaleString()}</td>
               <td className={`py-2 text-right font-bold ${d.difference > 0 ? 'text-red-600' : 'text-green-600'}`}>

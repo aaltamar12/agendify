@@ -321,6 +321,18 @@ export default function TicketPage() {
           </div>
         </div>
 
+        {appointment.price > 0 && (
+          <div className="flex items-center gap-3">
+            <CreditCard className="h-4 w-4 shrink-0 text-violet-400" />
+            <div>
+              <p className="text-xs text-gray-500">Total a pagar</p>
+              <p className="text-sm font-bold text-violet-400">
+                {formatCurrency(appointment.price)}
+              </p>
+            </div>
+          </div>
+        )}
+
         {business.address && (
           <div className="flex items-center gap-3">
             <MapPin className="h-4 w-4 shrink-0 text-violet-400" />
@@ -900,6 +912,18 @@ export default function TicketPage() {
                 </p>
               </div>
             </div>
+
+            {appointment.price > 0 && (
+              <div className="flex items-center gap-3">
+                <CreditCard className="h-4 w-4 shrink-0 text-violet-600" />
+                <div>
+                  <p className="text-xs text-gray-500">Total a pagar</p>
+                  <p className="text-sm font-bold text-violet-600">
+                    {formatCurrency(appointment.price)}
+                  </p>
+                </div>
+              </div>
+            )}
 
             {business.address && (
               <div className="flex items-center gap-3">
