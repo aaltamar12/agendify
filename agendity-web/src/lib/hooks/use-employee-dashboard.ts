@@ -58,6 +58,15 @@ export function useEmployeeCheckin() {
   });
 }
 
+export function useEmployeeCheckinByCode() {
+  return useMutation({
+    mutationFn: (ticketCode: string) =>
+      post<ApiResponse<Appointment>>(ENDPOINTS.EMPLOYEE_PORTAL.checkinByCode, {
+        ticket_code: ticketCode,
+      }),
+  });
+}
+
 export function useInvitationDetails(token: string) {
   return useQuery({
     queryKey: ['invitation', token],

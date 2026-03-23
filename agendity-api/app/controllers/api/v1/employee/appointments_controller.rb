@@ -15,6 +15,32 @@ module Api
           render_success(AppointmentSerializer.render_as_hash(appointments, view: :detailed))
         end
 
+        # POST /api/v1/employee/checkin_by_code
+        def checkin_by_code
+          appointment = current_employee.business.appointments
+            .includes(:service, :employee, :customer)
+            .find_by!(ticket_code: params[:ticket_code])
+
+          result = Appointments::CheckinService.call(
+            appointment: appointment,
+            actor: current_user,
+            confirmed: params[:confirmed] == true || params[:confirmed] == "true",
+            substitute_reason: params[:substitute_reason]
+          )
+
+          if result.success?
+            render_success(AppointmentSerializer.render_as_hash(result.data, view: :detailed))
+          elsif result.data.is_a?(Hash) && result.data[:requires_confirmation]
+            render json: {
+              error: result.error,
+              requires_confirmation: true,
+              assigned_employee: result.data[:assigned_employee]
+            }, status: :conflict
+          else
+            render_error(result.error, status: :unprocessable_entity)
+          end
+        end
+
         # POST /api/v1/employee/appointments/:id/checkin
         def checkin
           appointment = current_employee.business.appointments

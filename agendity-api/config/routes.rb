@@ -136,6 +136,7 @@ Rails.application.routes.draw do
         resources :appointments, only: [:index] do
           post :checkin, on: :member
         end
+        post :checkin_by_code, to: "appointments#checkin_by_code"
       end
 
       # Cash register

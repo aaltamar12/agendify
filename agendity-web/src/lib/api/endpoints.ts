@@ -139,6 +139,7 @@ export const ENDPOINTS = {
     score: `${BASE}/employee/score`,
     appointments: `${BASE}/employee/appointments`,
     checkin: (id: number) => `${BASE}/employee/appointments/${id}/checkin`,
+    checkinByCode: `${BASE}/employee/checkin_by_code`,
   },
 
   REPORTS: {

@@ -4,14 +4,14 @@ import { useState } from 'react';
 import { ScanLine, Check, AlertTriangle, Camera, Keyboard } from 'lucide-react';
 import { Button, Card, Input } from '@/components/ui';
 import { QrScanner } from '@/components/shared/qr-scanner';
-import { useCheckinByCode } from '@/lib/hooks/use-appointments';
+import { useEmployeeCheckinByCode } from '@/lib/hooks/use-employee-dashboard';
 import { useUIStore } from '@/lib/stores/ui-store';
 
 export default function EmployeeCheckinPage() {
   const [ticketCode, setTicketCode] = useState('');
   const [showScanner, setShowScanner] = useState(false);
   const [checkinResult, setCheckinResult] = useState<{ success: boolean; message: string; details?: string } | null>(null);
-  const checkinMutation = useCheckinByCode();
+  const checkinMutation = useEmployeeCheckinByCode();
   const { addToast } = useUIStore();
 
   const handleCheckin = async (code?: string) => {

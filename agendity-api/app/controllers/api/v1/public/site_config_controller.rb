@@ -6,7 +6,7 @@ module Api
       # Returns public platform configuration (contact info, payment data).
       # No authentication required.
       class SiteConfigController < BaseController
-        skip_before_action :authenticate_user!, raise: false
+        skip_before_action :authenticate_user!
         skip_before_action :render_empty_for_admin_without_business!
 
         # GET /api/v1/public/site_config

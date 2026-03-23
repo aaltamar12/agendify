@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "rqrcode"
+
 # Generates QR code PNG binary for use in emails and other contexts.
 module QrCodeHelper
   # Generate a QR code PNG as binary string.
