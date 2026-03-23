@@ -1382,6 +1382,72 @@ end
   end
 end
 
+# --- Historical appointments for Studio 70 (12 months) ---
+puts "  📈 Generating 12-month historical data for Studio 70..."
+
+s70_employees = studio_70.employees.active.to_a
+s70_services = studio_70.services.to_a
+s70_customers = mde_customers
+s70_historical = 0
+
+12.downto(1) do |months_ago|
+  month_start = months_ago.months.ago.beginning_of_month.to_date
+  month_end = [month_start.end_of_month.to_date, Date.current - 1].min
+  next if month_end < month_start
+
+  month_num = month_start.month
+  base_per_day = case month_num
+                 when 12 then 20      # December: high season
+                 when 1  then 4       # January: very low
+                 when 2  then 5       # February: recovering
+                 when 10, 11 then 9   # Oct-Nov: pre-holiday
+                 when 6, 7 then 4     # Mid-year: low
+                 else 7               # Normal
+                 end
+
+  (month_start..month_end).each do |date|
+    dow = date.wday
+    daily_volume = case dow
+                   when 0 then (base_per_day * 1.2).round
+                   when 5 then (base_per_day * 1.5).round
+                   when 6 then (base_per_day * 1.8).round
+                   else base_per_day
+                   end
+    daily_volume = (daily_volume * rand(0.8..1.2)).round
+    daily_volume = [daily_volume, 1].max
+
+    daily_volume.times do |i|
+      employee = s70_employees[i % s70_employees.size]
+      service = s70_services.sample
+      customer = s70_customers.sample
+      next unless employee && service && customer
+
+      slot_offset = (i / s70_employees.size)
+      hour = 9 + (slot_offset * (service.duration_minutes / 60.0)).floor
+      hour = [hour, 18].min
+      minute = (slot_offset * service.duration_minutes % 60).to_i
+      minute = minute < 30 ? 0 : 30
+      start_time = format("%02d:%02d", hour, minute)
+      next if Appointment.exists?(employee: employee, appointment_date: date, start_time: start_time)
+
+      seed_appointment!(
+        employee: employee,
+        appointment_date: date,
+        start_time: start_time,
+        end_time: format("%02d:%02d", hour + (service.duration_minutes / 60.0).ceil, minute),
+        business: studio_70,
+        service: service,
+        customer: customer,
+        status: :completed,
+        price: service.price
+      )
+      s70_historical += 1
+    end
+  end
+end
+
+puts "  ✅ #{s70_historical} historical appointments for Studio 70"
+
 Subscription.find_or_create_by!(business: studio_70, plan: plan_inteligente, status: :active) do |s|
   s.start_date = Date.current
   s.end_date = Date.current + 30.days
@@ -1389,59 +1455,16 @@ end
 
 puts "  ✅ Studio 70 fully seeded (Medellín, #{studio_70.appointments.count} appointments)"
 
-# --- AI Suggestions for Studio 70 (Plan Inteligente demo) ---
-puts "  🤖 Creating AI pricing suggestions for Studio 70..."
-
-DynamicPricing.find_or_create_by!(business: studio_70, name: "Temporada alta — Diciembre") do |dp|
-  dp.service = nil
-  dp.start_date = Date.new(Date.current.year, 12, 1)
-  dp.end_date = Date.new(Date.current.year, 12, 31)
-  dp.price_adjustment_type = :percentage
-  dp.adjustment_mode = :progressive_asc
-  dp.adjustment_start_value = 10
-  dp.adjustment_end_value = 25
-  dp.days_of_week = []
-  dp.status = :suggested
-  dp.suggested_by = "system"
-  dp.suggestion_reason = "Diciembre historicamente tiene 52% mas demanda que el promedio mensual. " \
-                         "Sugerimos un incremento progresivo del 10% al 25% a lo largo del mes " \
-                         "para maximizar ingresos sin perder clientes al inicio."
-  dp.analysis_data = { december_appointments: 78, monthly_avg: 51.3, pct_over: 52 }
+# --- AI Suggestions generated from real data ---
+puts "  🤖 Generating AI pricing suggestions for Studio 70..."
+DynamicPricing.where(business: studio_70, status: :suggested).destroy_all
+ai_result = Intelligence::DemandAnalysisService.call(business: studio_70)
+if ai_result.success?
+  puts "  ✅ #{ai_result.data.size} AI pricing suggestions generated for Studio 70"
+  ai_result.data.each { |s| puts "     - #{s.name}: #{s.suggestion_reason[0..80]}..." }
+else
+  puts "  ⚠️  AI analysis failed: #{ai_result.error}"
 end
-
-DynamicPricing.find_or_create_by!(business: studio_70, name: "Premium fin de semana") do |dp|
-  dp.service = nil
-  dp.start_date = Date.current
-  dp.end_date = Date.current + 90.days
-  dp.price_adjustment_type = :percentage
-  dp.adjustment_mode = :fixed_mode
-  dp.adjustment_value = 15
-  dp.days_of_week = [6, 0]
-  dp.status = :suggested
-  dp.suggested_by = "system"
-  dp.suggestion_reason = "Los sabados y domingos tienes 38% mas citas que entre semana. " \
-                         "Puedes aprovechar la alta demanda con una tarifa premium de +15% " \
-                         "para estos dias sin afectar tu flujo entre semana."
-  dp.analysis_data = { weekday_avg: 12.4, weekend_avg: 17.1, pct_diff: 38 }
-end
-
-DynamicPricing.find_or_create_by!(business: studio_70, name: "Descuento martes y miercoles") do |dp|
-  dp.service = nil
-  dp.start_date = Date.current
-  dp.end_date = Date.current + 60.days
-  dp.price_adjustment_type = :percentage
-  dp.adjustment_mode = :fixed_mode
-  dp.adjustment_value = -10
-  dp.days_of_week = [2, 3]
-  dp.status = :suggested
-  dp.suggested_by = "system"
-  dp.suggestion_reason = "Los martes y miercoles son tus dias con menor ocupacion (45%). " \
-                         "Un descuento del 10% podria atraer mas clientes en estos dias " \
-                         "y equilibrar tu carga de trabajo durante la semana."
-  dp.analysis_data = { tuesday_occupancy: 0.42, wednesday_occupancy: 0.48, avg_occupancy: 0.68 }
-end
-
-puts "  ✅ 3 AI pricing suggestions created for Studio 70"
 
 # --- Reconciliation discrepancies for Studio 70 (Plan Inteligente) ---
 puts "  ⚠️  Creating reconciliation discrepancies for Studio 70..."
