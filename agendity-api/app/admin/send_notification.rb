@@ -3,7 +3,7 @@
 ActiveAdmin.register_page "Send Notification" do
   menu priority: 12, label: "Enviar Notificacion"
 
-  NOTIFICATION_TYPES = %w[new_booking payment_submitted payment_approved booking_cancelled reminder ai_suggestion].freeze
+  NOTIFICATION_TYPES = %w[new_booking payment_submitted payment_approved booking_cancelled reminder ai_suggestion subscription_expiry].freeze
 
   content title: "Enviar Notificacion" do
     businesses = Business.order(:name).pluck(:name, :id)

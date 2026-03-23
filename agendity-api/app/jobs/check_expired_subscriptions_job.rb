@@ -29,16 +29,8 @@ class CheckExpiredSubscriptionsJob < ApplicationJob
 
   private
 
-  def extend_subscription(subscription, paid_order)
-    subscription.update!(end_date: subscription.end_date + 1.month)
-
-    ActivityLog.log(
-      business: subscription.business,
-      action: "subscription_renewed",
-      description: "Suscripción renovada hasta #{subscription.end_date.strftime('%d/%m/%Y')}",
-      actor_type: "system",
-      resource: subscription
-    )
+  def extend_subscription(subscription, _paid_order)
+    subscription.process_renewal!(new_end_date: subscription.end_date + 1.month)
   end
 
   def downgrade_to_basic(subscription)

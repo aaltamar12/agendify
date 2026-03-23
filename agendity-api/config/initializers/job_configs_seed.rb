@@ -13,6 +13,7 @@ Rails.application.config.after_initialize do
     { job_class: "CheckExpiredSubscriptionsJob", name: "Suscripciones vencidas", description: "Marca suscripciones vencidas.", schedule: "Diario a las 12:05am" },
     { job_class: "SendSubscriptionReminderJob", name: "Recordatorio suscripcion", description: "Recuerda pago a negocios.", schedule: "Diario a las 9am" },
     { job_class: "CleanupOldRequestLogsJob", name: "Limpieza request logs", description: "Elimina logs antiguos.", schedule: "Domingos a las 4am" },
+    { job_class: "SubscriptionExpiryAlertJob", name: "Alertas de expiracion", description: "Envia alertas de suscripcion por vencer (5 dias, dia de, 2 dias despues + suspension).", schedule: "Diario a las 8am" },
     { job_class: "Intelligence::PricingSuggestionJob", name: "Sugerencias IA", description: "Analiza demanda y sugiere tarifas dinamicas (Plan Inteligente).", schedule: "1ro y 15 de cada mes" },
   ].each do |attrs|
     JobConfig.find_or_create_by!(job_class: attrs[:job_class]) do |jc|

@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -19,6 +20,14 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 export default function EmployeeRegisterPage() {
+  return (
+    <Suspense>
+      <EmployeeRegisterForm />
+    </Suspense>
+  );
+}
+
+function EmployeeRegisterForm() {
   const searchParams = useSearchParams();
   const token = searchParams.get('token') || '';
   const router = useRouter();

@@ -17,6 +17,7 @@ import { useCurrentSubscription } from '@/lib/hooks/use-subscription';
 import { useUIStore } from '@/lib/stores/ui-store';
 import { ADVANCED_REPORTS_PLANS, AI_FEATURES_PLANS } from '@/lib/constants';
 import type { DynamicPricingPayload } from '@/lib/hooks/use-dynamic-pricing';
+import type { DayOfWeek } from '@/lib/api/types';
 
 const DAY_LABELS = ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'];
 
@@ -389,7 +390,7 @@ function CreatePricingModal({ onClose }: { onClose: () => void }) {
           <p className="mb-2 text-xs text-gray-400">Vacio = todos los dias laborales. Dias cerrados deshabilitados.</p>
           <div className="flex gap-1.5">
             {DAY_LABELS.map((label, i) => {
-              const isClosed = !openDays.includes(i);
+              const isClosed = !openDays.includes(i as DayOfWeek);
               return (
               <button
                 key={i}

@@ -1,0 +1,24 @@
+<h2>Hola, <%= @business.name %></h2>
+
+<p><strong>Tu suscripción al plan <%= @plan_name %> vence hoy.</strong></p>
+
+<p>Si no renuevas tu suscripción, tu cuenta será <strong>suspendida en 2 días</strong> y no podrás acceder a las funcionalidades de tu negocio en Agendity.</p>
+
+<table class="detail-table">
+  <tr>
+    <td>Plan actual</td>
+    <td><%= @plan_name %></td>
+  </tr>
+  <tr>
+    <td>Fecha de vencimiento</td>
+    <td><%= @end_date.strftime('%d/%m/%Y') %> (hoy)</td>
+  </tr>
+  <tr>
+    <td>Suspensión</td>
+    <td><%= (@end_date + 2.days).strftime('%d/%m/%Y') %></td>
+  </tr>
+</table>
+
+<p>Renueva ahora para evitar interrupciones en tu servicio.</p>
+
+<p>— El equipo de Agendity</p>

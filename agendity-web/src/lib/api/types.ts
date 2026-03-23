@@ -74,6 +74,7 @@ export interface Business {
   longitude: number | null;
   logo_url: string | null;
   cover_url: string | null;
+  cover_source: string | null;
   primary_color: string;
   secondary_color: string;
   currency: string;
@@ -96,6 +97,9 @@ export interface Business {
   nequi_phone: string | null;
   daviplata_phone: string | null;
   bancolombia_account: string | null;
+  cashback_enabled?: boolean;
+  cashback_percentage?: number;
+  cancellation_refund_as_credit?: boolean;
   owner_id: number;
   created_at: string;
   updated_at: string;
@@ -125,9 +129,13 @@ export interface Employee {
   bio: string | null;
   active: boolean;
   commission_percentage: number | null;
-  document_number: string | null;
-  document_type: string | null;
-  fiscal_address: string | null;
+  document_number?: string | null;
+  document_type?: string | null;
+  fiscal_address?: string | null;
+  has_account?: boolean;
+  pending_balance?: number;
+  score?: number | null;
+  rating_avg?: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -176,6 +184,7 @@ export interface Appointment {
   service_id: number;
   customer_id: number;
   date: string;
+  appointment_date?: string;
   start_time: string;
   end_time: string;
   status: AppointmentStatus;
@@ -186,11 +195,18 @@ export interface Appointment {
   ticket_code: string | null;
   created_at: string;
   updated_at: string;
+  original_price?: number;
+  credits_applied?: number;
+  dynamic_pricing_id?: number | null;
+  checked_in_by_type?: string | null;
+  checked_in_by_id?: number | null;
+  checkin_substitute?: boolean;
   // Expanded relations (optional, included via serializer)
   employee?: Employee;
   service?: Service;
   customer?: Customer;
   payment?: Payment;
+  appointment_services?: AppointmentService[];
 }
 
 export interface Payment {
@@ -207,6 +223,18 @@ export interface Payment {
   rejection_reason: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface AppointmentService {
+  id: number;
+  appointment_id?: number;
+  service_id: number;
+  employee_id?: number;
+  service_name?: string;
+  price: number;
+  duration_minutes?: number;
+  service?: Service;
+  employee?: Employee;
 }
 
 export interface Review {
@@ -277,13 +305,13 @@ export interface Plan {
   slug: string;
   description: string | null;
   price_monthly: number;
-  price_monthly_usd: number | null;
-  price_yearly: number;
-  currency: string;
-  max_employees: number;
-  max_services: number;
-  features: string[];
-  active: boolean;
+  price_monthly_usd?: number | null;
+  price_yearly?: number;
+  currency?: string;
+  max_employees?: number;
+  max_services?: number;
+  features?: string[];
+  active?: boolean;
   created_at: string;
   updated_at: string;
 }

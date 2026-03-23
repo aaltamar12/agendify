@@ -49,6 +49,11 @@ production:
     queue: default
     schedule: every 15 minutes
 
+  subscription_expiry_alerts:
+    class: SubscriptionExpiryAlertJob
+    queue: default
+    schedule: every day at 8am
+
   cleanup_request_logs:
     class: CleanupOldRequestLogsJob
     queue: low

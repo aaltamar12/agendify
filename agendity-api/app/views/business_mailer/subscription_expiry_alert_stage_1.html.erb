@@ -1,0 +1,20 @@
+<h2>Hola, <%= @business.name %></h2>
+
+<p>Te escribimos para recordarte que tu suscripción al plan <strong><%= @plan_name %></strong> vence el <strong><%= @end_date.strftime('%d/%m/%Y') %></strong> (en 5 días).</p>
+
+<p>Para seguir disfrutando de todas las funcionalidades de tu plan, te recomendamos renovar tu suscripción antes de esa fecha.</p>
+
+<table class="detail-table">
+  <tr>
+    <td>Plan actual</td>
+    <td><%= @plan_name %></td>
+  </tr>
+  <tr>
+    <td>Fecha de vencimiento</td>
+    <td><%= @end_date.strftime('%d/%m/%Y') %></td>
+  </tr>
+</table>
+
+<p>Si tienes alguna pregunta sobre tu suscripción, no dudes en contactarnos.</p>
+
+<p>— El equipo de Agendity</p>

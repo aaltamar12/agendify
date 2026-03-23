@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
@@ -9,6 +10,14 @@ import { resetPasswordSchema, type ResetPasswordFormData } from '@/lib/validatio
 import { useResetPassword } from '@/lib/hooks/use-auth';
 
 export default function ResetPasswordPage() {
+  return (
+    <Suspense>
+      <ResetPasswordForm />
+    </Suspense>
+  );
+}
+
+function ResetPasswordForm() {
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
 

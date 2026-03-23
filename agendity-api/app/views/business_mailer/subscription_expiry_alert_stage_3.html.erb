@@ -1,0 +1,16 @@
+<h2>Hola, <%= @business.name %></h2>
+
+<p><strong>Tu cuenta en Agendity ha sido suspendida.</strong></p>
+
+<p>Tu suscripción al plan <strong><%= @plan_name %></strong> venció el <strong><%= @end_date.strftime('%d/%m/%Y') %></strong> y el período de gracia de 2 días ha terminado.</p>
+
+<p>Mientras tu cuenta esté suspendida:</p>
+<ul>
+  <li>Tus clientes no podrán hacer nuevas reservas</li>
+  <li>No tendrás acceso al panel de administración</li>
+  <li>Tus datos se mantienen seguros y no serán eliminados</li>
+</ul>
+
+<p><strong>Para reactivar tu cuenta, contacta al equipo de Agendity para renovar tu suscripción.</strong></p>
+
+<p>— El equipo de Agendity</p>

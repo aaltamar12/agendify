@@ -36,7 +36,7 @@ const employeeFormSchema = z.object({
     .optional()
     .or(z.literal('')),
   active: z.boolean(),
-  commission_percentage: z.coerce.number().min(0).max(100).optional(),
+  commission_percentage: z.coerce.number().min(0).max(100).optional().default(0),
   service_ids: z.array(z.number()),
   schedules: z.array(scheduleEntrySchema),
 });
@@ -95,7 +95,7 @@ export function EmployeeForm({ employee, onSubmit, loading }: EmployeeFormProps)
     watch,
     control,
   } = useForm<EmployeeFormData>({
-    resolver: zodResolver(employeeFormSchema),
+    resolver: zodResolver(employeeFormSchema) as any,
     defaultValues: {
       name: employee?.name ?? '',
       phone: employee?.phone ?? '',

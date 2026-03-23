@@ -128,8 +128,8 @@ function ReconciliationContent() {
                   className="cursor-pointer rounded-lg border border-gray-200 px-3 py-2 text-sm hover:border-violet-300 hover:bg-violet-50"
                 >
                   {emp.name}
-                  {emp.pending_balance > 0 && (
-                    <span className="ml-2 text-xs text-orange-600">${Number(emp.pending_balance).toLocaleString()}</span>
+                  {(emp.pending_balance ?? 0) > 0 && (
+                    <span className="ml-2 text-xs text-orange-600">${Number(emp.pending_balance ?? 0).toLocaleString()}</span>
                   )}
                 </button>
               ))}

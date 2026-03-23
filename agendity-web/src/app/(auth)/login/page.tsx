@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
@@ -9,6 +10,14 @@ import { loginSchema, type LoginFormData } from '@/lib/validations/auth';
 import { useLogin } from '@/lib/hooks/use-auth';
 
 export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
+  );
+}
+
+function LoginForm() {
   const searchParams = useSearchParams();
   const resetSuccess = searchParams.get('reset') === 'success';
 

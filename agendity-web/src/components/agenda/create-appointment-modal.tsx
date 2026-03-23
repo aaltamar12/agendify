@@ -12,7 +12,7 @@ import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { get } from '@/lib/api/client';
 import { ENDPOINTS } from '@/lib/api/endpoints';
-import type { ApiResponse, Service, Employee, Customer } from '@/lib/api/types';
+import type { ApiResponse, Service, Employee, Customer, DayOfWeek } from '@/lib/api/types';
 import {
   createAppointmentSchema,
   type CreateAppointmentFormData,
@@ -359,7 +359,7 @@ export function CreateAppointmentModal({
                 validate: (value) => {
                   if (!value) return 'La fecha es requerida';
                   const date = new Date(value + 'T00:00:00');
-                  if (closedDays.includes(date.getDay())) {
+                  if (closedDays.includes(date.getDay() as DayOfWeek)) {
                     return 'El negocio no opera este dia';
                   }
                   return true;

@@ -8,6 +8,17 @@ ActiveAdmin.register Subscription do
   # -- Eager loading --
   includes :business, :plan
 
+  # -- Custom Actions --
+  action_item :renew, only: :show do
+    link_to "Renovar suscripción", renew_admin_subscription_path(resource), method: :put,
+      data: { confirm: "¿Renovar esta suscripción por 1 mes más?" }
+  end
+
+  member_action :renew, method: :put do
+    resource.process_renewal!
+    redirect_to admin_subscription_path(resource), notice: "Suscripción renovada hasta #{resource.end_date.strftime('%d/%m/%Y')}."
+  end
+
   # -- Index --
   index do
     selectable_column

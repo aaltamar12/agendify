@@ -1809,6 +1809,15 @@ notification_events = [
     sound_enabled: false,
     in_app_notification: true,
     active: true
+  },
+  {
+    event_key: "subscription_expiry",
+    title: "Alerta de suscripción",
+    body_template: "Tu suscripción requiere atención",
+    browser_notification: true,
+    sound_enabled: true,
+    in_app_notification: true,
+    active: true
   }
 ]
 

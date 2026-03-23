@@ -43,7 +43,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       const businesses: { slug: string; updated_at: string }[] = json.data ?? [];
       businessPages = businesses.map((b) => ({
         url: `${SITE_URL}/${b.slug}`,
-        lastModified: new Date(b.updated_at),
+        lastModified: b.updated_at ? new Date(b.updated_at) : new Date(),
         changeFrequency: 'weekly' as const,
         priority: 0.7,
       }));
