@@ -4,8 +4,10 @@ module Intelligence
   # Analyzes historical appointment data to detect demand patterns
   # and generate dynamic pricing suggestions. Uses pure SQL queries.
   class DemandAnalysisService < BaseService
-    HIGH_DEMAND_THRESHOLD = 0.7  # 70% occupancy = high demand
-    WEEKEND_DIFF_THRESHOLD = 1.3 # 30% more on weekends
+    HIGH_DEMAND_THRESHOLD = 0.7   # 70% occupancy = high demand
+    LOW_DEMAND_THRESHOLD = 0.5    # 50% below average = low demand month
+    ABOVE_AVG_THRESHOLD = 1.3     # 30% above average = above-average month
+    WEEKEND_DIFF_THRESHOLD = 1.3  # 30% more on weekends
 
     def initialize(business:)
       @business = business
@@ -14,6 +16,7 @@ module Intelligence
     def call
       suggestions = []
       suggestions += analyze_monthly_patterns
+      suggestions += analyze_relative_demand
       suggestions += analyze_day_of_week_patterns
       suggestions += analyze_seasonal_patterns
       suggestions = filter_existing(suggestions)
@@ -53,6 +56,61 @@ module Intelligence
                   "Sugerimos aumentar tarifas un #{adj}% para maximizar ingresos.",
           analysis: { month: month_int, occupancy: occupancy.round(2), appointments: count, capacity: capacity }
         }
+      end
+      suggestions
+    end
+
+    # Detect months significantly below or above average (relative to the business's own data)
+    def analyze_relative_demand
+      monthly_data = @business.appointments
+        .where("appointment_date >= ?", 12.months.ago)
+        .where.not(status: :cancelled)
+        .group("EXTRACT(MONTH FROM appointment_date)")
+        .count
+
+      return [] if monthly_data.size < 3
+
+      avg = monthly_data.values.sum / monthly_data.size.to_f
+      return [] if avg.zero?
+
+      suggestions = []
+      monthly_data.each do |month, count|
+        month_int = month.to_i
+        ratio = count / avg
+        month_name = Date::MONTHNAMES[month_int] || "Mes #{month_int}"
+        target_year = month_int >= Date.current.month ? Date.current.year : Date.current.year + 1
+
+        if ratio <= LOW_DEMAND_THRESHOLD
+          # Low demand month — suggest discount to attract clients
+          pct_below = ((1 - ratio) * 100).round(0)
+          discount = [pct_below / 3, 20].min.clamp(5, 20)
+
+          suggestions << {
+            name: "Promocion — #{month_name}",
+            start_date: Date.new(target_year, month_int, 1),
+            end_date: Date.new(target_year, month_int, -1),
+            adjustment_mode: :fixed_mode,
+            adjustment_value: -discount,
+            reason: "#{month_name} tiene #{pct_below}% menos citas que el promedio. " \
+                    "Sugerimos un descuento del #{discount}% para atraer mas clientes en este periodo.",
+            analysis: { month: month_int, appointments: count, average: avg.round(1), pct_below: pct_below }
+          }
+        elsif ratio >= ABOVE_AVG_THRESHOLD
+          # Above-average month — suggest moderate increase
+          pct_above = ((ratio - 1) * 100).round(0)
+          increase = [pct_above / 3, 15].min.clamp(5, 15)
+
+          suggestions << {
+            name: "Alta demanda — #{month_name}",
+            start_date: Date.new(target_year, month_int, 1),
+            end_date: Date.new(target_year, month_int, -1),
+            adjustment_mode: :fixed_mode,
+            adjustment_value: increase,
+            reason: "#{month_name} tiene #{pct_above}% mas citas que el promedio. " \
+                    "Sugerimos un incremento del #{increase}% para maximizar ingresos.",
+            analysis: { month: month_int, appointments: count, average: avg.round(1), pct_above: pct_above }
+          }
+        end
       end
       suggestions
     end
