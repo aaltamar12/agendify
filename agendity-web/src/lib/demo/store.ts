@@ -18,7 +18,7 @@ import type {
   Plan,
 } from '@/lib/api/types';
 
-import { seedUser, seedBusiness, seedSubscription, seedPlan } from './data/business';
+import { seedUser, seedBusiness, seedSubscription, seedPlan, seedSecondBusiness, seedIntelligentePlan } from './data/business';
 import { seedServices } from './data/services';
 import { seedEmployees } from './data/employees';
 import { seedAppointments, seedPayments } from './data/appointments';
@@ -27,12 +27,21 @@ import { seedReviews } from './data/reviews';
 import { seedNotifications } from './data/notifications';
 import { seedBusinessHours } from './data/business-hours';
 import { seedBlockedSlots } from './data/blocked-slots';
+import { seedCreditAccounts, seedCreditTransactions } from './data/credits';
+import type { CreditAccount, CreditTransaction } from './data/credits';
+import { seedDynamicPricings } from './data/dynamic-pricing';
+import type { DynamicPricing } from './data/dynamic-pricing';
+import { seedGoals } from './data/goals';
+import type { Goal } from './data/goals';
+import { seedTodaySummary, seedCashRegisterHistory } from './data/cash-register';
+import type { CashRegisterSummary, CashRegisterClose } from './data/cash-register';
 
 const STORAGE_KEY = 'agendity-demo-store';
 
 export interface DemoStore {
   user: User;
   business: Business;
+  secondBusiness: Business;
   subscription: Subscription;
   plan: Plan;
   services: Service[];
@@ -44,6 +53,14 @@ export interface DemoStore {
   notifications: Notification[];
   businessHours: BusinessHour[];
   blockedSlots: BlockedSlot[];
+
+  // New feature data
+  creditAccounts: CreditAccount[];
+  creditTransactions: CreditTransaction[];
+  dynamicPricings: DynamicPricing[];
+  goals: Goal[];
+  cashRegisterToday: CashRegisterSummary;
+  cashRegisterHistory: CashRegisterClose[];
 
   // Auto-increment counters
   nextIds: {
@@ -73,6 +90,7 @@ function createFreshStore(): DemoStore {
   return {
     user: seedUser(),
     business: seedBusiness(),
+    secondBusiness: seedSecondBusiness(),
     subscription: seedSubscription(),
     plan: seedPlan(),
     services,
@@ -84,6 +102,15 @@ function createFreshStore(): DemoStore {
     notifications,
     businessHours,
     blockedSlots,
+
+    // New feature data
+    creditAccounts: seedCreditAccounts(),
+    creditTransactions: seedCreditTransactions(),
+    dynamicPricings: seedDynamicPricings(),
+    goals: seedGoals(),
+    cashRegisterToday: seedTodaySummary(),
+    cashRegisterHistory: seedCashRegisterHistory(),
+
     nextIds: {
       service: 100,
       employee: 100,

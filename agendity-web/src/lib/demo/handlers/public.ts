@@ -45,7 +45,15 @@ route('get', '/api/v1/public/customer_lookup', ({ query }) => {
   const customer = store.customers.find((c) => c.email === email);
 
   if (customer) {
-    return { data: { name: customer.name, phone: customer.phone, email: customer.email } };
+    const creditAccount = store.creditAccounts.find((a) => a.customer_id === customer.id);
+    return {
+      data: {
+        name: customer.name,
+        phone: customer.phone,
+        email: customer.email,
+        credit_balance: creditAccount?.balance ?? 0,
+      },
+    };
   }
 
   return { data: null };
@@ -71,6 +79,34 @@ route('post', '/api/v1/public/checkin_by_code', ({ body }) => {
 
   const updated = getStore().appointments.find((a) => a.id === apt.id);
   return { data: updated };
+});
+
+// GET /api/v1/public/ad_banners
+route('get', '/api/v1/public/ad_banners', () => {
+  return {
+    data: [
+      {
+        id: 1,
+        title: 'Descuento entre semana',
+        description: '15% de descuento en todos los servicios de lunes a jueves',
+        image_url: null,
+        link_url: null,
+        active: true,
+        position: 'top',
+        business_id: 1,
+      },
+      {
+        id: 2,
+        title: 'Nuevo: Tratamiento Capilar Premium',
+        description: 'Prueba nuestro tratamiento capilar con keratina brasileña',
+        image_url: null,
+        link_url: null,
+        active: true,
+        position: 'bottom',
+        business_id: 1,
+      },
+    ],
+  };
 });
 
 // ---------------------------------------------------------------
@@ -166,6 +202,123 @@ route('get', '/api/v1/public/:slug/availability', ({ query }) => {
   }
 
   return { data: slots };
+});
+
+// GET /api/v1/public/:slug/price_preview
+route('get', '/api/v1/public/:slug/price_preview', ({ query }) => {
+  const store = getStore();
+  const serviceId = Number(query.service_id);
+  const date = query.date;
+  const service = store.services.find((s) => s.id === serviceId);
+
+  if (!service) {
+    throw { status: 404, message: 'Servicio no encontrado' };
+  }
+
+  // Check dynamic pricing
+  const dayOfWeek = new Date(date + 'T12:00:00').getDay();
+  const activePricing = store.dynamicPricings.find(
+    (p) =>
+      p.active &&
+      p.days_of_week.includes(dayOfWeek) &&
+      date >= p.start_date &&
+      date <= p.end_date,
+  );
+
+  const basePrice = service.price;
+  let finalPrice = basePrice;
+  let discountPercentage = 0;
+
+  if (activePricing) {
+    discountPercentage = activePricing.discount_percentage;
+    finalPrice = Math.round(basePrice * (1 + discountPercentage / 100));
+  }
+
+  return {
+    data: {
+      service_id: serviceId,
+      date,
+      base_price: basePrice,
+      final_price: finalPrice,
+      discount_percentage: discountPercentage,
+      dynamic_pricing_id: activePricing?.id ?? null,
+      dynamic_pricing_name: activePricing?.name ?? null,
+    },
+  };
+});
+
+// GET /api/v1/public/:slug/price_calendar
+route('get', '/api/v1/public/:slug/price_calendar', ({ query }) => {
+  const store = getStore();
+  const serviceId = Number(query.service_id);
+  const service = store.services.find((s) => s.id === serviceId);
+
+  if (!service) {
+    return { data: [] };
+  }
+
+  // Generate 14 days of prices
+  const days: { date: string; price: number; discount_percentage: number }[] = [];
+  for (let i = 0; i < 14; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() + i);
+    const dateStr = d.toISOString().split('T')[0];
+    const dayOfWeek = d.getDay();
+
+    const activePricing = store.dynamicPricings.find(
+      (p) =>
+        p.active &&
+        p.days_of_week.includes(dayOfWeek) &&
+        dateStr >= p.start_date &&
+        dateStr <= p.end_date,
+    );
+
+    const discount = activePricing?.discount_percentage ?? 0;
+    days.push({
+      date: dateStr,
+      price: Math.round(service.price * (1 + discount / 100)),
+      discount_percentage: discount,
+    });
+  }
+
+  return { data: days };
+});
+
+// GET /api/v1/public/:slug/cancel_preview
+route('get', '/api/v1/public/:slug/cancel_preview', ({ query }) => {
+  const store = getStore();
+  const ticketCode = query.ticket_code;
+  const apt = store.appointments.find((a) => a.ticket_code === ticketCode);
+
+  if (!apt) {
+    throw { status: 404, message: 'Cita no encontrada' };
+  }
+
+  const deadlineHours = store.business.cancellation_deadline_hours;
+  const appointmentTime = new Date(`${apt.date}T${apt.start_time}:00`);
+  const hoursUntil =
+    (appointmentTime.getTime() - Date.now()) / (1000 * 60 * 60);
+  const withinDeadline = hoursUntil < deadlineHours;
+
+  const penaltyPct = withinDeadline ? store.business.cancellation_policy_pct : 0;
+  const penaltyAmount = Math.round((apt.price * penaltyPct) / 100);
+  const refundAmount = apt.price - penaltyAmount;
+  const refundAsCredit = store.business.cancellation_refund_as_credit;
+
+  return {
+    data: {
+      appointment_id: apt.id,
+      ticket_code: ticketCode,
+      within_deadline: withinDeadline,
+      deadline_hours: deadlineHours,
+      hours_until_appointment: Math.round(hoursUntil * 10) / 10,
+      penalty_percentage: penaltyPct,
+      penalty_amount: penaltyAmount,
+      refund_amount: refundAmount,
+      refund_as_credit: refundAsCredit,
+      original_price: apt.price,
+    },
+  };
 });
 
 // POST /api/v1/public/:slug/book

@@ -19,6 +19,12 @@ import './handlers/notifications';
 import './handlers/blocked-slots';
 import './handlers/reviews';
 import './handlers/locations';
+import './handlers/credits';
+import './handlers/dynamic-pricing';
+import './handlers/goals';
+import './handlers/cash-register';
+import './handlers/reconciliation';
+import './handlers/notification-config';
 import './handlers/public';
 import './handlers/qr';
 
