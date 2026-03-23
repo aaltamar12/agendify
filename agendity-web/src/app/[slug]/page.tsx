@@ -79,6 +79,8 @@ export default function BusinessPage() {
     total_reviews,
   } = data;
 
+  const isIndependent = !!business.independent;
+
   // Sort business hours by day
   const sortedHours = [...business_hours].sort(
     (a, b) => a.day_of_week - b.day_of_week,
@@ -102,7 +104,9 @@ export default function BusinessPage() {
           )}
           <div>
             <h1 className="font-bold text-gray-900">{business.name}</h1>
-            <p className="text-xs text-gray-500">Reserva tu cita</p>
+            <p className="text-xs text-gray-500">
+              {isIndependent ? `Agenda tu cita con ${business.name}` : 'Reserva tu cita'}
+            </p>
           </div>
         </div>
 
@@ -155,11 +159,18 @@ export default function BusinessPage() {
                 {business.name}
               </h1>
               <div className="mt-1 flex items-center gap-2 text-sm text-white/90">
-                <Badge
-                  className="bg-white/20 text-white border-0"
-                >
-                  {BUSINESS_TYPES[business.business_type]}
-                </Badge>
+                {!isIndependent && (
+                  <Badge
+                    className="bg-white/20 text-white border-0"
+                  >
+                    {BUSINESS_TYPES[business.business_type]}
+                  </Badge>
+                )}
+                {isIndependent && (
+                  <Badge className="bg-violet-500/30 text-white border-0">
+                    Profesional independiente
+                  </Badge>
+                )}
                 {total_reviews > 0 && (
                   <span className="flex items-center gap-1">
                     <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
@@ -180,7 +191,7 @@ export default function BusinessPage() {
           size="lg"
           onClick={() => setShowBooking(true)}
         >
-          Reservar cita
+          {isIndependent ? `Agenda tu cita con ${business.name}` : 'Reservar cita'}
         </Button>
 
         {/* About */}
@@ -193,8 +204,8 @@ export default function BusinessPage() {
           </Card>
         )}
 
-        {/* Location map — right after "Sobre nosotros" */}
-        {(business.address || business.latitude) && (
+        {/* Location map — right after "Sobre nosotros" (hidden for independent professionals) */}
+        {!isIndependent && (business.address || business.latitude) && (
           <div className="space-y-3">
             <h2 className="font-semibold text-gray-900">
               <MapPin className="mr-2 inline-block h-4 w-4 text-violet-600" />

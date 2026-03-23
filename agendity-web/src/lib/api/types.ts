@@ -99,6 +99,11 @@ export interface Business {
   owner_id: number;
   created_at: string;
   updated_at: string;
+  // True when this is an independent professional (no physical establishment)
+  independent?: boolean;
+  // Legal fields (admin-managed)
+  nit?: string | null;
+  legal_representative_name?: string | null;
   // True when business has Profesional+ plan with featured listing
   featured?: boolean;
   // True when business has a plan with ai_features (verified badge in explore)
@@ -118,6 +123,9 @@ export interface Employee {
   bio: string | null;
   active: boolean;
   commission_percentage: number | null;
+  document_number: string | null;
+  document_type: string | null;
+  fiscal_address: string | null;
   created_at: string;
   updated_at: string;
 }

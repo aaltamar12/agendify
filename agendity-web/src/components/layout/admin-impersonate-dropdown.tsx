@@ -128,10 +128,15 @@ export function AdminImpersonateDropdown() {
                         {biz.name}
                       </p>
                       <StatusBadge status={biz.status} />
+                      {biz.independent && (
+                        <span className="inline-flex shrink-0 items-center rounded-full bg-cyan-50 px-1.5 py-0.5 text-[10px] font-medium leading-none text-cyan-700">
+                          Independiente
+                        </span>
+                      )}
                     </div>
                     <div className="flex items-center gap-1.5">
                       <span className="text-xs text-gray-500">
-                        {BUSINESS_TYPES[biz.business_type as BusinessType] ?? biz.business_type}
+                        {biz.independent ? 'Profesional' : (BUSINESS_TYPES[biz.business_type as BusinessType] ?? biz.business_type)}
                       </span>
                       <span className="text-xs text-gray-300">&middot;</span>
                       <PlanBadge planName={biz.plan_name} />

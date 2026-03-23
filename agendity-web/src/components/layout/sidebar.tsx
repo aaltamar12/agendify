@@ -67,6 +67,7 @@ export function Sidebar({ className, topOffset = 0 }: SidebarProps) {
   const { user, clearAuth } = useAuthStore();
   const { planSlug } = useCurrentSubscription();
   const { data: business } = useCurrentBusiness();
+  const isIndependent = business?.independent ?? false;
   const isAIPlan = AI_FEATURES_PLANS.includes(planSlug);
 
   // Count pending AI suggestions for badge
@@ -106,7 +107,9 @@ export function Sidebar({ className, topOffset = 0 }: SidebarProps) {
 
       {/* Navigation */}
       <nav className="flex-1 space-y-1 px-3 py-4">
-        {navItems.map((item) => (
+        {navItems
+          .filter((item) => !isIndependent || item.href !== '/dashboard/employees')
+          .map((item) => (
           <SidebarItem
             key={item.href}
             item={item}

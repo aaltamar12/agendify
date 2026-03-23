@@ -31,10 +31,10 @@ const profileSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
   description: z.string().optional(),
   phone: z.string().min(1, 'El teléfono es requerido'),
-  address: z.string().min(1, 'La dirección es requerida'),
-  city: z.string().min(1, 'La ciudad es requerida'),
+  address: z.string().optional(),
+  city: z.string().optional(),
   state: z.string().optional(),
-  country: z.string().min(1, 'El país es requerido'),
+  country: z.string().optional(),
   instagram_url: z.string().optional(),
   facebook_url: z.string().optional(),
   website_url: z.string().optional(),
@@ -667,11 +667,13 @@ function ProfileSection({
     facebook_url?: string | null;
     website_url?: string | null;
     google_maps_url?: string | null;
+    independent?: boolean;
   };
   onSave: (data: ProfileFormData) => Promise<void>;
   onSaveCoords: (lat: number, lng: number) => Promise<void>;
   loading: boolean;
 }) {
+  const isIndependent = !!business.independent;
   const [showLocationPicker, setShowLocationPicker] = useState(false);
   const [pickedCoords, setPickedCoords] = useState<{ lat: number; lng: number } | null>(
     business.latitude && business.longitude
@@ -732,11 +734,11 @@ function ProfileSection({
   return (
     <Card>
       <h2 className="mb-4 text-lg font-semibold text-gray-900">
-        Perfil del negocio
+        {isIndependent ? 'Tu perfil profesional' : 'Perfil del negocio'}
       </h2>
       <form onSubmit={handleSubmit(handleSaveWithCoords)} className="space-y-4">
         <Input
-          label="Nombre del negocio"
+          label={isIndependent ? 'Tu nombre' : 'Nombre del negocio'}
           error={errors.name?.message}
           {...register('name')}
         />
@@ -746,19 +748,22 @@ function ProfileSection({
           error={errors.description?.message}
           {...register('description')}
         />
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className={`grid grid-cols-1 gap-4 ${isIndependent ? '' : 'sm:grid-cols-2'}`}>
           <Input
             label="Teléfono"
             error={errors.phone?.message}
             {...register('phone')}
           />
-          <Input
-            label="Dirección"
-            placeholder="Calle 84 #53-120"
-            error={errors.address?.message}
-            {...register('address')}
-          />
+          {!isIndependent && (
+            <Input
+              label="Dirección"
+              placeholder="Calle 84 #53-120"
+              error={errors.address?.message}
+              {...register('address')}
+            />
+          )}
         </div>
+        {!isIndependent && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <Select
             key={`country-${countriesData?.data?.length ?? 0}`}
@@ -809,7 +814,10 @@ function ProfileSection({
             {...register('city')}
           />
         </div>
+        )}
 
+        {!isIndependent && (
+        <>
         {/* Location picker */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
@@ -875,6 +883,8 @@ function ProfileSection({
           placeholder="https://maps.app.goo.gl/..."
           {...register('google_maps_url')}
         />
+        </>
+        )}
 
         {/* Social links */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

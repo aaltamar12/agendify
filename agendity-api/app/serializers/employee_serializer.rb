@@ -5,6 +5,7 @@ class EmployeeSerializer < Blueprinter::Base
 
   fields :business_id, :user_id, :name, :phone, :email,
          :bio, :active, :commission_percentage,
+         :document_number, :document_type, :fiscal_address,
          :created_at, :updated_at
 
   # Frontend expects avatar_url — prefer ActiveStorage avatar, fallback to legacy photo_url
@@ -44,6 +45,7 @@ class EmployeeSerializer < Blueprinter::Base
   view :minimal do
     excludes :business_id, :user_id, :phone, :email, :bio,
              :commission_percentage, :score, :rating_avg,
+             :document_number, :document_type, :fiscal_address,
              :created_at, :updated_at
   end
 end

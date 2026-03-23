@@ -1865,3 +1865,91 @@ ad_banners.each do |attrs|
 end
 
 puts "  ✅ #{AdBanner.count} ad banners"
+
+# ============================================================================
+# INDEPENDENT PROFESSIONAL — Miguel Barrero
+# ============================================================================
+puts "\n💇 Creating Independent Professional: Miguel Barrero..."
+
+miguel_user = User.find_or_create_by!(email: "miguel@barrero.com") do |u|
+  u.name = "Miguel Barrero"
+  u.password = "password123"
+  u.role = :owner
+  u.phone = "+573009876543"
+end
+
+miguel_business = Business.find_or_create_by!(slug: "miguel-barrero") do |b|
+  b.owner = miguel_user
+  b.name = "Miguel Barrero"
+  b.business_type = :barbershop
+  b.independent = true
+  b.description = "Barbero profesional con más de 10 años de experiencia. Especialista en cortes clásicos y diseño de barba."
+  b.phone = "+573009876543"
+  b.email = "miguel@barrero.com"
+  b.timezone = "America/Bogota"
+  b.currency = "COP"
+  b.country = "CO"
+  b.state = "ATL"
+  b.city = "Barranquilla"
+  b.cancellation_policy_pct = 0
+  b.cancellation_deadline_hours = 12
+  b.trial_ends_at = 30.days.from_now
+  b.status = :active
+  b.onboarding_completed = true
+  b.instagram_url = "https://instagram.com/miguelbarrero"
+end
+
+# Employee (himself)
+emp_miguel = Employee.find_or_create_by!(business: miguel_business, name: "Miguel Barrero") do |e|
+  e.user = miguel_user
+  e.phone = "+573009876543"
+  e.email = "miguel@barrero.com"
+  e.document_type = "CC"
+  e.document_number = "1045678901"
+  e.fiscal_address = "Cra 50 #72-100, Barranquilla"
+  e.active = true
+end
+
+# Services
+miguel_services = [
+  { name: "Corte clásico", price: 25_000, duration_minutes: 30, description: "Corte con tijera y máquina" },
+  { name: "Barba", price: 15_000, duration_minutes: 20, description: "Perfilado y diseño de barba" },
+  { name: "Corte + Barba", price: 35_000, duration_minutes: 45, description: "Combo completo" },
+  { name: "Diseño de cejas", price: 10_000, duration_minutes: 15, description: "Perfilado de cejas con navaja" },
+].map do |attrs|
+  svc = Service.find_or_create_by!(business: miguel_business, name: attrs[:name]) do |s|
+    s.price = attrs[:price]
+    s.duration_minutes = attrs[:duration_minutes]
+    s.description = attrs[:description]
+    s.active = true
+  end
+  # Link employee to service
+  EmployeeService.find_or_create_by!(employee: emp_miguel, service: svc)
+  svc
+end
+
+# Business hours (Mon-Sat 9:00-18:00, Sun closed)
+(0..6).each do |day|
+  BusinessHour.find_or_create_by!(business: miguel_business, day_of_week: day) do |bh|
+    if day == 0
+      bh.open_time = "09:00"
+      bh.close_time = "18:00"
+      bh.closed = true
+    else
+      bh.open_time = "09:00"
+      bh.close_time = "18:00"
+      bh.closed = false
+    end
+  end
+end
+
+# Trial subscription
+miguel_sub = Subscription.find_or_create_by!(business: miguel_business, plan: plan_basico) do |s|
+  s.status = :active
+  s.start_date = Date.current
+  s.end_date = Date.current + 30.days
+end
+
+puts "  ✅ Miguel Barrero (independent) created — slug: miguel-barrero"
+puts "     Services: #{miguel_services.map(&:name).join(', ')}"
+puts "     Plan: Básico (trial)"

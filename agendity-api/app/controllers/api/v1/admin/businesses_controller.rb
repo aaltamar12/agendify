@@ -22,7 +22,8 @@ module Api
                 slug: b.slug,
                 business_type: b.business_type,
                 status: b.status,
-                plan_name: b.current_plan&.name
+                plan_name: b.current_plan&.name,
+                independent: b.independent?
               }
             end
           )

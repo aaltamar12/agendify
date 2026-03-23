@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Calendar, Scissors, Users, CreditCard, MoreHorizontal } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
+import { useCurrentBusiness } from '@/lib/hooks/use-business';
 
 const mobileItems = [
   { href: '/dashboard/agenda', label: 'Agenda', icon: Calendar },
@@ -15,10 +16,16 @@ const mobileItems = [
 
 export function MobileNav() {
   const pathname = usePathname();
+  const { data: business } = useCurrentBusiness();
+  const isIndependent = business?.independent ?? false;
+
+  const filteredItems = isIndependent
+    ? mobileItems.filter((item) => item.href !== '/dashboard/employees')
+    : mobileItems;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-20 flex h-16 items-center justify-around border-t border-gray-200 bg-white md:hidden">
-      {mobileItems.map(({ href, label, icon: Icon }) => {
+      {filteredItems.map(({ href, label, icon: Icon }) => {
         const isActive = pathname.startsWith(href);
         return (
           <Link

@@ -212,7 +212,13 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_23_000010) do
     t.boolean "cashback_enabled", default: false
     t.decimal "cashback_percentage", precision: 5, scale: 2, default: "0.0"
     t.boolean "cancellation_refund_as_credit", default: true
+    t.string "nit"
+    t.string "legal_representative_name"
+    t.string "legal_representative_document"
+    t.string "legal_representative_document_type"
+    t.boolean "independent", default: false, null: false
     t.index ["city"], name: "index_businesses_on_city"
+    t.index ["independent"], name: "index_businesses_on_independent"
     t.index ["latitude", "longitude"], name: "index_businesses_on_latitude_and_longitude"
     t.index ["owner_id"], name: "index_businesses_on_owner_id"
     t.index ["slug"], name: "index_businesses_on_slug", unique: true
@@ -384,6 +390,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_23_000010) do
     t.text "bio"
     t.decimal "commission_percentage", precision: 5, scale: 2
     t.decimal "pending_balance", precision: 12, scale: 2, default: "0.0"
+    t.string "document_number"
+    t.string "document_type"
+    t.string "fiscal_address"
     t.index ["business_id"], name: "index_employees_on_business_id"
     t.index ["user_id"], name: "index_employees_on_user_id"
   end

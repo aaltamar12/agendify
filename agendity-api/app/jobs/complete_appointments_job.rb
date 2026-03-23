@@ -3,7 +3,6 @@
 # Scheduled job that marks checked-in appointments as completed
 # when their end_time has passed, then triggers a rating request.
 class CompleteAppointmentsJob < ApplicationJob
-  include ConfigurableJob
   queue_as :default
 
   def perform

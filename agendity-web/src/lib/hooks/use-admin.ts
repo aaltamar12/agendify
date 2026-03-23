@@ -18,6 +18,7 @@ interface AdminBusiness {
   business_type: string;
   status: 'active' | 'suspended' | 'inactive';
   plan_name: string | null;
+  independent?: boolean;
 }
 
 interface ImpersonateResponse {
