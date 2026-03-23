@@ -145,10 +145,12 @@ export function BookingConfirmation({
                 </span>
               </div>
             )}
-            <div className="flex items-center gap-2 text-gray-600">
-              <Scissors className="h-4 w-4 text-violet-600" />
-              <span>{selectedService?.name}</span>
-            </div>
+            {selectedServices.map((svc) => (
+              <div key={svc.id} className="flex items-center gap-2 text-gray-600">
+                <Scissors className="h-4 w-4 text-violet-600" />
+                <span>{svc.name}</span>
+              </div>
+            ))}
             <div className="flex items-center gap-2 text-gray-600">
               <Calendar className="h-4 w-4 text-violet-600" />
               <span>{selectedDate && formatDate(selectedDate)}</span>
@@ -156,6 +158,11 @@ export function BookingConfirmation({
             <div className="flex items-center gap-2 text-gray-600">
               <Clock className="h-4 w-4 text-violet-600" />
               <span>{selectedTime && formatTime(selectedTime)}</span>
+            </div>
+            {/* Total a pagar */}
+            <div className="flex items-center gap-2 font-semibold text-violet-700">
+              <CreditCard className="h-4 w-4" />
+              <span>Total: {formatCurrency(selectedServices.reduce((sum, s) => sum + Number(s.price), 0))}</span>
             </div>
           </div>
 
