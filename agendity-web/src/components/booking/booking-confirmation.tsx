@@ -35,6 +35,7 @@ export function BookingConfirmation({
 }: BookingConfirmationProps) {
   const {
     selectedService,
+    selectedServices,
     selectedEmployee,
     selectedDate,
     selectedTime,
@@ -314,17 +315,30 @@ export function BookingConfirmation({
       <Card className="divide-y divide-gray-100">
         <div className="flex items-start gap-3 pb-4">
           <Scissors className="mt-0.5 h-5 w-5 shrink-0 text-violet-600" />
-          <div>
-            <p className="text-sm text-gray-500">Servicio</p>
-            <p className="font-medium text-gray-900">
-              {selectedService?.name}
+          <div className="flex-1">
+            <p className="text-sm text-gray-500">
+              {selectedServices.length > 1 ? `Servicios (${selectedServices.length})` : 'Servicio'}
             </p>
-            <p className="text-sm text-violet-600 font-semibold">
-              {selectedService && formatCurrency(selectedService.price)}
-              <span className="ml-2 text-gray-400 font-normal">
-                {selectedService && formatDuration(selectedService.duration_minutes)}
-              </span>
-            </p>
+            {selectedServices.map((svc) => (
+              <div key={svc.id} className="flex items-baseline justify-between gap-2">
+                <p className="font-medium text-gray-900">{svc.name}</p>
+                <p className="text-sm text-violet-600 font-semibold whitespace-nowrap">
+                  {formatCurrency(svc.price)}
+                  <span className="ml-1 text-gray-400 font-normal">{formatDuration(svc.duration_minutes)}</span>
+                </p>
+              </div>
+            ))}
+            {selectedServices.length > 1 && (
+              <div className="mt-1 flex items-baseline justify-between border-t border-gray-100 pt-1">
+                <p className="text-sm font-medium text-gray-700">Total</p>
+                <p className="text-sm font-bold text-violet-700">
+                  {formatCurrency(selectedServices.reduce((sum, s) => sum + s.price, 0))}
+                  <span className="ml-1 text-gray-400 font-normal">
+                    {formatDuration(selectedServices.reduce((sum, s) => sum + s.duration_minutes, 0))}
+                  </span>
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -348,23 +362,26 @@ export function BookingConfirmation({
             <p className="text-sm text-gray-600">
               {selectedTime && formatTime(selectedTime)}
             </p>
-            {selectedService && selectedTime && (
-              <>
-                <p className="mt-1 text-sm text-gray-500">
-                  Duración estimada: {formatDuration(selectedService.duration_minutes)}
-                </p>
-                <p className="text-sm text-gray-500">
-                  Tu cita terminaría aproximadamente a las{' '}
-                  <span className="font-medium text-gray-700">
-                    {formatTime(
-                      dayjs(selectedTime, 'HH:mm')
-                        .add(selectedService.duration_minutes, 'minute')
-                        .format('HH:mm')
-                    )}
-                  </span>
-                </p>
-              </>
-            )}
+            {selectedServices.length > 0 && selectedTime && (() => {
+              const totalMinutes = selectedServices.reduce((sum, s) => sum + s.duration_minutes, 0);
+              return (
+                <>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Duración total estimada: {formatDuration(totalMinutes)}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    Tu cita terminaría aproximadamente a las{' '}
+                    <span className="font-medium text-gray-700">
+                      {formatTime(
+                        dayjs(selectedTime, 'HH:mm')
+                          .add(totalMinutes, 'minute')
+                          .format('HH:mm')
+                      )}
+                    </span>
+                  </p>
+                </>
+              );
+            })()}
           </div>
         </div>
 
