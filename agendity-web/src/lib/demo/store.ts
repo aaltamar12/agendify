@@ -37,6 +37,7 @@ import { seedTodaySummary, seedCashRegisterHistory } from './data/cash-register'
 import type { CashRegisterSummary, CashRegisterClose } from './data/cash-register';
 
 const STORAGE_KEY = 'agendity-demo-store';
+const STORE_VERSION = 2; // Bump to force re-seed when demo data structure changes
 
 export interface DemoStore {
   user: User;
@@ -133,15 +134,20 @@ export function initStore(): void {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
-      store = JSON.parse(saved);
-      console.log('[DEMO] Store restored from localStorage');
-      return;
+      const parsed = JSON.parse(saved);
+      if (parsed._version === STORE_VERSION) {
+        store = parsed;
+        console.log('[DEMO] Store restored from localStorage');
+        return;
+      }
+      console.log('[DEMO] Store version mismatch, re-seeding');
     }
   } catch {
     // Corrupted data — start fresh
   }
 
   store = createFreshStore();
+  (store as any)._version = STORE_VERSION;
   persistStore();
   console.log('[DEMO] Store initialized with seed data');
 }
@@ -192,6 +198,7 @@ export function nextId(entity: keyof DemoStore['nextIds']): number {
  */
 export function resetStore(): void {
   store = createFreshStore();
+  (store as any)._version = STORE_VERSION;
   persistStore();
   console.log('[DEMO] Store reset to seed data');
 }
