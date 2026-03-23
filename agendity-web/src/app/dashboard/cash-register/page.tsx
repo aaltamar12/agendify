@@ -279,7 +279,7 @@ function EmployeeRow({
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const hasPending = emp.pending_from_previous > 0;
-  const paymentType = emp.payment_type || (emp.commission_pct > 0 ? 'commission' : 'none');
+  const paymentType = emp.payment_type || (emp.commission_pct > 0 ? 'commission' : 'manual');
   const hasCommission = paymentType === 'commission' && emp.commission_pct > 0;
   const hasFixedDaily = paymentType === 'fixed_daily' && (emp.fixed_daily_pay ?? 0) > 0;
   const hasFixedAmount = hasCommission || hasFixedDaily || hasPending;

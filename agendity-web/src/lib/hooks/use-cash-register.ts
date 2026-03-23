@@ -15,7 +15,7 @@ interface AppointmentDetail {
 interface EmployeeSummary {
   employee_id: number;
   employee_name: string;
-  payment_type?: 'none' | 'commission' | 'fixed_daily';
+  payment_type?: 'manual' | 'commission' | 'fixed_daily';
   appointments_count: number;
   total_earned: number;
   commission_pct: number;

@@ -4,7 +4,7 @@ import { useRef, useState } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Camera } from 'lucide-react';
+import { Camera, AlertTriangle } from 'lucide-react';
 import { Button, Input, Select, Avatar } from '@/components/ui';
 import { useServices } from '@/lib/hooks/use-services';
 import { useUploadEmployeeAvatar } from '@/lib/hooks/use-employees';
@@ -36,7 +36,7 @@ const employeeFormSchema = z.object({
     .optional()
     .or(z.literal('')),
   active: z.boolean(),
-  payment_type: z.enum(['none', 'commission', 'fixed_daily']).default('none'),
+  payment_type: z.enum(['manual', 'commission', 'fixed_daily']).default('manual'),
   commission_percentage: z.coerce.number().min(0).max(100).optional().default(0),
   fixed_daily_pay: z.coerce.number().int('Debe ser un valor entero').min(0).optional().default(0),
   service_ids: z.array(z.number()),
@@ -103,7 +103,7 @@ export function EmployeeForm({ employee, onSubmit, loading }: EmployeeFormProps)
       phone: employee?.phone ?? '',
       email: employee?.email ?? '',
       active: employee?.active ?? true,
-      payment_type: employee?.payment_type ?? 'none',
+      payment_type: employee?.payment_type ?? 'manual',
       commission_percentage: employee?.commission_percentage ?? 0,
       fixed_daily_pay: employee?.fixed_daily_pay ?? 0,
       service_ids: employee?.service_ids ?? [],
@@ -207,12 +207,19 @@ export function EmployeeForm({ employee, onSubmit, loading }: EmployeeFormProps)
       <Select
         label="Tipo de pago"
         options={[
-          { value: 'none', label: 'Sin pago configurado (manual)' },
+          { value: 'manual', label: 'Sin pago configurado (manual)' },
           { value: 'commission', label: 'Comisión (% sobre servicios)' },
           { value: 'fixed_daily', label: 'Pago fijo diario ($)' },
         ]}
         {...register('payment_type')}
       />
+
+      {watchPaymentType === 'manual' && (
+        <p className="!mt-1 flex items-center gap-1.5 text-xs text-amber-600">
+          <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+          Se recomienda configurar una comision o pago fijo para un mejor control en el cierre de caja.
+        </p>
+      )}
 
       {watchPaymentType === 'commission' && (
         <Input
