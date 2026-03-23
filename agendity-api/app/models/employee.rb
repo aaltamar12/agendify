@@ -21,6 +21,9 @@ class Employee < ApplicationRecord
   # -- Enums --
   enum :payment_type, { manual: "none", commission: "commission", fixed_daily: "fixed_daily" }, default: :manual
 
+  # -- Callbacks --
+  before_save :clear_unused_payment_fields
+
   # -- Validations --
   validates :name, presence: true
   validates :payment_type, inclusion: { in: payment_types.keys }
@@ -32,10 +35,17 @@ class Employee < ApplicationRecord
 
   # -- Ransack (ActiveAdmin filters) --
   def self.ransackable_attributes(_auth_object = nil)
-    %w[name active business_id document_number document_type fiscal_address created_at updated_at]
+    %w[name active business_id document_number document_type fiscal_address payment_type created_at updated_at]
   end
 
   def self.ransackable_associations(_auth_object = nil)
     %w[business services appointments]
+  end
+
+  private
+
+  def clear_unused_payment_fields
+    self.commission_percentage = 0 unless commission?
+    self.fixed_daily_pay = 0 unless fixed_daily?
   end
 end
