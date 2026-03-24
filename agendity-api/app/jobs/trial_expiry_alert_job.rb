@@ -118,6 +118,14 @@ class TrialExpiryAlertJob < ApplicationJob
   def suspend_business!(business)
     business.suspended!
 
+    AdminNotification.notify!(
+      title: "Negocio suspendido por trial vencido",
+      body: "#{business.name} fue suspendido automaticamente",
+      notification_type: "trial_expired",
+      link: "/admin/businesses/#{business.id}",
+      icon: "⚠️"
+    )
+
     ActivityLog.log(
       business: business,
       action: "business_suspended",

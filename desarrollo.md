@@ -543,6 +543,14 @@ El producto está funcional de punta a punta. Todas las features core están imp
 - [x] Tipo de pago de empleado: payment_type (manual/commission/fixed_daily) + fixed_daily_pay; cierre de caja calcula según tipo; alerta naranja en formulario para empleados manuales
 - [x] Error codes en API: ServiceResult con error_code, render_error con code: param; códigos definidos en appointments, auth, bookings, cash register, credits, invitations
 - [x] Copys industry-agnostic: landing, SEO, registro y explore ya no dicen "barberías y salones" sino "negocios que trabajan con citas"; nuevos tipos de negocio en registro (spa, estudio de uñas, consultorio, masajes, etc.)
+- [x] Email de bienvenida (BusinessMailer#welcome) con mini-onboarding, se dispara en RegisterService vía deliver_later
+- [x] QR en email de confirmación de reserva (rqrcode gem, QrCodeHelper, imagen inline con attachments.inline)
+- [x] Códigos de descuento (DiscountCode: percentage/fixed, max_uses, vigencia, source manual/birthday, ligado a cliente opcional)
+- [x] Campañas de cumpleaños (BirthdayCampaignJob diario 8am, birth_date en Customer, configuración por negocio)
+- [x] Employee checkin endpoint (POST /api/v1/employee/checkin_by_code con lógica de sustituto)
+- [x] formatCurrency con Intl.NumberFormat('es-CO') en frontend (separadores de miles, sin decimales)
+- [x] DemandAnalysisService mejorado: meses bajos generan descuento, meses altos generan incremento; meses en español (MONTH_NAMES_ES)
+- [x] Subscription banner en dashboard (SubscriptionBanner, estados amarillo/rojo/rojo oscuro para suscripción y trial)
 
 ### Infraestructura
 - [x] Docker Compose (7 servicios: PostgreSQL, Redis, NATS, Rails API, Sidekiq, Next.js, Nginx)
@@ -555,10 +563,10 @@ El producto está funcional de punta a punta. Todas las features core están imp
 - [x] Sistema de referidos (ReferralCode + Referral, link ?ref=CODE → localStorage → registro → activación al aprobar pago, panel ActiveAdmin)
 - [x] Trial reducido a 7 días + TrialExpiryAlertJob con 3 stages + trial_alert_stage en Business
 - [x] Checkout de suscripción P2P (página /dashboard/subscription/checkout, CheckoutService, ApprovePaymentService)
-- [x] SiteConfig: configuración de plataforma en DB (key/value), seeds con datos de contacto y pago, editable desde ActiveAdmin
+- [x] SiteConfig: configuración de plataforma en DB (key/value, 7 claves), seeds con datos de contacto, pago y app_url, editable desde ActiveAdmin
 - [x] Tipo de pago de empleado (payment_type: manual/commission/fixed_daily, fixed_daily_pay, cierre de caja adaptado)
 - [x] Error codes en API (ServiceResult#error_code, render_error con code:)
-- [x] Copys industry-agnostic en landing, SEO, registro y explore
+- [x] Copys industry-agnostic en landing, SEO, registro y explore; nuevos tipos de negocio (spa, estudio de uñas, consultorio, masajes, cosmetología)
 
 ### Cambios recientes (marzo 2026 — segunda iteración)
 - [x] Sistema de cancelaciones completo (cancelled_by: business/customer, penalización por deadline, pending_penalty en customer, endpoint público, botón en ticket)
@@ -595,10 +603,17 @@ El producto está funcional de punta a punta. Todas las features core están imp
 - Activity Logs y Request Logs están disponibles en el panel de SuperAdmin para auditoría completa.
 - Las órdenes de pago de suscripción se generan automáticamente y el superadmin las confirma manualmente.
 - El trial dura 7 días. Al vencer, el negocio debe pagar via checkout P2P. `ApprovePaymentService` reactiva el negocio y activa el referral si corresponde.
-- `SiteConfig` centraliza todos los datos de contacto y pago de la plataforma; los mailers no tienen valores hardcoded.
+- `SiteConfig` centraliza todos los datos de contacto y pago de la plataforma (7 claves: support_email, support_whatsapp, admin_email, payment_nequi, payment_bancolombia, payment_daviplata, app_url); los mailers no tienen valores hardcoded.
 - Los error codes en API permiten que el frontend maneje errores específicos sin depender solo del mensaje de texto.
+- `BusinessMailer#welcome` se dispara en `RegisterService` con mini-onboarding y datos de contacto desde SiteConfig.
+- El email de confirmación de reserva incluye QR del ticket como imagen inline (rqrcode gem + `QrCodeHelper#ticket_qr_png`).
+- Los codigos de descuento (DiscountCode) se aplican en el booking flow: después de tarifa dinámica, antes de créditos. Los birthday codes son de un solo uso y están ligados al cliente.
+- `BirthdayCampaignJob` corre diario a las 8am y genera códigos de descuento para clientes con cumpleaños hoy.
+- `formatCurrency` usa `Intl.NumberFormat('es-CO')` — separadores de miles con punto, sin decimales.
+- `DemandAnalysisService` genera sugerencias en español (MONTH_NAMES_ES) para meses de alta demanda (incremento) y baja demanda (descuento), ademas de fines de semana y temporada navideña.
 - Ver `docs/tech/flujos-completos.md` para diagramas detallados de todos los flujos del sistema.
 - Ver `docs/tech/sistema-referidos.md` para el flujo técnico del sistema de referidos y checkout de suscripción.
+- Ver `docs/tech/codigos-descuento-cumpleanos.md` para la documentación técnica de códigos de descuento y campañas de cumpleaños.
 
 ### Pendiente para lanzamiento
 - [ ] CI/CD (GitHub Actions) — nice to have

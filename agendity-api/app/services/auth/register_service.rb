@@ -27,6 +27,14 @@ module Auth
 
         BusinessMailer.welcome(business).deliver_later
 
+        AdminNotification.notify!(
+          title: "Nuevo negocio registrado",
+          body: "#{business.name} (#{user.email}) — Trial 7 dias",
+          notification_type: "new_business",
+          link: "/admin/businesses/#{business.id}",
+          icon: "🆕"
+        )
+
         token         = TokenGenerator.encode(user)
         refresh_token = create_refresh_token(user)
 

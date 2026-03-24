@@ -1,6 +1,6 @@
 # Sistema de Referidos y Checkout de Suscripcion
 
-> Ultima actualizacion: 2026-03-23
+> Ultima actualizacion: 2026-03-24
 > Modelos: `ReferralCode`, `Referral`, `SubscriptionPaymentOrder`, `SiteConfig`
 
 ---
@@ -210,14 +210,15 @@ CREATE TABLE site_configs (
 
 ### Seeds (claves disponibles)
 
-| Key | Descripcion | Ejemplo |
-|-----|-------------|---------|
-| `support_email` | Email de soporte al cliente | `soporte@agendity.co` |
-| `support_whatsapp` | WhatsApp de soporte | `+573001234567` |
-| `admin_email` | Email del administrador (para notificaciones internas) | `admin@agendity.co` |
-| `payment_nequi` | Numero Nequi para recibir pagos de suscripcion | `3001234567` |
-| `payment_bancolombia` | Cuenta Bancolombia para pagos de suscripcion | `123-456789-00` |
-| `payment_daviplata` | Numero Daviplata para pagos de suscripcion | `3001234567` |
+| Key | Descripcion | Usado por |
+|-----|-------------|-----------|
+| `support_email` | Email de soporte al cliente | Todos los mailers, checkout |
+| `support_whatsapp` | WhatsApp de soporte | `BusinessMailer#trial_expiry_alert`, `trial_ended_thank_you`, checkout |
+| `admin_email` | Email del administrador (para notificaciones internas) | `AdminMailer`, jobs de alertas |
+| `payment_nequi` | Numero Nequi de Agendity para recibir pagos de suscripcion | Checkout de suscripcion, `trial_ended_thank_you` |
+| `payment_bancolombia` | Cuenta Bancolombia de Agendity para pagos de suscripcion | Checkout de suscripcion, `trial_ended_thank_you` |
+| `payment_daviplata` | Numero Daviplata de Agendity para pagos de suscripcion | Checkout de suscripcion, `trial_ended_thank_you` |
+| `app_url` | URL base de la aplicacion frontend | `BusinessMailer#welcome`, `trial_ended_thank_you` |
 
 ### Uso en mailers
 

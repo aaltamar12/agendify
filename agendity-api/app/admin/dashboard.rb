@@ -9,6 +9,41 @@ ActiveAdmin.register_page "Dashboard" do
     text_node '<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3"></script>'.html_safe
     text_node '<script src="https://cdn.jsdelivr.net/npm/chartkick@5"></script>'.html_safe
 
+    # -- Admin Notifications --
+    unread_count = AdminNotification.unread.count
+    recent_notifications = AdminNotification.order(created_at: :desc).limit(10)
+
+    if recent_notifications.any?
+      columns do
+        column do
+          panel "Notificaciones recientes#{" (#{unread_count} sin leer)" if unread_count > 0}" do
+            table_for recent_notifications do
+              column(:icon) { |n| n.icon }
+              column(:titulo) do |n|
+                text = n.title
+                text = content_tag(:strong, text) unless n.read?
+                if n.link.present?
+                  link_to text, n.link
+                else
+                  text
+                end
+              end
+              column(:detalle) { |n| truncate(n.body.to_s, length: 60) }
+              column(:tiempo) { |n| time_ago_in_words(n.created_at) + " ago" }
+              column(:estado) { |n| status_tag(n.read? ? "Leida" : "Nueva", class: n.read? ? "ok" : "error") }
+            end
+
+            div style: "margin-top: 10px; display: flex; gap: 10px;" do
+              text_node link_to("Ver todas", admin_admin_notifications_path, class: "button")
+              if unread_count > 0
+                text_node link_to("Marcar todas como leidas", mark_all_read_admin_admin_notifications_path, method: :put, class: "button")
+              end
+            end
+          end
+        end
+      end
+    end
+
     # -- Summary cards --
     columns do
       column do

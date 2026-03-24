@@ -158,14 +158,39 @@ Templates:
 
 ## Banner en Frontend
 
-`SubscriptionBanner` en `src/components/layout/subscription-banner.tsx`:
-- Amarillo: 5 a 1 dias antes (suscripcion)
-- Rojo: dia de vencimiento (suscripcion)
-- Rojo oscuro: despues de vencer (suscripcion)
+`SubscriptionBanner` en `src/components/layout/subscription-banner.tsx`.
 
-Para trial: se muestra banner segun `business.trial_ends_at` mientras el negocio este en periodo de prueba.
+Aparece en la parte superior del dashboard (debajo del topbar) para todos los negocios con suscripcion por vencer o trial activo.
 
-Se muestra automaticamente basado en `subscription.end_date` o `business.trial_ends_at`.
+### Estados para suscripcion paga
+
+| Condicion | Color | Mensaje ejemplo |
+|-----------|-------|-----------------|
+| 5 a 1 dias antes de vencer | Amarillo | "Tu plan Profesional vence en X dias. Renueva ahora." |
+| Dia de vencimiento | Rojo | "Tu plan Profesional vence hoy. Renueva ahora." |
+| Despues de vencer | Rojo oscuro | "Tu plan vencio hace X dias. Renueva para evitar suspension." |
+
+### Estados para trial
+
+| Condicion | Color | Mensaje ejemplo |
+|-----------|-------|-----------------|
+| Trial activo (>2 dias restantes) | Azul/informativo | "Estas en tu periodo de prueba. X dias restantes." |
+| 2 dias o menos | Amarillo | "Tu periodo de prueba termina en X dias. Elige tu plan." |
+| Trial vencido (sin suspension) | Rojo | "Tu periodo de prueba termino. Elige tu plan para continuar." |
+
+Se muestra automaticamente basado en `subscription.end_date` o `business.trial_ends_at`. El boton CTA lleva a `/dashboard/subscription/checkout`.
+
+### Mailer adicional: trial_ended_thank_you
+
+En el **stage 2** del trial (dia que termina), ademas de la notificacion in-app, se envia un email especial de agradecimiento con los planes y datos de pago:
+
+```ruby
+BusinessMailer.trial_ended_thank_you(business)
+# Incluye: lista de planes con precios, datos de pago (Nequi/Bancolombia/Daviplata)
+# Leidos desde SiteConfig
+```
+
+Esto es diferente al `trial_expiry_alert(business, stage: 2)` que tambien existe para la notificacion in-app.
 
 ---
 

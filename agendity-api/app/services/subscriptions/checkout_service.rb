@@ -31,6 +31,14 @@ module Subscriptions
 
       NotifyAdminSubscriptionProofJob.perform_later(order.id)
 
+      AdminNotification.notify!(
+        title: "Nuevo comprobante de pago",
+        body: "#{@business.name} envio comprobante para Plan #{plan.name} ($#{order.amount.to_i})",
+        notification_type: "subscription_proof",
+        link: "/admin/subscription_payment_orders/#{order.id}",
+        icon: "💳"
+      )
+
       success({ order_id: order.id, status: order.status })
     end
   end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_23_221759) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_24_151655) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "unaccent"
@@ -75,6 +75,19 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_23_221759) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["placement", "active"], name: "index_ad_banners_on_placement_and_active"
+  end
+
+  create_table "admin_notifications", force: :cascade do |t|
+    t.string "title", null: false
+    t.text "body"
+    t.string "notification_type"
+    t.string "link"
+    t.boolean "read", default: false, null: false
+    t.string "icon"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_at"], name: "index_admin_notifications_on_created_at"
+    t.index ["read"], name: "index_admin_notifications_on_read"
   end
 
   create_table "appointment_services", force: :cascade do |t|

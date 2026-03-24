@@ -1,6 +1,6 @@
 # Sistema de Tarifas Dinamicas — Agendity
 
-> Ultima actualizacion: 2026-03-22
+> Ultima actualizacion: 2026-03-24
 > Disponible desde: **Plan Profesional+**
 > Sugerencias IA: **Solo Plan Inteligente**
 
@@ -221,9 +221,19 @@ Elimina una tarifa.
 
 ### Fase actual: Queries SQL
 
-El servicio analiza datos historicos con 3 estrategias:
+El servicio analiza datos historicos con 4 estrategias. Los nombres de meses se generan en **espanol** (`MONTH_NAMES_ES`).
 
-#### 1. Patrones mensuales
+#### Constantes de umbrales
+
+| Constante | Valor | Significado |
+|---|---|---|
+| `HIGH_DEMAND_THRESHOLD` | 0.7 | Ocupacion >= 70% → mes de alta demanda |
+| `LOW_DEMAND_THRESHOLD` | 0.5 | 50% por debajo del promedio → mes bajo |
+| `ABOVE_AVG_THRESHOLD` | 1.3 | 30% por encima del promedio → mes alto |
+| `WEEKEND_DIFF_THRESHOLD` | 1.3 | 30% mas en fines de semana que entre semana |
+
+#### 1. Patrones mensuales (ocupacion absoluta)
+
 ```sql
 SELECT EXTRACT(MONTH FROM appointment_date) as month, COUNT(*)
 FROM appointments
@@ -231,21 +241,50 @@ WHERE appointment_date >= NOW() - INTERVAL '12 months'
   AND status != 'cancelled'
 GROUP BY month
 ```
-- Compara vs capacidad estimada (empleados x slots x dias)
-- Si ocupacion > 70% → sugiere incremento proporcional (10-30%)
 
-#### 2. Fin de semana vs entre semana
+- Compara cada mes vs capacidad estimada (empleados activos x slots por dia x 26 dias)
+- Si ocupacion >= 70% → sugiere incremento proporcional (10-30%)
+- Nombre de sugerencia: `"Temporada alta — Diciembre"` (en espanol)
+
+#### 2. Demanda relativa (meses bajos Y altos vs promedio del negocio)
+
+Requiere minimo 3 meses de datos historicos.
+
+```ruby
+avg = monthly_data.values.sum / monthly_data.size.to_f
+
+# Mes bajo: ratio <= 0.5 (50% o menos del promedio)
+# → sugiere DESCUENTO para atraer clientes
+discount = clamp(pct_below / 3, 5, 20)  # max 20% de descuento
+# Nombre: "Promocion — Febrero"
+# Razon: "Febrero tiene X% menos citas que el promedio. Sugerimos descuento del Y%"
+
+# Mes alto: ratio >= 1.3 (30% o mas del promedio)
+# → sugiere INCREMENTO moderado
+increase = clamp(pct_above / 3, 5, 15)  # max 15% de incremento
+# Nombre: "Alta demanda — Julio"
+# Razon: "Julio tiene X% mas citas que el promedio. Sugerimos incremento del Y%"
+```
+
+El `target_year` se calcula correctamente: si el mes ya paso en el año actual, la sugerencia se genera para el siguiente año.
+
+#### 3. Fin de semana vs entre semana
+
 ```sql
 SELECT EXTRACT(DOW FROM appointment_date) as dow, COUNT(*)
 FROM appointments
 WHERE appointment_date >= NOW() - INTERVAL '3 months'
 GROUP BY dow
 ```
-- Si weekend > weekday * 1.3 → sugiere premium para fines de semana
 
-#### 3. Temporada navidena
-- Compara diciembre historico vs promedio mensual
-- Si diciembre > promedio * 1.4 → sugiere incremento progresivo 10% a 25%
+- Si weekend_avg > weekday_avg * 1.3 → sugiere premium fines de semana
+- Nombre: `"Premium fin de semana"`
+
+#### 4. Temporada navidena
+
+- Compara diciembre historico vs promedio mensual del ultimo año
+- Si diciembre > promedio * 1.4 → sugiere incremento progresivo 10% a 25% (modo `progressive_asc`)
+- Nombre: `"Temporada navidena"`
 
 ### Job: PricingSuggestionJob
 

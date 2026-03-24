@@ -1,7 +1,7 @@
 # Documentación Técnica — Agendity
 
-> Ultima actualizacion: 2026-03-23 (actualizado con referidos, checkout, trial 7d, SiteConfig, employee payment_type, error codes)
-> **Fase del proyecto:** Pre-lanzamiento (15 etapas de features completadas)
+> Ultima actualizacion: 2026-03-24 (actualizado con discount codes, birthday campaigns, welcome email, QR en email, employee checkin endpoint, demand analysis mejorado, formatCurrency, industry-agnostic copys, subscription banner)
+> **Fase del proyecto:** Pre-lanzamiento (15+ etapas de features completadas)
 
 ## Índice
 
@@ -35,6 +35,7 @@
 | [metas-financieras.md](metas-financieras.md) | Metas financieras (Plan Inteligente): tipos de meta, progreso, sugerencias |
 | [banners-publicitarios.md](banners-publicitarios.md) | Banners publicitarios en Explore: modelo, tracking de impresiones/clicks, gestion desde ActiveAdmin |
 | [whatsapp-plan-gating.md](whatsapp-plan-gating.md) | WhatsApp gated por plan: MultiChannelService, canales por plan, WhatsAppChannel stub |
+| [codigos-descuento-cumpleanos.md](codigos-descuento-cumpleanos.md) | Codigos de descuento (modelo, CRUD, validacion publica, booking flow) + campanas de cumpleanos (BirthdayCampaignJob, birth_date en Customer) |
 | [../costos-operativos.md](../costos-operativos.md) | Costos operativos: notificaciones, infra, WhatsApp, email, escalas LATAM |
 | [decisiones/](decisiones/) | ADRs (Architecture Decision Records) |
 

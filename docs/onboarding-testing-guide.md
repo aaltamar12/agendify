@@ -29,6 +29,8 @@ El dueno del negocio entra a la landing page y se registra con su nombre, email,
 
 **Referidos:** Si el usuario llego via `agendity.co/register?ref=CODE`, el codigo se guarda en localStorage y se envia al backend durante el registro. Se crea un `Referral` en estado `pending` asociado al `ReferralCode` del referidor.
 
+**Email de bienvenida:** Inmediatamente despues del registro, el sistema envia via Sidekiq un email de bienvenida (`BusinessMailer#welcome`) con un mini-onboarding que explica los 6 pasos a completar, la fecha de fin del trial y los datos de contacto de soporte.
+
 ### 1.2 Onboarding (configuracion inicial)
 
 Despues de registrarse, el sistema guia al dueno por 6 pasos:
@@ -135,8 +137,8 @@ Cada negocio tiene una pagina publica en `agendity.co/{slug}`. Muestra:
 1. **Seleccionar servicio** — cards con nombre, precio y duracion. Puede seleccionar multiples servicios
 2. **Seleccionar empleado** — foto, nombre, y opcion "cualquier disponible"
 3. **Seleccionar fecha y hora** — calendario con dias disponibles, grid de horarios libres. Los dias cerrados y horarios bloqueados estan deshabilitados. Si hay tarifa dinamica activa, se muestra el precio ajustado
-4. **Datos del cliente** — nombre, telefono, email. Si es cliente recurrente (mismo email/telefono), se detecta automaticamente y se muestra su balance de creditos disponibles. Puede aplicar creditos al pago
-5. **Confirmacion** — resumen completo: servicio(s), empleado, fecha/hora, precio (con tarifa dinamica si aplica), creditos aplicados, instrucciones de pago (a que numero de Nequi/Daviplata/Bancolombia enviar)
+4. **Datos del cliente** — nombre, telefono, email, y opcionalmente fecha de cumpleanos. Si es cliente recurrente (mismo email/telefono), se detecta automaticamente y se muestra su balance de creditos disponibles. Puede aplicar creditos al pago
+5. **Confirmacion** — resumen completo: servicio(s), empleado, fecha/hora, precio (con tarifa dinamica si aplica), creditos aplicados, instrucciones de pago (a que numero de Nequi/Daviplata/Bancolombia enviar). El usuario puede ingresar un **codigo de descuento** — se valida en tiempo real contra la API y se muestra el desglose actualizado
 
 Al confirmar:
 - Se crea la cita con estado `pending_payment`

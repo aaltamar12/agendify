@@ -106,6 +106,14 @@ class SubscriptionExpiryAlertJob < ApplicationJob
     business = subscription.business
     business.suspended!
 
+    AdminNotification.notify!(
+      title: "Negocio suspendido por suscripcion vencida",
+      body: "#{business.name} fue suspendido automaticamente",
+      notification_type: "subscription_expired",
+      link: "/admin/businesses/#{business.id}",
+      icon: "🔴"
+    )
+
     ActivityLog.log(
       business: business,
       action: "business_suspended",
