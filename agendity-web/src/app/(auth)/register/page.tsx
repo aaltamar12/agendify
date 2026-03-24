@@ -10,7 +10,7 @@ import { registerSchema, type RegisterFormData } from '@/lib/validations/auth';
 import { useRegister } from '@/lib/hooks/use-auth';
 
 const businessTypeOptions = [
-  { value: 'barberia', label: 'Barbería' },
+  { value: 'barbershop', label: 'Barbería' },
   { value: 'salon', label: 'Salón de belleza' },
   { value: 'spa', label: 'Spa' },
   { value: 'nails', label: 'Estudio de uñas' },

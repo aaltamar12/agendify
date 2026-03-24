@@ -19,7 +19,7 @@ class Business < ApplicationRecord
   encrypts :bancolombia_account, deterministic: true
 
   # -- Enums --
-  enum :business_type, { barbershop: 0, salon: 1, spa: 2, nails: 3, other: 4 }
+  enum :business_type, { barbershop: 0, salon: 1, spa: 2, nails: 3, other: 4, estetica: 5, consultorio: 6 }
   enum :status, { active: 0, suspended: 1, inactive: 2 }
 
   # -- Attachments --
