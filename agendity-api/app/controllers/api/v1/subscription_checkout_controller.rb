@@ -8,6 +8,7 @@ module Api
     #   - Submit payment proof
     #   - Check subscription/trial status
     class SubscriptionCheckoutController < BaseController
+      skip_before_action :require_business!, only: [:plans, :payment_info, :status]
       skip_before_action :render_empty_for_admin_without_business!
 
       # GET /api/v1/subscription/plans
@@ -58,6 +59,7 @@ module Api
       # GET /api/v1/subscription/status
       def status
         business = current_business
+        return render_success({ admin: true }) unless business
 
         active_subscription = business.subscriptions.active.where("end_date >= ?", Date.current).order(end_date: :desc).first
         pending_order = business.subscription_payment_orders.proof_submitted.order(created_at: :desc).first

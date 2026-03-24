@@ -22,6 +22,7 @@ import { requestNotificationPermission } from '@/lib/utils/browser-notification'
 import { formatCurrency } from '@/lib/utils/format';
 import { isDemoMode } from '@/lib/demo/is-demo';
 import { SUPPORT_CONFIG } from '@/lib/constants';
+import { useAuthStore } from '@/lib/stores/auth-store';
 import type { Plan } from '@/lib/api/types';
 
 const DemoBanner = dynamic(() => import('@/components/shared/demo-banner'), {
@@ -36,28 +37,28 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const { sidebarOpen, setSidebarOpen } = useUIStore();
   const { isImpersonating } = useImpersonationStore();
+  const { user } = useAuthStore();
+  const isAdmin = user?.role === 'admin';
   const { data: business } = useCurrentBusiness();
   const { subscription, daysUntilExpiry } = useCurrentSubscription();
   const { data: subscriptionStatus } = useSubscriptionStatus();
   const { data: plans } = useSubscriptionPlans();
   const { data: siteConfig } = useSiteConfig();
-  const isBusinessSuspended = business?.status === 'suspended';
-  const isBusinessInactive = business?.status === 'inactive';
+  const isBusinessSuspended = !isAdmin && business?.status === 'suspended';
+  const isBusinessInactive = !isAdmin && business?.status === 'inactive';
 
-  // Trial expired: no active subscription, trial_ends_at in the past, never had a subscription
+  // Admin users skip all subscription/trial checks
   const hadSubscription = subscriptionStatus?.had_subscription ?? false;
-  const trialExpired =
+  const trialExpired = !isAdmin &&
     !subscription &&
     !hadSubscription &&
     !!business?.trial_ends_at &&
     new Date(business.trial_ends_at) < new Date();
 
-  // Don't block if there's a pending payment order under review
   const hasPendingOrder = !!subscriptionStatus?.pending_order;
 
-  // Should block: trial expired or suspended, but not if pending order
-  const shouldBlockTrialExpired = trialExpired && !hasPendingOrder && !isBusinessSuspended;
-  const shouldBlockSuspended = isBusinessSuspended && !hasPendingOrder;
+  const shouldBlockTrialExpired = !isAdmin && trialExpired && !hasPendingOrder && !isBusinessSuspended;
+  const shouldBlockSuspended = !isAdmin && isBusinessSuspended && !hasPendingOrder;
   const isBusinessHidden = isBusinessSuspended;
   const isDemo = isDemoMode();
   const showSubscriptionBanner = daysUntilExpiry !== null && daysUntilExpiry <= 5;
