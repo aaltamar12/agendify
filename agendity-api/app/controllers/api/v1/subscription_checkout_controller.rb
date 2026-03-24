@@ -67,6 +67,7 @@ module Api
           trial_active: business.trial_ends_at.present? && business.trial_ends_at > Time.current,
           trial_days_remaining: business.trial_ends_at.present? ? [(business.trial_ends_at.to_date - Date.current).to_i, 0].max : nil,
           has_active_subscription: active_subscription.present?,
+          had_subscription: business.subscriptions.exists?,
           subscription: active_subscription ? {
             id: active_subscription.id,
             plan_name: active_subscription.plan.name,

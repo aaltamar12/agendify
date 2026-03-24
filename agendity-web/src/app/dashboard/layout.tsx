@@ -44,9 +44,11 @@ export default function DashboardLayout({
   const isBusinessSuspended = business?.status === 'suspended';
   const isBusinessInactive = business?.status === 'inactive';
 
-  // Trial expired: no active subscription and trial_ends_at is in the past
+  // Trial expired: no active subscription, trial_ends_at in the past, never had a subscription
+  const hadSubscription = subscriptionStatus?.had_subscription ?? false;
   const trialExpired =
     !subscription &&
+    !hadSubscription &&
     !!business?.trial_ends_at &&
     new Date(business.trial_ends_at) < new Date();
 
