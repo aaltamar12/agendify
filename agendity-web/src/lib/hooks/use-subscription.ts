@@ -42,11 +42,11 @@ export function useCurrentSubscription(): SubscriptionInfo {
 
     const planLabel = PLAN_DISPLAY[planSlug]?.label ?? 'Trial';
 
-    // Calculate days until subscription expires
-    const endDate = subscription?.end_date;
+    // Calculate days until subscription or trial expires
+    const endDate = subscription?.end_date || (isTrialing ? business?.trial_ends_at : null);
     let daysUntilExpiry: number | null = null;
     if (endDate) {
-      const end = new Date(endDate + 'T23:59:59');
+      const end = new Date(endDate.includes('T') ? endDate : endDate + 'T23:59:59');
       const now = new Date();
       daysUntilExpiry = Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
     }

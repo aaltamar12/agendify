@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { AlertTriangle, Clock } from 'lucide-react';
 import { useCurrentSubscription } from '@/lib/hooks/use-subscription';
 
@@ -29,9 +30,10 @@ export function SubscriptionBanner() {
   }
 
   return (
-    <div className={`flex h-10 items-center justify-center gap-2 px-4 text-sm font-medium ${bgClass}`}>
+    <Link href="/dashboard/subscription/checkout" className={`flex h-10 items-center justify-center gap-2 px-4 text-sm font-medium ${bgClass} hover:opacity-90 transition-opacity`}>
       <Icon className="h-4 w-4 shrink-0" />
       <span className="truncate">{message}</span>
-    </div>
+      <span className="shrink-0 rounded bg-white/20 px-2 py-0.5 text-xs font-bold">Renovar</span>
+    </Link>
   );
 }
