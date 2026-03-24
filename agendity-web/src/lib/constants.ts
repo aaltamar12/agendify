@@ -126,35 +126,35 @@ export const PLAN_RESTRICTED_FEATURES: Record<string, PlanSlug[]> = {
 // Features that show a lock icon + tooltip for specific plans
 export const PLAN_FEATURE_LOCKS: Record<string, { requiredPlans: PlanSlug[]; tooltip: string }> = {
   '/dashboard/reviews': {
-    requiredPlans: ['profesional', 'inteligente'],
+    requiredPlans: ['trial', 'profesional', 'inteligente'],
     tooltip: 'Disponible en Plan Profesional',
   },
   '/dashboard/cash-register': {
-    requiredPlans: ['profesional', 'inteligente'],
+    requiredPlans: ['trial', 'profesional', 'inteligente'],
     tooltip: 'Disponible en Plan Profesional',
   },
   '/dashboard/dynamic-pricing': {
-    requiredPlans: ['profesional', 'inteligente'],
+    requiredPlans: ['trial', 'profesional', 'inteligente'],
     tooltip: 'Disponible en Plan Profesional',
   },
   '/dashboard/reconciliation': {
-    requiredPlans: ['inteligente'],
+    requiredPlans: ['trial', 'inteligente'],
     tooltip: 'Disponible en Plan Inteligente',
   },
   '/dashboard/goals': {
-    requiredPlans: ['inteligente'],
+    requiredPlans: ['trial', 'inteligente'],
     tooltip: 'Disponible en Plan Inteligente',
   },
 };
 
 // Advanced reports lock (Básico gets basic reports, but advanced are locked)
-export const ADVANCED_REPORTS_PLANS: PlanSlug[] = ['profesional', 'inteligente'];
+export const ADVANCED_REPORTS_PLANS: PlanSlug[] = ['trial', 'profesional', 'inteligente'];
 
 // Brand customization lock (logo + colors)
-export const BRAND_CUSTOMIZATION_PLANS: PlanSlug[] = ['profesional', 'inteligente'];
+export const BRAND_CUSTOMIZATION_PLANS: PlanSlug[] = ['trial', 'profesional', 'inteligente'];
 
 // AI features lock
-export const AI_FEATURES_PLANS: PlanSlug[] = ['inteligente'];
+export const AI_FEATURES_PLANS: PlanSlug[] = ['trial', 'inteligente'];
 
 // --- Support config ---
 
