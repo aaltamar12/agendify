@@ -238,30 +238,29 @@ interface TrialBlockScreenProps {
 
 function TrialBlockScreen({ title, subtitle, plans, siteConfig, variant }: TrialBlockScreenProps) {
   const isSuspended = variant === 'suspended';
-  const iconBg = isSuspended ? 'bg-red-100' : 'bg-violet-100';
-  const iconColor = isSuspended ? 'text-red-600' : 'text-violet-600';
+  const showPlans = variant === 'expired' && plans.length > 0;
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12">
-      <div className="w-full max-w-4xl">
+      <div className={`w-full ${showPlans ? 'max-w-4xl' : 'max-w-md'}`}>
         {/* Header */}
-        <div className="text-center mb-10">
-          <div className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full ${iconBg}`}>
+        <div className="text-center mb-8">
+          <div className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full ${isSuspended ? 'bg-red-100' : 'bg-violet-100'}`}>
             {isSuspended ? (
-              <ShieldX className={`h-8 w-8 ${iconColor}`} />
+              <ShieldX className="h-8 w-8 text-red-600" />
             ) : (
-              <Timer className={`h-8 w-8 ${iconColor}`} />
+              <Timer className="h-8 w-8 text-violet-600" />
             )}
           </div>
           <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
           <p className="mt-2 text-gray-600 max-w-lg mx-auto">{subtitle}</p>
         </div>
 
-        {/* Plan cards */}
-        {plans.length > 0 && (
+        {/* Plan cards — only for trial expired (first time choosing) */}
+        {showPlans && (
           <div className="grid gap-4 sm:grid-cols-3 mb-8">
             {plans.map((plan) => {
-              const isPopular = plan.slug === 'professional' || plan.slug === 'profesional';
+              const isPopular = plan.name?.toLowerCase().includes('profesional');
               return (
                 <div
                   key={plan.id}
@@ -275,28 +274,12 @@ function TrialBlockScreen({ title, subtitle, plans, siteConfig, variant }: Trial
                     </span>
                   )}
                   <h3 className="text-lg font-semibold text-gray-900">{plan.name}</h3>
-                  {plan.description && (
-                    <p className="mt-1 text-sm text-gray-500">{plan.description}</p>
-                  )}
                   <div className="mt-3">
                     <span className="text-3xl font-bold text-gray-900">
                       {formatCurrency(plan.price_monthly)}
                     </span>
                     <span className="text-sm text-gray-500"> /mes</span>
                   </div>
-                  {plan.features && plan.features.length > 0 && (
-                    <ul className="mt-4 flex-1 space-y-2">
-                      {plan.features.map((feature) => (
-                        <li
-                          key={feature}
-                          className="flex items-start gap-2 text-sm text-gray-600"
-                        >
-                          <Check className="mt-0.5 h-4 w-4 shrink-0 text-violet-600" />
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
                 </div>
               );
             })}
@@ -307,9 +290,13 @@ function TrialBlockScreen({ title, subtitle, plans, siteConfig, variant }: Trial
         <div className="text-center">
           <Link
             href="/dashboard/subscription/checkout"
-            className="cursor-pointer inline-flex items-center gap-2 rounded-lg bg-violet-600 px-8 py-3 text-base font-semibold text-white hover:bg-violet-700 transition-colors"
+            className={`cursor-pointer inline-flex items-center gap-2 rounded-lg transition-colors ${
+              isSuspended
+                ? 'border border-violet-600 bg-white px-5 py-2 text-sm font-medium text-violet-600 hover:bg-violet-50'
+                : 'bg-violet-600 px-8 py-3 text-base font-semibold text-white hover:bg-violet-700'
+            }`}
           >
-            Elegir plan y pagar
+            {isSuspended ? 'Renovar suscripcion' : 'Elegir plan y pagar'}
           </Link>
         </div>
 
