@@ -170,7 +170,7 @@ En `agendity.co/explore`, los usuarios pueden buscar negocios por nombre, filtra
 Cuando un usuario sube comprobante de pago, aparece en `/dashboard/payments` en la tab "Pendientes". El negocio puede:
 
 - **Ver comprobante** — imagen del recibo
-- **Aprobar** — la cita pasa a "Confirmada", se notifica al usuario
+- **Aprobar** — la cita pasa a "Confirmada", se notifica al usuario. El email de confirmacion incluye el **QR del ticket** embebido como imagen (generado con `rqrcode`)
 - **Rechazar** — con razon (ej: "Monto incorrecto"), se notifica al usuario
 - **Recordar pago** — envia email/WhatsApp al usuario pidiendo que pague
 
@@ -358,7 +358,32 @@ Cuando el trial termina o el negocio quiere contratar un plan, el flujo es:
 7. Si aprueba: `ApprovePaymentService` crea la `Subscription`, activa el `Referral` (si hay), reactiva el negocio
 8. Si rechaza: el negocio recibe notificacion con razon y puede volver a intentarlo
 
-### 7.5 Profesional independiente
+### 7.5 Codigos de descuento
+
+Desde `/dashboard/discount-codes` el negocio puede:
+- Crear codigos de descuento manuales (porcentaje o monto fijo, con limite de usos y fechas de vigencia)
+- Ver el historial de codigos activos e inactivos
+- Ver cuantas veces se ha usado cada codigo
+
+Los codigos se aplican en el paso 5 del flujo de reserva (Confirmacion). El sistema valida en tiempo real si el codigo es valido para ese negocio.
+
+Los codigos con `source: "birthday"` son generados automaticamente por el sistema y aparecen marcados como tal. Cada uno es de un solo uso y esta ligado a un cliente especifico.
+
+### 7.6 Campana de cumpleanos
+
+Si el negocio activa `birthday_campaign_enabled` en su configuracion, cada dia a las 8am el sistema (`BirthdayCampaignJob`) busca clientes con cumpleanos ese dia y:
+1. Genera un codigo de descuento unico para ese cliente (% configurable, valido X dias)
+2. Envia un email de felicitacion con el codigo y un link a la pagina de reservas
+3. Envia WhatsApp si el plan lo incluye
+
+**Configuracion** (desde Settings del negocio):
+- Activar/desactivar campana
+- % de descuento del codigo (default 10%)
+- Dias de validez del codigo (default 7)
+
+Para que funcione, el cliente debe haber proporcionado su fecha de nacimiento al reservar (campo opcional en el paso 4 del flujo de reserva).
+
+### 7.7 Profesional independiente
 
 Agendity tambien soporta profesionales independientes (sin local fisico). Se crean desde el SuperAdmin y funcionan igual que un negocio pero:
 - No tienen seccion de empleados (ellos mismos son el unico empleado)

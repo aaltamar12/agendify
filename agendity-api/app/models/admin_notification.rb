@@ -17,4 +17,8 @@ class AdminNotification < ApplicationRecord
   def self.notify!(title:, body: nil, notification_type: nil, link: nil, icon: nil)
     create!(title: title, body: body, notification_type: notification_type, link: link, icon: icon)
   end
+
+  def self.ransackable_attributes(_auth_object = nil)
+    %w[title body notification_type read created_at]
+  end
 end

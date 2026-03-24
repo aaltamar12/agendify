@@ -54,6 +54,18 @@ ActiveAdmin.register Business do
     column :city
     column :rating_average
     bool_column :onboarding_completed
+    column(:trial) do |b|
+      if b.subscriptions.active.where("end_date >= ?", Date.current).exists?
+        status_tag("Pagado", class: "", style: "background: #22c55e; color: white; border-radius: 9999px; padding: 2px 10px; font-size: 11px;")
+      elsif b.trial_ends_at.present? && b.trial_ends_at > Time.current
+        days = ((b.trial_ends_at - Time.current) / 1.day).ceil
+        status_tag("Trial (#{days}d)", class: "", style: "background: #f59e0b; color: white; border-radius: 9999px; padding: 2px 10px; font-size: 11px;")
+      elsif b.trial_ends_at.present?
+        status_tag("Expirado", class: "", style: "background: #ef4444; color: white; border-radius: 9999px; padding: 2px 10px; font-size: 11px;")
+      else
+        "—"
+      end
+    end
     column :created_at
     actions
   end
