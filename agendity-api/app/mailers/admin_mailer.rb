@@ -13,7 +13,7 @@ class AdminMailer < ApplicationMailer
 
     mail(
       to: admin_email,
-      subject: "Comprobante de pago recibido — #{@business.name}"
+      subject: "[Suscripcion] Comprobante de pago — #{@business.name} — Plan #{@plan&.name} — $#{@order.amount.to_i}"
     )
   end
 end
