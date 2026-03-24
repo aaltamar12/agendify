@@ -371,17 +371,23 @@ Los codigos con `source: "birthday"` son generados automaticamente por el sistem
 
 ### 7.6 Campana de cumpleanos
 
-Si el negocio activa `birthday_campaign_enabled` en su configuracion, cada dia a las 8am el sistema (`BirthdayCampaignJob`) busca clientes con cumpleanos ese dia y:
-1. Genera un codigo de descuento unico para ese cliente (% configurable, valido X dias)
-2. Envia un email de felicitacion con el codigo y un link a la pagina de reservas
-3. Envia WhatsApp si el plan lo incluye
+La campana de cumpleanos se activa **por negocio desde el SuperAdmin** (no desde el dashboard del negocio). Es una decision del equipo comercial de Agendity al hablar con el negocio.
 
-**Configuracion** (desde Settings del negocio):
-- Activar/desactivar campana
-- % de descuento del codigo (default 10%)
-- Dias de validez del codigo (default 7)
+**Flujo comercial:**
+1. El equipo de Agendity contacta al negocio y le ofrece la campana de cumpleanos
+2. Si el negocio acepta, el admin va a ActiveAdmin > Businesses > editar el negocio
+3. En la seccion "Birthday Campaign": check "Enabled", configura el % de descuento y los dias de validez
+4. A partir de ese momento, cada dia a las 8am el sistema (`BirthdayCampaignJob`) busca clientes de ese negocio con cumpleanos ese dia y:
+   - Genera un codigo de descuento unico para ese cliente (% configurable, valido X dias, un solo uso)
+   - Envia un email de felicitacion con el codigo y un link a la pagina de reservas
+   - Envia WhatsApp si el plan lo incluye
 
-Para que funcione, el cliente debe haber proporcionado su fecha de nacimiento al reservar (campo opcional en el paso 4 del flujo de reserva).
+**Configuracion** (desde ActiveAdmin > Businesses > Edit):
+- **Enabled**: activar/desactivar la campana para este negocio
+- **Discount %**: porcentaje de descuento del codigo generado (default 10%)
+- **Days valid**: cuantos dias tiene el cliente para usar el codigo (default 7)
+
+**Requisito:** el cliente debe haber proporcionado su fecha de nacimiento al reservar (campo opcional en el paso 4 del flujo de reserva). Si no tiene fecha de nacimiento registrada, no recibe codigo.
 
 ### 7.7 Profesional independiente
 
