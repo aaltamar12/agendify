@@ -29,7 +29,7 @@ El dueno del negocio entra a la landing page y se registra con su nombre, email,
 
 **Referidos:** Si el usuario llego via `agendity.co/register?ref=CODE`, el codigo se guarda en localStorage y se envia al backend durante el registro. Se crea un `Referral` en estado `pending` asociado al `ReferralCode` del referidor.
 
-**Email de bienvenida:** Inmediatamente despues del registro, el sistema envia via Sidekiq un email de bienvenida (`BusinessMailer#welcome`) con un mini-onboarding que explica los 6 pasos a completar, la fecha de fin del trial y los datos de contacto de soporte.
+**Email de bienvenida:** Inmediatamente despues del registro, el sistema envia via Sidekiq un email de bienvenida (`BusinessMailer#welcome`) con: saludo personalizado con el nombre del negocio, recordatorio de que el trial dura 7 dias (con fecha de vencimiento exacta), mini-onboarding con 7 funcionalidades clave (agenda, empleados, servicios, pagos, check-in, reportes, link publico de reservas), CTA "Ir al dashboard", y datos de contacto de soporte.
 
 ### 1.2 Onboarding (configuracion inicial)
 
@@ -332,20 +332,42 @@ El sistema envia notificaciones por multiples canales:
 
 Las notificaciones llegan en tiempo real via NATS WebSocket — no hay que refrescar la pagina.
 
-### 7.3 Banner de suscripcion y trial
+### 7.3 Pantalla de bloqueo (trial vencido / suspension)
 
-Cuando la suscripcion o el trial esta por vencer, aparece un banner en la parte superior del dashboard:
+Cuando el trial de 7 dias termina o el negocio es suspendido, el dashboard completo se bloquea y muestra una pantalla de interrupcion en vez del contenido habitual.
+
+**Trial vencido (dias 8-9 tras el registro):**
+- Mensaje neutro: "Tu periodo de prueba ha terminado"
+- Muestra los 3 planes disponibles (Basico, Profesional, Inteligente) con sus caracteristicas y precios
+- CTA principal: "Elegir plan y pagar" → redirige a `/dashboard/subscription/checkout`
+
+**Negocio suspendido (dia 10+ sin pagar):**
+- Mensaje urgente en rojo: "Tu cuenta ha sido suspendida"
+- Explicacion: el negocio publico esta inactivo y los clientes no pueden reservar
+- Mismos 3 planes + CTA "Reactivar ahora" → `/dashboard/subscription/checkout`
+
+**Excepcion — comprobante en revision:**
+- Si el negocio ya subio un comprobante y esta en estado `pending`, la pantalla de bloqueo **no aparece**
+- En su lugar se muestra un mensaje informativo: "Tu comprobante esta en revision. Te notificaremos pronto"
+
+La pantalla de bloqueo cubre todo el dashboard (sidebar + contenido) y no permite navegar a ninguna otra seccion hasta que el pago sea aprobado.
+
+### 7.4 Banner de suscripcion y trial
+
+Cuando la suscripcion o el trial esta por vencer, aparece un banner en la parte superior del dashboard. El banner es **clickeable** y lleva directamente a `/dashboard/subscription/checkout`. Muestra un badge "Renovar" y los dias restantes, tanto para trials como para suscripciones pagas.
 
 | Estado | Color | Mensaje |
 |--------|-------|---------|
-| 5 a 1 dias antes de vencer | Amarillo | "Tu plan Profesional vence en X dias" |
+| Trial activo (mas de 2 dias) | Amarillo | "Tu periodo de prueba vence en X dias" |
+| Trial por vencer (2 dias o menos) | Amarillo intenso | "Tu trial vence en X dias. Elige tu plan" |
+| 5 a 1 dias antes de vencer suscripcion | Amarillo | "Tu plan Profesional vence en X dias" |
 | Dia que vence | Rojo | "Tu plan Profesional vence hoy. Renueva ahora" |
 | Despues de vencer | Rojo oscuro | "Tu plan vencio hace X dias. Renueva para evitar suspension" |
 | 2 dias despues | — | Negocio suspendido automaticamente |
 
-Para negocios en trial, el banner muestra el tiempo restante del periodo de prueba de 7 dias y un CTA para ir al checkout y elegir un plan.
+El banner no aparece si el negocio tiene un comprobante de pago en revision (`pending` en `SubscriptionPaymentOrder`).
 
-### 7.4 Checkout de suscripcion (P2P)
+### 7.5 Checkout de suscripcion (P2P)
 
 Cuando el trial termina o el negocio quiere contratar un plan, el flujo es:
 
@@ -358,7 +380,7 @@ Cuando el trial termina o el negocio quiere contratar un plan, el flujo es:
 7. Si aprueba: `ApprovePaymentService` crea la `Subscription`, activa el `Referral` (si hay), reactiva el negocio
 8. Si rechaza: el negocio recibe notificacion con razon y puede volver a intentarlo
 
-### 7.5 Codigos de descuento
+### 7.6 Codigos de descuento
 
 Desde `/dashboard/discount-codes` el negocio puede:
 - Crear codigos de descuento manuales (porcentaje o monto fijo, con limite de usos y fechas de vigencia)
@@ -369,7 +391,7 @@ Los codigos se aplican en el paso 5 del flujo de reserva (Confirmacion). El sist
 
 Los codigos con `source: "birthday"` son generados automaticamente por el sistema y aparecen marcados como tal. Cada uno es de un solo uso y esta ligado a un cliente especifico.
 
-### 7.6 Campana de cumpleanos
+### 7.7 Campana de cumpleanos
 
 La campana de cumpleanos se activa **por negocio desde el SuperAdmin** (no desde el dashboard del negocio). Es una decision del equipo comercial de Agendity al hablar con el negocio.
 
@@ -389,7 +411,7 @@ La campana de cumpleanos se activa **por negocio desde el SuperAdmin** (no desde
 
 **Requisito:** el cliente debe haber proporcionado su fecha de nacimiento al reservar (campo opcional en el paso 4 del flujo de reserva). Si no tiene fecha de nacimiento registrada, no recibe codigo.
 
-### 7.7 Profesional independiente
+### 7.8 Profesional independiente
 
 Agendity tambien soporta profesionales independientes (sin local fisico). Se crean desde el SuperAdmin y funcionan igual que un negocio pero:
 - No tienen seccion de empleados (ellos mismos son el unico empleado)
@@ -473,23 +495,64 @@ Desde ActiveAdmin > Configuracion:
 - Estos valores se usan en todos los mailers y en la pagina de checkout de suscripcion
 - Ningun valor esta hardcodeado en el codigo — todo se lee con `SiteConfig.get(:clave)`
 
-### 8.10 Sidekiq
+### 8.10 Notificaciones del admin (AdminNotification)
+
+El panel del SuperAdmin incluye un sistema de notificaciones internas (`AdminNotification`) visible en el dashboard de ActiveAdmin con un badge que muestra el numero de notificaciones no leidas.
+
+**Eventos que generan una AdminNotification automaticamente:**
+- Un nuevo negocio se registra
+- Un negocio sube un comprobante de suscripcion
+- El trial de un negocio expira
+- La suscripcion de un negocio expira
+- Un negocio es suspendido automaticamente
+
+La pagina completa esta en **ActiveAdmin > Notificaciones** e incluye acciones "Marcar como leida" y "Marcar todas como leidas". Las notificaciones no leidas muestran un indicador visual en la lista.
+
+### 8.11 Trial column en tabla de negocios
+
+En **ActiveAdmin > Businesses**, la tabla incluye una columna de estado de suscripcion con etiquetas de color:
+
+| Estado | Etiqueta | Color |
+|--------|----------|-------|
+| En trial activo | Trial (Xd restantes) | Amarillo |
+| Suscripcion paga activa | Pagado | Verde |
+| Trial o suscripcion expirada | Expirado | Rojo |
+| Suspendido | Suspendido | Rojo oscuro |
+
+### 8.12 Sidekiq y sidekiq-cron
 
 En `/admin/sidekiq` se monitorean los jobs en background: colas, ejecucion, programados, fallidos. Protegido por autenticacion basica con credenciales de admin.
+
+Los jobs recurrentes corren automaticamente via **sidekiq-cron** (visible en `/admin/sidekiq/cron`). No requieren configuracion manual — se definen en codigo y se registran al arrancar Sidekiq:
+
+| Job | Frecuencia | Descripcion |
+|-----|-----------|-------------|
+| `CompleteAppointmentsJob` | Cada 15 min | Marca citas `checked_in` como `completed` |
+| `TrialExpiryAlertJob` | Diario 8am | Alertas y suspension por trial vencido |
+| `SubscriptionExpiryAlertJob` | Diario 8am | Alertas y suspension por suscripcion vencida |
+| `BirthdayCampaignJob` | Diario 8am | Codigos de descuento y mensajes de cumpleanos |
+| `Intelligence::PricingSuggestionJob` | Dia 1 y 15 del mes | Sugerencias de tarifa dinamica IA |
 
 ---
 
 ## PARTE 9 — Alertas automaticas
 
-### 9.1 Trial por vencer
+### 9.1 Trial por vencer — flujo completo
 
-Job diario (`TrialExpiryAlertJob`) a las 8am. Aplica a negocios en periodo de prueba:
+Job diario (`TrialExpiryAlertJob`) a las 8am. Aplica a negocios en periodo de prueba de 7 dias:
 
-| Momento | Accion |
-|---------|--------|
-| 2 dias antes de fin del trial | Email + notificacion in-app |
-| Dia que vence el trial | Email + notificacion + banner rojo + CTA a checkout |
-| 2 dias despues | Email + notificacion + **negocio suspendido** |
+| Dia | Momento | Accion |
+|-----|---------|--------|
+| Dia 5 | 2 dias antes de fin del trial | Banner amarillo "Tu trial vence en 2 dias" + email de aviso |
+| Dia 7 | Trial vence | Email de agradecimiento + invitacion a elegir plan. Dashboard bloqueado con pantalla de planes |
+| Dia 9 | 2 dias despues de vencer | Email urgente + **negocio suspendido**. Pantalla roja urgente en el dashboard |
+
+**Flujo del negocio para reactivarse:**
+1. El negocio entra al dashboard bloqueado y ve la pantalla de planes
+2. Va a `/dashboard/subscription/checkout`, elige un plan, sube comprobante de pago
+3. Admin recibe `AdminNotification` + email con el comprobante en revision
+4. Admin aprueba desde ActiveAdmin > Ordenes de Pago
+5. `ApprovePaymentService` reactiva el negocio con suscripcion activa — el dashboard se desbloquea inmediatamente
 
 Anti-duplicados: campo `trial_alert_stage` en `Business` (0→1→2→3). Se resetea al activar una suscripcion paga.
 
@@ -507,11 +570,11 @@ Anti-duplicados: campo `expiry_alert_stage` en la suscripcion (0→1→2→3). S
 
 ### 9.3 Completar citas
 
-Job cada 15 min (`CompleteAppointmentsJob`): busca citas en estado `checked_in` cuya hora de fin ya paso y las marca como `completed`. Dispara cashback y solicitud de calificacion.
+Job cada 15 min (`CompleteAppointmentsJob`), gestionado via sidekiq-cron: busca citas en estado `checked_in` cuya hora de fin ya paso y las marca como `completed`. Dispara cashback y solicitud de calificacion.
 
 ### 9.4 Sugerencias de tarifa dinamica (Plan Inteligente)
 
-Job quincenal (`Intelligence::PricingSuggestionJob`): analiza datos historicos de citas, detecta periodos de alta demanda y crea sugerencias de tarifa dinamica con estado `suggested`.
+Job quincenal (`Intelligence::PricingSuggestionJob`), gestionado via sidekiq-cron: corre el dia 1 y el dia 15 de cada mes. Analiza datos historicos de citas, detecta periodos de alta demanda y crea sugerencias de tarifa dinamica con estado `suggested`.
 
 ---
 
@@ -542,23 +605,23 @@ El frontend puede hacer `if (error.code === 'slot_unavailable')` en vez de compa
 
 ## RESTRICCIONES POR PLAN
 
-| Feature | Trial/Basico | Profesional | Inteligente |
-|---------|:---:|:---:|:---:|
-| Agenda, servicios, empleados, clientes, pagos, check-in, QR, notificaciones | Si | Si | Si |
-| Creditos (ver y ajustar) | Si | Si | Si |
-| Reportes basicos (resumen) | Si | Si | Si |
-| Reportes avanzados (graficas) | — | Si | Si |
-| Resenas | — | Si | Si |
-| Tarifas dinamicas (manual) | — | Si | Si |
-| Cierre de caja | — | Si | Si |
-| Personalizacion de marca (logo, colores) | — | Si | Si |
-| WhatsApp al usuario final | — | Si | Si |
-| Cashback automatico | — | Si | Si |
-| Sugerencias IA (tarifas) | — | — | Si |
-| Metas financieras | — | — | Si |
-| Reconciliacion contable | — | — | Si |
+| Feature | Trial (7 dias) | Basico | Profesional | Inteligente |
+|---------|:---:|:---:|:---:|:---:|
+| Agenda, servicios, empleados, clientes, pagos, check-in, QR, notificaciones | Si | Si | Si | Si |
+| Creditos (ver y ajustar) | Si | Si | Si | Si |
+| Reportes basicos (resumen) | Si | Si | Si | Si |
+| Reportes avanzados (graficas) | Si | — | Si | Si |
+| Resenas | Si | — | Si | Si |
+| Tarifas dinamicas (manual) | Si | — | Si | Si |
+| Cierre de caja | Si | — | Si | Si |
+| Personalizacion de marca (logo, colores) | Si | — | Si | Si |
+| WhatsApp al usuario final | Si | — | Si | Si |
+| Cashback automatico | Si | — | Si | Si |
+| Sugerencias IA (tarifas) | Si | — | — | Si |
+| Metas financieras | Si | — | — | Si |
+| Reconciliacion contable | Si | — | — | Si |
 
-El trial de 7 dias da acceso completo al Plan Profesional. Al vencer, el negocio debe contratar un plan via checkout P2P.
+**El trial de 7 dias da acceso completo a TODAS las features**, incluyendo las exclusivas del Plan Inteligente. El objetivo es que el negocio experimente el valor maximo antes de elegir un plan. Al vencer, el negocio debe contratar un plan via checkout P2P.
 
 ---
 

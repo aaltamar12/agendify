@@ -1,10 +1,11 @@
 'use client';
 
-import { Suspense, useEffect } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Eye, EyeOff } from 'lucide-react';
 import { Button, Input, Select, Card } from '@/components/ui';
 import { registerSchema, type RegisterFormData } from '@/lib/validations/auth';
 import { useRegister } from '@/lib/hooks/use-auth';
@@ -29,6 +30,8 @@ export default function RegisterPage() {
 
 function RegisterForm() {
   const searchParams = useSearchParams();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const {
     register,
@@ -80,17 +83,35 @@ function RegisterForm() {
 
         <Input
           label="Contraseña"
-          type="password"
+          type={showPassword ? 'text' : 'password'}
           placeholder="Mínimo 6 caracteres"
           error={errors.password?.message}
+          rightElement={
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          }
           {...register('password')}
         />
 
         <Input
           label="Confirmar contraseña"
-          type="password"
+          type={showConfirmPassword ? 'text' : 'password'}
           placeholder="Repite tu contraseña"
           error={errors.passwordConfirmation?.message}
+          rightElement={
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          }
           {...register('passwordConfirmation')}
         />
 

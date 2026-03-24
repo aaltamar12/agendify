@@ -1,10 +1,11 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Eye, EyeOff } from 'lucide-react';
 import { Button, Input, Card } from '@/components/ui';
 import { loginSchema, type LoginFormData } from '@/lib/validations/auth';
 import { useLogin } from '@/lib/hooks/use-auth';
@@ -20,6 +21,7 @@ export default function LoginPage() {
 function LoginForm() {
   const searchParams = useSearchParams();
   const resetSuccess = searchParams.get('reset') === 'success';
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -58,9 +60,18 @@ function LoginForm() {
 
         <Input
           label="Contraseña"
-          type="password"
+          type={showPassword ? 'text' : 'password'}
           placeholder="••••••••"
           error={errors.password?.message}
+          rightElement={
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          }
           {...register('password')}
         />
 
