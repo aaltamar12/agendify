@@ -57,8 +57,10 @@ export default function DashboardLayout({
 
   const hasPendingOrder = !!subscriptionStatus?.pending_order;
 
-  const shouldBlockTrialExpired = !isAdmin && trialExpired && !hasPendingOrder && !isBusinessSuspended;
-  const shouldBlockSuspended = !isAdmin && isBusinessSuspended && !hasPendingOrder;
+  // Allow checkout page even when blocked
+  const isCheckoutPage = pathname?.startsWith('/dashboard/subscription');
+  const shouldBlockTrialExpired = !isAdmin && !isCheckoutPage && trialExpired && !hasPendingOrder && !isBusinessSuspended;
+  const shouldBlockSuspended = !isAdmin && !isCheckoutPage && isBusinessSuspended && !hasPendingOrder;
   const isBusinessHidden = isBusinessSuspended;
   const isDemo = isDemoMode();
   const showSubscriptionBanner = daysUntilExpiry !== null && daysUntilExpiry <= 5;
@@ -305,7 +307,7 @@ function TrialBlockScreen({ title, subtitle, plans, siteConfig, variant }: Trial
         <div className="text-center">
           <Link
             href="/dashboard/subscription/checkout"
-            className="inline-flex items-center gap-2 rounded-lg bg-violet-600 px-8 py-3 text-base font-semibold text-white hover:bg-violet-700 transition-colors"
+            className="cursor-pointer inline-flex items-center gap-2 rounded-lg bg-violet-600 px-8 py-3 text-base font-semibold text-white hover:bg-violet-700 transition-colors"
           >
             Elegir plan y pagar
           </Link>
