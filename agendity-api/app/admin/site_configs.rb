@@ -1,30 +1,31 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register SiteConfig do
-  menu priority: 13, label: "Site Configs"
-  permit_params :key, :value, :description
+  menu priority: 13, label: "Configuracion"
+  permit_params :value
+
+  actions :index, :show, :edit, :update
 
   # -- Index --
   index do
-    selectable_column
-    id_column
     column :key
-    column(:value) { |c| truncate(c.value, length: 80) }
     column :description
+    column(:value) { |c| truncate(c.value, length: 80) }
     column :updated_at
-    actions
+    actions defaults: false do |config|
+      item "Editar", edit_admin_site_config_path(config)
+    end
   end
 
   # -- Filters --
   filter :key
-  filter :description
 
-  # -- Form --
+  # -- Form (only value is editable) --
   form do |f|
-    f.inputs "Configuration" do
-      f.input :key
-      f.input :value, as: :text
-      f.input :description
+    f.inputs "Configuracion" do
+      f.input :key, input_html: { disabled: true }
+      f.input :description, input_html: { disabled: true }
+      f.input :value, as: :text, hint: "Modifica el valor de esta configuracion"
     end
     f.actions
   end
@@ -32,11 +33,9 @@ ActiveAdmin.register SiteConfig do
   # -- Show --
   show do
     attributes_table do
-      row :id
       row :key
-      row :value
       row :description
-      row :created_at
+      row :value
       row :updated_at
     end
   end
