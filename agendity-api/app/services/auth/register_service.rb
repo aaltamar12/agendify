@@ -25,6 +25,8 @@ module Auth
 
         associate_referral!(business)
 
+        BusinessMailer.welcome(business).deliver_later
+
         token         = TokenGenerator.encode(user)
         refresh_token = create_refresh_token(user)
 

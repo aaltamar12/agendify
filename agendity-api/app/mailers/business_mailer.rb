@@ -113,6 +113,21 @@ class BusinessMailer < ApplicationMailer
     )
   end
 
+  # Welcome email sent right after registration.
+  def welcome(business)
+    @business          = business
+    @owner             = business.owner
+    @trial_ends_at     = business.trial_ends_at
+    @support_email     = SiteConfig.get("support_email")
+    @support_whatsapp  = SiteConfig.get("support_whatsapp")
+    @app_url           = SiteConfig.get("app_url")
+
+    mail(
+      to: @owner.email,
+      subject: "¡Bienvenido a Agendity, #{@owner.name}! Tu negocio está listo"
+    )
+  end
+
   # Remind the business about an upcoming subscription payment.
   def subscription_payment_reminder(payment_order)
     @order    = payment_order

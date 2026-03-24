@@ -1,0 +1,40 @@
+¡Bienvenido a Agendity, <%= @owner.name %>!
+
+Tu negocio "<%= @business.name %>" ya está creado.
+
+Tienes 7 días de prueba gratis con acceso completo. Tu trial termina el <%= @trial_ends_at.strftime("%d/%m/%Y") %>.
+
+--- ¿Qué puedes hacer? ---
+
+📅 Agenda — Ve y gestiona todas tus citas en un calendario visual. Crea citas manuales o recibe reservas online.
+
+👥 Empleados — Agrega tu equipo, asigna servicios y configura horarios individuales.
+
+✂️ Servicios — Define tus servicios con precio y duración. Aparecerán en tu página pública de reservas.
+
+💳 Pagos — Recibe comprobantes de pago de tus clientes y apruébalos desde la app.
+
+📱 Check-in — Escanea el QR del ticket de tu cliente cuando llegue al negocio.
+
+📊 Reportes — Mira tus ingresos, servicios más populares y clientes frecuentes.
+
+🔗 Tu link de reservas — Comparte tu link agendity.co/<%= @business.slug %> para que tus clientes reserven online 24/7.
+
+--- Próximos pasos ---
+
+Completa la configuración de tu negocio en el onboarding para empezar a recibir reservas.
+
+<% if @app_url.present? %>
+Ir al dashboard: <%= @app_url %>/dashboard
+<% end %>
+
+--- ¿Necesitas ayuda? Escríbenos: ---
+
+<% if @support_email.present? %>
+Email: <%= @support_email %>
+<% end %>
+<% if @support_whatsapp.present? %>
+WhatsApp: <%= @support_whatsapp %>
+<% end %>
+
+— El equipo de Agendity

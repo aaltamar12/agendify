@@ -1,0 +1,59 @@
+<h2>¡Bienvenido a Agendity, <%= @owner.name %>!</h2>
+
+<p>Tu negocio <strong><%= @business.name %></strong> ya está creado.</p>
+
+<p>Tienes <strong>7 días de prueba gratis</strong> con acceso completo. Tu trial termina el <strong><%= @trial_ends_at.strftime("%d/%m/%Y") %></strong>.</p>
+
+<h3>¿Qué puedes hacer?</h3>
+
+<table class="detail-table">
+  <tr>
+    <td>📅 <strong>Agenda</strong></td>
+    <td>Ve y gestiona todas tus citas en un calendario visual. Crea citas manuales o recibe reservas online.</td>
+  </tr>
+  <tr>
+    <td>👥 <strong>Empleados</strong></td>
+    <td>Agrega tu equipo, asigna servicios y configura horarios individuales.</td>
+  </tr>
+  <tr>
+    <td>✂️ <strong>Servicios</strong></td>
+    <td>Define tus servicios con precio y duración. Aparecerán en tu página pública de reservas.</td>
+  </tr>
+  <tr>
+    <td>💳 <strong>Pagos</strong></td>
+    <td>Recibe comprobantes de pago de tus clientes y apruébalos desde la app.</td>
+  </tr>
+  <tr>
+    <td>📱 <strong>Check-in</strong></td>
+    <td>Escanea el QR del ticket de tu cliente cuando llegue al negocio.</td>
+  </tr>
+  <tr>
+    <td>📊 <strong>Reportes</strong></td>
+    <td>Mira tus ingresos, servicios más populares y clientes frecuentes.</td>
+  </tr>
+  <tr>
+    <td>🔗 <strong>Tu link de reservas</strong></td>
+    <td>Comparte tu link <strong>agendity.co/<%= @business.slug %></strong> para que tus clientes reserven online 24/7.</td>
+  </tr>
+</table>
+
+<h3>Próximos pasos</h3>
+
+<p>Completa la configuración de tu negocio en el onboarding para empezar a recibir reservas.</p>
+
+<% if @app_url.present? %>
+  <p><a href="<%= @app_url %>/dashboard" style="display: inline-block; background-color: #7c3aed; color: #ffffff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600;">Ir al dashboard</a></p>
+<% end %>
+
+<h3>¿Necesitas ayuda?</h3>
+
+<p>Escríbenos:</p>
+
+<% if @support_email.present? %>
+  <p>📧 Email: <strong><%= @support_email %></strong></p>
+<% end %>
+<% if @support_whatsapp.present? %>
+  <p>💬 WhatsApp: <strong><%= @support_whatsapp %></strong></p>
+<% end %>
+
+<p>— El equipo de Agendity</p>
