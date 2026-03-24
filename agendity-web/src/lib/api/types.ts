@@ -114,6 +114,7 @@ export interface Business {
   featured?: boolean;
   // True when business has a plan with ai_features (verified badge in explore)
   verified?: boolean;
+  trial_ends_at: string | null;
   // Included via serializer association
   current_subscription?: Subscription | null;
 }

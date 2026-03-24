@@ -52,6 +52,7 @@ export function seedSecondBusiness(): Business {
     owner_id: 2,
     created_at: '2025-10-01T10:00:00Z',
     updated_at: '2026-03-15T10:00:00Z',
+    trial_ends_at: null,
     featured: true,
     current_subscription: {
       id: 2,
@@ -213,6 +214,7 @@ export function seedBusiness(): Business {
     owner_id: 1,
     created_at: '2025-11-01T10:00:00Z',
     updated_at: '2026-03-15T10:00:00Z',
+    trial_ends_at: null,
     featured: true,
     current_subscription: seedSubscription(),
   };

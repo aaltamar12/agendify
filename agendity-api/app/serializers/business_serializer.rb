@@ -16,6 +16,7 @@ class BusinessSerializer < Blueprinter::Base
          :nequi_phone, :daviplata_phone, :bancolombia_account,
          :nit, :legal_representative_name, :legal_representative_document, :legal_representative_document_type, :independent,
          :birthday_campaign_enabled, :birthday_discount_pct, :birthday_discount_days_valid,
+         :trial_ends_at,
          :created_at, :updated_at
 
   # Serve logo from ActiveStorage attachment, fallback to legacy logo_url column
