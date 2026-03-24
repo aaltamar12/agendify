@@ -132,7 +132,7 @@ function RegisterForm() {
 
         {registerMutation.isError && (
           <p className="text-sm text-red-600">
-            {(registerMutation.error as Error)?.message ||
+            {(registerMutation.error as any)?.response?.data?.error ||
               'Hubo un error al crear la cuenta. Intenta de nuevo.'}
           </p>
         )}

@@ -77,7 +77,7 @@ function LoginForm() {
 
         {loginMutation.isError && (
           <p className="text-sm text-red-600">
-            {(loginMutation.error as Error)?.message ||
+            {(loginMutation.error as any)?.response?.data?.error ||
               'Credenciales inválidas. Intenta de nuevo.'}
           </p>
         )}
