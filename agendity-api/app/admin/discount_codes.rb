@@ -75,7 +75,7 @@ ActiveAdmin.register DiscountCode do
       f.input :code
       f.input :name
       f.input :discount_type, as: :select, collection: %w[percentage fixed]
-      f.input :discount_value
+      f.input :discount_value, as: :number, min: 0, step: 0.01
       f.input :max_uses
       f.input :valid_from, as: :datepicker
       f.input :valid_until, as: :datepicker
