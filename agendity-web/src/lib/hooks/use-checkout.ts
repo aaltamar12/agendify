@@ -32,7 +32,12 @@ export function useSubscriptionCheckout() {
       const formData = new FormData();
       formData.append('plan_id', String(data.plan_id));
       formData.append('proof', data.proof);
-      return post(ENDPOINTS.SUBSCRIPTION.checkout, formData);
+      // Let Axios set Content-Type automatically so it includes the multipart
+      // boundary. The instance default (application/json) must be unset here,
+      // otherwise Rails never receives the file.
+      return post(ENDPOINTS.SUBSCRIPTION.checkout, formData, {
+        headers: { 'Content-Type': undefined },
+      });
     },
   });
 }
