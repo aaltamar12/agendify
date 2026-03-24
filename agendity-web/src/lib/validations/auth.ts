@@ -24,7 +24,7 @@ export const registerSchema = z
       .string()
       .min(1, 'Confirma tu contraseña'),
     businessName: z.string().min(1, 'El nombre del negocio es requerido'),
-    businessType: z.enum(['barberia', 'salon'], {
+    businessType: z.enum(['barbershop', 'salon', 'spa', 'nails', 'estetica', 'consultorio', 'other'], {
       error: 'Selecciona el tipo de negocio',
     }),
     referralCode: z.string().optional(),

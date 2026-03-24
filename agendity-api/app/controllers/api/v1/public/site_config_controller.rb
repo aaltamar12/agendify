@@ -7,6 +7,7 @@ module Api
       # No authentication required.
       class SiteConfigController < BaseController
         skip_before_action :authenticate_user!
+        skip_before_action :require_business!
         skip_before_action :render_empty_for_admin_without_business!
 
         # GET /api/v1/public/site_config
