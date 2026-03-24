@@ -30,6 +30,7 @@ gem "city-state"
 
 # Background jobs
 gem "sidekiq", "~> 7.0"
+gem "sidekiq-cron"
 
 # Redis
 gem "redis"
