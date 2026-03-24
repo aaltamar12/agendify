@@ -80,7 +80,7 @@ ActiveAdmin.register ReferralCode do
       f.input :referrer_name
       f.input :referrer_email
       f.input :referrer_phone
-      f.input :commission_percentage, label: "Commission (%)"
+      f.input :commission_percentage, label: "Comision (%)", as: :number, min: 0, max: 100, step: 0.01
       f.input :status, as: :select, collection: ReferralCode.statuses.keys
       f.input :notes
     end
