@@ -5,6 +5,7 @@
 # Safe to run multiple times (find_or_create_by).
 
 Rails.application.config.after_initialize do
+  next if Rails.env.test?
   next unless ActiveRecord::Base.connection.table_exists?("site_configs")
 
   [
