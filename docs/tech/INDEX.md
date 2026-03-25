@@ -1,6 +1,6 @@
 # Documentación Técnica — Agendity
 
-> Ultima actualizacion: 2026-03-24 (actualizado con discount codes, birthday campaigns, welcome email, QR en email, employee checkin endpoint, demand analysis mejorado, formatCurrency, industry-agnostic copys, subscription banner)
+> Ultima actualizacion: 2026-03-25 (agregados sidekiq-jobs.md, email-bienvenida.md; alertas-suscripcion.md con Stage 4 deactivation)
 > **Fase del proyecto:** Pre-lanzamiento (15+ etapas de features completadas)
 
 ## Índice
@@ -36,6 +36,8 @@
 | [banners-publicitarios.md](banners-publicitarios.md) | Banners publicitarios en Explore: modelo, tracking de impresiones/clicks, gestion desde ActiveAdmin |
 | [whatsapp-plan-gating.md](whatsapp-plan-gating.md) | WhatsApp gated por plan: MultiChannelService, canales por plan, WhatsAppChannel stub |
 | [codigos-descuento-cumpleanos.md](codigos-descuento-cumpleanos.md) | Codigos de descuento (modelo, CRUD, validacion publica, booking flow) + campanas de cumpleanos (BirthdayCampaignJob, birth_date en Customer) |
+| [sidekiq-jobs.md](sidekiq-jobs.md) | Todos los Sidekiq jobs: lista completa, queues, schedules, sidekiq.yml, sidekiq-cron initializer, monitoreo |
+| [email-bienvenida.md](email-bienvenida.md) | Email de bienvenida post-registro: BusinessMailer#welcome, contenido, variables SiteConfig, flujo |
 | [../costos-operativos.md](../costos-operativos.md) | Costos operativos: notificaciones, infra, WhatsApp, email, escalas LATAM |
 | [decisiones/](decisiones/) | ADRs (Architecture Decision Records) |
 

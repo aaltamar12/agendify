@@ -539,7 +539,7 @@ El producto está funcional de punta a punta. Todas las features core están imp
 - [x] Mailers usan SiteConfig.get() en vez de valores hardcoded
 - [x] Trial de 7 días (antes 30) — Business#trial_ends_at = 7.days.from_now al registrar
 - [x] TrialExpiryAlertJob (diario 8am, 3 stages: aviso 2 días antes, día de fin, suspensión 2 días después)
-- [x] trial_alert_stage en Business para anti-duplicados de alertas de trial
+- [x] trial_alert_stage en Business para anti-duplicados de alertas de trial (0=ninguna, 1=2d aviso, 2=dia fin, 3=suspendido, 4=inactivo)
 - [x] Tipo de pago de empleado: payment_type (manual/commission/fixed_daily) + fixed_daily_pay; cierre de caja calcula según tipo; alerta naranja en formulario para empleados manuales
 - [x] Error codes en API: ServiceResult con error_code, render_error con code: param; códigos definidos en appointments, auth, bookings, cash register, credits, invitations
 - [x] Copys industry-agnostic: landing, SEO, registro y explore ya no dicen "barberías y salones" sino "negocios que trabajan con citas"; nuevos tipos de negocio en registro (spa, estudio de uñas, consultorio, masajes, etc.)
@@ -561,7 +561,7 @@ El producto está funcional de punta a punta. Todas las features core están imp
 
 ### Cambios recientes — nuevas features (marzo 2026)
 - [x] Sistema de referidos (ReferralCode + Referral, link ?ref=CODE → localStorage → registro → activación al aprobar pago, panel ActiveAdmin)
-- [x] Trial reducido a 7 días + TrialExpiryAlertJob con 3 stages + trial_alert_stage en Business
+- [x] Trial reducido a 7 días + TrialExpiryAlertJob con 4 stages (2d aviso, dia fin, +2d suspension, +7d inactive) + trial_alert_stage en Business
 - [x] Checkout de suscripción P2P (página /dashboard/subscription/checkout, CheckoutService, ApprovePaymentService)
 - [x] SiteConfig: configuración de plataforma en DB (key/value, 7 claves), seeds con datos de contacto, pago y app_url, editable desde ActiveAdmin
 - [x] Tipo de pago de empleado (payment_type: manual/commission/fixed_daily, fixed_daily_pay, cierre de caja adaptado)
@@ -614,6 +614,9 @@ El producto está funcional de punta a punta. Todas las features core están imp
 - Ver `docs/tech/flujos-completos.md` para diagramas detallados de todos los flujos del sistema.
 - Ver `docs/tech/sistema-referidos.md` para el flujo técnico del sistema de referidos y checkout de suscripción.
 - Ver `docs/tech/codigos-descuento-cumpleanos.md` para la documentación técnica de códigos de descuento y campañas de cumpleaños.
+- Ver `docs/tech/sidekiq-jobs.md` para la lista completa de jobs, queues, schedules y config de sidekiq-cron.
+- Ver `docs/tech/email-bienvenida.md` para el email de bienvenida post-registro (BusinessMailer#welcome).
+- Ver `docs/tech/alertas-suscripcion.md` para el flujo de alertas de trial y suscripción con los 4 stages (incluyendo Stage 4: inactive en día +7).
 
 ### Pendiente para lanzamiento
 - [ ] CI/CD (GitHub Actions) — nice to have

@@ -12,11 +12,12 @@ Adicionalmente, existe un job separado para el periodo de trial (`TrialExpiryAle
 
 ### Flujo de alertas
 
-| Momento | Canales | Accion adicional |
-|---------|---------|------------------|
-| 5 dias antes | Email + In-app + NATS + WhatsApp* | Warning |
-| Dia de vencimiento | Email + In-app + NATS + WhatsApp* | Urgencia |
-| 2 dias despues | Email + In-app + NATS + WhatsApp* | **Negocio suspendido** |
+| Stage | Momento | Canales | Accion adicional |
+|-------|---------|---------|------------------|
+| 1 | 5 dias antes | Email + In-app + NATS + WhatsApp* | Warning |
+| 2 | Dia de vencimiento | Email + In-app + NATS + WhatsApp* | Urgencia |
+| 3 | Dia +2 despues | Email + In-app + NATS + WhatsApp* | **Negocio suspendido** (`suspended`) |
+| 4 | Dia +7 despues | — | **Negocio desactivado** (`inactive`) — dashboard bloqueado total |
 
 *WhatsApp solo si el plan lo incluye (`plan.whatsapp_notifications?`)
 
@@ -26,7 +27,8 @@ Campo `expiry_alert_stage` en `subscriptions`:
 - `0` = ninguna alerta enviada
 - `1` = alerta de 5 dias enviada
 - `2` = alerta de dia de vencimiento enviada
-- `3` = alerta final + negocio suspendido
+- `3` = alerta final + negocio suspendido (`suspended`)
+- `4` = negocio desactivado (`inactive`) — dashboard bloqueado total
 
 Se resetea a `0` cuando se renueva la suscripcion via `process_renewal!`.
 
@@ -34,22 +36,62 @@ Se resetea a `0` cuando se renueva la suscripcion via `process_renewal!`.
 
 ```ruby
 # app/jobs/subscription_expiry_alert_job.rb
-# Corre diario a las 8am (config/recurring.yml)
+# Cola: default | Schedule: diario 8am (sidekiq-cron)
 class SubscriptionExpiryAlertJob < ApplicationJob
   queue_as :default
 
   def perform
     # Stage 1: 5 dias antes
     Subscription.expiring_in(5).where(expiry_alert_stage: 0)
+      .includes(:plan, business: :owner).find_each { |s| send_alert(s, stage: 1) }
 
     # Stage 2: Dia de vencimiento
     Subscription.active.where(end_date: Date.current, expiry_alert_stage: 1)
+      .includes(:plan, business: :owner).find_each { |s| send_alert(s, stage: 2) }
 
-    # Stage 3: 2 dias despues (gracia)
+    # Stage 3: 2 dias despues (gracia) — suspend
     Subscription.expired_since(2).where(expiry_alert_stage: 2)
+      .includes(:plan, business: :owner).find_each do |s|
+        send_alert(s, stage: 3)
+        suspend_business!(s)        # business.suspended!
+      end
+
+    # Stage 4: 7 dias despues — deactivate (bloqueo total)
+    Subscription.expired_since(7).where(expiry_alert_stage: 3)
+      .includes(:plan, business: :owner).find_each do |s|
+        deactivate_business!(s)     # s.update!(expiry_alert_stage: 4) + business.inactive!
+      end
   end
 end
 ```
+
+**Stage 4 — deactivate_business!:**
+```ruby
+def deactivate_business!(subscription)
+  business = subscription.business
+  subscription.update!(expiry_alert_stage: 4)
+  business.inactive!
+
+  AdminNotification.notify!(
+    title: "Negocio desactivado por suscripcion vencida",
+    body: "#{business.name} fue desactivado automaticamente (7 dias sin renovar)",
+    notification_type: "business_deactivated",
+    link: "/admin/businesses/#{business.id}"
+  )
+
+  ActivityLog.log(
+    business: business,
+    action: "business_deactivated",
+    description: "Negocio desactivado por suscripcion vencida (7 dias sin renovar)",
+    actor_type: "system",
+    resource: subscription
+  )
+end
+```
+
+**Diferencia entre `suspended` e `inactive`:**
+- `suspended` (stage 3): dashboard accesible con banner, pagina publica deshabilitada
+- `inactive` (stage 4): dashboard completamente bloqueado, pantalla "Cuenta desactivada"
 
 ### Scopes en Subscription
 
@@ -76,15 +118,16 @@ Disponible desde ActiveAdmin > Subscriptions > "Renovar suscripcion"
 
 ### Contexto
 
-El trial dura **7 dias** (antes eran 30). Al registrarse, `Business#trial_ends_at` se fija en `7.days.from_now`. Cuando el trial termina, el negocio debe elegir un plan y subir comprobante de pago para continuar.
+El trial dura **7 dias**. Al registrarse, `Business#trial_ends_at` se fija en `7.days.from_now`. Cuando el trial termina, el negocio debe elegir un plan y subir comprobante de pago para continuar.
 
 ### Flujo de alertas
 
-| Momento | Stage | Canales | Accion |
-|---------|-------|---------|--------|
-| 2 dias antes del fin del trial | 1 | Email + In-app + WhatsApp* | Aviso: "Tu trial termina en 2 dias, elige tu plan" |
-| Dia que termina el trial | 2 | Email + In-app + WhatsApp* | Email de agradecimiento + enlace a elegir plan |
-| 2 dias despues del fin del trial | 3 | Email + In-app + WhatsApp* | **Negocio suspendido automaticamente** |
+| Stage | Momento | Canales | Accion |
+|-------|---------|---------|--------|
+| 1 | 2 dias antes del fin del trial | Email + In-app + WhatsApp* | Aviso: "Tu trial termina en 2 dias, elige tu plan" |
+| 2 | Dia que termina el trial | Email + In-app + WhatsApp* | `trial_ended_thank_you` + enlace a elegir plan |
+| 3 | Dia +2 despues del fin del trial | Email + In-app + WhatsApp* | **Negocio suspendido** (`suspended`) |
+| 4 | Dia +7 despues del fin del trial | — | **Negocio desactivado** (`inactive`) — dashboard bloqueado total |
 
 *WhatsApp solo si el plan del trial lo incluye.
 
@@ -94,7 +137,8 @@ Campo `trial_alert_stage` en `businesses`:
 - `0` = ninguna alerta enviada
 - `1` = alerta de 2 dias antes enviada
 - `2` = alerta del dia de fin enviada
-- `3` = alerta final + negocio suspendido
+- `3` = alerta final + negocio suspendido (`suspended`)
+- `4` = negocio desactivado (`inactive`) — dashboard bloqueado total
 
 Sirve como anti-duplicados: cada stage se envia una sola vez.
 
@@ -102,23 +146,55 @@ Sirve como anti-duplicados: cada stage se envia una sola vez.
 
 ```ruby
 # app/jobs/trial_expiry_alert_job.rb
-# Corre diario a las 8am (config/recurring.yml)
+# Cola: default | Schedule: diario 8am (sidekiq-cron)
 class TrialExpiryAlertJob < ApplicationJob
   queue_as :default
 
   def perform
     # Stage 1: 2 dias antes
-    Business.on_trial.where(trial_ends_at: 2.days.from_now.beginning_of_day..2.days.from_now.end_of_day)
-             .where(trial_alert_stage: 0)
+    Business.trial_expiring_in(2).where(trial_alert_stage: 0)
+      .includes(:owner, :subscriptions).find_each { |b| send_alert(b, stage: 1) }
 
     # Stage 2: Dia que termina el trial
-    Business.on_trial.where(trial_ends_at: Date.current.beginning_of_day..Date.current.end_of_day)
-             .where(trial_alert_stage: 1)
+    Business.trial_expiring_in(0).where(trial_alert_stage: 1)
+      .includes(:owner, :subscriptions).find_each { |b| send_alert(b, stage: 2) }
 
     # Stage 3: 2 dias despues (suspender)
-    Business.on_trial.where(trial_ends_at: ..2.days.ago.end_of_day)
-             .where(trial_alert_stage: 2)
+    Business.trial_expired_since(2).where(trial_alert_stage: 2)
+      .includes(:owner, :subscriptions).find_each do |b|
+        send_alert(b, stage: 3)
+        suspend_business!(b)          # business.suspended!
+      end
+
+    # Stage 4: 7 dias despues (desactivar — bloqueo total)
+    Business.trial_expired_since(7).where(trial_alert_stage: 3)
+      .includes(:owner, :subscriptions).find_each do |b|
+        deactivate_business!(b)       # business.update!(trial_alert_stage: 4) + business.inactive!
+      end
   end
+end
+```
+
+**Stage 4 — deactivate_business!:**
+```ruby
+def deactivate_business!(business)
+  business.update!(trial_alert_stage: 4)
+  business.inactive!
+
+  AdminNotification.notify!(
+    title: "Negocio desactivado por trial vencido",
+    body: "#{business.name} fue desactivado (7 dias sin suscribirse)",
+    notification_type: "business_deactivated",
+    link: "/admin/businesses/#{business.id}"
+  )
+
+  ActivityLog.log(
+    business: business,
+    action: "business_deactivated",
+    description: "Negocio desactivado por trial vencido (7 dias sin suscribirse)",
+    actor_type: "system",
+    resource: business
+  )
 end
 ```
 
@@ -194,6 +270,57 @@ Esto es diferente al `trial_expiry_alert(business, stage: 2)` que tambien existe
 
 ---
 
+---
+
+## 3. Configuracion de Sidekiq
+
+### sidekiq.yml
+
+```yaml
+# config/sidekiq.yml
+---
+:concurrency: 5
+:queues:
+  - default
+  - notifications
+  - intelligence
+  - mailers
+```
+
+Los jobs de alertas de suscripcion y trial usan la cola `default`.
+
+### sidekiq-cron (initializer)
+
+```ruby
+# config/initializers/sidekiq_cron.rb
+if Sidekiq.server?
+  Sidekiq::Cron::Job.load_from_hash!(
+    "trial_expiry_alerts" => {
+      "class" => "TrialExpiryAlertJob",
+      "cron"  => "0 8 * * *",    # Daily at 8:00 AM
+      "queue" => "default",
+      "description" => "Alertas de trial (2d antes, dia de, +2d suspension, +7d inactivar)"
+    },
+    "subscription_expiry_alerts" => {
+      "class" => "SubscriptionExpiryAlertJob",
+      "cron"  => "0 8 * * *",    # Daily at 8:00 AM
+      "queue" => "default",
+      "description" => "Alertas de suscripcion (5d antes, dia de, +2d suspension, +7d inactivar)"
+    }
+    # ... mas jobs en config/initializers/sidekiq_cron.rb
+  )
+end
+```
+
+Ver el doc completo de todos los jobs en [sidekiq-jobs.md](sidekiq-jobs.md).
+
+### Monitoreo
+
+- `/admin/sidekiq` — panel de Sidekiq Web (queues, retries, stats)
+- `/admin/sidekiq/cron` — listado de jobs recurrentes con ultima ejecucion y estado
+
+---
+
 ## Archivos clave
 
 - `app/jobs/subscription_expiry_alert_job.rb`
@@ -205,4 +332,5 @@ Esto es diferente al `trial_expiry_alert(business, stage: 2)` que tambien existe
 - `app/views/business_mailer/subscription_renewed.html.erb`
 - `app/views/business_mailer/trial_expiry_alert_stage_*.html.erb`
 - `agendity-web/src/components/layout/subscription-banner.tsx`
-- `config/recurring.yml` (schedule)
+- `config/initializers/sidekiq_cron.rb` (schedule)
+- `config/sidekiq.yml` (queues + concurrency)

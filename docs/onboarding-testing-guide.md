@@ -588,16 +588,25 @@ En **ActiveAdmin > Businesses**, la tabla incluye una columna de estado de suscr
 
 En `/admin/sidekiq` se monitorean los jobs en background: colas, ejecucion, programados, fallidos. Protegido por autenticacion basica con credenciales de admin.
 
-Los jobs recurrentes corren automaticamente via **sidekiq-cron** (visible en `/admin/sidekiq/cron`). No requieren configuracion manual — se definen en codigo y se registran al arrancar Sidekiq:
+**Configuracion de colas** (`config/sidekiq.yml`):
+
+- `default` — jobs generales (notificaciones al negocio, alertas de suscripcion)
+- `notifications` — notificaciones al usuario final (solicitud de calificacion, cashback)
+- `intelligence` — jobs de IA (sugerencias de tarifa dinamica)
+- `mailers` — reservado para futuros jobs de email dedicados
+
+Los jobs recurrentes corren automaticamente via **sidekiq-cron** (visible en `/admin/sidekiq/cron`). Se definen en `config/initializers/sidekiq_cron.rb` y se registran al arrancar Sidekiq:
 
 
-| Job                                  | Frecuencia         | Descripcion                                   |
-| ------------------------------------ | ------------------ | --------------------------------------------- |
-| `CompleteAppointmentsJob`            | Cada 15 min        | Marca citas `checked_in` como `completed`     |
-| `TrialExpiryAlertJob`                | Diario 8am         | Alertas y suspension por trial vencido        |
-| `SubscriptionExpiryAlertJob`         | Diario 8am         | Alertas y suspension por suscripcion vencida  |
-| `BirthdayCampaignJob`                | Diario 8am         | Codigos de descuento y mensajes de cumpleanos |
-| `Intelligence::PricingSuggestionJob` | Dia 1 y 15 del mes | Sugerencias de tarifa dinamica IA             |
+| Job                                  | Frecuencia         | Descripcion                                                              |
+| ------------------------------------ | ------------------ | ------------------------------------------------------------------------ |
+| `CompleteAppointmentsJob`            | Cada 15 min        | Marca citas `checked_in` como `completed`; dispara cashback y calificacion |
+| `TrialExpiryAlertJob`                | Diario 8am         | 4 stages: aviso 2d, dia de fin, suspension +2d, desactivacion +7d       |
+| `SubscriptionExpiryAlertJob`         | Diario 8am         | 4 stages: aviso 5d, dia de fin, suspension +2d, desactivacion +7d       |
+| `BirthdayCampaignJob`                | Diario 8am         | Genera codigos de cumpleanos para negocios con la campana activa         |
+| `Intelligence::PricingSuggestionJob` | Dia 1 y 15 del mes | Analiza demanda historica y genera sugerencias de tarifas dinamicas      |
+
+Ver documentacion completa en `docs/tech/sidekiq-jobs.md`.
 
 
 ---
