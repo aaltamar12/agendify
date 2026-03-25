@@ -8,8 +8,8 @@ Rails.application.routes.draw do
 
   # Sidekiq Web UI — authenticated behind ActiveAdmin session
   Sidekiq::Web.use(Rack::Auth::Basic) do |username, password|
-    admin = AdminUser.find_by(email: username)
-    admin&.valid_password?(password)
+    user = User.find_by(email: username, role: :admin)
+    user&.valid_password?(password)
   end
   mount Sidekiq::Web => "/admin/sidekiq"
 

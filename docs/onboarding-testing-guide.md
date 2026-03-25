@@ -4,13 +4,14 @@ Esta guia presenta TODAS las funcionalidades de Agendity siguiendo el flujo natu
 
 ---
 
-## Que es Agendity
+## sQue es Agendity
 
 Agendity es una plataforma SaaS de gestion de citas para cualquier negocio que trabaje con reservas: barberias, salones de belleza, spas, estudios de unas, consultorios, masajes, cosmetologia y mas. Permite a los negocios recibir reservas online, gestionar pagos, empleados, clientes y reportes desde un solo lugar. Los usuarios finales (clientes del negocio) reservan sin necesidad de crear cuenta.
 
 Los copys de la plataforma (landing, SEO, registro, explore) son industry-agnostic: no dicen "barberias y salones" sino "negocios que trabajan con citas". Los tipos de negocio disponibles en el registro cubren barberia, salon, spa, estudio de unas, consultorio, masajes, cosmetologia, entre otros.
 
 **Actores principales:**
+
 - **Cliente** = el negocio (barberia, salon, consultorio, etc.) que paga suscripcion
 - **Usuario final** = la persona que reserva citas (no paga, no necesita cuenta)
 - **Empleado** = staff del negocio con portal propio
@@ -23,6 +24,7 @@ Los copys de la plataforma (landing, SEO, registro, explore) son industry-agnost
 ### 1.1 Registro
 
 El dueno del negocio entra a la landing page y se registra con su nombre, email, telefono, contrasena y tipo de negocio (barberia, salon, spa, estudio de unas, consultorio, masajes, cosmetologia, etc.). Al registrarse se crea automaticamente:
+
 - Una cuenta de usuario (role: owner)
 - Un negocio con slug unico (ej: `barberia-elite`)
 - Una suscripcion trial de **7 dias**
@@ -65,6 +67,7 @@ Desde `/dashboard/settings` el negocio puede en cualquier momento:
 La pantalla principal del dashboard es la agenda. Muestra todas las citas en un calendario visual (FullCalendar) con vista de dia o semana.
 
 **Colores por estado:**
+
 - Naranja = pendiente de pago
 - Azul = comprobante enviado
 - Verde = confirmada
@@ -73,6 +76,7 @@ La pantalla principal del dashboard es la agenda. Muestra todas las citas en un 
 - Rojo = cancelada
 
 **Acciones:**
+
 - Filtrar por empleado
 - Navegar entre dias/semanas
 - Click en una cita para ver detalle completo
@@ -101,6 +105,7 @@ CRUD completo de servicios con nombre, descripcion, precio (COP), duracion (minu
 ### 2.5 Gestion de empleados
 
 CRUD completo de empleados con:
+
 - Nombre, telefono, email, foto de perfil
 - Servicios que ofrece (relacion many-to-many)
 - Horario individual por dia de la semana
@@ -123,6 +128,7 @@ Lista de todos los clientes que han reservado al menos una vez. Incluye busqueda
 ### 3.1 Pagina publica del negocio
 
 Cada negocio tiene una pagina publica en `agendity.co/{slug}`. Muestra:
+
 - Portada y logo
 - Descripcion, tipo de negocio, calificacion promedio
 - Lista de servicios con precio y duracion
@@ -141,6 +147,7 @@ Cada negocio tiene una pagina publica en `agendity.co/{slug}`. Muestra:
 5. **Confirmacion** — resumen completo: servicio(s), empleado, fecha/hora, precio (con tarifa dinamica si aplica), creditos aplicados, instrucciones de pago (a que numero de Nequi/Daviplata/Bancolombia enviar). El usuario puede ingresar un **codigo de descuento** — se valida en tiempo real contra la API y se muestra el desglose actualizado
 
 Al confirmar:
+
 - Se crea la cita con estado `pending_payment`
 - Se genera un codigo de ticket unico (ej: `FE89E62168B5`)
 - Se bloquea el slot para evitar doble reserva
@@ -183,6 +190,7 @@ Si el usuario aplico creditos, se muestra el precio original tachado y el nuevo 
 Cuando el usuario llega al local, presenta su ticket (QR en el celular o impreso). El negocio escanea el QR desde `/dashboard/checkin` usando la camara del dispositivo, o ingresa el codigo manualmente.
 
 **Reglas:**
+
 - Solo funciona 30 minutos antes de la hora de la cita
 - Solo citas con estado "Confirmada" pueden hacer check-in
 - Si un empleado diferente al asignado hace el check-in, se pide confirmacion y razon (cambio de turno, empleado ausente, etc.)
@@ -191,10 +199,12 @@ Cuando el usuario llega al local, presenta su ticket (QR en el celular o impreso
 ### 4.3 Completar citas automaticamente
 
 Un job automatico (`CompleteAppointmentsJob`) corre cada 15 minutos y marca como "Completada" las citas que:
+
 - Estan en estado `checked_in`
 - Ya paso la hora de fin del servicio
 
 Al completarse:
+
 - Si el plan tiene cashback, se otorgan creditos al cliente automaticamente
 - Se envia email/WhatsApp al usuario pidiendo que califique su experiencia
 
@@ -205,6 +215,7 @@ Al completarse:
 ### 5.1 Invitacion
 
 El negocio puede invitar empleados a tener su propia cuenta:
+
 1. Desde `/dashboard/employees`, click "Invitar" junto al empleado
 2. Se genera un link por email
 3. El empleado abre el link, crea su contrasena y accede al portal
@@ -212,6 +223,7 @@ El negocio puede invitar empleados a tener su propia cuenta:
 ### 5.2 Dashboard del empleado
 
 El empleado ve su rendimiento personal:
+
 - **Score** (0-100) — basado en calificaciones de clientes (60%) y puntualidad en check-ins (40%)
 - **Calificacion promedio** de resenas
 - **Citas de hoy** y del mes
@@ -243,15 +255,18 @@ El historial de cierres esta en `/dashboard/cash-register/history` con filtros p
 El sistema de creditos funciona como un monedero virtual por cliente:
 
 **Como se generan creditos:**
+
 - **Cashback** — al completar una cita, se otorga un % del precio como credito (configurado por SuperAdmin en el plan)
 - **Reembolso por cancelacion** — si el usuario cancela dentro del plazo, el monto menos la penalizacion se devuelve como credito
 - **Ajuste manual** — el negocio puede agregar o quitar creditos a cualquier cliente
 - **Credito masivo** — dar creditos a multiples clientes a la vez (ej: promocion de apertura)
 
 **Como se usan:**
+
 - En el paso 4 de la reserva, si el cliente tiene creditos, se muestra el balance y puede aplicarlos al pago
 
 **Donde se gestionan:**
+
 - `/dashboard/credits` — ver resumen, historial por cliente, hacer ajustes
 
 ### 6.3 Tarifas dinamicas (Plan Profesional+)
@@ -259,10 +274,12 @@ El sistema de creditos funciona como un monedero virtual por cliente:
 Permite ajustar precios automaticamente segun la fecha:
 
 **Manual (Profesional+):**
+
 - Crear reglas con nombre, rango de fechas, % o COP de ajuste, modo (fijo o progresivo), dias de la semana
 - Ejemplo: "Fin de semana +15%" para viernes y sabados
 
 **IA (Inteligente):**
+
 - El sistema analiza datos historicos y detecta periodos de alta demanda
 - Genera sugerencias automaticas (ej: "Diciembre tiene 40% mas demanda — sugerimos +20%")
 - El negocio acepta o rechaza cada sugerencia
@@ -272,6 +289,7 @@ Las tarifas activas se aplican automaticamente en el flujo de reserva publica. E
 ### 6.4 Metas financieras (Plan Inteligente)
 
 El negocio establece objetivos y ve progreso en tiempo real:
+
 - **Meta mensual** — "Quiero facturar $5.000.000 este mes" → barra de progreso + cuanto falta
 - **Punto de equilibrio** — ingresar costos fijos, ver cuanto falta para cubrir gastos
 - **Promedio diario** — meta de ingresos por dia
@@ -280,6 +298,7 @@ El negocio establece objetivos y ve progreso en tiempo real:
 ### 6.5 Reconciliacion contable (Plan Inteligente)
 
 Verifica la consistencia de los datos financieros:
+
 - Balance de empleados: comisiones acumuladas vs pagos realizados
 - Creditos de clientes: suma de transacciones vs balance actual
 - Si hay discrepancias, se muestran en tabla roja para corregir
@@ -310,25 +329,30 @@ En `/dashboard/qr` el negocio obtiene su link publico y un QR descargable para i
 El sistema envia notificaciones por multiples canales:
 
 **Al negocio:**
+
 - Notificacion in-app (campana en el dashboard)
 - Notificacion del navegador (push notification)
 - Sonido de alerta
 
 **Al usuario final:**
+
 - Email (todos los planes)
 - WhatsApp (Plan Profesional+) — via WhatsApp Business API de Meta
 
 **Eventos que generan notificacion:**
-| Evento | Al negocio | Al usuario |
-|--------|:----------:|:----------:|
-| Nueva reserva | Si | Si |
-| Comprobante enviado | Si | — |
-| Pago aprobado | — | Si |
-| Pago rechazado | — | Si |
-| Cita cancelada | Si | Si |
-| Recordatorio de pago | — | Si |
-| Solicitud de calificacion | — | Si |
-| Suscripcion por vencer | Si | — |
+
+
+| Evento                    | Al negocio | Al usuario |
+| ------------------------- | ---------- | ---------- |
+| Nueva reserva             | Si         | Si         |
+| Comprobante enviado       | Si         | —          |
+| Pago aprobado             | —          | Si         |
+| Pago rechazado            | —          | Si         |
+| Cita cancelada            | Si         | Si         |
+| Recordatorio de pago      | —          | Si         |
+| Solicitud de calificacion | —          | Si         |
+| Suscripcion por vencer    | Si         | —          |
+
 
 Las notificaciones llegan en tiempo real via NATS WebSocket — no hay que refrescar la pagina.
 
@@ -337,18 +361,21 @@ Las notificaciones llegan en tiempo real via NATS WebSocket — no hay que refre
 El flujo completo despues de que termina el trial o la suscripcion sigue estas etapas:
 
 **1. Trial vencido — dashboard accesible con pantalla de planes (dia 7):**
+
 - Mensaje neutro: "Tu periodo de prueba ha terminado"
 - Muestra los 3 planes disponibles (Basico, Profesional, Inteligente) con sus caracteristicas y precios
 - CTA principal: "Elegir plan y pagar" → redirige a `/dashboard/subscription/checkout`
 - El dashboard completo se bloquea y muestra una pantalla de interrupcion en vez del contenido habitual
 
 **2. Negocio suspendido — dashboard accesible con banner (dia +2 tras vencer):**
+
 - El negocio pasa a estado `suspended`
 - El dashboard **sigue siendo accesible** pero muestra un **banner prominente** indicando la suspension
 - El negocio puede navegar el dashboard y ver sus datos, pero la pagina publica de reservas esta deshabilitada (los clientes no pueden reservar)
 - El banner incluye CTA "Reactivar ahora" → `/dashboard/subscription/checkout`
 
 **3. Negocio inactivo — bloqueado total (dia +7 tras vencer):**
+
 - El negocio pasa a estado `inactive`
 - El dashboard queda **completamente bloqueado** con pantalla de "Cuenta desactivada"
 - No se puede navegar a ninguna seccion
@@ -356,14 +383,18 @@ El flujo completo despues de que termina el trial o la suscripcion sigue estas e
 - CTA unico: "Reactivar cuenta" → `/dashboard/subscription/checkout`
 
 **Flujo resumido:**
-| Etapa | Momento | Estado | Dashboard |
-|-------|---------|--------|-----------|
-| Trial activo | Dias 1-7 | `active` | Acceso completo |
-| Trial vencido | Dia 7 | `active` (trial expirado) | Pantalla de planes (bloqueado) |
-| Suspendido | Dia +2 tras vencer | `suspended` | Accesible con banner de suspension |
-| Inactivo | Dia +7 tras vencer | `inactive` | Bloqueado total ("Cuenta desactivada") |
+
+
+| Etapa         | Momento            | Estado                    | Dashboard                              |
+| ------------- | ------------------ | ------------------------- | -------------------------------------- |
+| Trial activo  | Dias 1-7           | `active`                  | Acceso completo                        |
+| Trial vencido | Dia 7              | `active` (trial expirado) | Pantalla de planes (bloqueado)         |
+| Suspendido    | Dia +2 tras vencer | `suspended`               | Accesible con banner de suspension     |
+| Inactivo      | Dia +7 tras vencer | `inactive`                | Bloqueado total ("Cuenta desactivada") |
+
 
 **Excepcion — comprobante en revision:**
+
 - Si el negocio ya subio un comprobante y esta en estado `pending`, el banner/pantalla de bloqueo **no aparece**
 - En su lugar se muestra un mensaje informativo: "Tu comprobante esta en revision. Te notificaremos pronto"
 
@@ -371,15 +402,17 @@ El flujo completo despues de que termina el trial o la suscripcion sigue estas e
 
 Cuando la suscripcion o el trial esta por vencer, aparece un banner en la parte superior del dashboard. El banner es **clickeable** y lleva directamente a `/dashboard/subscription/checkout`. Muestra un badge "Renovar" y los dias restantes, tanto para trials como para suscripciones pagas.
 
-| Estado | Color | Mensaje |
-|--------|-------|---------|
-| Trial activo (mas de 2 dias) | Amarillo | "Tu periodo de prueba vence en X dias" |
-| Trial por vencer (2 dias o menos) | Amarillo intenso | "Tu trial vence en X dias. Elige tu plan" |
-| 5 a 1 dias antes de vencer suscripcion | Amarillo | "Tu plan Profesional vence en X dias" |
-| Dia que vence | Rojo | "Tu plan Profesional vence hoy. Renueva ahora" |
-| Despues de vencer | Rojo oscuro | "Tu plan vencio hace X dias. Renueva para evitar suspension" |
-| 2 dias despues | — | Negocio suspendido (dashboard con banner) |
-| 7 dias despues | — | Negocio inactivo (bloqueado total) |
+
+| Estado                                 | Color            | Mensaje                                                      |
+| -------------------------------------- | ---------------- | ------------------------------------------------------------ |
+| Trial activo (mas de 2 dias)           | Amarillo         | "Tu periodo de prueba vence en X dias"                       |
+| Trial por vencer (2 dias o menos)      | Amarillo intenso | "Tu trial vence en X dias. Elige tu plan"                    |
+| 5 a 1 dias antes de vencer suscripcion | Amarillo         | "Tu plan Profesional vence en X dias"                        |
+| Dia que vence                          | Rojo             | "Tu plan Profesional vence hoy. Renueva ahora"               |
+| Despues de vencer                      | Rojo oscuro      | "Tu plan vencio hace X dias. Renueva para evitar suspension" |
+| 2 dias despues                         | —                | Negocio suspendido (dashboard con banner)                    |
+| 7 dias despues                         | —                | Negocio inactivo (bloqueado total)                           |
+
 
 El banner no aparece si el negocio tiene un comprobante de pago en revision (`pending` en `SubscriptionPaymentOrder`).
 
@@ -399,6 +432,7 @@ Cuando el trial termina o el negocio quiere contratar un plan, el flujo es:
 ### 7.6 Codigos de descuento
 
 Desde `/dashboard/discount-codes` el negocio puede:
+
 - Crear codigos de descuento manuales (porcentaje o monto fijo, con limite de usos y fechas de vigencia)
 - Ver el historial de codigos activos e inactivos
 - Ver cuantas veces se ha usado cada codigo
@@ -412,15 +446,17 @@ Los codigos con `source: "birthday"` son generados automaticamente por el sistem
 La campana de cumpleanos se activa **por negocio desde el SuperAdmin** (no desde el dashboard del negocio). Es una decision del equipo comercial de Agendity al hablar con el negocio.
 
 **Flujo comercial:**
+
 1. El equipo de Agendity contacta al negocio y le ofrece la campana de cumpleanos
 2. Si el negocio acepta, el admin va a ActiveAdmin > Businesses > editar el negocio
 3. En la seccion "Birthday Campaign": check "Enabled", configura el % de descuento y los dias de validez
 4. A partir de ese momento, cada dia a las 8am el sistema (`BirthdayCampaignJob`) busca clientes de ese negocio con cumpleanos ese dia y:
-   - Genera un codigo de descuento unico para ese cliente (% configurable, valido X dias, un solo uso)
-   - Envia un email de felicitacion con el codigo y un link a la pagina de reservas
-   - Envia WhatsApp si el plan lo incluye
+  - Genera un codigo de descuento unico para ese cliente (% configurable, valido X dias, un solo uso)
+  - Envia un email de felicitacion con el codigo y un link a la pagina de reservas
+  - Envia WhatsApp si el plan lo incluye
 
 **Configuracion** (desde ActiveAdmin > Businesses > Edit):
+
 - **Enabled**: activar/desactivar la campana para este negocio
 - **Discount %**: porcentaje de descuento del codigo generado (default 10%)
 - **Days valid**: cuantos dias tiene el cliente para usar el codigo (default 7)
@@ -430,6 +466,7 @@ La campana de cumpleanos se activa **por negocio desde el SuperAdmin** (no desde
 ### 7.8 Profesional independiente
 
 Agendity tambien soporta profesionales independientes (sin local fisico). Se crean desde el SuperAdmin y funcionan igual que un negocio pero:
+
 - No tienen seccion de empleados (ellos mismos son el unico empleado)
 - No tienen direccion fisica ni mapa
 - El sidebar muestra "Profesional" en vez del tipo de negocio
@@ -442,6 +479,7 @@ Agendity tambien soporta profesionales independientes (sin local fisico). Se cre
 ### 8.1 Panel de administracion
 
 En `/admin` (ActiveAdmin) el equipo gestiona toda la plataforma:
+
 - Ver y editar negocios, usuarios, planes, suscripciones
 - Ver citas, pagos, resenas de cualquier negocio
 - Dashboard con graficas de nuevos negocios, citas por estado
@@ -450,6 +488,7 @@ En `/admin` (ActiveAdmin) el equipo gestiona toda la plataforma:
 ### 8.2 Observar como un negocio (impersonacion)
 
 El admin puede ver el dashboard exactamente como lo ve un negocio:
+
 1. Click "Observar como..." en el topbar
 2. Buscar negocio por nombre (muestra plan y badge "Independiente" si aplica)
 3. Click → ahora ves el dashboard del negocio
@@ -459,6 +498,7 @@ El admin puede ver el dashboard exactamente como lo ve un negocio:
 ### 8.3 Crear profesional independiente
 
 Desde ActiveAdmin > "Profesionales Independientes":
+
 1. Llenar datos: nombre, email, telefono, tipo de documento
 2. Se crea automaticamente: usuario + negocio + empleado + suscripcion trial de 7 dias
 3. Se genera link de acceso con credenciales temporales
@@ -470,6 +510,7 @@ Desde "Enviar Notificacion" el admin puede enviar notificaciones manuales a uno 
 ### 8.5 Gestion de jobs
 
 Desde "Jobs" el admin puede:
+
 - Ver todos los jobs programados con su estado y ultima ejecucion
 - Habilitar/deshabilitar jobs individuales
 - Ejecutar un job manualmente ("Run now")
@@ -478,12 +519,14 @@ Desde "Jobs" el admin puede:
 ### 8.6 Aprobar comprobante de suscripcion
 
 Desde ActiveAdmin > Ordenes de Pago > detalle > "Aprobar" o "Rechazar":
+
 - **Aprobar:** ejecuta `ApprovePaymentService` (crea Subscription, activa Referral si hay, reactiva Business, notifica al negocio)
 - **Rechazar:** notifica al negocio con razon del rechazo; el negocio puede subir un nuevo comprobante
 
 ### 8.7 Renovar suscripcion manualmente
 
 Desde ActiveAdmin > Subscriptions > detalle de suscripcion > "Renovar":
+
 - Extiende 30 dias
 - Reactiva el negocio si estaba suspendido
 - Envia notificacion de confirmacion al negocio (email + in-app + WhatsApp)
@@ -491,12 +534,14 @@ Desde ActiveAdmin > Subscriptions > detalle de suscripcion > "Renovar":
 ### 8.8 Sistema de referidos
 
 Desde ActiveAdmin > Codigos de Referido:
+
 - CRUD de `ReferralCode` (codigo unico, nombre/email/celular del referidor, comision %)
 - El admin crea el codigo y entrega al referidor el link `agendity.co/register?ref=CODE`
 - Panel de Referidos: lista de todos los `Referral` con su estado (pending/activated/paid)
 - Accion "Marcar como pagado" para registrar el pago de comision al referidor
 
 **Ciclo del referido:**
+
 1. Admin crea `ReferralCode` y se lo entrega al referidor
 2. Referidor comparte el link `agendity.co/register?ref=CODE` con potenciales clientes
 3. Nuevo negocio se registra via ese link → codigo se guarda en localStorage → se envia al backend → `Referral` en estado `pending`
@@ -506,6 +551,7 @@ Desde ActiveAdmin > Codigos de Referido:
 ### 8.9 Configuracion de plataforma (SiteConfig)
 
 Desde ActiveAdmin > Configuracion:
+
 - Editar valores de `SiteConfig` (key/value en DB)
 - Claves disponibles: `support_email`, `support_whatsapp`, `payment_nequi`, `payment_bancolombia`, `payment_daviplata`, `admin_email`
 - Estos valores se usan en todos los mailers y en la pagina de checkout de suscripcion
@@ -516,6 +562,7 @@ Desde ActiveAdmin > Configuracion:
 El panel del SuperAdmin incluye un sistema de notificaciones internas (`AdminNotification`) visible en el dashboard de ActiveAdmin con un badge que muestra el numero de notificaciones no leidas.
 
 **Eventos que generan una AdminNotification automaticamente:**
+
 - Un nuevo negocio se registra
 - Un negocio sube un comprobante de suscripcion
 - El trial de un negocio expira
@@ -528,12 +575,14 @@ La pagina completa esta en **ActiveAdmin > Notificaciones** e incluye acciones "
 
 En **ActiveAdmin > Businesses**, la tabla incluye una columna de estado de suscripcion con etiquetas de color:
 
-| Estado | Etiqueta | Color |
-|--------|----------|-------|
-| En trial activo | Trial (Xd restantes) | Amarillo |
-| Suscripcion paga activa | Pagado | Verde |
-| Trial o suscripcion expirada | Expirado | Rojo |
-| Suspendido | Suspendido | Rojo oscuro |
+
+| Estado                       | Etiqueta             | Color       |
+| ---------------------------- | -------------------- | ----------- |
+| En trial activo              | Trial (Xd restantes) | Amarillo    |
+| Suscripcion paga activa      | Pagado               | Verde       |
+| Trial o suscripcion expirada | Expirado             | Rojo        |
+| Suspendido                   | Suspendido           | Rojo oscuro |
+
 
 ### 8.12 Sidekiq y sidekiq-cron
 
@@ -541,13 +590,15 @@ En `/admin/sidekiq` se monitorean los jobs en background: colas, ejecucion, prog
 
 Los jobs recurrentes corren automaticamente via **sidekiq-cron** (visible en `/admin/sidekiq/cron`). No requieren configuracion manual — se definen en codigo y se registran al arrancar Sidekiq:
 
-| Job | Frecuencia | Descripcion |
-|-----|-----------|-------------|
-| `CompleteAppointmentsJob` | Cada 15 min | Marca citas `checked_in` como `completed` |
-| `TrialExpiryAlertJob` | Diario 8am | Alertas y suspension por trial vencido |
-| `SubscriptionExpiryAlertJob` | Diario 8am | Alertas y suspension por suscripcion vencida |
-| `BirthdayCampaignJob` | Diario 8am | Codigos de descuento y mensajes de cumpleanos |
-| `Intelligence::PricingSuggestionJob` | Dia 1 y 15 del mes | Sugerencias de tarifa dinamica IA |
+
+| Job                                  | Frecuencia         | Descripcion                                   |
+| ------------------------------------ | ------------------ | --------------------------------------------- |
+| `CompleteAppointmentsJob`            | Cada 15 min        | Marca citas `checked_in` como `completed`     |
+| `TrialExpiryAlertJob`                | Diario 8am         | Alertas y suspension por trial vencido        |
+| `SubscriptionExpiryAlertJob`         | Diario 8am         | Alertas y suspension por suscripcion vencida  |
+| `BirthdayCampaignJob`                | Diario 8am         | Codigos de descuento y mensajes de cumpleanos |
+| `Intelligence::PricingSuggestionJob` | Dia 1 y 15 del mes | Sugerencias de tarifa dinamica IA             |
+
 
 ---
 
@@ -557,14 +608,17 @@ Los jobs recurrentes corren automaticamente via **sidekiq-cron** (visible en `/a
 
 Job diario (`TrialExpiryAlertJob`) a las 8am. Aplica a negocios en periodo de prueba de 7 dias:
 
-| Dia | Momento | Accion |
-|-----|---------|--------|
-| Dia 5 | 2 dias antes de fin del trial | Banner amarillo "Tu trial vence en 2 dias" + email de aviso |
-| Dia 7 | Trial vence | Email de agradecimiento + invitacion a elegir plan. Dashboard bloqueado con pantalla de planes |
-| Dia 9 | 2 dias despues de vencer | Email urgente + **negocio suspendido**. Dashboard accesible con banner de suspension, reservas publicas deshabilitadas |
-| Dia 14 | 7 dias despues de vencer | **Negocio inactivo**. Dashboard completamente bloqueado con pantalla "Cuenta desactivada" |
+
+| Dia    | Momento                       | Accion                                                                                                                 |
+| ------ | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Dia 5  | 2 dias antes de fin del trial | Banner amarillo "Tu trial vence en 2 dias" + email de aviso                                                            |
+| Dia 7  | Trial vence                   | Email de agradecimiento + invitacion a elegir plan. Dashboard bloqueado con pantalla de planes                         |
+| Dia 9  | 2 dias despues de vencer      | Email urgente + **negocio suspendido**. Dashboard accesible con banner de suspension, reservas publicas deshabilitadas |
+| Dia 14 | 7 dias despues de vencer      | **Negocio inactivo**. Dashboard completamente bloqueado con pantalla "Cuenta desactivada"                              |
+
 
 **Flujo del negocio para reactivarse:**
+
 1. El negocio entra al dashboard bloqueado y ve la pantalla de planes
 2. Va a `/dashboard/subscription/checkout`, elige un plan, sube comprobante de pago
 3. Admin recibe `AdminNotification` + email con el comprobante en revision
@@ -577,12 +631,14 @@ Anti-duplicados: campo `trial_alert_stage` en `Business` (0→1→2→3). Se res
 
 Job diario (`SubscriptionExpiryAlertJob`) a las 8am. Aplica a negocios con suscripcion activa:
 
-| Momento | Accion |
-|---------|--------|
-| 5 dias antes | Email + notificacion + WhatsApp (si aplica) |
-| Dia que vence | Email + notificacion + WhatsApp + banner rojo |
+
+| Momento        | Accion                                                                                    |
+| -------------- | ----------------------------------------------------------------------------------------- |
+| 5 dias antes   | Email + notificacion + WhatsApp (si aplica)                                               |
+| Dia que vence  | Email + notificacion + WhatsApp + banner rojo                                             |
 | 2 dias despues | Email + notificacion + WhatsApp + **negocio suspendido** (dashboard accesible con banner) |
-| 7 dias despues | **Negocio inactivo** (dashboard bloqueado total, "Cuenta desactivada") |
+| 7 dias despues | **Negocio inactivo** (dashboard bloqueado total, "Cuenta desactivada")                    |
+
 
 Anti-duplicados: campo `expiry_alert_stage` en la suscripcion (0→1→2→3). Se resetea al renovar.
 
@@ -610,6 +666,7 @@ La API usa `error_code` en las respuestas de error para que el frontend pueda ma
 ```
 
 Los error codes estan definidos por dominio:
+
 - **appointments** — `slot_unavailable`, `outside_business_hours`, `appointment_not_found`, etc.
 - **auth** — `invalid_credentials`, `token_expired`, `account_suspended`, etc.
 - **bookings** — `business_closed`, `past_slot`, `service_inactive`, etc.
@@ -623,21 +680,23 @@ El frontend puede hacer `if (error.code === 'slot_unavailable')` en vez de compa
 
 ## RESTRICCIONES POR PLAN
 
-| Feature | Trial (7 dias) | Basico | Profesional | Inteligente |
-|---------|:---:|:---:|:---:|:---:|
-| Agenda, servicios, empleados, clientes, pagos, check-in, QR, notificaciones | Si | Si | Si | Si |
-| Creditos (ver y ajustar) | Si | Si | Si | Si |
-| Reportes basicos (resumen) | Si | Si | Si | Si |
-| Reportes avanzados (graficas) | Si | — | Si | Si |
-| Resenas | Si | — | Si | Si |
-| Tarifas dinamicas (manual) | Si | — | Si | Si |
-| Cierre de caja | Si | — | Si | Si |
-| Personalizacion de marca (logo, colores) | Si | — | Si | Si |
-| WhatsApp al usuario final | Si | — | Si | Si |
-| Cashback automatico | Si | — | Si | Si |
-| Sugerencias IA (tarifas) | Si | — | — | Si |
-| Metas financieras | Si | — | — | Si |
-| Reconciliacion contable | Si | — | — | Si |
+
+| Feature                                                                     | Trial (7 dias) | Basico | Profesional | Inteligente |
+| --------------------------------------------------------------------------- | -------------- | ------ | ----------- | ----------- |
+| Agenda, servicios, empleados, clientes, pagos, check-in, QR, notificaciones | Si             | Si     | Si          | Si          |
+| Creditos (ver y ajustar)                                                    | Si             | Si     | Si          | Si          |
+| Reportes basicos (resumen)                                                  | Si             | Si     | Si          | Si          |
+| Reportes avanzados (graficas)                                               | Si             | —      | Si          | Si          |
+| Resenas                                                                     | Si             | —      | Si          | Si          |
+| Tarifas dinamicas (manual)                                                  | Si             | —      | Si          | Si          |
+| Cierre de caja                                                              | Si             | —      | Si          | Si          |
+| Personalizacion de marca (logo, colores)                                    | Si             | —      | Si          | Si          |
+| WhatsApp al usuario final                                                   | Si             | —      | Si          | Si          |
+| Cashback automatico                                                         | Si             | —      | Si          | Si          |
+| Sugerencias IA (tarifas)                                                    | Si             | —      | —           | Si          |
+| Metas financieras                                                           | Si             | —      | —           | Si          |
+| Reconciliacion contable                                                     | Si             | —      | —           | Si          |
+
 
 **El trial de 7 dias da acceso completo a TODAS las features**, incluyendo las exclusivas del Plan Inteligente. El objetivo es que el negocio experimente el valor maximo antes de elegir un plan. Al vencer, el negocio debe contratar un plan via checkout P2P.
 
@@ -672,3 +731,4 @@ El frontend puede hacer `if (error.code === 'slot_unavailable')` en vez de compa
     → Tipo de pago: commission 30% = $60.000 → confirma pago en efectivo
 14. Siguiente visita, Pedro tiene $1.250 de credito disponible
 ```
+
