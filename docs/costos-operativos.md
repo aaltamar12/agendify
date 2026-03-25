@@ -444,24 +444,56 @@ Todos los WhatsApp a usuario final aplican unicamente si el negocio tiene plan P
 | Suscripcion al negocio (UTILITY) | 18 | $0.0080 | $0.14 |
 | **TOTAL** | **13,410** | | **$143.57** |
 
-**Resumen mensual — Pequena escala (30 negocios):**
+**Costos iniciales — Mes 1 (incluye pagos anuales):**
+
+| Concepto | Costo | Periodo | Nota |
+|----------|-------|---------|------|
+| VPS OVH | $12 | Mensual | |
+| Dominio agendity.co | **$16** | **Anual** | GoDaddy, primer ano |
+| Spacemail SMTP Pro | **$10** | **Anual** | Spaceship, 1 buzon + 10 aliases |
+| WhatsApp API | $144 | Mensual | Solo si ya hay negocios Pro+ |
+| **TOTAL Mes 1** | **$182** | | Incluye $26 de pagos anuales |
+
+**Sin WhatsApp (mes 1 real):** $38 (VPS + dominio + email anuales)
+
+**Resumen mensual — Meses 2-12 (30 negocios, ya pagados anuales):**
 
 | Concepto | Self-hosted | Vercel Hobby | Vercel Pro |
 |----------|------------|--------------|------------|
 | VPS OVH | $12 | $12 | $12 |
 | Frontend | $0 (en VPS) | $0 (free) | $20 |
-| Dominio agendity.co | $4 | $4 | $4 |
-| Email (Spacemail SMTP) | $1 | $1 | $1 |
+| Dominio agendity.co | $0 (ya pagado) | $0 | $0 |
+| Email (Spacemail SMTP) | $0 (ya pagado) | $0 | $0 |
 | WhatsApp API | $144 | $144 | $144 |
-| **TOTAL/mes** | **$161** | **$161** | **$181** |
-| **TOTAL 6 meses** | **$966** | **$966** | **$1,086** |
+| **TOTAL/mes** | **$156** | **$156** | **$176** |
 
 | | Self-hosted | Vercel Hobby | Vercel Pro |
 |---|------------|--------------|------------|
 | Ingresos | $489/mes | $489/mes | $489/mes |
-| Margen | +$328 (67%) | +$328 (67%) | +$308 (63%) |
+| Margen | +$333 (68%) | +$333 (68%) | +$313 (64%) |
 
-**Sin WhatsApp (mes 1):** $17 (self-hosted) / $17 (Hobby) / $37 (Pro)
+**Sin WhatsApp (meses 2-12):** $12/mes (solo VPS)
+
+**Costo total Ano 1 (self-hosted, con WhatsApp):**
+
+| Concepto | Costo |
+|----------|-------|
+| VPS OVH (12 × $12) | $144 |
+| Dominio (anual) | $16 |
+| Spacemail (anual) | $10 |
+| WhatsApp API (11 × $144, desde mes 2) | $1,584 |
+| **TOTAL Ano 1** | **$1,754** |
+
+**Costo total Ano 2+ (renovacion):**
+
+| Concepto | Costo |
+|----------|-------|
+| VPS OVH (12 × $12) | $144 |
+| Dominio renovacion (anual) | **$42** |
+| Spacemail renovacion (anual) | $10 |
+| WhatsApp API (12 × $144) | $1,728 |
+| **TOTAL Ano 2** | **$1,924** |
+| **Costo mensual promedio Ano 2** | **~$160/mes** |
 
 ---
 
