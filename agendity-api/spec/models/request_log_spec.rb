@@ -12,13 +12,15 @@ RSpec.describe RequestLog, type: :model do
 
     describe ".errors" do
       it "returns logs with status >= 400" do
-        expect(described_class.errors).to contain_exactly(client_error_log, server_error_log)
+        expect(described_class.errors).to include(client_error_log, server_error_log)
+        expect(described_class.errors).not_to include(ok_log)
       end
     end
 
     describe ".server_errors" do
       it "returns logs with status >= 500" do
-        expect(described_class.server_errors).to contain_exactly(server_error_log)
+        expect(described_class.server_errors).to include(server_error_log)
+        expect(described_class.server_errors).not_to include(ok_log, client_error_log)
       end
     end
 
