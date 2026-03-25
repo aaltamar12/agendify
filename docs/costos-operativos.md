@@ -444,17 +444,14 @@ Todos los WhatsApp a usuario final aplican unicamente si el negocio tiene plan P
 | Suscripcion al negocio (UTILITY) | 18 | $0.0080 | $0.14 |
 | **TOTAL** | **13,410** | | **$143.57** |
 
-**Costos iniciales — Mes 1 (incluye pagos anuales):**
+**Costos iniciales — Mes 1 (incluye pagos anuales, sin WhatsApp):**
 
 | Concepto | Costo | Periodo | Nota |
 |----------|-------|---------|------|
 | VPS OVH | $12 | Mensual | |
 | Dominio agendity.co | **$16** | **Anual** | GoDaddy, primer ano |
 | Spacemail SMTP Pro | **$10** | **Anual** | Spaceship, 1 buzon + 10 aliases |
-| WhatsApp API | $144 | Mensual | Solo si ya hay negocios Pro+ |
-| **TOTAL Mes 1** | **$182** | | Incluye $26 de pagos anuales |
-
-**Sin WhatsApp (mes 1 real):** $38 (VPS + dominio + email anuales)
+| **TOTAL Mes 1** | **$38** | | WhatsApp no aplica (aun no hay negocios Pro+) |
 
 **Resumen mensual — Meses 2-12 (30 negocios, ya pagados anuales):**
 
