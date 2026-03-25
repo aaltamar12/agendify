@@ -57,10 +57,9 @@ export default function DashboardLayout({
 
   const hasPendingOrder = !!subscriptionStatus?.pending_order;
 
-  // Allow checkout page even when blocked
+  // Only block trial expired (never paid). Suspended = dashboard accessible with banner.
   const isCheckoutPage = pathname?.startsWith('/dashboard/subscription');
   const shouldBlockTrialExpired = !isAdmin && !isCheckoutPage && trialExpired && !hasPendingOrder && !isBusinessSuspended;
-  const shouldBlockSuspended = !isAdmin && !isCheckoutPage && isBusinessSuspended && !hasPendingOrder;
   const isBusinessHidden = isBusinessSuspended;
   const isDemo = isDemoMode();
   const showSubscriptionBanner = daysUntilExpiry !== null && daysUntilExpiry <= 5;
@@ -122,20 +121,10 @@ export default function DashboardLayout({
     );
   }
 
-  // Suspended business: block with urgent message
-  if (shouldBlockSuspended) {
-    return (
-      <TrialBlockScreen
-        title="Tu cuenta ha sido suspendida"
-        subtitle="Tu negocio no es visible para tus clientes. Elige un plan para reactivarlo."
-        plans={plans ?? []}
-        siteConfig={siteConfig}
-        variant="suspended"
-      />
-    );
-  }
+  // Suspended: NOT blocked — dashboard accessible with yellow banner "Tu negocio está oculto"
+  // The SubscriptionBanner shows "Tu plan venció" with link to checkout
 
-  // Trial expired: block with "choose a plan" screen
+  // Trial expired (never paid): block with "choose a plan" screen
   if (shouldBlockTrialExpired) {
     return (
       <TrialBlockScreen

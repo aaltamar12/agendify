@@ -45,8 +45,10 @@ export function useSubscriptionCheckout() {
 interface SubscriptionStatus {
   trial_ends_at: string | null;
   in_trial: boolean;
+  had_subscription: boolean;
   subscription: any;
   pending_order: any;
+  admin?: boolean;
 }
 
 export function useSubscriptionStatus() {

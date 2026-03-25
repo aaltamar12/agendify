@@ -44,8 +44,17 @@ class TrialExpiryAlertJob < ApplicationJob
       counts[:stage_3] += 1
     end
 
+    # Stage 4: 7 days after trial ends — deactivate (full block)
+    Business.trial_expired_since(7).where(trial_alert_stage: 3)
+      .includes(:owner, :subscriptions).find_each do |business|
+      next if has_active_subscription?(business)
+
+      deactivate_business!(business)
+      counts[:stage_4] = (counts[:stage_4] || 0) + 1
+    end
+
     record_success!(
-      "Alerts sent — 2-day-before: #{counts[:stage_1]}, trial-end: #{counts[:stage_2]}, suspended: #{counts[:stage_3]}"
+      "Alerts sent — 2-day-before: #{counts[:stage_1]}, trial-end: #{counts[:stage_2]}, suspended: #{counts[:stage_3]}, deactivated: #{counts[:stage_4] || 0}"
     )
   rescue StandardError => e
     record_error!(e.message)
@@ -130,6 +139,27 @@ class TrialExpiryAlertJob < ApplicationJob
       business: business,
       action: "business_suspended",
       description: "Negocio suspendido por trial vencido (gracia de 2 dias agotada)",
+      actor_type: "system",
+      resource: business
+    )
+  end
+
+  def deactivate_business!(business)
+    business.update!(trial_alert_stage: 4)
+    business.inactive!
+
+    AdminNotification.notify!(
+      title: "Negocio desactivado por trial vencido",
+      body: "#{business.name} fue desactivado (7 dias sin suscribirse)",
+      notification_type: "business_deactivated",
+      link: "/admin/businesses/#{business.id}",
+      icon: "⛔"
+    )
+
+    ActivityLog.log(
+      business: business,
+      action: "business_deactivated",
+      description: "Negocio desactivado por trial vencido (7 dias sin suscribirse)",
       actor_type: "system",
       resource: business
     )

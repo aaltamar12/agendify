@@ -29,7 +29,7 @@ class SubscriptionExpiryAlertJob < ApplicationJob
       counts[:stage_2] += 1
     end
 
-    # Stage 3: 2 days after expiration (grace period ended)
+    # Stage 3: 2 days after expiration (grace period ended) — suspend
     Subscription.expired_since(2).where(expiry_alert_stage: 2)
       .includes(:plan, business: :owner).find_each do |subscription|
       send_alert(subscription, stage: 3)
@@ -37,8 +37,15 @@ class SubscriptionExpiryAlertJob < ApplicationJob
       counts[:stage_3] += 1
     end
 
+    # Stage 4: 7 days after expiration — deactivate (full block)
+    Subscription.expired_since(7).where(expiry_alert_stage: 3)
+      .includes(:plan, business: :owner).find_each do |subscription|
+      deactivate_business!(subscription)
+      counts[:stage_4] = (counts[:stage_4] || 0) + 1
+    end
+
     record_success!(
-      "Alerts sent — 5-day: #{counts[:stage_1]}, expiry-day: #{counts[:stage_2]}, suspended: #{counts[:stage_3]}"
+      "Alerts sent — 5-day: #{counts[:stage_1]}, expiry-day: #{counts[:stage_2]}, suspended: #{counts[:stage_3]}, deactivated: #{counts[:stage_4] || 0}"
     )
   rescue StandardError => e
     record_error!(e.message)
@@ -118,6 +125,28 @@ class SubscriptionExpiryAlertJob < ApplicationJob
       business: business,
       action: "business_suspended",
       description: "Negocio suspendido por suscripción vencida (gracia de 2 días agotada)",
+      actor_type: "system",
+      resource: subscription
+    )
+  end
+
+  def deactivate_business!(subscription)
+    business = subscription.business
+    subscription.update!(expiry_alert_stage: 4)
+    business.inactive!
+
+    AdminNotification.notify!(
+      title: "Negocio desactivado por suscripcion vencida",
+      body: "#{business.name} fue desactivado automaticamente (7 dias sin renovar)",
+      notification_type: "business_deactivated",
+      link: "/admin/businesses/#{business.id}",
+      icon: "⛔"
+    )
+
+    ActivityLog.log(
+      business: business,
+      action: "business_deactivated",
+      description: "Negocio desactivado por suscripcion vencida (7 dias sin renovar)",
       actor_type: "system",
       resource: subscription
     )
