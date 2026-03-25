@@ -332,25 +332,40 @@ El sistema envia notificaciones por multiples canales:
 
 Las notificaciones llegan en tiempo real via NATS WebSocket — no hay que refrescar la pagina.
 
-### 7.3 Pantalla de bloqueo (trial vencido / suspension)
+### 7.3 Estados post-trial y suspension
 
-Cuando el trial de 7 dias termina o el negocio es suspendido, el dashboard completo se bloquea y muestra una pantalla de interrupcion en vez del contenido habitual.
+El flujo completo despues de que termina el trial o la suscripcion sigue estas etapas:
 
-**Trial vencido (dias 8-9 tras el registro):**
+**1. Trial vencido — dashboard accesible con pantalla de planes (dia 7):**
 - Mensaje neutro: "Tu periodo de prueba ha terminado"
 - Muestra los 3 planes disponibles (Basico, Profesional, Inteligente) con sus caracteristicas y precios
 - CTA principal: "Elegir plan y pagar" → redirige a `/dashboard/subscription/checkout`
+- El dashboard completo se bloquea y muestra una pantalla de interrupcion en vez del contenido habitual
 
-**Negocio suspendido (dia 10+ sin pagar):**
-- Mensaje urgente en rojo: "Tu cuenta ha sido suspendida"
-- Explicacion: el negocio publico esta inactivo y los clientes no pueden reservar
-- Mismos 3 planes + CTA "Reactivar ahora" → `/dashboard/subscription/checkout`
+**2. Negocio suspendido — dashboard accesible con banner (dia +2 tras vencer):**
+- El negocio pasa a estado `suspended`
+- El dashboard **sigue siendo accesible** pero muestra un **banner prominente** indicando la suspension
+- El negocio puede navegar el dashboard y ver sus datos, pero la pagina publica de reservas esta deshabilitada (los clientes no pueden reservar)
+- El banner incluye CTA "Reactivar ahora" → `/dashboard/subscription/checkout`
+
+**3. Negocio inactivo — bloqueado total (dia +7 tras vencer):**
+- El negocio pasa a estado `inactive`
+- El dashboard queda **completamente bloqueado** con pantalla de "Cuenta desactivada"
+- No se puede navegar a ninguna seccion
+- Mensaje: "Tu cuenta ha sido desactivada por falta de pago"
+- CTA unico: "Reactivar cuenta" → `/dashboard/subscription/checkout`
+
+**Flujo resumido:**
+| Etapa | Momento | Estado | Dashboard |
+|-------|---------|--------|-----------|
+| Trial activo | Dias 1-7 | `active` | Acceso completo |
+| Trial vencido | Dia 7 | `active` (trial expirado) | Pantalla de planes (bloqueado) |
+| Suspendido | Dia +2 tras vencer | `suspended` | Accesible con banner de suspension |
+| Inactivo | Dia +7 tras vencer | `inactive` | Bloqueado total ("Cuenta desactivada") |
 
 **Excepcion — comprobante en revision:**
-- Si el negocio ya subio un comprobante y esta en estado `pending`, la pantalla de bloqueo **no aparece**
+- Si el negocio ya subio un comprobante y esta en estado `pending`, el banner/pantalla de bloqueo **no aparece**
 - En su lugar se muestra un mensaje informativo: "Tu comprobante esta en revision. Te notificaremos pronto"
-
-La pantalla de bloqueo cubre todo el dashboard (sidebar + contenido) y no permite navegar a ninguna otra seccion hasta que el pago sea aprobado.
 
 ### 7.4 Banner de suscripcion y trial
 
@@ -363,7 +378,8 @@ Cuando la suscripcion o el trial esta por vencer, aparece un banner en la parte 
 | 5 a 1 dias antes de vencer suscripcion | Amarillo | "Tu plan Profesional vence en X dias" |
 | Dia que vence | Rojo | "Tu plan Profesional vence hoy. Renueva ahora" |
 | Despues de vencer | Rojo oscuro | "Tu plan vencio hace X dias. Renueva para evitar suspension" |
-| 2 dias despues | — | Negocio suspendido automaticamente |
+| 2 dias despues | — | Negocio suspendido (dashboard con banner) |
+| 7 dias despues | — | Negocio inactivo (bloqueado total) |
 
 El banner no aparece si el negocio tiene un comprobante de pago en revision (`pending` en `SubscriptionPaymentOrder`).
 
@@ -545,7 +561,8 @@ Job diario (`TrialExpiryAlertJob`) a las 8am. Aplica a negocios en periodo de pr
 |-----|---------|--------|
 | Dia 5 | 2 dias antes de fin del trial | Banner amarillo "Tu trial vence en 2 dias" + email de aviso |
 | Dia 7 | Trial vence | Email de agradecimiento + invitacion a elegir plan. Dashboard bloqueado con pantalla de planes |
-| Dia 9 | 2 dias despues de vencer | Email urgente + **negocio suspendido**. Pantalla roja urgente en el dashboard |
+| Dia 9 | 2 dias despues de vencer | Email urgente + **negocio suspendido**. Dashboard accesible con banner de suspension, reservas publicas deshabilitadas |
+| Dia 14 | 7 dias despues de vencer | **Negocio inactivo**. Dashboard completamente bloqueado con pantalla "Cuenta desactivada" |
 
 **Flujo del negocio para reactivarse:**
 1. El negocio entra al dashboard bloqueado y ve la pantalla de planes
@@ -564,7 +581,8 @@ Job diario (`SubscriptionExpiryAlertJob`) a las 8am. Aplica a negocios con suscr
 |---------|--------|
 | 5 dias antes | Email + notificacion + WhatsApp (si aplica) |
 | Dia que vence | Email + notificacion + WhatsApp + banner rojo |
-| 2 dias despues | Email + notificacion + WhatsApp + **negocio suspendido** |
+| 2 dias despues | Email + notificacion + WhatsApp + **negocio suspendido** (dashboard accesible con banner) |
+| 7 dias despues | **Negocio inactivo** (dashboard bloqueado total, "Cuenta desactivada") |
 
 Anti-duplicados: campo `expiry_alert_stage` en la suscripcion (0→1→2→3). Se resetea al renovar.
 
