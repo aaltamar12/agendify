@@ -8,6 +8,8 @@ RSpec.describe CompleteAppointmentsJob, type: :job do
 
   before do
     allow(Realtime::NatsPublisher).to receive(:publish)
+    allow(JobConfig).to receive(:enabled?).and_return(true)
+    allow(JobConfig).to receive(:record_run!)
   end
 
   describe "#perform" do
@@ -26,13 +28,19 @@ RSpec.describe CompleteAppointmentsJob, type: :job do
           price: 25_000)
       end
 
+      let(:cashback_result) { ServiceResult.new(success: true, data: nil) }
+
+      before do
+        allow(Credits::CashbackService).to receive(:call).and_return(cashback_result)
+      end
+
       it "marks checked_in appointments as completed" do
         described_class.perform_now
         expect(past_appointment.reload.status).to eq("completed")
       end
 
       it "triggers CashbackService" do
-        expect(Credits::CashbackService).to receive(:call).with(appointment: past_appointment)
+        expect(Credits::CashbackService).to receive(:call).with(appointment: past_appointment).and_return(cashback_result)
         described_class.perform_now
       end
 
@@ -75,6 +83,11 @@ RSpec.describe CompleteAppointmentsJob, type: :job do
           end_time: "10:30",
           status: :checked_in,
           price: 25_000)
+      end
+
+      before do
+        allow(Credits::CashbackService).to receive(:call)
+          .and_return(ServiceResult.new(success: true, data: nil))
       end
 
       it "marks it as completed (past date)" do

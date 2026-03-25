@@ -23,16 +23,22 @@ RSpec.describe Intelligence::DemandAnalysisService do
         # Create enough appointments to trigger high demand
         # Monthly capacity = 1 employee * (8*60/30 = 16 slots) * 26 days = 416
         # 70% threshold = ~291 appointments
+        # All appointments must be within a single month for the grouped query to detect high demand.
+        target_month_start = 2.months.ago.beginning_of_month.to_date
         300.times do |i|
           customer = create(:customer, business: business)
+          day_index = i % 26 # 26 working days, stay within the month
+          slot_in_day = i / 26 # 0..11 for 300 appointments across 26 days
+          hour = 8 + (slot_in_day / 2)
+          minute = (slot_in_day % 2) * 30
           create(:appointment,
             business: business,
             employee: employee,
             service: service,
             customer: customer,
-            appointment_date: 2.months.ago + (i % 28).days,
-            start_time: "10:00",
-            end_time: "10:30",
+            appointment_date: target_month_start + day_index.days,
+            start_time: format("%02d:%02d", hour, minute),
+            end_time: format("%02d:%02d", hour + (minute == 30 ? 1 : 0), minute == 30 ? 0 : 30),
             status: :completed,
             price: 25_000)
         end
@@ -58,22 +64,26 @@ RSpec.describe Intelligence::DemandAnalysisService do
     context "when weekends have significantly more demand" do
       before do
         # Create more appointments on weekends vs weekdays
+        slot_counter = 0
         3.months.ago.to_date.upto(Date.current) do |date|
           next if date.wday.between?(1, 5) && rand > 0.2 # sparse weekdays
           count = [0, 6].include?(date.wday) ? 4 : 1
 
-          count.times do
+          count.times do |j|
             customer = create(:customer, business: business)
+            hour = 8 + (slot_counter % 10)
+            minute = (slot_counter / 10 % 2) * 30
             create(:appointment,
               business: business,
               employee: employee,
               service: service,
               customer: customer,
               appointment_date: date,
-              start_time: "#{10 + rand(6)}:00",
-              end_time: "#{10 + rand(6)}:30",
+              start_time: format("%02d:%02d", hour, minute),
+              end_time: format("%02d:%02d", hour + (minute == 30 ? 1 : 0), minute == 30 ? 0 : 30),
               status: :completed,
               price: 25_000)
+            slot_counter += 1
           end
         end
       end
@@ -102,14 +112,16 @@ RSpec.describe Intelligence::DemandAnalysisService do
       # Create some appointments to potentially trigger suggestions
       50.times do |i|
         customer = create(:customer, business: business)
+        hour = 8 + (i % 10)
+        minute = (i / 10 % 2) * 30
         create(:appointment,
           business: business,
           employee: employee,
           service: service,
           customer: customer,
           appointment_date: Date.current + (i % 7).days,
-          start_time: "10:00",
-          end_time: "10:30",
+          start_time: format("%02d:%02d", hour, minute),
+          end_time: format("%02d:%02d", hour + (minute == 30 ? 1 : 0), minute == 30 ? 0 : 30),
           status: :completed,
           price: 25_000)
       end
@@ -136,21 +148,25 @@ RSpec.describe Intelligence::DemandAnalysisService do
         dec_count = (yearly_avg * 1.5).to_i # 30 — well above 1.4x threshold
 
         # Spread appointments across all months for context
+        slot_counter = 0
         (1..12).each do |month|
           count = month == 12 ? dec_count : yearly_avg
-          count.times do
+          count.times do |j|
             customer = create(:customer, business: business)
-            day = rand(1..28)
+            day = (slot_counter % 28) + 1
+            hour = 8 + (slot_counter % 10)
+            minute = (slot_counter / 10 % 2) * 30
             create(:appointment,
               business: business,
               employee: employee,
               service: service,
               customer: customer,
               appointment_date: Date.new(Date.current.year - 1, month, day),
-              start_time: "10:00",
-              end_time: "10:30",
+              start_time: format("%02d:%02d", hour, minute),
+              end_time: format("%02d:%02d", hour + (minute == 30 ? 1 : 0), minute == 30 ? 0 : 30),
               status: :completed,
               price: 25_000)
+            slot_counter += 1
           end
         end
       end

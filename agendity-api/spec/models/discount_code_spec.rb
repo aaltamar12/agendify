@@ -6,7 +6,14 @@ RSpec.describe DiscountCode, type: :model do
   describe "validations" do
     subject { build(:discount_code, business: business) }
 
-    it { is_expected.to validate_presence_of(:code) }
+    # Note: validate_presence_of(:code) cannot be tested with shoulda-matchers
+    # because the before_validation :generate_code callback auto-generates a code
+    # when blank, so the model is always valid even with an empty code.
+    it "auto-generates a code when blank" do
+      code = build(:discount_code, business: business, code: "")
+      code.valid?
+      expect(code.code).to be_present
+    end
     it { is_expected.to validate_uniqueness_of(:code).scoped_to(:business_id).case_insensitive }
     it { is_expected.to validate_numericality_of(:discount_value).is_greater_than(0) }
 

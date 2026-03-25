@@ -29,6 +29,9 @@ RSpec.describe "Cash Register Lifecycle", type: :model do
   end
 
   def create_completed_appointment(employee, price: 50_000)
+    @slot_counter ||= 0
+    hour = 8 + @slot_counter
+    @slot_counter += 1
     customer = create(:customer, business: business)
     create(:appointment,
       business: business,
@@ -36,8 +39,8 @@ RSpec.describe "Cash Register Lifecycle", type: :model do
       service: service,
       customer: customer,
       appointment_date: today,
-      start_time: "10:00",
-      end_time: "10:30",
+      start_time: format("%02d:00", hour),
+      end_time: format("%02d:30", hour),
       price: price,
       status: :completed)
   end

@@ -1,6 +1,8 @@
 require "rails_helper"
 
 RSpec.describe "Subscription Lifecycle", type: :model do
+  include ActiveJob::TestHelper
+
   let(:plan) { create(:plan, name: "Profesional", price_monthly: 49_900) }
   let!(:referral_code) { create(:referral_code, code: "EMBAJADOR", commission_percentage: 10.0) }
 

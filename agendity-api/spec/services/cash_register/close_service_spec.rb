@@ -3,23 +3,38 @@ require "rails_helper"
 RSpec.describe CashRegister::CloseService do
   let(:business) { create(:business) }
   let(:user)     { create(:user) }
-  let(:employee) { create(:employee, business: business, pending_balance: 5_000) }
+  let(:employee) { create(:employee, business: business, pending_balance: 5_000, payment_type: :commission, commission_percentage: 40) }
 
   let(:today) { Date.current }
 
   before do
-    # Create completed appointments for today
-    2.times do
-      create(:appointment,
-        business: business,
-        employee: employee,
-        appointment_date: today,
-        status: :completed,
-        price: 30_000)
-    end
+    # Create completed appointments for today with distinct time slots
+    create(:appointment,
+      business: business,
+      employee: employee,
+      appointment_date: today,
+      start_time: "10:00",
+      end_time: "10:30",
+      status: :completed,
+      price: 30_000)
+    create(:appointment,
+      business: business,
+      employee: employee,
+      appointment_date: today,
+      start_time: "11:00",
+      end_time: "11:30",
+      status: :completed,
+      price: 30_000)
   end
 
   describe "successful close" do
+    before do
+      # Stub reconciliation to pass — the spec sets pending_balance directly
+      # without corresponding payment history, which causes a false discrepancy.
+      allow(CashRegister::ReconciliationService).to receive(:call)
+        .and_return(ServiceResult.new(success: true, data: []))
+    end
+
     let(:employee_payments) do
       [{
         employee_id: employee.id,
@@ -75,6 +90,11 @@ RSpec.describe CashRegister::CloseService do
   end
 
   describe "partial payment (pending balance)" do
+    before do
+      allow(CashRegister::ReconciliationService).to receive(:call)
+        .and_return(ServiceResult.new(success: true, data: []))
+    end
+
     let(:employee_payments) do
       [{
         employee_id: employee.id,

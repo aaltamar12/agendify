@@ -14,7 +14,7 @@ RSpec.describe Business, type: :model do
   end
 
   describe "enums" do
-    it { should define_enum_for(:business_type).with_values(barbershop: 0, salon: 1, spa: 2, nails: 3, other: 4) }
+    it { should define_enum_for(:business_type).with_values(barbershop: 0, salon: 1, spa: 2, nails: 3, other: 4, estetica: 5, consultorio: 6) }
     it { should define_enum_for(:status).with_values(active: 0, suspended: 1, inactive: 2) }
   end
 

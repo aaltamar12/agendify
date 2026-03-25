@@ -66,7 +66,7 @@ RSpec.describe Credits::CashbackService do
       expect(tx.amount).to eq(1_500)
       expect(tx.transaction_type).to eq("cashback")
       expect(tx.appointment).to eq(appointment)
-      expect(tx.description).to include("Cashback 5%")
+      expect(tx.description).to include("Cashback 5.0%")
       expect(tx.description).to include("Corte clásico")
     end
 

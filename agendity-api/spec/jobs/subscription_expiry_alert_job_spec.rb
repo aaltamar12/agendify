@@ -34,7 +34,7 @@ RSpec.describe SubscriptionExpiryAlertJob do
         expect { described_class.perform_now }.to change(Notification, :count).by(1)
 
         notification = Notification.last
-        expect(notification.title).to include("5 dias")
+        expect(notification.title).to include("5 días")
       end
 
       it "publishes real-time event" do

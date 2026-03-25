@@ -3,7 +3,7 @@ require "rails_helper"
 RSpec.describe Employees::AcceptInvitationService do
   let(:business) { create(:business) }
   let(:employee) { create(:employee, business: business, user_id: nil, name: "Juan Barbero") }
-  let(:invitation) do
+  let!(:invitation) do
     create(:employee_invitation,
       employee: employee,
       business: business,

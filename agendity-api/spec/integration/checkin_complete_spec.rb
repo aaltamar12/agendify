@@ -76,9 +76,7 @@ RSpec.describe "Checkin Complete", type: :model do
     after_end = Time.zone.parse("#{tomorrow} 10:50").in_time_zone("America/Bogota")
 
     travel_to after_end do
-      perform_enqueued_jobs do
-        CompleteAppointmentsJob.perform_now
-      end
+      CompleteAppointmentsJob.perform_now
     end
 
     appointment.reload

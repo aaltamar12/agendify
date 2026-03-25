@@ -11,6 +11,17 @@ require 'rspec/rails'
 require 'pundit/rspec'
 # Add additional requires below this line. Rails is not loaded until this point!
 
+# Force-load WhatsAppChannel — Zeitwerk maps whatsapp_channel.rb to WhatsappChannel,
+# but the class is defined as WhatsAppChannel (camelCase). This explicit require
+# ensures the constant is available for stubbing in specs.
+require_relative '../app/services/notifications/whatsapp_channel'
+
+# Silence Geocoder warnings in test environment
+Geocoder.configure(lookup: :test)
+Geocoder::Lookup::Test.set_default_stub(
+  [{ "latitude" => 10.9685, "longitude" => -74.7813, "city" => "Barranquilla", "country" => "Colombia" }]
+)
+
 # Requires supporting ruby files with custom matchers and macros, etc, in
 # spec/support/ and its subdirectories. Files matching `spec/**/*_spec.rb` are
 # run as spec files by default. This means that files in spec/support that end
@@ -45,6 +56,14 @@ RSpec.configure do |config|
   # examples within a transaction, remove the following line or assign false
   # instead of true.
   config.use_transactional_fixtures = true
+
+  # Include time helpers (travel_to, freeze_time) in all specs
+  config.include ActiveSupport::Testing::TimeHelpers
+
+  # Use test adapter for ActiveJob matchers (have_enqueued_job, have_enqueued_mail)
+  config.before(:each) do
+    ActiveJob::Base.queue_adapter = :test
+  end
 
   # You can uncomment this line to turn off ActiveRecord support entirely.
   # config.use_active_record = false

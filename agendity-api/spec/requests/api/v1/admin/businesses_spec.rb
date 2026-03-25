@@ -41,7 +41,7 @@ RSpec.describe "Api::V1::Admin::Businesses", type: :request do
 
       data = response.parsed_body["data"]
       first = data.first
-      expect(first.keys).to match_array(%w[id name slug business_type])
+      expect(first.keys).to match_array(%w[id name slug business_type status plan_name independent])
     end
 
     it "returns 403 for non-admin users" do

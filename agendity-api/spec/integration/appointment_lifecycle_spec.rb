@@ -102,9 +102,7 @@ RSpec.describe "Appointment Lifecycle", type: :model do
     after_end_time = Time.zone.parse("#{tomorrow} 10:45").in_time_zone("America/Bogota")
 
     travel_to after_end_time do
-      perform_enqueued_jobs do
-        CompleteAppointmentsJob.perform_now
-      end
+      CompleteAppointmentsJob.perform_now
     end
 
     appointment.reload
