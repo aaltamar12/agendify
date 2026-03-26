@@ -285,6 +285,7 @@ interface CreateReviewPayload {
   slug: string;
   appointment_id: number;
   rating: number;
+  employee_rating?: number;
   comment?: string;
   customer_name?: string;
 }

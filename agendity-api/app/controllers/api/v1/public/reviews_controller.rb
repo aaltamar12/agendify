@@ -33,34 +33,44 @@ module Api
         end
 
         # POST /api/v1/public/:slug/reviews
+        # Creates a business review (rating) and optionally an employee review (employee_rating)
         def create
           business = Business.find_by!(slug: params[:slug])
           appointment = business.appointments.find(params[:appointment_id])
 
           # Prevent duplicate reviews for the same appointment
-          existing = Review.find_by(appointment_id: appointment.id)
+          existing = Review.find_by(appointment_id: appointment.id, employee_id: nil)
           if existing
             return render_error("Ya calificaste esta cita.", status: :unprocessable_entity)
           end
 
-          review = business.reviews.new(
+          customer_name = params[:customer_name] || appointment.customer&.name
+
+          # Business review (always)
+          review = business.reviews.create!(
             appointment_id: appointment.id,
             customer_id: appointment.customer_id,
-            employee_id: appointment.employee_id,
-            customer_name: params[:customer_name] || appointment.customer&.name,
+            employee_id: nil,
+            customer_name: customer_name,
             rating: params[:rating],
             comment: params[:comment]
           )
 
-          if review.save
-            render_success({ review: ReviewSerializer.render_as_hash(review) }, status: :created)
-          else
-            render_error(
-              review.errors.full_messages.to_sentence,
-              status: :unprocessable_entity,
-              details: review.errors.messages
+          # Employee review (if employee_rating provided and appointment has employee)
+          if params[:employee_rating].present? && appointment.employee_id.present?
+            business.reviews.create!(
+              appointment_id: appointment.id,
+              customer_id: appointment.customer_id,
+              employee_id: appointment.employee_id,
+              customer_name: customer_name,
+              rating: params[:employee_rating],
+              comment: nil
             )
           end
+
+          render_success({ review: ReviewSerializer.render_as_hash(review) }, status: :created)
+        rescue ActiveRecord::RecordInvalid => e
+          render_error(e.message, status: :unprocessable_entity)
         end
       end
     end

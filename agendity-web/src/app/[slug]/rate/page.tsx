@@ -49,6 +49,14 @@ function ClickableStars({
   );
 }
 
+function ratingLabel(r: number) {
+  if (r === 1) return 'Muy mala';
+  if (r === 2) return 'Mala';
+  if (r === 3) return 'Regular';
+  if (r === 4) return 'Buena';
+  return 'Excelente';
+}
+
 export default function RatePage() {
   const params = useParams<{ slug: string }>();
   const searchParams = useSearchParams();
@@ -58,7 +66,8 @@ export default function RatePage() {
   const { data, isLoading, error } = useRatingPage(slug, appointmentId);
   const createReview = useCreateReview();
 
-  const [rating, setRating] = useState(0);
+  const [employeeRating, setEmployeeRating] = useState(0);
+  const [businessRating, setBusinessRating] = useState(0);
   const [comment, setComment] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
@@ -118,14 +127,18 @@ export default function RatePage() {
 
   const { appointment, business_name, business_logo_url } = data;
 
+  const hasEmployee = !!appointment.employee_name;
+  const canSubmit = businessRating > 0 && (!hasEmployee || employeeRating > 0);
+
   const handleSubmit = () => {
-    if (rating === 0) return;
+    if (!canSubmit) return;
 
     createReview.mutate(
       {
         slug,
         appointment_id: appointment.id,
-        rating,
+        rating: businessRating,
+        employee_rating: hasEmployee ? employeeRating : undefined,
         comment: comment.trim() || undefined,
         customer_name: appointment.customer_name || undefined,
       },
@@ -173,23 +186,34 @@ export default function RatePage() {
           </div>
         </Card>
 
-        {/* Rating */}
+        {/* Rating — Professional */}
+        {hasEmployee && (
+          <div className="mb-6 text-center">
+            <p className="mb-3 text-sm font-medium text-gray-700">
+              ¿Cómo fue tu experiencia con {appointment.employee_name}?
+            </p>
+            <div className="flex justify-center">
+              <ClickableStars rating={employeeRating} onChange={setEmployeeRating} />
+            </div>
+            {employeeRating > 0 && (
+              <p className="mt-2 text-sm text-violet-600 font-medium">
+                {ratingLabel(employeeRating)}
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Rating — Business */}
         <div className="mb-6 text-center">
           <p className="mb-3 text-sm font-medium text-gray-700">
-            {appointment.employee_name
-              ? `¿Cómo fue tu experiencia con ${appointment.employee_name}?`
-              : '¿Cómo fue tu experiencia?'}
+            ¿Cómo calificas a {business_name}?
           </p>
           <div className="flex justify-center">
-            <ClickableStars rating={rating} onChange={setRating} />
+            <ClickableStars rating={businessRating} onChange={setBusinessRating} />
           </div>
-          {rating > 0 && (
+          {businessRating > 0 && (
             <p className="mt-2 text-sm text-violet-600 font-medium">
-              {rating === 1 && 'Muy mala'}
-              {rating === 2 && 'Mala'}
-              {rating === 3 && 'Regular'}
-              {rating === 4 && 'Buena'}
-              {rating === 5 && 'Excelente'}
+              {ratingLabel(businessRating)}
             </p>
           )}
         </div>
@@ -217,7 +241,7 @@ export default function RatePage() {
           fullWidth
           size="lg"
           onClick={handleSubmit}
-          disabled={rating === 0 || createReview.isPending}
+          disabled={!canSubmit || createReview.isPending}
         >
           {createReview.isPending ? 'Enviando...' : 'Enviar calificación'}
         </Button>
