@@ -98,6 +98,7 @@ export interface Business {
   daviplata_phone: string | null;
   bancolombia_account: string | null;
   breb_key: string | null;
+  dynamic_pricing_coverage?: number;
   cashback_enabled?: boolean;
   cashback_percentage?: number;
   cancellation_refund_as_credit?: boolean;

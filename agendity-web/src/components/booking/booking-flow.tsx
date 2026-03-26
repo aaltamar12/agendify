@@ -98,7 +98,7 @@ export function BookingFlow({
 
       {/* Step content */}
       <div className="min-h-[300px]">
-        {currentStep === 1 && <ServiceSelector services={services} hasDynamicPricing={hasDynamicPricing} />}
+        {currentStep === 1 && <ServiceSelector services={services} hasDynamicPricing={hasDynamicPricing} dynamicPricingCoverage={business.dynamic_pricing_coverage ?? 0} />}
         {currentStep === 2 && <EmployeeSelector employees={employees} />}
         {currentStep === 3 && <DateTimePicker slug={slug} />}
         {currentStep === 4 && <CustomerForm slug={slug} />}

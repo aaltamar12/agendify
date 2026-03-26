@@ -10,9 +10,13 @@ import type { Service } from '@/lib/api/types';
 interface ServiceSelectorProps {
   services: Service[];
   hasDynamicPricing?: boolean;
+  /** Fraction of services with active dynamic pricing (0.0 to 1.0) */
+  dynamicPricingCoverage?: number;
 }
 
-export function ServiceSelector({ services, hasDynamicPricing }: ServiceSelectorProps) {
+export function ServiceSelector({ services, hasDynamicPricing, dynamicPricingCoverage = 0 }: ServiceSelectorProps) {
+  const showGeneralMessage = hasDynamicPricing && dynamicPricingCoverage >= 0.6;
+  const showPerServiceMessage = hasDynamicPricing && !showGeneralMessage;
   const { selectedServices, toggleService } = useBookingStore();
 
   const activeServices = services.filter((s) => s.active);
@@ -43,6 +47,14 @@ export function ServiceSelector({ services, hasDynamicPricing }: ServiceSelector
           Selecciona el servicio que deseas reservar
         </p>
       </div>
+
+      {/* General dynamic pricing message (≥60% of services) */}
+      {showGeneralMessage && (
+        <p className="flex items-center gap-1 text-sm text-amber-600">
+          <Zap className="h-3.5 w-3.5" />
+          El precio puede variar según el día
+        </p>
+      )}
 
       {Array.from(categories.entries()).map(([category, catServices]) => (
         <div key={category} className="space-y-3">
@@ -105,7 +117,7 @@ export function ServiceSelector({ services, hasDynamicPricing }: ServiceSelector
                       {formatDuration(service.duration_minutes)}
                     </span>
                   </div>
-                  {hasDynamicPricing && (
+                  {showPerServiceMessage && (
                     <p className="mt-2 flex items-center gap-1 text-xs text-amber-600">
                       <Zap className="h-3 w-3" />
                       El precio puede variar según el día

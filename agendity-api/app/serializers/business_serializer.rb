@@ -56,6 +56,20 @@ class BusinessSerializer < Blueprinter::Base
     plan&.featured_listing || false
   end
 
+  # Returns the fraction of services covered by active dynamic pricings (0.0 to 1.0)
+  # null service_id means "applies to all" → coverage = 1.0
+  field :dynamic_pricing_coverage do |business, _options|
+    active_pricings = business.dynamic_pricings.currently_active
+    next 0.0 if active_pricings.empty?
+    next 1.0 if active_pricings.where(service_id: nil).exists?
+
+    total_services = business.services.where(active: true).count
+    next 0.0 if total_services.zero?
+
+    covered = active_pricings.where.not(service_id: nil).distinct.count(:service_id)
+    (covered.to_f / total_services).round(2)
+  end
+
   view :public do
     excludes :owner_id, :status, :onboarding_completed,
              :current_subscription, :cover_source,

@@ -8,9 +8,7 @@ import { Spinner } from '@/components/ui';
 import { getNextDays, parseDate, formatTime } from '@/lib/utils/date';
 import { formatCurrency } from '@/lib/utils/format';
 import { useBookingStore } from '@/lib/stores/booking-store';
-import { useAvailability, usePriceCalendar, usePricePreview, usePricePreviewMulti } from '@/lib/hooks/use-public';
-import { DYNAMIC_PRICING_GROUP_THRESHOLD } from '@/lib/constants';
-import type { PricePreviewData } from '@/lib/hooks/use-public';
+import { useAvailability, usePriceCalendar, usePricePreview } from '@/lib/hooks/use-public';
 
 interface DateTimePickerProps {
   slug: string;
@@ -59,68 +57,6 @@ export function DateTimePicker({ slug }: DateTimePickerProps) {
     selectedService?.id ?? 0,
     currentDate,
   );
-
-  // Fetch price previews for ALL selected services (for grouping logic)
-  const extraServiceIds = selectedServices.slice(1).map((s) => s.id);
-  const extraPreviews = usePricePreviewMulti(slug, extraServiceIds, currentDate);
-
-  // Build array of all price previews (primary + extras)
-  const allPreviews = useMemo(() => {
-    const results: { serviceId: number; data: PricePreviewData }[] = [];
-    if (pricePreview && selectedService) {
-      results.push({ serviceId: selectedService.id, data: pricePreview });
-    }
-    extraPreviews.forEach((q, idx) => {
-      if (q.data) {
-        results.push({ serviceId: extraServiceIds[idx], data: q.data });
-      }
-    });
-    return results;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pricePreview, selectedService?.id, ...extraPreviews.map((q) => q.data)]);
-
-  // Determine if we should show a grouped dynamic pricing message
-  const groupedPricing = useMemo(() => {
-    const isMultiService = selectedServices.length > 1;
-    if (!isMultiService) return null;
-
-    // Only consider services that actually have dynamic pricing applied
-    const withDynamic = allPreviews.filter(
-      (p) => p.data.has_dynamic_pricing && p.data.adjustment_pct !== 0 && p.data.dynamic_pricing_name,
-    );
-    if (withDynamic.length === 0) return null;
-
-    // Count occurrences of each dynamic_pricing_name
-    const nameCount = new Map<string, { count: number; data: PricePreviewData }>();
-    for (const p of withDynamic) {
-      const name = p.data.dynamic_pricing_name!;
-      const existing = nameCount.get(name);
-      if (existing) {
-        existing.count++;
-      } else {
-        nameCount.set(name, { count: 1, data: p.data });
-      }
-    }
-
-    // Find the most common pricing name
-    let dominant: { name: string; count: number; data: PricePreviewData } | null = null;
-    for (const [name, { count, data }] of nameCount) {
-      if (!dominant || count > dominant.count) {
-        dominant = { name, count, data };
-      }
-    }
-    if (!dominant) return null;
-
-    const ratio = dominant.count / selectedServices.length;
-    if (ratio >= DYNAMIC_PRICING_GROUP_THRESHOLD) {
-      return {
-        name: dominant.name,
-        adjustment_pct: dominant.data.adjustment_pct,
-        is_discount: dominant.data.is_discount,
-      };
-    }
-    return null;
-  }, [allPreviews, selectedServices.length]);
 
   // Sync price preview data to the store when it changes
   useEffect(() => {
@@ -276,40 +212,7 @@ export function DateTimePicker({ slug }: DateTimePickerProps) {
       </div>
 
       {/* Dynamic price display for selected date */}
-      {/* Grouped message: when ≥60% of multi-service selections share the same pricing */}
-      {selectedServices.length > 1 && groupedPricing ? (
-        <div
-          className={cn(
-            'flex items-center gap-2 rounded-lg border px-4 py-3',
-            groupedPricing.is_discount
-              ? 'bg-green-50 border-green-200'
-              : 'bg-orange-50 border-orange-200',
-          )}
-        >
-          <Zap
-            className={cn(
-              'h-4 w-4 shrink-0',
-              groupedPricing.is_discount
-                ? 'text-green-600 fill-green-600'
-                : 'text-orange-600 fill-orange-600',
-            )}
-          />
-          <p
-            className={cn(
-              'text-sm font-medium',
-              groupedPricing.is_discount ? 'text-green-800' : 'text-orange-800',
-            )}
-          >
-            {groupedPricing.name}:{' '}
-            <span className="font-semibold">
-              {groupedPricing.adjustment_pct > 0 ? '+' : ''}
-              {groupedPricing.adjustment_pct}%
-            </span>{' '}
-            en todos los servicios
-          </p>
-        </div>
-      ) : pricePreview?.has_dynamic_pricing && pricePreview.adjustment_pct !== 0 ? (
-        /* Single service or <60% shared: show per-service detail */
+      {pricePreview?.has_dynamic_pricing && pricePreview.adjustment_pct !== 0 ? (
         <div
           className={cn(
             'flex items-center justify-between rounded-lg border px-4 py-3',
