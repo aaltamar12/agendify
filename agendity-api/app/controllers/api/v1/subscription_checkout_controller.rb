@@ -25,7 +25,8 @@ module Api
             max_reservations_month: p.max_reservations_month,
             ai_features: p.ai_features,
             ticket_digital: p.ticket_digital,
-            advanced_reports: p.advanced_reports
+            advanced_reports: p.advanced_reports,
+            features: p.features || []
           }
         })
       end

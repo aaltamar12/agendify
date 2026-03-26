@@ -184,6 +184,9 @@ Rails.application.routes.draw do
 
       # Public endpoints (no auth required)
       namespace :public do
+        # Public plans (for landing page, no auth required)
+        get "plans", to: "plans#index"
+
         # Referral code validation
         get "referral_codes/:code/validate", to: "referral_codes#validate"
 

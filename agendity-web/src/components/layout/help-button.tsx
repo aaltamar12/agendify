@@ -173,7 +173,7 @@ export function HelpButton() {
                 </span>
               </span>
               <a
-                href="/dashboard/settings#plan"
+                href="/dashboard/subscription/checkout"
                 onClick={() => setOpen(false)}
                 className="text-xs font-medium text-violet-600 transition-colors hover:text-violet-700"
               >

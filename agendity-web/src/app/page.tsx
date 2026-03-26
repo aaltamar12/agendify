@@ -10,21 +10,20 @@ import {
   Users,
   Smartphone,
   ArrowRight,
-  Check,
   CheckCircle,
   Bell,
   MessageCircle,
   Shield,
   Star,
   Zap,
-  Sparkles,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { LandingPricing } from '@/components/landing/landing-pricing';
 
 export const metadata: Metadata = {
   title: 'Agendity — Agenda de citas para tu negocio | Reservas online 24/7',
   description:
-    'Software de gestión de citas para barberías, salones, consultorios y cualquier negocio que trabaje con reservas. Reservas online 24/7, agenda digital, control de ingresos, recordatorios automáticos y reportes. 7 días gratis.',
+    'Software de gestión de citas para barberías, salones, consultorios y cualquier negocio que trabaje con reservas. Reservas online 24/7, agenda digital, control de ingresos, recordatorios automáticos y reportes. 25 días gratis.',
   keywords: [
     'agenda de citas para negocios',
     'reservas online barbería',
@@ -124,7 +123,7 @@ const TESTIMONIALS = [
 const FAQ = [
   {
     question: '¿Agendity es gratis?',
-    answer: 'Sí. Tienes 7 días gratis con acceso completo al Plan Profesional, sin necesidad de tarjeta de crédito. Después eliges el plan que mejor se ajuste a tu negocio.',
+    answer: 'Sí. Tienes 25 días gratis con acceso completo al Plan Inteligente, sin necesidad de tarjeta de crédito. Después eliges el plan que mejor se ajuste a tu negocio.',
   },
   {
     question: '¿Mis clientes necesitan descargar una app?',
@@ -174,7 +173,7 @@ const jsonLd = {
     '@type': 'Offer',
     price: '0',
     priceCurrency: 'COP',
-    description: '7 días de prueba gratis',
+    description: '25 días de prueba gratis',
   },
   aggregateRating: {
     '@type': 'AggregateRating',
@@ -223,7 +222,7 @@ export default function Home() {
         <section className="flex flex-col items-center justify-center gap-8 px-6 py-20 text-center sm:py-28">
           <span className="inline-flex items-center gap-2 rounded-full bg-violet-50 px-4 py-1.5 text-sm font-medium text-violet-700">
             <Zap className="h-4 w-4" />
-            7 días gratis — Sin tarjeta de crédito
+            25 días gratis — Sin tarjeta de crédito
           </span>
           <h1 className="max-w-3xl text-5xl font-bold tracking-tight text-gray-900 sm:text-6xl">
             Tu negocio,{' '}
@@ -325,7 +324,7 @@ export default function Home() {
                     </Link>
                   </div>
                   <p className="mt-3 text-xs text-gray-400">
-                    7 días gratis. Sin tarjeta de crédito.
+                    25 días gratis. Sin tarjeta de crédito.
                   </p>
                 </div>
 
@@ -428,94 +427,8 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Pricing */}
-        <section id="precios" className="px-6 py-20">
-          <div className="mx-auto max-w-5xl">
-            <h2 className="mb-4 text-center text-3xl font-bold text-gray-900">
-              Planes simples, sin sorpresas
-            </h2>
-            <p className="mx-auto mb-12 max-w-xl text-center text-gray-500">
-              7 días gratis con acceso completo al Plan Profesional. Sin tarjeta de crédito.
-            </p>
-
-            <div className="grid gap-6 sm:grid-cols-3">
-              {/* Básico */}
-              <div className="flex flex-col rounded-2xl border border-gray-200 bg-white p-6">
-                <h3 className="text-lg font-semibold text-gray-900">Básico</h3>
-                <p className="mt-1 text-sm text-gray-500">Para empezar a organizarte</p>
-                <div className="mt-4">
-                  <span className="text-4xl font-bold text-gray-900">$8</span>
-                  <span className="text-sm text-gray-500"> USD/mes</span>
-                  <p className="mt-1 text-xs text-gray-400">~$37,000 COP/mes</p>
-                </div>
-                <ul className="mt-6 flex-1 space-y-3">
-                  {['Agenda y calendario', 'Hasta 3 empleados', 'Hasta 5 servicios', 'Página pública', 'QR de reservas', 'Reportes básicos'].map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-sm text-gray-600">
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-violet-600" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                <Link href="/register" className="mt-6">
-                  <Button variant="outline" fullWidth>Empezar gratis</Button>
-                </Link>
-              </div>
-
-              {/* Profesional */}
-              <div className="flex flex-col rounded-2xl border-2 border-violet-600 bg-white p-6 shadow-lg">
-                <div className="mb-2 flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-gray-900">Profesional</h3>
-                  <span className="rounded-full bg-violet-100 px-3 py-0.5 text-xs font-semibold text-violet-700">Popular</span>
-                </div>
-                <p className="text-sm text-gray-500">Para negocios que quieren crecer</p>
-                <div className="mt-4">
-                  <span className="text-4xl font-bold text-gray-900">$17</span>
-                  <span className="text-sm text-gray-500"> USD/mes</span>
-                  <p className="mt-1 text-xs text-gray-400">~$75,000 COP/mes</p>
-                </div>
-                <ul className="mt-6 flex-1 space-y-3">
-                  {['Todo del plan Básico', 'Hasta 10 empleados', 'Servicios ilimitados', 'Ticket digital VIP con QR', 'Reportes avanzados', 'Personalización de marca', 'Negocio destacado', 'Cierre de caja'].map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-sm text-gray-600">
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-violet-600" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                <Link href="/register" className="mt-6">
-                  <Button fullWidth>Empezar gratis</Button>
-                </Link>
-              </div>
-
-              {/* Inteligente */}
-              <div className="relative flex flex-col rounded-2xl border border-gray-200 bg-gradient-to-br from-violet-50 to-white p-6">
-                <div className="mb-2 flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-gray-900">Inteligente</h3>
-                  <Sparkles className="h-5 w-5 text-violet-600" />
-                </div>
-                <p className="text-sm text-gray-500">IA que hace crecer tu negocio</p>
-                <div className="mt-4">
-                  <span className="text-4xl font-bold text-gray-900">$23</span>
-                  <span className="text-sm text-gray-500"> USD/mes</span>
-                  <p className="mt-1 text-xs text-gray-400">~$99,000 COP/mes</p>
-                </div>
-                <ul className="mt-6 flex-1 space-y-3">
-                  {['Todo del plan Profesional', 'Empleados ilimitados', 'Análisis inteligente con IA', 'Predicción de ingresos', 'Recomendaciones de precios', 'Alertas de clientes inactivos', 'Tarifas dinámicas automáticas', 'Soporte prioritario'].map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-sm text-gray-600">
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-violet-600" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                <Link href="/register" className="mt-6">
-                  <Button fullWidth>Empezar gratis</Button>
-                </Link>
-                <p className="mt-2 text-center text-xs text-violet-600 font-medium">
-                  Solo $6 USD más que el Profesional
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
+        {/* Pricing — fetched from API */}
+        <LandingPricing />
 
         {/* FAQ */}
         <section id="preguntas" className="bg-gray-50 px-6 py-20">
@@ -549,7 +462,7 @@ export default function Home() {
         <section className="bg-violet-600 px-6 py-20 text-center">
           <div className="mx-auto max-w-2xl">
             <h2 className="mb-4 text-3xl font-bold text-white">
-              Empieza tu prueba gratis de 7 días
+              Empieza tu prueba gratis de 25 días
             </h2>
             <p className="mb-8 text-lg text-violet-200">
               Sin tarjeta de crédito. Sin compromisos. Cancela cuando quieras.

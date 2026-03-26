@@ -24,8 +24,8 @@ puts "\n📋 Creating plans..."
 
 plan_basico = Plan.find_or_initialize_by(name: "Básico")
 plan_basico.update!(
-  price_monthly: 37_000,
-  price_monthly_usd: 8,
+  price_monthly: 33_000,
+  price_monthly_usd: 9,
   max_employees: 3,
   max_services: 5,
   max_reservations_month: nil,
@@ -36,13 +36,22 @@ plan_basico.update!(
   brand_customization: false,
   featured_listing: false,
   priority_support: false,
-  whatsapp_notifications: false
+  whatsapp_notifications: false,
+  features: [
+    "Agenda y calendario",
+    "Hasta 3 empleados",
+    "Hasta 5 servicios",
+    "Página pública",
+    "QR de reservas",
+    "Notificaciones por email",
+    "Reportes básicos"
+  ]
 )
 
 plan_profesional = Plan.find_or_initialize_by(name: "Profesional")
 plan_profesional.update!(
-  price_monthly: 75_000,
-  price_monthly_usd: 17,
+  price_monthly: 82_000,
+  price_monthly_usd: 22,
   max_employees: 10,
   max_services: nil, # unlimited
   max_reservations_month: nil,
@@ -55,13 +64,26 @@ plan_profesional.update!(
   priority_support: false,
   cashback_enabled: true,
   cashback_percentage: 5,
-  whatsapp_notifications: true
+  whatsapp_notifications: true,
+  features: [
+    "Todo del plan Básico",
+    "Hasta 10 empleados",
+    "Servicios ilimitados",
+    "Notificaciones WhatsApp",
+    "Ticket digital VIP con QR",
+    "Reportes avanzados",
+    "Personalización de marca",
+    "Negocio destacado",
+    "Cierre de caja",
+    "Tarifas dinámicas",
+    "Créditos / Cashback"
+  ]
 )
 
 plan_inteligente = Plan.find_or_initialize_by(name: "Inteligente")
 plan_inteligente.update!(
   price_monthly: 99_000,
-  price_monthly_usd: 23,
+  price_monthly_usd: 27,
   max_employees: nil, # unlimited
   max_services: nil,
   max_reservations_month: nil,
@@ -74,7 +96,20 @@ plan_inteligente.update!(
   priority_support: true,
   cashback_enabled: true,
   cashback_percentage: 5,
-  whatsapp_notifications: true
+  whatsapp_notifications: true,
+  features: [
+    "Todo del plan Profesional",
+    "Empleados ilimitados",
+    "Análisis inteligente con IA",
+    "Predicción de ingresos",
+    "Recomendaciones de precios",
+    "Alertas de clientes inactivos",
+    "Tarifas dinámicas automáticas",
+    "Metas financieras",
+    "Reconciliación contable",
+    "Badge verificado",
+    "Soporte prioritario"
+  ]
 )
 
 puts "  ✅ Plans: #{Plan.count} (Básico, Profesional, Inteligente)"
@@ -1589,6 +1624,8 @@ Business.find_or_create_by!(slug: "barber-king") do |b|
   b.timezone = "America/Bogota"
   b.currency = "COP"
   b.onboarding_completed = true
+  b.trial_ends_at = 1.day.ago
+  b.trial_alert_stage = 3
 end
 
 puts "  ✅ Barber King (suspended)"
@@ -2090,7 +2127,8 @@ site_configs = {
   "admin_email" => { value: "admin@agendity.com", description: "Email del administrador de la plataforma" },
   "admin_whatsapp" => { value: "+573001234567", description: "WhatsApp del administrador" },
   "app_url" => { value: "https://app.agendity.com", description: "URL de la aplicacion web" },
-  "admin_url" => { value: "https://api.agendity.com", description: "URL del panel de administracion" }
+  "admin_url" => { value: "https://api.agendity.com", description: "URL del panel de administracion" },
+  "trm_rate" => { value: "3667", description: "Tasa de cambio USD/COP para calculo de precios de planes" }
 }
 
 site_configs.each do |key, attrs|

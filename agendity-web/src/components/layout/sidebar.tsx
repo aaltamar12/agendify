@@ -169,6 +169,8 @@ function SidebarItem({ item, isActive, planSlug, badge }: SidebarItemProps) {
             setTimeout(() => setShowTooltip(false), 2500);
           }
         }}
+        onMouseEnter={() => { if (isLocked) setShowTooltip(true); }}
+        onMouseLeave={() => { if (isLocked) setShowTooltip(false); }}
         className={cn(
           'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors',
           isLocked

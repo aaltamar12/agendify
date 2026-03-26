@@ -67,7 +67,14 @@ export function BusinessCard({ business }: BusinessCardProps) {
           <Badge>{typeLabel}</Badge>
         </div>
 
-        <StarRating rating={Number(business.rating_average) || 0} size="sm" showValue />
+        <div className="flex items-center gap-1.5">
+          <StarRating rating={Number(business.rating_average) || 0} size="sm" showValue />
+          {business.total_reviews > 0 && (
+            <span className="text-xs text-gray-400">
+              ({business.total_reviews} {business.total_reviews === 1 ? 'reseña' : 'reseñas'})
+            </span>
+          )}
+        </div>
 
         {business.address && (
           <p className="flex items-center gap-1 text-sm text-gray-500">

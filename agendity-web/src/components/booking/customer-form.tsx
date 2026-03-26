@@ -266,12 +266,15 @@ export function CustomerForm({ slug }: CustomerFormProps) {
           {...register('email')}
         />
 
-        <Input
-          label="Fecha de nacimiento (opcional)"
-          type="date"
-          error={errors.birth_date?.message}
-          {...register('birth_date')}
-        />
+        <div>
+          <Input
+            label="Fecha de nacimiento (opcional)"
+            type="date"
+            error={errors.birth_date?.message}
+            {...register('birth_date')}
+          />
+          <p className="mt-1 text-xs text-gray-400">Agrégala y recibe descuentos de cumpleaños</p>
+        </div>
 
         <Input
           label="Teléfono"

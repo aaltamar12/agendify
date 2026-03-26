@@ -232,29 +232,70 @@ Templates:
 
 ---
 
-## Banner en Frontend
+## Banners del Dashboard
 
-`SubscriptionBanner` en `src/components/layout/subscription-banner.tsx`.
+El dashboard tiene 4 banners que se apilan verticalmente en la parte superior. Cada uno ocupa `40px` de alto y se posiciona con `position: fixed` y z-index decreciente.
 
-Aparece en la parte superior del dashboard (debajo del topbar) para todos los negocios con suscripcion por vencer o trial activo.
+### Orden de apilamiento
 
-### Estados para suscripcion paga
+| # | Banner | z-index | Condicion |
+|---|--------|---------|-----------|
+| 1 | Demo | 59 | Solo en modo demo (`isDemoMode()`) |
+| 2 | Impersonacion | 59 | SuperAdmin observando como negocio |
+| 3 | Oculto (amarillo) | 58 | `isBusinessSuspended && !showSubscriptionBanner` |
+| 4 | Suscripcion | 57 | `daysUntilExpiry !== null && daysUntilExpiry <= 5` |
 
-| Condicion | Color | Mensaje ejemplo |
-|-----------|-------|-----------------|
-| 5 a 1 dias antes de vencer | Amarillo | "Tu plan Profesional vence en X dias. Renueva ahora." |
-| Dia de vencimiento | Rojo | "Tu plan Profesional vence hoy. Renueva ahora." |
-| Despues de vencer | Rojo oscuro | "Tu plan vencio hace X dias. Renueva para evitar suspension." |
+El offset vertical de cada banner se calcula dinamicamente contando cuantos banners superiores estan visibles.
 
-### Estados para trial
+### Logica de visibilidad (layout.tsx)
 
-| Condicion | Color | Mensaje ejemplo |
-|-----------|-------|-----------------|
-| Trial activo (>2 dias restantes) | Azul/informativo | "Estas en tu periodo de prueba. X dias restantes." |
-| 2 dias o menos | Amarillo | "Tu periodo de prueba termina en X dias. Elige tu plan." |
-| Trial vencido (sin suspension) | Rojo | "Tu periodo de prueba termino. Elige tu plan para continuar." |
+```typescript
+const showSubscriptionBanner = daysUntilExpiry !== null && daysUntilExpiry <= 5;
+const isBusinessHidden = isBusinessSuspended && !showSubscriptionBanner;
+```
 
-Se muestra automaticamente basado en `subscription.end_date` o `business.trial_ends_at`. El boton CTA lleva a `/dashboard/subscription/checkout`.
+**Regla clave:** El banner amarillo "Oculto" y el SubscriptionBanner **nunca se muestran al mismo tiempo**. Cuando la suspension es por falta de pago (trial o suscripcion vencida), `daysUntilExpiry` tiene un valor negativo (siempre <= 5) y el SubscriptionBanner lo cubre. El banner amarillo solo aparece cuando el negocio fue suspendido manualmente por el admin sin relacion con la suscripcion.
+
+### SubscriptionBanner (subscription-banner.tsx)
+
+Cubre **tanto trial como suscripcion pagada**. Se basa en `daysUntilExpiry` que se calcula desde `subscription.end_date` o `business.trial_ends_at`.
+
+| Condicion | Color | Icono | Mensaje | CTA |
+|-----------|-------|-------|---------|-----|
+| Trial, 6-20 dias restantes | Azul (`bg-blue-500`) | Info | "Estas en tu periodo de prueba. Te quedan {X} dias." | Ver planes → checkout |
+| 1-5 dias antes de vencer | Amber (`bg-amber-500`) | Clock | "Tu plan {plan} vence en {X} dias. Renueva para mantener tus funcionalidades." | Renovar → checkout |
+| Dia de vencimiento (0 dias) | Rojo (`bg-red-500`) | AlertTriangle | "Tu plan {plan} vence hoy. Renueva ahora para no perder acceso." | Renovar → checkout |
+| Vencido (dias negativos) | Rojo oscuro (`bg-red-600`) | AlertTriangle | "Tu plan {plan} vencio hace {X} dias. Tu negocio no aparece para usuarios hasta que renueves." | Renovar → checkout |
+
+El banner azul informativo aparece a partir del dia 5 del trial (con 20 dias restantes, asumiendo trial de 25 dias). A partir de 5 dias restantes cambia a los colores de urgencia (amber/rojo).
+
+El banner completo es un `<Link>` clickeable a `/dashboard/subscription/checkout`.
+
+### Banner Amarillo "Oculto" (layout.tsx)
+
+| Condicion | Mensaje | CTA |
+|-----------|---------|-----|
+| Negocio `suspended` sin datos de expiracion de suscripcion/trial | "Tu negocio esta oculto y no aparece para usuarios." | Boton "Renovar suscripcion" → checkout |
+
+Este caso solo ocurre cuando:
+- El admin suspendio manualmente el negocio desde ActiveAdmin (batch action o accion individual)
+- El negocio no tiene `trial_ends_at` ni suscripcion activa/expirada con fecha
+
+### Tabla resumen de escenarios
+
+| Escenario | Status negocio | Banner visible | Color |
+|-----------|---------------|---------------|-------|
+| Trial activo, >20 dias restantes | `active` | Ninguno | — |
+| Trial activo, 6-20 dias restantes | `active` | SubscriptionBanner | Azul (info) |
+| Trial activo, 3 dias restantes | `active` | SubscriptionBanner | Amber |
+| Trial vence hoy | `active` | SubscriptionBanner | Rojo |
+| Trial vencio hace 1 dia (gracia) | `active` | SubscriptionBanner | Rojo oscuro |
+| Trial vencio hace 2+ dias (job suspendio) | `suspended` | SubscriptionBanner | Rojo oscuro |
+| Trial vencio hace 30 dias | `suspended` | SubscriptionBanner | Rojo oscuro |
+| Suscripcion activa, 5 dias para vencer | `active` | SubscriptionBanner | Amber |
+| Suscripcion vencio, negocio suspendido | `suspended` | SubscriptionBanner | Rojo oscuro |
+| Suspendido manualmente por admin | `suspended` | Banner Oculto | Amarillo |
+| Negocio `inactive` (stage 4) | `inactive` | Dashboard bloqueado (pantalla completa "Cuenta desactivada") | — |
 
 ### Mailer adicional: trial_ended_thank_you
 
@@ -323,14 +364,19 @@ Ver el doc completo de todos los jobs en [sidekiq-jobs.md](sidekiq-jobs.md).
 
 ## Archivos clave
 
-- `app/jobs/subscription_expiry_alert_job.rb`
-- `app/jobs/trial_expiry_alert_job.rb`
-- `app/mailers/business_mailer.rb`
-- `app/models/subscription.rb` (scopes + `process_renewal!`)
-- `app/models/business.rb` (campo `trial_ends_at` + `trial_alert_stage`)
+### Backend (agendity-api)
+- `app/jobs/subscription_expiry_alert_job.rb` — Job de alertas de suscripcion (4 stages)
+- `app/jobs/trial_expiry_alert_job.rb` — Job de alertas de trial (4 stages)
+- `app/jobs/check_expired_subscriptions_job.rb` — Downgrade automatico a Basico
+- `app/mailers/business_mailer.rb` — Emails de alertas, renovacion, agradecimiento
+- `app/models/subscription.rb` — Scopes `expiring_in`, `expired_since` + `process_renewal!`
+- `app/models/business.rb` — Campos `trial_ends_at`, `trial_alert_stage`, enum `status`
 - `app/views/business_mailer/subscription_expiry_alert_stage_*.html.erb`
-- `app/views/business_mailer/subscription_renewed.html.erb`
 - `app/views/business_mailer/trial_expiry_alert_stage_*.html.erb`
-- `agendity-web/src/components/layout/subscription-banner.tsx`
-- `config/initializers/sidekiq_cron.rb` (schedule)
-- `config/sidekiq.yml` (queues + concurrency)
+- `config/initializers/sidekiq_cron.rb` — Schedule de jobs recurrentes
+
+### Frontend (agendity-web)
+- `src/app/dashboard/layout.tsx` — Logica de visibilidad y apilamiento de banners
+- `src/components/layout/subscription-banner.tsx` — Componente SubscriptionBanner (trial + suscripcion)
+- `src/lib/hooks/use-subscription.ts` — Hook `useCurrentSubscription()` que calcula `daysUntilExpiry`
+- `src/app/dashboard/subscription/checkout/page.tsx` — Pagina de checkout con planes detallados

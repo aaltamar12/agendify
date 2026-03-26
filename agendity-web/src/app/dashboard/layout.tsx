@@ -2,13 +2,14 @@
 
 import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import { Check, Clock, EyeOff, ShieldX, Timer } from 'lucide-react';
+import { Clock, EyeOff, ShieldX, Timer } from 'lucide-react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Topbar } from '@/components/layout/topbar';
 import { MobileNav } from '@/components/layout/mobile-nav';
 import { ImpersonationBanner } from '@/components/layout/impersonation-banner';
+import { PlanCard } from '@/components/shared/plan-card';
 import { SubscriptionBanner } from '@/components/layout/subscription-banner';
 import { ToastContainer } from '@/components/ui';
 import { useUIStore } from '@/lib/stores/ui-store';
@@ -60,9 +61,12 @@ export default function DashboardLayout({
   // Only block trial expired (never paid). Suspended = dashboard accessible with banner.
   const isCheckoutPage = pathname?.startsWith('/dashboard/subscription');
   const shouldBlockTrialExpired = !isAdmin && !isCheckoutPage && trialExpired && !hasPendingOrder && !isBusinessSuspended;
-  const isBusinessHidden = isBusinessSuspended;
   const isDemo = isDemoMode();
-  const showSubscriptionBanner = daysUntilExpiry !== null && daysUntilExpiry <= 5;
+  // Show subscription banner: trial info (≤20 days), urgency (≤5 days), or expired (negative)
+  const isTrialing = !subscriptionStatus?.subscription;
+  const showSubscriptionBanner = daysUntilExpiry !== null && (daysUntilExpiry <= 5 || (isTrialing && daysUntilExpiry <= 20));
+  // Show "Oculto" banner only for non-subscription suspensions (e.g. manual admin action)
+  const isBusinessHidden = isBusinessSuspended && !showSubscriptionBanner;
 
   // Real-time updates via NATS WebSocket
   useRealtime();
@@ -164,7 +168,13 @@ export default function DashboardLayout({
           style={{ top: [isDemo, isImpersonating].filter(Boolean).length * BANNER_HEIGHT }}
         >
           <EyeOff className="h-4 w-4" />
-          Tu negocio está oculto y no aparece para usuarios. El dashboard funciona normal.
+          Tu negocio está oculto y no aparece para usuarios.
+          <a
+            href="/dashboard/subscription/checkout"
+            className="ml-1 inline-flex items-center gap-1 rounded-md bg-yellow-900 px-3 py-1 text-xs font-semibold text-yellow-100 transition-colors hover:bg-yellow-800"
+          >
+            Renovar suscripción
+          </a>
         </div>
       )}
 
@@ -245,33 +255,12 @@ function TrialBlockScreen({ title, subtitle, plans, siteConfig, variant }: Trial
           <p className="mt-2 text-gray-600 max-w-lg mx-auto">{subtitle}</p>
         </div>
 
-        {/* Plan cards — only for trial expired (first time choosing) */}
+        {/* Plan cards with features — only for trial expired (first time choosing) */}
         {showPlans && (
           <div className="grid gap-4 sm:grid-cols-3 mb-8">
-            {plans.map((plan) => {
-              const isPopular = plan.name?.toLowerCase().includes('profesional');
-              return (
-                <div
-                  key={plan.id}
-                  className={`relative flex flex-col rounded-2xl border-2 bg-white p-5 ${
-                    isPopular ? 'border-violet-600 shadow-lg' : 'border-gray-200'
-                  }`}
-                >
-                  {isPopular && (
-                    <span className="absolute -top-3 right-4 rounded-full bg-violet-100 px-3 py-0.5 text-xs font-semibold text-violet-700">
-                      Popular
-                    </span>
-                  )}
-                  <h3 className="text-lg font-semibold text-gray-900">{plan.name}</h3>
-                  <div className="mt-3">
-                    <span className="text-3xl font-bold text-gray-900">
-                      {formatCurrency(plan.price_monthly)}
-                    </span>
-                    <span className="text-sm text-gray-500"> /mes</span>
-                  </div>
-                </div>
-              );
-            })}
+            {plans.map((plan) => (
+              <PlanCard key={plan.id} plan={plan} />
+            ))}
           </div>
         )}
 

@@ -45,7 +45,7 @@ export function UpgradeBanner({
           </p>
         </div>
         <Link
-          href="/dashboard/settings?tab=plan"
+          href="/dashboard/subscription/checkout"
           className="inline-flex items-center gap-2 whitespace-nowrap rounded-lg bg-white px-4 py-2 text-sm font-medium text-violet-700 shadow-sm transition-colors hover:bg-violet-50"
         >
           Ver planes

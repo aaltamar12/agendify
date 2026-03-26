@@ -124,6 +124,7 @@ export function AgendaCalendar({
         locale="es"
         headerToolbar={false}
         nowIndicator={true}
+        scrollTime={`${String(new Date().getHours()).padStart(2, '0')}:00:00`}
         allDaySlot={false}
         slotMinTime="06:00:00"
         slotMaxTime="22:00:00"

@@ -156,6 +156,60 @@ export const BRAND_CUSTOMIZATION_PLANS: PlanSlug[] = ['trial', 'profesional', 'i
 // AI features lock
 export const AI_FEATURES_PLANS: PlanSlug[] = ['trial', 'inteligente'];
 
+// --- Plan features (single source of truth for all plan displays) ---
+
+export function getPlanSlug(name: string): PlanSlug {
+  const lower = name.toLowerCase();
+  if (lower.includes('sico')) return 'basico';
+  if (lower.includes('rofesional')) return 'profesional';
+  if (lower.includes('nteligente')) return 'inteligente';
+  return 'trial';
+}
+
+export const PLAN_FEATURES: Record<string, string[]> = {
+  basico: [
+    'Agenda y calendario',
+    'Hasta 3 empleados',
+    'Hasta 5 servicios',
+    'Página pública',
+    'QR de reservas',
+    'Notificaciones por email',
+    'Reportes básicos',
+  ],
+  profesional: [
+    'Todo del plan Básico',
+    'Hasta 10 empleados',
+    'Servicios ilimitados',
+    'Notificaciones WhatsApp',
+    'Ticket digital VIP con QR',
+    'Reportes avanzados',
+    'Personalización de marca',
+    'Negocio destacado',
+    'Cierre de caja',
+    'Tarifas dinámicas',
+    'Créditos / Cashback',
+  ],
+  inteligente: [
+    'Todo del plan Profesional',
+    'Empleados ilimitados',
+    'Análisis inteligente con IA',
+    'Predicción de ingresos',
+    'Recomendaciones de precios',
+    'Alertas de clientes inactivos',
+    'Tarifas dinámicas automáticas',
+    'Metas financieras',
+    'Reconciliación contable',
+    'Badge verificado',
+    'Soporte prioritario',
+  ],
+};
+
+export const PLAN_DESCRIPTIONS: Record<string, string> = {
+  basico: 'Para empezar a organizarte',
+  profesional: 'Para negocios que quieren crecer',
+  inteligente: 'IA que hace crecer tu negocio',
+};
+
 // --- Support config ---
 
 export const SUPPORT_CONFIG = {

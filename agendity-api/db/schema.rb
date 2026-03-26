@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_24_151655) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_26_031813) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "unaccent"
@@ -524,6 +524,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_24_151655) do
     t.boolean "cashback_enabled", default: false, null: false
     t.decimal "cashback_percentage", precision: 5, scale: 2, default: "0.0", null: false
     t.boolean "whatsapp_notifications", default: false, null: false
+    t.jsonb "features", default: []
   end
 
   create_table "referral_codes", force: :cascade do |t|
