@@ -144,7 +144,29 @@ end
 puts "  ✅ Site configs updated for production"
 
 # ============================================================================
-# 4. JOB CONFIGS
+# 4. NOTIFICATION EVENT CONFIGS
+# ============================================================================
+puts "\n🔔 Creating notification event configs..."
+
+[
+  { event_key: "new_booking",           title: "Nueva reserva",          body_template: "{{customer_name}} reservó {{service_name}}",                browser_notification: true,  sound_enabled: true,  in_app_notification: true,  active: true },
+  { event_key: "payment_submitted",     title: "Comprobante recibido",   body_template: "{{customer_name}} envió un comprobante",                    browser_notification: true,  sound_enabled: true,  in_app_notification: true,  active: true },
+  { event_key: "booking_confirmed",     title: "Pago confirmado",        body_template: "Pago confirmado para {{customer_name}}",                    browser_notification: true,  sound_enabled: true,  in_app_notification: true,  active: true },
+  { event_key: "booking_cancelled",     title: "Cita cancelada",         body_template: "{{customer_name}} canceló su cita",                         browser_notification: true,  sound_enabled: true,  in_app_notification: true,  active: true },
+  { event_key: "appointment_completed", title: "Cita completada",        body_template: "{{customer_name}} completó su cita",                        browser_notification: false, sound_enabled: false, in_app_notification: true,  active: true },
+  { event_key: "ai_suggestion",         title: "Sugerencia inteligente", body_template: "Detectamos oportunidades para optimizar tus precios",       browser_notification: false, sound_enabled: false, in_app_notification: true,  active: true },
+  { event_key: "subscription_expiry",   title: "Alerta de suscripción",  body_template: "Tu suscripción requiere atención",                          browser_notification: true,  sound_enabled: true,  in_app_notification: true,  active: true },
+  { event_key: "birthday",              title: "Cumpleaños",             body_template: "Hoy es cumpleaños de {{customer_name}}",                    browser_notification: true,  sound_enabled: true,  in_app_notification: true,  active: true },
+].each do |attrs|
+  config = NotificationEventConfig.find_or_initialize_by(event_key: attrs[:event_key])
+  config.assign_attributes(attrs)
+  config.save!
+end
+
+puts "  ✅ #{NotificationEventConfig.count} notification event configs"
+
+# ============================================================================
+# 5. JOB CONFIGS (created via initializer on boot)
 # ============================================================================
 puts "\n🔧 Job configs created via initializer on boot"
 
@@ -152,6 +174,12 @@ puts ""
 puts "=" * 60
 puts "✅ Production seed complete!"
 puts ""
-puts "Admin login: #{admin.email}"
-puts "Admin password: #{ENV.fetch('ADMIN_PASSWORD', 'AgendityAdmin2026!')}"
+puts "  Admin: #{admin.email}"
+puts "  Password: #{ENV.fetch('ADMIN_PASSWORD', 'AgendityAdmin2026!')}"
+puts ""
+puts "  ⚠️  Actualiza en Admin > Configuración:"
+puts "     - payment_nequi (número real)"
+puts "     - payment_bancolombia (cuenta real)"
+puts "     - payment_daviplata (número real)"
+puts "     - support_whatsapp (número real)"
 puts "=" * 60
