@@ -1,6 +1,6 @@
 # Sistema de Referidos y Checkout de Suscripcion
 
-> Ultima actualizacion: 2026-03-24
+> Ultima actualizacion: 2026-03-26
 > Modelos: `ReferralCode`, `Referral`, `SubscriptionPaymentOrder`, `SiteConfig`
 
 ---
@@ -17,7 +17,7 @@ Agendity tiene un programa de referidos que permite a personas o empresas referi
 
 #### ReferralCode
 
-Creado y gestionado desde ActiveAdmin. Representa a un referidor.
+Creado desde ActiveAdmin o auto-generado via endpoint publico. Representa a un referidor.
 
 ```sql
 CREATE TABLE referral_codes (
@@ -28,6 +28,9 @@ CREATE TABLE referral_codes (
   referrer_phone varchar,
   commission_pct decimal(5,2) NOT NULL DEFAULT 10.0,  -- % de comision sobre el primer pago
   active boolean DEFAULT true,
+  bank_account varchar,              -- cuenta bancaria para pago de comision
+  bank_name varchar,                 -- nombre del banco
+  breb_key varchar,                  -- clave Bre-B para pago de comision
   timestamps
 );
 ```
@@ -57,27 +60,65 @@ CREATE TABLE referrals (
 ### Flujo de referido
 
 ```
-1. Referidor comparte: agendity.co/register?ref=JUAN2026
-2. Nuevo negocio abre el link → el frontend guarda el codigo en localStorage
-3. Negocio completa el registro → el codigo se envia en el body del POST /api/v1/auth/register
-4. Backend valida el codigo y crea Referral { status: :pending }
-5. Negocio completa el trial (7 dias) y paga su suscripcion
-6. Admin aprueba el comprobante → ApprovePaymentService:
+1. Referidor se registra en /referral (publico) o es creado desde ActiveAdmin
+2. Referidor comparte: agendity.co/register?ref=JUAN2026
+3. Nuevo negocio abre el link → el frontend guarda el codigo en localStorage
+4. Negocio completa el registro → el codigo se envia en el body del POST /api/v1/auth/register
+5. Backend valida el codigo y crea Referral { status: :pending }
+6. Negocio completa el trial (25 dias) y paga su suscripcion
+7. Admin aprueba el comprobante → ApprovePaymentService:
    a. Crea Subscription activa
    b. Busca Referral pendiente para el business
    c. Calcula commission_amount = payment_amount * (commission_pct / 100)
    d. Actualiza Referral { status: :activated, activated_at: Time.current }
-7. Admin paga al referidor fuera del sistema y marca desde ActiveAdmin:
+8. Admin paga al referidor fuera del sistema y marca desde ActiveAdmin:
    Referral → "Marcar como pagado" → { status: :paid, paid_at: Time.current }
 ```
+
+### Registro publico de referidores
+
+Cualquier persona puede registrarse como referidor desde la pagina publica `/referral`.
+
+**Endpoint:** `POST /api/v1/public/referral_codes`
+
+```json
+// Request
+{
+  "referral_code": {
+    "referrer_name": "Juan Perez",
+    "referrer_email": "juan@example.com",
+    "referrer_phone": "3001234567",
+    "bank_account": "123456789",
+    "bank_name": "Bancolombia",
+    "breb_key": "juan@breb"
+  }
+}
+
+// Response (201 Created)
+{
+  "code": "JUAN2026",
+  "referrer_name": "Juan Perez",
+  "referrer_email": "juan@example.com",
+  "commission_pct": 10.0,
+  "message": "Tu codigo de referido fue creado exitosamente"
+}
+```
+
+**Caracteristicas:**
+- Auto-generacion inmediata del codigo (sin aprobacion del admin)
+- El codigo se genera automaticamente a partir del nombre del referidor + año
+- Los datos de pago (`bank_account`, `bank_name`, `breb_key`) son opcionales al registrarse
+- El admin puede editar los datos de pago despues desde ActiveAdmin
+- Link en el footer de la landing page
 
 ### ActiveAdmin
 
 | Recurso | Acciones |
 |---------|----------|
-| Codigos de Referido | CRUD (code, nombre, email, telefono, comision %, activo) |
-| Referidos | Lista con estado, negocio, codigo, comision calculada; filtros por estado/codigo |
-| Accion en Referido | "Marcar como pagado" (transicion activated → paid) |
+| Codigos de Referido | CRUD (code, nombre, email, telefono, comision %, activo, bank_account, bank_name, breb_key) |
+| Referidos | Lista con estado, negocio, codigo, comision calculada; filtros por estado/codigo; panel "Datos de Pago" en show |
+| Accion en Referido | "Marcar como pagado" (transicion activated → paid); batch action "Marcar como pagados" |
+| Panel Resumen | Metricas: total referidos, activados, comision pendiente, comision pagada |
 
 ---
 
@@ -219,6 +260,7 @@ CREATE TABLE site_configs (
 | `payment_bancolombia` | Cuenta Bancolombia de Agendity para pagos de suscripcion | Checkout de suscripcion, `trial_ended_thank_you` |
 | `payment_daviplata` | Numero Daviplata de Agendity para pagos de suscripcion | Checkout de suscripcion, `trial_ended_thank_you` |
 | `app_url` | URL base de la aplicacion frontend | `BusinessMailer#welcome`, `trial_ended_thank_you` |
+| `trm` | Tasa Representativa del Mercado (USD→COP) | Calculo de precios en COP, checkout, landing, ActiveAdmin |
 
 ### Uso en mailers
 

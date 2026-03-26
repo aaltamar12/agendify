@@ -5,11 +5,11 @@
 | Sprint | Nombre | Duración estimada | Estado |
 |--------|--------|-------------------|--------|
 | [Sprint 1](sprint-1.md) | Correcciones rápidas | 1-2 días | Completado |
-| [Sprint 2](sprint-2.md) | Features pequeñas | 2-3 días | En progreso |
-| [Sprint 3](sprint-3.md) | Features medianas | 3-4 días | Pendiente |
-| [Sprint 4](sprint-4.md) | Features grandes parte 1 | 3-4 días | Pendiente |
-| [Sprint 5](sprint-5.md) | Features grandes parte 2 | 2-3 días | Pendiente |
-| [Sprint 6](sprint-6.md) | Features complejas | 3-4 días | Pendiente |
+| [Sprint 2](sprint-2.md) | Features pequeñas | 2-3 días | Completado |
+| [Sprint 3](sprint-3.md) | Features medianas | 3-4 días | Completado |
+| [Sprint 4](sprint-4.md) | Features grandes parte 1 | 3-4 días | Completado |
+| [Sprint 5](sprint-5.md) | Features grandes parte 2 | 2-3 días | Completado |
+| [Sprint 6](sprint-6.md) | Features complejas | 3-4 días | Parcial (6.1 completado, 6.2 y 6.3 pendientes) |
 
 ## Dependencias clave
 

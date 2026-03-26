@@ -399,12 +399,12 @@ El sistema debe estar preparado para incluir IA.
 
 **Trial:** 25 días gratis con acceso completo al Plan Profesional. Después elige un plan y paga via checkout P2P.
 
-**Estrategia de pricing:** El plan Inteligente debe ser el más atractivo. La diferencia de solo $6 USD ($24k COP) con el Profesional incentiva a elegir el plan con IA.
+**Estrategia de pricing:** El plan Inteligente debe ser el más atractivo. La diferencia de solo $5 USD ($17k COP) con el Profesional incentiva a elegir el plan con IA. Los precios se definen en USD en la DB y se convierten a COP usando la TRM configurable desde `SiteConfig.get(:trm)`. El campo `features` (jsonb) en Plan es editable desde ActiveAdmin.
 
 | | **Básico** | **Profesional** | **Inteligente** |
 |---|---|---|---|
-| **Precio/mes (USD)** | $8 | $17 | $23 |
-| **Precio/mes (COP)** | $37,000 | $75,000 | $99,000 |
+| **Precio/mes (USD)** | $9 | $22 | $27 |
+| **Precio/mes (COP)** | $33,000 | $82,000 | $99,000 |
 | Agenda y calendario | Si | Si | Si |
 | Servicios | Hasta 5 | Ilimitados | Ilimitados |
 | Empleados | Hasta 3 | Hasta 10 | Ilimitados |
@@ -598,23 +598,56 @@ El producto está funcional de punta a punta. Todas las features core están imp
 - [x] Banner "Oculto" en dashboard para negocios suspended
 - [x] Seeds de ejemplo: Barber King (suspended) y Glamour Studio (inactive)
 
-### Cambios recientes (marzo 2026 — Sprints 1-5)
-- [x] Trial 25 días (trial_ends_at = 25.days.from_now al registrar, TrialExpiryAlertJob con 4 stages)
-- [x] Nuevos precios de planes ($9/$22/$27 USD — $37k/$75k/$99k COP)
-- [x] Método de pago Bre-B (breb_key encriptado en Business, formulario en settings)
-- [x] T&C + Privacy Policy pages (páginas estáticas legales)
-- [x] Programa de referidos público (ReferralCode + Referral, link ?ref=CODE, activación al aprobar pago)
-- [x] Check-in mejorado (saludo personalizado + última visita del cliente)
-- [x] Smart dynamic pricing (DynamicPricing con tarifas por fecha/día, DemandAnalysisService con sugerencias IA)
-- [x] Countdown timer en ticket (cuenta regresiva visual hasta la hora de la cita)
-- [x] Rating page dedicada con calificación de profesional y negocio (flujo post-cita)
-- [x] Employee payment receipt (recibo PDF vía Grover + envío por email)
-- [x] Birthday one-click greeting (BirthdayCampaignJob + DiscountCode automático para cumpleaños)
-- [x] Virtual business + additional info (negocio virtual sin local físico, campo info adicional en pago)
+### Cambios recientes (marzo 2026 — Sprints 1-6 + credits toggle)
+
+**Sprint 1 — Correcciones rápidas:**
+- [x] Fix typos ("Desempeno" → "Desempeño", plan names en landing)
+- [x] Precios actualizados en landing ($9/$22/$27)
+- [x] "Ver planes" redirige a checkout
+- [x] Número de reseñas visible en Explore
+- [x] Subtítulo motivacional para birth_date en booking
+- [x] Hover en features bloqueadas del sidebar (no solo click)
+- [x] Auto-scroll calendario a hora actual
+
+**Sprint 2 — Features pequeñas:**
+- [x] Trial 25 días (trial_ends_at = 25.days.from_now al registrar, TrialExpiryAlertJob con 4 stages: 5d antes, día fin, +2d suspensión, +10d desactivación)
+- [x] Precios dinámicos desde API ($9/$22/$27 USD — $33k/$82k/$99k COP). TRM configurable desde SiteConfig
+- [x] Método de pago Bre-B (breb_key encriptado en Business, formulario en settings/onboarding/booking/ticket)
+- [x] Profesional independiente: foto de perfil circular (no logo/cover), CoverSection oculta
+- [x] Plan comparison en checkout y TrialBlockScreen (PlanCard con features del API)
+- [x] Componente compartido PlanCard (reutilizable en checkout, TrialBlockScreen, settings)
+- [x] Endpoint público `GET /api/v1/public/plans` (lista de planes con precios y features)
+
+**Sprint 3 — Features medianas:**
+- [x] Check-in mejorado (saludo personalizado + última visita + badge visita #N)
+- [x] Smart dynamic pricing — regla 60% (si ≥60% servicios comparten pricing → mensaje agrupado, `DYNAMIC_PRICING_GROUP_THRESHOLD = 0.6`)
+- [x] T&C + Privacy Policy pages (`/terms`, `/privacy`, basadas en Ley 1581/2012, checkbox obligatorio en registro, `terms_accepted_at` en User)
+- [x] Programa de referidos público: endpoint `POST /api/v1/public/referral_codes` (auto-generación inmediata), página `/referral`, link en footer
+- [x] Datos de pago en referido: `bank_account`, `bank_name`, `breb_key` en referral_codes
+- [x] Panel unificado de referidos en SuperAdmin (métricas, batch action "Marcar como pagados")
 - [x] Service categories CRUD (categorías de servicio con agrupamiento en booking flow)
-- [x] Componente compartido PlanCard (reutilizable en checkout y settings)
-- [x] Credits toggle per business (`credits_enabled` en Business, guards en booking/cashback/controller/frontend)
-- [x] Subscription banners mejorados (azul para trial info, lógica de ocultar después de cerrar, estados amarillo/rojo/rojo oscuro)
+
+**Sprint 4 — Features grandes parte 1:**
+- [x] Recordatorio 30 min antes de la cita (`SendAppointmentReminder30minJob`, se programa al confirmar pago)
+- [x] Countdown timer en ticket (componente `countdown-timer.tsx`, actualización cada segundo, soporte dark theme)
+- [x] Rating page dedicada `/{slug}/rate?appointment={id}` (estrellas clickeables, comentario, datos de la cita)
+- [x] Dual rating: calificación separada de profesional y negocio
+- [x] Employee cached rating (`rating_average` + `total_reviews` en employees, callback `after_create/destroy :update_employee_rating`)
+- [x] Employee selector en booking muestra estrellas + conteo de reviews
+
+**Sprint 5 — Features grandes parte 2:**
+- [x] Employee payment receipt (PDF vía Grover + email, `EmployeeMailer#payment_receipt`, endpoint `GET /api/v1/cash_register/:id/employee_payments/:id/receipt`)
+- [x] Birthday one-click greeting (Plan Inteligente): notificación in-app con botón "Enviar saludo", `POST /api/v1/customers/:id/send_birthday_greeting`, icono Cake rosa
+- [x] Virtual business + additional info (`virtual_business` boolean en businesses, `additional_info` text en payments, textarea condicional en frontend)
+
+**Sprint 6 — Features complejas:**
+- [x] Welcome modal via shared QR/link (detecta `?ref=shared` en URL pública, localStorage para una sola vez por slug, dashboard agrega `?ref=shared` al copiar URL/QR)
+- [ ] Cambio inmediato de precios — notificación a negocios con suscripción activa (pendiente)
+- [ ] Contenido legal completo de T&C y Privacy Policy (pendiente revisión con abogado)
+
+**Adicional:**
+- [x] Credits toggle per business (`credits_enabled` boolean en Business, default true; cuando false: no aplica créditos en booking, no otorga cashback, controller retorna 403, customer_lookup devuelve balance 0)
+- [x] Subscription banners refactored (banner azul informativo para trial días 5-20, amber/rojo para urgencia, lógica de visibilidad mejorada)
 
 ### Notas técnicas importantes
 - El `ticket_code` se genera SIEMPRE al crear la cita (no al aprobar el pago). Permite identificar la cita en todo el flujo. La visualización VIP (boarding pass + QR + descarga PNG) es exclusiva del plan Profesional+.

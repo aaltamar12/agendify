@@ -14,7 +14,7 @@ export default function QrPage() {
   const canvasRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
 
-  const publicUrl = business ? `${PUBLIC_BASE_URL}/${business.slug}` : '';
+  const publicUrl = business ? `${PUBLIC_BASE_URL}/${business.slug}?ref=shared` : '';
 
   const handleCopy = useCallback(async () => {
     if (!publicUrl) return;

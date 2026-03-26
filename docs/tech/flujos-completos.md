@@ -1,7 +1,7 @@
 # Flujos Completos — Agendity
 
-> Ultima actualizacion: 2026-03-16
-> **Fase del proyecto:** Pre-lanzamiento
+> Ultima actualizacion: 2026-03-26
+> **Fase del proyecto:** Pre-lanzamiento (Sprints 1-6 completados)
 
 Este documento contiene diagramas Mermaid detallados de todos los flujos del sistema Agendity, incluyendo todos los actores, estados, jobs en background, y comunicacion en tiempo real.
 
@@ -14,7 +14,10 @@ Este documento contiene diagramas Mermaid detallados de todos los flujos del sis
 3. [Diagrama 3: Maquina de estados de una cita (Appointment)](#diagrama-3-maquina-de-estados-de-una-cita)
 4. [Diagrama 4: Flujo de cancelacion](#diagrama-4-flujo-de-cancelacion)
 5. [Diagrama 5: Flujo de pagos con ciclo de rechazo](#diagrama-5-flujo-de-pagos-con-ciclo-de-rechazo)
-6. [Notas tecnicas importantes](#notas-tecnicas-importantes)
+6. [Diagrama 6: Flujo de rating (dual: profesional + negocio)](#diagrama-6-flujo-de-rating)
+7. [Diagrama 7: Ciclo de vida del trial (25 dias)](#diagrama-7-ciclo-de-vida-del-trial)
+8. [Diagrama 8: Flujo de referidos (con signup publico)](#diagrama-8-flujo-de-referidos)
+9. [Notas tecnicas importantes](#notas-tecnicas-importantes)
 
 ---
 
@@ -102,8 +105,9 @@ sequenceDiagram
     API->>PG: SELECT business + services + employees
     API-->>FE: Business + services + employees + horarios
 
-    UF->>FE: Selecciona servicio(s) (principal + adicionales)
-    UF->>FE: Selecciona profesional (filtrado por servicio)
+    UF->>FE: Selecciona servicio(s) (principal + adicionales, agrupados por categoria)
+    Note over FE: Smart dynamic pricing: si ≥60% servicios comparten pricing → mensaje agrupado
+    UF->>FE: Selecciona profesional (filtrado por servicio, con estrellas + reviews)
     UF->>FE: Selecciona fecha y hora disponible
 
     Note over FE,RD: Proteccion de concurrencia — Capa 1: Redis Lock
@@ -149,10 +153,10 @@ sequenceDiagram
 
     UF->>FE: Abre pagina del ticket /{slug}/ticket/{code}
     FE->>API: GET /api/v1/public/tickets/{code}
-    API-->>FE: Appointment + Business (con datos de pago: Nequi, Daviplata, Bancolombia)
+    API-->>FE: Appointment + Business (con datos de pago: Nequi, Daviplata, Bancolombia, Bre-B)
 
     Note over UF: El usuario ve instrucciones de pago con botones de copiar para cada metodo
-    UF->>UF: Realiza transferencia desde su app bancaria (Nequi/Daviplata/Bancolombia)
+    UF->>UF: Realiza transferencia desde su app bancaria (Nequi/Daviplata/Bancolombia/Bre-B)
     UF->>FE: Sube comprobante (imagen, max 5MB)
     FE->>API: POST /api/v1/public/tickets/{code}/payment (multipart: proof + payment_method + customer_email)
     API->>API: Valida identidad (customer_email debe coincidir con el email de la reserva)
@@ -203,12 +207,16 @@ sequenceDiagram
         UF->>FE: Sube nuevo comprobante (se repite el ciclo desde Fase 2)
     end
 
-    Note over UF,SA: FASE 4 — Recordatorio (24h antes)
+    Note over UF,SA: FASE 4 — Recordatorios (24h y 30min antes)
 
     Note over SK: Cron: AppointmentReminderSchedulerJob (8am diario)
     SK->>PG: SELECT citas confirmed de manana
     SK->>SK: Encola SendReminderJob por cada cita
     SK->>SK: AppointmentMailer.reminder → email al cliente (solo si sigue confirmed)
+
+    Note over SK: Al confirmar pago: se programa SendAppointmentReminder30minJob
+    SK->>SK: set(wait_until: appointment_time - 30.minutes)
+    SK->>SK: AppointmentMailer.reminder_30min → email + WhatsApp al cliente
 
     Note over UF,SA: FASE 5 — Check-in
 
@@ -217,7 +225,7 @@ sequenceDiagram
     NEG->>FE: Ingresa codigo del ticket (manual o escaneo QR)
     FE->>API: POST /api/v1/public/checkin_by_code { code: "ABC123" }
     API->>PG: UPDATE Appointment (status: checked_in, checked_in_at: Time.current)
-    API-->>FE: OK — Muestra confirmacion verde con datos de la cita
+    API-->>FE: OK — Muestra saludo personalizado + ultima visita + badge visita #N
 
     Note over UF,SA: FASE 6 — Completado
 
@@ -246,8 +254,10 @@ flowchart TB
         UF7[Descargar ticket como PNG]
         UF8[Compartir ticket via Web Share API]
         UF9[Cancelar cita desde ticket]
-        UF10[Escribir resena del negocio]
+        UF10[Escribir resena del negocio - pagina dedicada con dual rating]
         UF11[Ver mapa de negocios]
+        UF12[Ver countdown timer en ticket confirmado]
+        UF13[Registrarse como referidor en /referral]
     end
 
     subgraph NEG["Negocio - Dashboard"]
@@ -274,6 +284,10 @@ flowchart TB
         N21[Ver resenas - Pro+]
         N22[Gestionar notificaciones]
         N23[Toggle sonido de notificaciones]
+        N24[Toggle creditos/cashback per business]
+        N25[Enviar saludo de cumpleanos - one click - Plan Inteligente]
+        N26[Descargar recibo de pago de empleado - PDF]
+        N27[Gestionar categorias de servicios]
     end
 
     subgraph NEG2["Negocio - Configuracion de agenda"]
@@ -357,7 +371,8 @@ stateDiagram-v2
     end note
 
     note right of confirmed
-        Recordatorio automatico 24h antes (email)
+        Recordatorio automatico 24h + 30min antes
+        Countdown timer en ticket (cuenta regresiva)
         Ticket VIP visible (solo plan Pro+)
     end note
 
@@ -468,7 +483,7 @@ Diagrama detallado del flujo de pagos P2P, incluyendo el ciclo completo de recha
 ```mermaid
 flowchart TD
     A["Cita creada<br/>status: pending_payment<br/>ticket_code: generado"] --> B[Cliente ve instrucciones de pago en ticket]
-    B --> B1["Muestra datos de Nequi / Daviplata / Bancolombia<br/>con botones de copiar para cada numero/cuenta"]
+    B --> B1["Muestra datos de Nequi / Daviplata / Bancolombia / Bre-B<br/>con botones de copiar para cada numero/cuenta/clave"]
     B1 --> C[Cliente paga desde su app bancaria]
     C --> D["Cliente sube comprobante (imagen, max 5MB)"]
     D --> E{Validacion de identidad}
@@ -522,6 +537,153 @@ flowchart TD
 
 ---
 
+## Diagrama 6: Flujo de rating
+
+Flujo post-cita con pagina dedicada de calificacion y dual rating (profesional + negocio).
+
+```mermaid
+flowchart TD
+    A[Cita completada] --> B[SendBookingCompletedJob]
+    B --> C["Email al cliente: '¿Como fue tu experiencia con {employee} en {business}?'"]
+    C --> D["Link: /{slug}/rate?appointment={id}"]
+
+    D --> E[Pagina dedicada /rate]
+    E --> F["GET /api/v1/public/:slug/rate?appointment={id}"]
+    F --> G[Muestra datos de la cita + empleado + servicio]
+
+    G --> H[Calificacion del profesional - estrellas 1-5]
+    H --> I[Calificacion del negocio - estrellas 1-5]
+    I --> J[Comentario opcional]
+    J --> K["POST /api/v1/public/:slug/reviews"]
+
+    K --> L[Review creada en DB]
+    L --> M["Callback: update_employee_rating"]
+    M --> N["Employee: rating_average + total_reviews actualizados - cached"]
+    L --> O[Notificacion al negocio]
+
+    style A fill:#D1FAE5,stroke:#10B981
+    style E fill:#EDE9FE,stroke:#7C3AED
+    style L fill:#DBEAFE,stroke:#3B82F6
+    style N fill:#FEF3C7,stroke:#F59E0B
+```
+
+### Datos cacheados en Employee
+
+| Campo | Tipo | Descripcion |
+|-------|------|-------------|
+| `rating_average` | decimal(3,2) | Promedio de calificaciones (0.00 - 5.00) |
+| `total_reviews` | integer | Conteo total de reviews recibidas |
+
+Se actualizan via callback `after_create` y `after_destroy` en Review. Se muestran en el employee selector del booking flow (estrellas + conteo).
+
+---
+
+## Diagrama 7: Ciclo de vida del trial
+
+Trial de 25 dias con 4 stages de alertas y banners en el dashboard.
+
+```mermaid
+stateDiagram-v2
+    [*] --> TrialActivo: Registro (trial_ends_at = 25.days.from_now)
+
+    state TrialActivo {
+        [*] --> SinBanner: Dias 1-4 (>20 dias restantes)
+        SinBanner --> BannerAzul: Dia 5 (20 dias restantes)
+        BannerAzul --> AlertaAmber: 5 dias antes del fin (Stage 1)
+        AlertaAmber --> AlertaRoja: Dia del fin (Stage 2)
+    }
+
+    TrialActivo --> GracePeriod: Trial vence (dia 25)
+    GracePeriod --> Suspendido: +2 dias sin pagar (Stage 3)
+    Suspendido --> Desactivado: +10 dias sin pagar (Stage 4)
+
+    GracePeriod --> Activo: Paga via checkout P2P
+    Suspendido --> Activo: Paga via checkout P2P
+    Desactivado --> Activo: Paga via checkout P2P (requiere admin)
+
+    note right of TrialActivo
+        Banner azul informativo: "Estas en tu periodo de prueba"
+        Visible desde dia 5 hasta dia 20
+        A partir de 5 dias restantes: amber/rojo
+    end note
+
+    note right of Suspendido
+        business.status = suspended
+        Dashboard accesible con banner rojo
+        Pagina publica deshabilitada
+    end note
+
+    note right of Desactivado
+        business.status = inactive
+        Dashboard completamente bloqueado
+        Pantalla "Cuenta desactivada"
+    end note
+```
+
+### Stages del TrialExpiryAlertJob
+
+| Stage | Momento | Canales | Accion |
+|-------|---------|---------|--------|
+| 1 | 5 dias antes del fin | Email + In-app + WhatsApp* | "Tu trial termina en 5 dias, elige tu plan" |
+| 2 | Dia del fin | Email + In-app + WhatsApp* | `trial_ended_thank_you` + enlace a checkout |
+| 3 | +2 dias despues | Email + In-app + WhatsApp* | **Negocio suspendido** (`suspended`) |
+| 4 | +10 dias despues | — | **Negocio desactivado** (`inactive`) |
+
+---
+
+## Diagrama 8: Flujo de referidos
+
+Flujo completo incluyendo signup publico, auto-generacion de codigo, y activacion al aprobar pago.
+
+```mermaid
+flowchart TD
+    subgraph Registro["Registro de Referidor"]
+        A1["Persona visita /referral"] --> A2["Formulario: nombre, email, telefono"]
+        A2 --> A3["Datos de pago opcionales: banco, cuenta, Bre-B"]
+        A3 --> A4["POST /api/v1/public/referral_codes"]
+        A4 --> A5["ReferralCode creado (auto-generacion inmediata)"]
+        A5 --> A6["Referidor recibe su codigo: JUAN2026"]
+    end
+
+    subgraph AdminCreacion["Creacion desde Admin"]
+        B1["Admin crea desde ActiveAdmin"] --> B2["CRUD con bank_account, bank_name, breb_key"]
+    end
+
+    subgraph Referencia["Uso del Codigo"]
+        C1["Referidor comparte: agendity.co/register?ref=JUAN2026"]
+        C1 --> C2["Nuevo negocio abre link"]
+        C2 --> C3["Frontend guarda codigo en localStorage"]
+        C3 --> C4["Negocio completa registro"]
+        C4 --> C5["POST /auth/register con ref code"]
+        C5 --> C6["Referral creado (status: pending)"]
+    end
+
+    subgraph Activacion["Activacion"]
+        D1["Negocio completa trial 25 dias"] --> D2["Paga via checkout P2P"]
+        D2 --> D3["Admin aprueba comprobante"]
+        D3 --> D4["ApprovePaymentService"]
+        D4 --> D5["Referral → activated + comision calculada"]
+    end
+
+    subgraph Pago["Pago al Referidor"]
+        E1["Admin ve comision pendiente en panel"] --> E2["Paga fuera del sistema"]
+        E2 --> E3["Marca como pagado desde ActiveAdmin"]
+        E3 --> E4["Referral → paid"]
+    end
+
+    A6 --> C1
+    B2 --> C1
+    C6 --> D1
+    D5 --> E1
+
+    style A5 fill:#D1FAE5,stroke:#10B981
+    style C6 fill:#FEF3C7,stroke:#F59E0B
+    style D5 fill:#DBEAFE,stroke:#3B82F6
+    style E4 fill:#D1FAE5,stroke:#10B981
+```
+
+---
+
 ## Notas tecnicas importantes
 
 ### ticket_code: siempre se genera
@@ -546,7 +708,7 @@ Todos los jobs se procesan con Sidekiq (colas: `default` y `low`). Cada job que 
 
 ### Datos de pago: encriptados
 
-Los datos de pago del negocio (`nequi_phone`, `daviplata_phone`, `bancolombia_account`) estan encriptados en la base de datos con `Rails.encrypts` y filtrados en logs.
+Los datos de pago del negocio (`nequi_phone`, `daviplata_phone`, `bancolombia_account`, `breb_key`) estan encriptados en la base de datos con `Rails.encrypts` y filtrados en logs.
 
 ### Proteccion de concurrencia: 3 capas
 

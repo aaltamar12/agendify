@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import {
   MapPin,
   Phone,
@@ -20,13 +20,16 @@ import { StarRating } from '@/components/shared/star-rating';
 import { MapEmbed } from '@/components/shared/map-embed';
 import { BookingFlow } from '@/components/booking/booking-flow';
 import { usePublicBusiness } from '@/lib/hooks/use-public';
+import { WelcomeModal } from '@/components/shared/welcome-modal';
 import { formatCurrency, formatPhone, truncate } from '@/lib/utils/format';
 import { DAYS_OF_WEEK, BUSINESS_TYPES } from '@/lib/constants';
 import type { DayOfWeek } from '@/lib/api/types';
 
 export default function BusinessPage() {
   const params = useParams<{ slug: string }>();
+  const searchParams = useSearchParams();
   const slug = params.slug;
+  const isSharedRef = searchParams.get('ref') === 'shared';
 
   const { data, isLoading, error } = usePublicBusiness(slug);
   const [showBooking, setShowBooking] = useState(false);
@@ -123,6 +126,9 @@ export default function BusinessPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Welcome modal for shared link / QR visitors */}
+      {isSharedRef && <WelcomeModal slug={slug} />}
+
       {/* Cover / Header */}
       <div className="relative">
         {business.cover_url ? (

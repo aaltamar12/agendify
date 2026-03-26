@@ -128,6 +128,19 @@ class BusinessMailer < ApplicationMailer
     )
   end
 
+  # Notify the business about upcoming price changes.
+  def price_change_notification(business, old_prices, new_prices, effective_date)
+    @business       = business
+    @old_prices     = old_prices
+    @new_prices     = new_prices
+    @effective_date = effective_date
+
+    mail(
+      to: @business.owner.email,
+      subject: "Cambio de precios en Agendity — Efectivo desde el #{@effective_date.strftime('%d/%m/%Y')}"
+    )
+  end
+
   # Remind the business about an upcoming subscription payment.
   def subscription_payment_reminder(payment_order)
     @order    = payment_order

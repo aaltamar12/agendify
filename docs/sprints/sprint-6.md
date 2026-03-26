@@ -1,6 +1,6 @@
 # Sprint 6 — Features complejas (3-4 días)
 
-- [ ] **6.1** Mensaje de bienvenida via link/QR compartido
+- [x] **6.1** Mensaje de bienvenida via link/QR compartido
   - `agendity-web/src/components/shared/welcome-modal.tsx` (nuevo)
   - Detectar `?ref=shared` en URL pública
   - localStorage para mostrar una sola vez por slug

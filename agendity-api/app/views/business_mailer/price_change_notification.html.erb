@@ -1,0 +1,32 @@
+<h2>Hola, <%= @business.name %></h2>
+
+<p>Te informamos que a partir del <strong><%= @effective_date.strftime('%d/%m/%Y') %></strong> habrá un ajuste en los precios de nuestros planes.</p>
+
+<table class="detail-table" style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+  <thead>
+    <tr>
+      <th style="text-align: left; padding: 8px; border-bottom: 2px solid #e5e7eb;">Plan</th>
+      <th style="text-align: right; padding: 8px; border-bottom: 2px solid #e5e7eb;">Precio actual</th>
+      <th style="text-align: right; padding: 8px; border-bottom: 2px solid #e5e7eb;">Nuevo precio</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @new_prices.each do |plan_name, new_price| %>
+      <tr>
+        <td style="padding: 8px; border-bottom: 1px solid #f3f4f6;"><%= plan_name %></td>
+        <td style="text-align: right; padding: 8px; border-bottom: 1px solid #f3f4f6;">
+          <%= number_to_currency(@old_prices[plan_name], unit: '$', precision: 0, delimiter: '.') %> COP
+        </td>
+        <td style="text-align: right; padding: 8px; border-bottom: 1px solid #f3f4f6;">
+          <strong><%= number_to_currency(new_price, unit: '$', precision: 0, delimiter: '.') %> COP</strong>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<p><strong>Esto aplica al renovar tu suscripción.</strong> Tu suscripción actual no se verá afectada hasta su próxima fecha de renovación.</p>
+
+<p>Si tienes alguna pregunta, no dudes en contactarnos.</p>
+
+<p>— El equipo de Agendity</p>

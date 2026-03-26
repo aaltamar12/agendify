@@ -1,7 +1,7 @@
 # Documentación Técnica — Agendity
 
-> Ultima actualizacion: 2026-03-25 (agregados sidekiq-jobs.md, email-bienvenida.md; alertas-suscripcion.md con Stage 4 deactivation)
-> **Fase del proyecto:** Pre-lanzamiento (15+ etapas de features completadas)
+> Ultima actualizacion: 2026-03-26 (Sprints 1-6 completados, precios actualizados $9/$22/$27, trial 25 dias, referidos publicos, rating dual, credits toggle)
+> **Fase del proyecto:** Pre-lanzamiento (Sprints 1-6 completados, 20+ etapas de features)
 
 ## Índice
 
@@ -12,7 +12,7 @@
 | [frontend-architecture.md](frontend-architecture.md) | Arquitectura del frontend Next.js 16 PWA (109 archivos TS/TSX) |
 | [autenticacion-jwt.md](autenticacion-jwt.md) | Flujo JWT completo: login → token → cookie sync → middleware |
 | [sistema-pagos-p2p.md](sistema-pagos-p2p.md) | Sistema de pagos P2P: comprobantes, aprobación, estados |
-| [sistema-planes.md](sistema-planes.md) | Planes de suscripción: restricciones, UI, badge, upgrade |
+| [sistema-planes.md](sistema-planes.md) | Planes de suscripción ($9/$22/$27 USD): TRM en SiteConfig, features jsonb, PlanCard, endpoint público /api/v1/public/plans |
 | [setup-local.md](setup-local.md) | Guía de setup local para desarrollo (Rails + Next.js + Redis + NATS) |
 | [concurrencia-slots.md](concurrencia-slots.md) | Protección contra double-booking: Redis lock + SELECT FOR UPDATE + unique index |
 | [notificaciones.md](notificaciones.md) | Sistema de notificaciones: in-app, email, jobs, schedulers |
@@ -30,8 +30,8 @@
 | [features-recientes.md](features-recientes.md) | Multiples servicios, creditos en reserva, banners publicitarios, metas financieras, precios dinamicos, pricing por plan |
 | [env-variables.md](env-variables.md) | Variables de entorno: frontend (4) + backend (25), valores dev/prod, notas de seguridad |
 | [profesional-independiente.md](profesional-independiente.md) | Profesional independiente: modelo Business con `independent: true`, flujo de creacion, diferencias con negocio regular |
-| [alertas-suscripcion.md](alertas-suscripcion.md) | Alertas de expiracion: SubscriptionExpiryAlertJob (5d/0d/+2d) + TrialExpiryAlertJob (7d trial, 3 stages) |
-| [sistema-referidos.md](sistema-referidos.md) | Sistema de referidos (ReferralCode + Referral) + checkout de suscripcion P2P + ApprovePaymentService + SiteConfig |
+| [alertas-suscripcion.md](alertas-suscripcion.md) | Alertas de expiracion: SubscriptionExpiryAlertJob (5d/0d/+2d/+7d) + TrialExpiryAlertJob (25d trial, 4 stages: 5d/0d/+2d/+10d) + banner azul informativo |
+| [sistema-referidos.md](sistema-referidos.md) | Sistema de referidos (ReferralCode + Referral) + signup publico + checkout P2P + ApprovePaymentService + SiteConfig + TRM |
 | [metas-financieras.md](metas-financieras.md) | Metas financieras (Plan Inteligente): tipos de meta, progreso, sugerencias |
 | [banners-publicitarios.md](banners-publicitarios.md) | Banners publicitarios en Explore: modelo, tracking de impresiones/clicks, gestion desde ActiveAdmin |
 | [whatsapp-plan-gating.md](whatsapp-plan-gating.md) | WhatsApp gated por plan: MultiChannelService, canales por plan, WhatsAppChannel stub |
