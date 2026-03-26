@@ -92,6 +92,7 @@ route('post', '/api/v1/appointments/:appointmentId/payments/submit', ({ params }
           approved_at: null,
           rejected_at: null,
           rejection_reason: null,
+          additional_info: null,
           created_at: now,
           updated_at: now,
         };

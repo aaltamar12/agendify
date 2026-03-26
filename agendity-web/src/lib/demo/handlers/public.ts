@@ -484,6 +484,7 @@ route('post', '/api/v1/public/tickets/:code/payment', ({ params }) => {
           approved_at: null,
           rejected_at: null,
           rejection_reason: null,
+          additional_info: null,
           created_at: now,
           updated_at: now,
         };

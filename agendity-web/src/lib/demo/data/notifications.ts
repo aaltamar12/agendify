@@ -20,6 +20,7 @@ export function seedNotifications(): Notification[] {
       notification_type: 'new_booking',
       link: '/dashboard/agenda',
       read: false,
+      metadata: null,
       created_at: hoursAgo(1),
     },
     {
@@ -29,6 +30,7 @@ export function seedNotifications(): Notification[] {
       notification_type: 'payment_submitted',
       link: '/dashboard/payments',
       read: false,
+      metadata: null,
       created_at: hoursAgo(2),
     },
     {
@@ -38,6 +40,7 @@ export function seedNotifications(): Notification[] {
       notification_type: 'new_booking',
       link: '/dashboard/agenda',
       read: false,
+      metadata: null,
       created_at: hoursAgo(4),
     },
     {
@@ -47,6 +50,7 @@ export function seedNotifications(): Notification[] {
       notification_type: 'payment_submitted',
       link: '/dashboard/payments',
       read: false,
+      metadata: null,
       created_at: hoursAgo(6),
     },
     {
@@ -56,6 +60,7 @@ export function seedNotifications(): Notification[] {
       notification_type: 'booking_cancelled',
       link: '/dashboard/agenda',
       read: true,
+      metadata: null,
       created_at: hoursAgo(12),
     },
     {
@@ -65,6 +70,7 @@ export function seedNotifications(): Notification[] {
       notification_type: 'payment_approved',
       link: '/dashboard/agenda',
       read: true,
+      metadata: null,
       created_at: hoursAgo(24),
     },
     {
@@ -74,6 +80,7 @@ export function seedNotifications(): Notification[] {
       notification_type: 'new_booking',
       link: '/dashboard/agenda',
       read: true,
+      metadata: null,
       created_at: hoursAgo(36),
     },
     {
@@ -83,6 +90,7 @@ export function seedNotifications(): Notification[] {
       notification_type: 'reminder',
       link: '/dashboard/agenda',
       read: true,
+      metadata: null,
       created_at: hoursAgo(48),
     },
   ];

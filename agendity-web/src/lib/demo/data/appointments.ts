@@ -163,6 +163,7 @@ export function seedAppointments(
         approved_at: paymentStatus === 'approved' ? isoNow() : null,
         rejected_at: null,
         rejection_reason: null,
+        additional_info: null,
         created_at: isoNow(),
         updated_at: isoNow(),
       };

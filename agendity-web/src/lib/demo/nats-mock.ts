@@ -67,6 +67,7 @@ function emitRandomEvent(): void {
       notification_type: eventType,
       link: eventType === 'new_booking' ? '/dashboard/agenda' : '/dashboard/payments',
       read: false,
+      metadata: null,
       created_at: new Date().toISOString(),
     });
   });
