@@ -29,7 +29,7 @@ module Api
           )
 
           if result.success?
-            render_success(AppointmentSerializer.render_as_hash(result.data, view: :detailed))
+            render_checkin_success(result.data)
           elsif result.data.is_a?(Hash) && result.data[:requires_confirmation]
             render json: {
               error: result.error,
@@ -55,7 +55,7 @@ module Api
           )
 
           if result.success?
-            render_success(AppointmentSerializer.render_as_hash(result.data, view: :detailed))
+            render_checkin_success(result.data)
           else
             # Check if it requires confirmation (substitute check-in)
             if result.data.is_a?(Hash) && result.data[:requires_confirmation]
@@ -68,6 +68,17 @@ module Api
               render_error(result.error, status: :unprocessable_entity)
             end
           end
+        end
+
+        private
+
+        def render_checkin_success(checkin_data)
+          render json: {
+            data: AppointmentSerializer.render_as_hash(checkin_data[:appointment], view: :detailed),
+            customer_name: checkin_data[:customer_name],
+            last_visit: checkin_data[:last_visit],
+            visit_count: checkin_data[:visit_count]
+          }, status: :ok
         end
       end
     end

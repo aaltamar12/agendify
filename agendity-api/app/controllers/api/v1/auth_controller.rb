@@ -64,7 +64,7 @@ module Api
       end
 
       def register_params
-        params.permit(:name, :email, :password, :password_confirmation, :phone, :business_name, :business_type, :referral_code)
+        params.permit(:name, :email, :password, :password_confirmation, :phone, :business_name, :business_type, :referral_code, :terms_accepted)
       end
 
       def refresh_params

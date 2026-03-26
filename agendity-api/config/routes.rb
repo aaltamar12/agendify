@@ -190,6 +190,9 @@ Rails.application.routes.draw do
         # Referral code validation
         get "referral_codes/:code/validate", to: "referral_codes#validate"
 
+        # Public referral signup
+        post "referral_codes", to: "referral_signup#create"
+
         # Platform config (contact info, payment data)
         get "site_config", to: "site_config#show"
 

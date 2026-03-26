@@ -9,7 +9,8 @@ RSpec.describe Auth::RegisterService do
       password_confirmation: "password123",
       phone: "3001234567",
       business_name: "Barberia Elite",
-      business_type: "barbershop"
+      business_type: "barbershop",
+      terms_accepted: true
     }
   end
 
@@ -149,6 +150,39 @@ RSpec.describe Auth::RegisterService do
 
         expect(result).to be_success
         expect(Referral.count).to eq(0)
+      end
+    end
+
+    context "without terms_accepted" do
+      subject { described_class.call(**base_params.merge(terms_accepted: nil)) }
+
+      it "returns failure with TERMS_NOT_ACCEPTED code" do
+        result = subject
+
+        expect(result).to be_failure
+        expect(result.error_code).to eq("TERMS_NOT_ACCEPTED")
+        expect(result.error).to eq("Debes aceptar los términos y condiciones")
+      end
+
+      it "does not create a User" do
+        expect { subject }.not_to change(User, :count)
+      end
+
+      it "does not create a Business" do
+        expect { subject }.not_to change(Business, :count)
+      end
+    end
+
+    context "with terms_accepted" do
+      subject { described_class.call(**base_params.merge(terms_accepted: true)) }
+
+      it "sets terms_accepted_at on the user" do
+        freeze_time do
+          subject
+          user = User.last
+
+          expect(user.terms_accepted_at).to be_within(1.second).of(Time.current)
+        end
       end
     end
 

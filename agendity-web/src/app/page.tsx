@@ -481,7 +481,7 @@ export default function Home() {
 
         {/* Footer */}
         <footer className="border-t border-gray-200 bg-white px-6 py-12">
-          <div className="mx-auto grid max-w-6xl gap-8 sm:grid-cols-3">
+          <div className="mx-auto grid max-w-6xl gap-8 sm:grid-cols-4">
             <div className="flex flex-col gap-1">
               <Link href="/" className="text-xl font-bold text-violet-600">Agendity</Link>
               <p className="text-sm text-gray-400">
@@ -516,6 +516,18 @@ export default function Home() {
               </Link>
               <Link href="/login" className="hover:text-gray-900 transition-colors">
                 Iniciar sesión
+              </Link>
+              <Link href="/referral" className="hover:text-gray-900 transition-colors">
+                Programa de referidos
+              </Link>
+            </nav>
+            <nav aria-label="Legal" className="flex flex-col gap-2 text-sm text-gray-500">
+              <p className="text-xs font-semibold uppercase tracking-wider text-gray-900">Legal</p>
+              <Link href="/terms" className="hover:text-gray-900 transition-colors">
+                Términos y Condiciones
+              </Link>
+              <Link href="/privacy" className="hover:text-gray-900 transition-colors">
+                Política de Privacidad
               </Link>
             </nav>
           </div>

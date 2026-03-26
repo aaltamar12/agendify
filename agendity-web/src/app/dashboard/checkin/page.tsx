@@ -10,18 +10,23 @@ import {
   Calendar,
   Clock,
   Camera,
+  History,
+  Hash,
 } from 'lucide-react';
 import { Button, Card, Input } from '@/components/ui';
 import { QrScanner } from '@/components/shared/qr-scanner';
 import { useCheckinByCode } from '@/lib/hooks/use-appointments';
 import { formatDate, formatTime } from '@/lib/utils/date';
-import type { Appointment } from '@/lib/api/types';
+import type { Appointment, CheckinLastVisit } from '@/lib/api/types';
 
 export default function CheckinPage() {
   const [ticketCode, setTicketCode] = useState('');
   const [showScanner, setShowScanner] = useState(false);
   const [checkedInAppointment, setCheckedInAppointment] =
     useState<Appointment | null>(null);
+  const [customerName, setCustomerName] = useState<string | null>(null);
+  const [lastVisit, setLastVisit] = useState<CheckinLastVisit | null>(null);
+  const [visitCount, setVisitCount] = useState<number>(0);
 
   const checkinMutation = useCheckinByCode();
 
@@ -33,6 +38,9 @@ export default function CheckinPage() {
     try {
       const result = await checkinMutation.mutateAsync(code);
       setCheckedInAppointment(result.data);
+      setCustomerName(result.customer_name);
+      setLastVisit(result.last_visit);
+      setVisitCount(result.visit_count);
     } catch {
       // Error handled by mutation state
     }
@@ -51,6 +59,9 @@ export default function CheckinPage() {
     try {
       const result = await checkinMutation.mutateAsync(ticketCode);
       setCheckedInAppointment(result.data);
+      setCustomerName(result.customer_name);
+      setLastVisit(result.last_visit);
+      setVisitCount(result.visit_count);
     } catch {
       // Error handled by mutation state
     }
@@ -59,6 +70,9 @@ export default function CheckinPage() {
   function handleReset() {
     setTicketCode('');
     setCheckedInAppointment(null);
+    setCustomerName(null);
+    setLastVisit(null);
+    setVisitCount(0);
     checkinMutation.reset();
   }
 
@@ -78,13 +92,38 @@ export default function CheckinPage() {
             <div className="rounded-full bg-green-100 p-3">
               <CheckCircle className="h-8 w-8 text-green-600" />
             </div>
+
+            {/* Greeting with customer name */}
             <h2 className="mt-3 text-lg font-bold text-green-900">
-              Check-in exitoso
+              {lastVisit
+                ? `Bienvenido de vuelta, ${customerName}!`
+                : `Bienvenido, ${customerName}!`}
             </h2>
-            <p className="mt-1 text-sm text-green-700">
-              El cliente ha sido registrado
+
+            {/* Visit count badge */}
+            {visitCount > 0 && (
+              <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-violet-100 px-3 py-1 text-xs font-semibold text-violet-700">
+                <Hash className="h-3 w-3" />
+                Visita #{visitCount}
+              </span>
+            )}
+
+            {/* Recommendation to greet by name */}
+            <p className="mt-2 text-sm text-green-700">
+              Saludalo por su nombre
             </p>
           </div>
+
+          {/* Last visit info */}
+          {lastVisit && (
+            <div className="mt-3 flex items-center justify-center gap-2 rounded-lg bg-green-100 px-4 py-2 text-sm text-green-800">
+              <History className="h-4 w-4 shrink-0" />
+              <span>
+                Ultima visita: {formatDate(lastVisit.date)}
+                {lastVisit.employee_name && ` con ${lastVisit.employee_name}`}
+              </span>
+            </div>
+          )}
 
           <div className="mt-4 space-y-3 rounded-lg bg-white p-4">
             <div className="flex items-center gap-2 text-sm text-gray-600">

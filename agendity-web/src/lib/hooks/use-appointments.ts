@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { get, post, put } from '@/lib/api/client';
 import { ENDPOINTS } from '@/lib/api/endpoints';
-import type { ApiResponse, Appointment } from '@/lib/api/types';
+import type { ApiResponse, Appointment, CheckinResponse } from '@/lib/api/types';
 import type { CreateAppointmentFormData } from '@/lib/validations/appointment';
 
 // --- Query keys ---
@@ -128,7 +128,7 @@ export function useCheckinByCode() {
 
   return useMutation({
     mutationFn: (ticketCode: string) =>
-      post<ApiResponse<Appointment>>(ENDPOINTS.APPOINTMENTS.checkinByCode, {
+      post<CheckinResponse>(ENDPOINTS.APPOINTMENTS.checkinByCode, {
         ticket_code: ticketCode,
       }),
     onSuccess: () => {

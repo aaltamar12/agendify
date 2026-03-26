@@ -400,6 +400,20 @@ export interface Notification {
   created_at: string;
 }
 
+// --- Checkin response ---
+
+export interface CheckinLastVisit {
+  date: string;
+  employee_name: string | null;
+}
+
+export interface CheckinResponse {
+  data: Appointment;
+  customer_name: string;
+  last_visit: CheckinLastVisit | null;
+  visit_count: number;
+}
+
 // --- API response wrappers ---
 
 export interface ApiResponse<T> {

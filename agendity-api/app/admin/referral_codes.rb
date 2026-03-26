@@ -3,7 +3,8 @@
 ActiveAdmin.register ReferralCode do
   menu priority: 11, label: "Referral Codes"
   permit_params :code, :referrer_name, :referrer_email, :referrer_phone,
-                :commission_percentage, :status, :notes
+                :commission_percentage, :status, :notes,
+                :bank_account, :bank_name, :breb_key
 
   # -- Index --
   index do
@@ -22,6 +23,9 @@ ActiveAdmin.register ReferralCode do
     column("Pending Commission") do |rc|
       amount = rc.referrals.activated.sum(:commission_amount)
       number_to_currency(amount, unit: "$", precision: 0)
+    end
+    column("Datos de Pago") do |rc|
+      rc.bank_account.present? || rc.bank_name.present? || rc.breb_key.present? ? status_tag("Sí", class: "ok") : status_tag("No", class: "error")
     end
     column :created_at
     actions
@@ -55,7 +59,45 @@ ActiveAdmin.register ReferralCode do
       end
     end
 
-    panel "Referrals (#{resource.referrals.count})" do
+    panel "Datos de Pago" do
+      attributes_table_for resource do
+        row :bank_name
+        row :bank_account
+        row("Llave Bre-B") { |rc| rc.breb_key || "—" }
+      end
+    end
+
+    panel "Resumen de Referidos" do
+      referrals = resource.referrals
+      columns do
+        column do
+          div class: "dashboard_metric" do
+            h3 referrals.count.to_s
+            span "Total Referidos"
+          end
+        end
+        column do
+          div class: "dashboard_metric" do
+            h3 (referrals.activated.count + referrals.paid.count).to_s
+            span "Activados"
+          end
+        end
+        column do
+          div class: "dashboard_metric" do
+            h3 number_to_currency(referrals.activated.sum(:commission_amount), unit: "$", precision: 0)
+            span "Comisión Pendiente"
+          end
+        end
+        column do
+          div class: "dashboard_metric" do
+            h3 number_to_currency(referrals.paid.sum(:commission_amount), unit: "$", precision: 0)
+            span "Comisión Pagada"
+          end
+        end
+      end
+    end
+
+    panel "Referidos (#{resource.referrals.count})" do
       table_for resource.referrals.includes(business: :owner, subscription: :plan).order(created_at: :desc) do
         column(:business) { |r| link_to r.business.name, admin_business_path(r.business) }
         column :status do |r|
@@ -83,6 +125,11 @@ ActiveAdmin.register ReferralCode do
       f.input :commission_percentage, label: "Comision (%)", as: :number, min: 0, max: 100, step: 0.01
       f.input :status, as: :select, collection: ReferralCode.statuses.keys
       f.input :notes
+    end
+    f.inputs "Datos de Pago" do
+      f.input :bank_name, label: "Banco"
+      f.input :bank_account, label: "Cuenta Bancaria"
+      f.input :breb_key, label: "Llave Bre-B"
     end
     f.actions
   end

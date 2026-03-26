@@ -247,6 +247,11 @@ export default function CheckoutPage() {
             Enviar comprobante de pago
           </Button>
 
+          <p className="text-center text-xs text-gray-400">
+            Al pagar aceptas nuestros{' '}
+            <a href="/terms" target="_blank" className="text-violet-600 hover:underline">Términos y Condiciones</a>
+          </p>
+
           {checkout.isError && (
             <p className="text-center text-sm text-red-600">
               Hubo un error al enviar el comprobante. Intenta de nuevo.

@@ -61,7 +61,9 @@ module Appointments
           actor_type: actor_type,
           resource: @appointment
         )
-        success(@appointment)
+
+        checkin_data = build_checkin_data
+        ServiceResult.new(success: true, data: checkin_data)
       else
         failure("Could not check in appointment", details: @appointment.errors.full_messages)
       end
@@ -93,6 +95,40 @@ module Appointments
       ).in_time_zone(tz)
 
       ((appointment_time - now) / 60).round(0)
+    end
+
+    def build_checkin_data
+      customer = @appointment.customer
+      business = @appointment.business
+
+      # Count completed visits for this customer at this business (including current check-in)
+      visit_count = customer.appointments
+        .where(business: business)
+        .where(status: [:completed, :checked_in])
+        .count
+
+      # Find last completed visit before this one
+      last_appointment = customer.appointments
+        .where(business: business)
+        .where(status: [:completed, :checked_in])
+        .where.not(id: @appointment.id)
+        .order(appointment_date: :desc, start_time: :desc)
+        .includes(:employee)
+        .first
+
+      last_visit = if last_appointment
+        {
+          date: last_appointment.appointment_date.to_s,
+          employee_name: last_appointment.employee&.name
+        }
+      end
+
+      {
+        appointment: @appointment,
+        customer_name: customer&.name,
+        last_visit: last_visit,
+        visit_count: visit_count
+      }
     end
 
     def determine_actor_type

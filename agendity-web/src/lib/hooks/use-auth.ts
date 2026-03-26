@@ -32,7 +32,7 @@ export function useRegister() {
   const setAuth = useAuthStore((s) => s.setAuth);
 
   return useMutation({
-    mutationFn: (data: RegisterFormData & { referralCode?: string }) =>
+    mutationFn: (data: RegisterFormData & { referralCode?: string; termsAccepted?: boolean }) =>
       post<ApiResponse<AuthResponse>>(ENDPOINTS.AUTH.register, {
         name: data.name,
         email: data.email,
@@ -41,6 +41,7 @@ export function useRegister() {
         business_name: data.businessName,
         business_type: data.businessType,
         referral_code: data.referralCode,
+        terms_accepted: data.termsAccepted,
       }),
     onSuccess: (response) => {
       const { token, refresh_token, user } = response.data;

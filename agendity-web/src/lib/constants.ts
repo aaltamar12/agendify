@@ -227,6 +227,10 @@ export const SUPPORT_CHANNELS_BY_PLAN: Record<PlanSlug, string[]> = {
 
 // --- Misc ---
 
+// Dynamic pricing: if ≥ this fraction of selected services share the same
+// dynamic_pricing_name, show one grouped message instead of per-service messages.
+export const DYNAMIC_PRICING_GROUP_THRESHOLD = 0.6;
+
 export const DEFAULT_TIMEZONE = 'America/Bogota';
 export const DEFAULT_CURRENCY = 'COP';
 export const DEFAULT_COUNTRY = 'CO';

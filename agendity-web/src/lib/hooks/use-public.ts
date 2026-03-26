@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueries, useMutation, useQueryClient } from '@tanstack/react-query';
 import { get, post } from '@/lib/api/client';
 import { ENDPOINTS } from '@/lib/api/endpoints';
 import type {
@@ -301,6 +301,30 @@ export function usePricePreview(
     select: (res) => res.data,
     enabled: !!slug && !!serviceId && !!date,
   });
+}
+
+/**
+ * Fetch price previews for multiple services in parallel.
+ * Returns an array of { serviceId, data } for each completed query.
+ */
+export function usePricePreviewMulti(
+  slug: string,
+  serviceIds: number[],
+  date: string | null,
+) {
+  const queries = useQueries({
+    queries: serviceIds.map((serviceId) => ({
+      queryKey: ['public', 'price_preview', slug, serviceId, date],
+      queryFn: () =>
+        get<ApiResponse<PricePreviewData>>(ENDPOINTS.PUBLIC.pricePreview(slug), {
+          params: { service_id: serviceId, date },
+        }),
+      select: (res: ApiResponse<PricePreviewData>) => res.data,
+      enabled: !!slug && !!serviceId && !!date,
+    })),
+  });
+
+  return queries;
 }
 
 export function usePriceCalendar(

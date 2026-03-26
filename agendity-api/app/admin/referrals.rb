@@ -7,6 +7,14 @@ ActiveAdmin.register Referral do
   # -- Eager loading --
   includes :referral_code, :subscription, business: :owner
 
+  # -- Batch action: mark selected as paid --
+  batch_action "Marcar como pagados", confirm: "¿Marcar los referidos seleccionados como pagados?" do |ids|
+    batch_action_collection.find(ids).each do |referral|
+      referral.mark_paid! if referral.activated?
+    end
+    redirect_to collection_path, notice: "Referidos seleccionados marcados como pagados."
+  end
+
   # -- Index --
   index do
     selectable_column
@@ -46,6 +54,17 @@ ActiveAdmin.register Referral do
       row :paid_at
       row :notes
       row :created_at
+    end
+
+    panel "Datos de Pago del Referidor" do
+      rc = resource.referral_code
+      attributes_table_for rc do
+        row(:referrer_name)
+        row(:referrer_email)
+        row :bank_name
+        row :bank_account
+        row("Llave Bre-B") { |r| r.breb_key || "—" }
+      end
     end
   end
 

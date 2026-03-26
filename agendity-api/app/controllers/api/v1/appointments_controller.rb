@@ -70,7 +70,7 @@ module Api
         result = Appointments::CheckinService.call(appointment: @appointment)
 
         if result.success?
-          render_success(AppointmentSerializer.render_as_hash(result.data, view: :detailed))
+          render_checkin_success(result.data)
         else
           render_error(result.error, status: :unprocessable_entity, details: result.details)
         end
@@ -85,7 +85,7 @@ module Api
         result = Appointments::CheckinService.call(appointment: appointment)
 
         if result.success?
-          render_success(AppointmentSerializer.render_as_hash(result.data, view: :detailed))
+          render_checkin_success(result.data)
         else
           render_error(result.error, status: :unprocessable_entity, details: result.details)
         end
@@ -169,6 +169,15 @@ module Api
       end
 
       private
+
+      def render_checkin_success(checkin_data)
+        render json: {
+          data: AppointmentSerializer.render_as_hash(checkin_data[:appointment], view: :detailed),
+          customer_name: checkin_data[:customer_name],
+          last_visit: checkin_data[:last_visit],
+          visit_count: checkin_data[:visit_count]
+        }, status: :ok
+      end
 
       def set_appointment
         @appointment = current_business.appointments.find(params[:id])

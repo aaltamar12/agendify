@@ -4,7 +4,7 @@ module Auth
   # Registers a new business owner: creates the User, a default Business,
   # and returns JWT + refresh token so the client is immediately authenticated.
   class RegisterService < BaseService
-    def initialize(name:, email:, password:, password_confirmation:, phone: nil, business_name: nil, business_type: nil, referral_code: nil)
+    def initialize(name:, email:, password:, password_confirmation:, phone: nil, business_name: nil, business_type: nil, referral_code: nil, terms_accepted: nil)
       @name                  = name
       @email                 = email
       @password              = password
@@ -13,9 +13,12 @@ module Auth
       @business_name         = business_name
       @business_type         = business_type || "barbershop"
       @referral_code         = referral_code
+      @terms_accepted        = terms_accepted
     end
 
     def call
+      return failure("Debes aceptar los términos y condiciones", code: "TERMS_NOT_ACCEPTED") unless @terms_accepted.present?
+
       ActiveRecord::Base.transaction do
         user = build_user
         return failure("Validation failed", code: "USER_VALIDATION_FAILED", details: user.errors.full_messages) unless user.save
@@ -51,7 +54,8 @@ module Auth
         password:              @password,
         password_confirmation: @password_confirmation,
         phone:                 @phone,
-        role:                  :owner
+        role:                  :owner,
+        terms_accepted_at:     Time.current
       )
     end
 

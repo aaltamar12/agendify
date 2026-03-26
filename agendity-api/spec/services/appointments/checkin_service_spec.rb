@@ -71,5 +71,94 @@ RSpec.describe Appointments::CheckinService do
         end
       end
     end
+
+    context "enhanced check-in data" do
+      let(:other_employee) { create(:employee, business: business) }
+
+      context "when customer has previous completed visits" do
+        let!(:past_appointment) do
+          create(:appointment,
+            business: business,
+            employee: other_employee,
+            customer: customer,
+            service: service,
+            status: :completed,
+            appointment_date: Date.current - 7,
+            start_time: "14:00",
+            end_time: "14:30"
+          )
+        end
+
+        it "returns last_visit data with date and employee name" do
+          travel_to Time.zone.parse("#{Date.current} 09:45") do
+            result = described_class.call(appointment: appointment)
+            expect(result).to be_success
+            expect(result.data[:last_visit]).to be_present
+            expect(result.data[:last_visit][:date]).to eq((Date.current - 7).to_s)
+            expect(result.data[:last_visit][:employee_name]).to eq(other_employee.name)
+          end
+        end
+
+        it "returns correct visit_count" do
+          travel_to Time.zone.parse("#{Date.current} 09:45") do
+            result = described_class.call(appointment: appointment)
+            expect(result).to be_success
+            # 1 completed + 1 checked_in (current)
+            expect(result.data[:visit_count]).to eq(2)
+          end
+        end
+
+        it "returns customer_name" do
+          travel_to Time.zone.parse("#{Date.current} 09:45") do
+            result = described_class.call(appointment: appointment)
+            expect(result).to be_success
+            expect(result.data[:customer_name]).to eq(customer.name)
+          end
+        end
+      end
+
+      context "when customer is a first-time visitor" do
+        it "returns no last_visit" do
+          travel_to Time.zone.parse("#{Date.current} 09:45") do
+            result = described_class.call(appointment: appointment)
+            expect(result).to be_success
+            expect(result.data[:last_visit]).to be_nil
+          end
+        end
+
+        it "returns visit_count of 1" do
+          travel_to Time.zone.parse("#{Date.current} 09:45") do
+            result = described_class.call(appointment: appointment)
+            expect(result).to be_success
+            expect(result.data[:visit_count]).to eq(1)
+          end
+        end
+      end
+
+      context "when customer has visits at a different business" do
+        let(:other_business) { create(:business) }
+        let!(:other_business_appointment) do
+          create(:appointment,
+            business: other_business,
+            employee: create(:employee, business: other_business),
+            customer: customer,
+            service: create(:service, business: other_business),
+            status: :completed,
+            appointment_date: Date.current - 3,
+            start_time: "11:00",
+            end_time: "11:30"
+          )
+        end
+
+        it "does not count visits from other businesses" do
+          travel_to Time.zone.parse("#{Date.current} 09:45") do
+            result = described_class.call(appointment: appointment)
+            expect(result).to be_success
+            expect(result.data[:visit_count]).to eq(1)
+            expect(result.data[:last_visit]).to be_nil
+          end
+        end
+      end
+    end
   end
 end
