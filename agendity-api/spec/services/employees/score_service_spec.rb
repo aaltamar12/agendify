@@ -32,6 +32,29 @@ RSpec.describe Employees::ScoreService do
         expect(result.data[:rating_avg]).to eq(0)
         expect(result.data[:completed_appointments]).to eq(0)
         expect(result.data[:total_revenue]).to eq(0)
+        expect(result.data[:on_time_rate]).to eq(0)
+        expect(result.data[:overall]).to eq(50) # 50% rating_score + 50% punctuality defaults
+      end
+    end
+
+    context "with checked_in appointments and on_time data" do
+      before do
+        now = Time.current
+        apt = create(:appointment,
+          business: business,
+          employee: employee,
+          customer: customer,
+          service: service,
+          status: :checked_in,
+          appointment_date: Date.current,
+          start_time: now.strftime("%H:%M"),
+          checked_in_at: now)
+      end
+
+      it "calculates on_time_rate" do
+        result = described_class.call(employee: employee)
+        expect(result).to be_success
+        expect(result.data[:on_time_rate]).to be >= 0
       end
     end
   end

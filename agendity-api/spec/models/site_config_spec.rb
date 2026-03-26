@@ -34,4 +34,11 @@ RSpec.describe SiteConfig, type: :model do
       expect(described_class.get("existing")).to eq("new")
     end
   end
+
+  describe ".ransackable_attributes" do
+    it "returns allowed attributes" do
+      expect(described_class.ransackable_attributes).to be_an(Array)
+    end
+  end
+
 end

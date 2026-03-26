@@ -158,4 +158,15 @@ RSpec.describe "Api::V1::Services", type: :request do
       expect(response).to have_http_status(:forbidden)
     end
   end
+
+  describe "PATCH /api/v1/services/:id (update failure)" do
+    it "returns 422 when update has invalid data" do
+      service = create(:service, business: business)
+      patch "/api/v1/services/#{service.id}",
+            params: { service: { name: "", price: -1 } },
+            headers: headers
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response.parsed_body["error"]).to be_present
+    end
+  end
 end

@@ -82,4 +82,23 @@ RSpec.describe "Api::V1::DynamicPricing", type: :request do
       expect(response).to have_http_status(:no_content)
     end
   end
+
+  describe "POST /api/v1/dynamic_pricing (failure)" do
+    it "returns 422 when creation fails" do
+      post "/api/v1/dynamic_pricing",
+           params: { dynamic_pricing: { name: "", start_date: "", end_date: "" } },
+           headers: headers
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+  end
+
+  describe "PATCH /api/v1/dynamic_pricing/:id (failure)" do
+    it "returns 422 when update fails" do
+      pricing = create(:dynamic_pricing, business: business)
+      patch "/api/v1/dynamic_pricing/#{pricing.id}",
+            params: { dynamic_pricing: { name: "" } },
+            headers: headers
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+  end
 end

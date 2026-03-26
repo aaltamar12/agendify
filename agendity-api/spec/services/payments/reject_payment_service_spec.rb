@@ -31,6 +31,14 @@ RSpec.describe Payments::RejectPaymentService do
         described_class.call(payment: payment, reason: "Invalid proof")
         expect(Notifications::MultiChannelService).to have_received(:call)
       end
+
+      it "creates an activity log" do
+        expect { described_class.call(payment: payment, reason: "Invalid proof") }
+          .to change(ActivityLog, :count).by(1)
+        log = ActivityLog.last
+        expect(log.action).to eq("payment_rejected")
+      end
     end
+
   end
 end

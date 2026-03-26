@@ -26,6 +26,14 @@ RSpec.describe ApplicationPolicy do
     expect(subject.destroy?).to be false
   end
 
+  it "new? delegates to create?" do
+    expect(subject.new?).to eq(subject.create?)
+  end
+
+  it "edit? delegates to update?" do
+    expect(subject.edit?).to eq(subject.update?)
+  end
+
   describe ApplicationPolicy::Scope do
     let(:scope) { double("scope", none: []) }
 

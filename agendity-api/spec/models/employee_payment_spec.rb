@@ -21,4 +21,17 @@ RSpec.describe EmployeePayment, type: :model do
       expect(payment.remaining_debt).to eq(20_000)
     end
   end
+
+  describe ".ransackable_attributes" do
+    it "returns allowed attributes" do
+      expect(described_class.ransackable_attributes).to be_an(Array)
+    end
+  end
+
+  describe ".ransackable_associations" do
+    it "returns allowed associations" do
+      expect(described_class.ransackable_associations).to be_an(Array)
+    end
+  end
+
 end

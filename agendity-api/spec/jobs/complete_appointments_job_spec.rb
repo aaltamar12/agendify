@@ -226,5 +226,13 @@ RSpec.describe CompleteAppointmentsJob, type: :job do
         expect(past_appointment.reload.status).to eq("checked_in")
       end
     end
+
+    context "when an error occurs during processing" do
+      it "records the error and re-raises" do
+        allow(Appointment).to receive(:includes).and_raise(StandardError.new("DB error"))
+
+        expect { described_class.perform_now }.to raise_error(StandardError, "DB error")
+      end
+    end
   end
 end

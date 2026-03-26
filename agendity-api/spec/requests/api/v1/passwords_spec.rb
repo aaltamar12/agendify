@@ -27,5 +27,18 @@ RSpec.describe "Api::V1::Passwords", type: :request do
       }
       expect(response).to have_http_status(:unprocessable_entity)
     end
+
+    it "resets password successfully with valid token" do
+      raw_token, hashed_token = Devise.token_generator.generate(User, :reset_password_token)
+      user.update_columns(reset_password_token: hashed_token, reset_password_sent_at: Time.current)
+
+      post "/api/v1/auth/reset_password", params: {
+        token: raw_token,
+        password: "newsecurepassword123",
+        password_confirmation: "newsecurepassword123"
+      }
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body["data"]["message"]).to include("actualizada")
+    end
   end
 end

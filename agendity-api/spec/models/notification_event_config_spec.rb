@@ -20,4 +20,16 @@ RSpec.describe NotificationEventConfig, type: :model do
       end
     end
   end
+
+  describe ".ransackable_attributes" do
+    it "returns allowed attributes" do
+      expect(described_class.ransackable_attributes).to be_an(Array)
+    end
+  end
+
+  describe ".ransackable_associations" do
+    it "returns empty array" do
+      expect(described_class.ransackable_associations).to eq([])
+    end
+  end
 end

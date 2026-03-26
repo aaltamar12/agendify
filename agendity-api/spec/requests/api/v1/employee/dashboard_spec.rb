@@ -37,5 +37,13 @@ RSpec.describe "Api::V1::Employee::Dashboard", type: :request do
       get "/api/v1/employee/score", headers: headers
       expect(response.status).to be_in([200, 400])
     end
+
+    it "returns error when score service fails" do
+      allow(Employees::ScoreService).to receive(:call).and_return(
+        ServiceResult.new(success: false, error: "Score calculation failed")
+      )
+      get "/api/v1/employee/score", headers: headers
+      expect(response).to have_http_status(:bad_request)
+    end
   end
 end

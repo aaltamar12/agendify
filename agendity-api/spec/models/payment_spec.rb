@@ -49,4 +49,16 @@ RSpec.describe Payment, type: :model do
       expect(payment.reload).to be_transfer
     end
   end
+
+  describe ".ransackable_attributes" do
+    it "returns allowed attributes" do
+      expect(described_class.ransackable_attributes).to include("status", "payment_method", "amount")
+    end
+  end
+
+  describe ".ransackable_associations" do
+    it "returns allowed associations" do
+      expect(described_class.ransackable_associations).to include("appointment")
+    end
+  end
 end

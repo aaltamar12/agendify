@@ -190,4 +190,14 @@ RSpec.describe Appointments::CancelAppointmentService do
     expect(SendBookingCancelledJob).to receive(:perform_later).with(appointment.id)
     described_class.call(appointment: appointment, cancelled_by: "business")
   end
+
+  describe "activity log on cancellation" do
+    it "creates an activity log entry" do
+      expect {
+        described_class.call(appointment: appointment, cancelled_by: "business", reason: "No show")
+      }.to change(ActivityLog, :count).by(1)
+      log = ActivityLog.last
+      expect(log.action).to eq("appointment_cancelled")
+    end
+  end
 end

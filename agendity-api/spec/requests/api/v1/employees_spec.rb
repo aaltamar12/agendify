@@ -235,4 +235,41 @@ RSpec.describe "Api::V1::Employees", type: :request do
       expect(response).to have_http_status(:unprocessable_entity)
     end
   end
+
+  describe "POST /api/v1/employees/:id/upload_avatar (attachment failure)" do
+    it "returns 422 when avatar fails to attach" do
+      employee = create(:employee, business: business)
+      allow_any_instance_of(ActiveStorage::Attached::One).to receive(:attached?).and_return(false)
+      file = fixture_file_upload(Rails.root.join("spec/fixtures/files/test_image.png"), "image/png")
+      post "/api/v1/employees/#{employee.id}/upload_avatar",
+           params: { avatar: file },
+           headers: headers
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+  end
+
+  describe "GET /api/v1/employees/:id/balance_history" do
+    it "returns balance timeline with payments and adjustments" do
+      employee = create(:employee, business: business)
+      close = create(:cash_register_close, business: business, closed_by_user: user)
+      create(:employee_payment, employee: employee, cash_register_close: close)
+      create(:employee_balance_adjustment,
+        employee: employee,
+        business: business,
+        performed_by_user: user,
+        amount: 5000,
+        reason: "correction",
+        balance_before: 0,
+        balance_after: 5000)
+
+      get "/api/v1/employees/#{employee.id}/balance_history", headers: headers
+      expect(response).to have_http_status(:ok)
+      data = response.parsed_body["data"]
+      expect(data).to have_key("timeline")
+      expect(data["employee_id"]).to eq(employee.id)
+      expect(data["timeline"].length).to eq(2)
+      types = data["timeline"].map { |t| t["type"] }
+      expect(types).to include("payment", "adjustment")
+    end
+  end
 end

@@ -136,5 +136,33 @@ RSpec.describe Api::V1::Public::BusinessesController, type: :request do
       data = response.parsed_body["data"]
       expect(data.length).to eq(30)
     end
+
+    it "includes dynamic pricing adjustments in calendar" do
+      # Create a dynamic pricing that applies to all days
+      create(:dynamic_pricing,
+        business: business,
+        service: service,
+        price_adjustment_type: :percentage,
+        adjustment_mode: :fixed_mode,
+        adjustment_value: 15,
+        start_date: Date.current - 1.day,
+        end_date: Date.current + 30.days,
+        days_of_week: [],
+        status: :active)
+
+      get "/api/v1/public/#{business.slug}/price_calendar", params: {
+        service_id: service.id,
+        from: Date.tomorrow.to_s,
+        days: 3
+      }
+
+      expect(response).to have_http_status(:ok)
+      data = response.parsed_body["data"]
+      open_day = data.find { |d| !d["closed"] }
+      if open_day
+        expect(open_day["has_dynamic_pricing"]).to be true
+        expect(open_day["adjusted_price"]).not_to eq(open_day["base_price"])
+      end
+    end
   end
 end

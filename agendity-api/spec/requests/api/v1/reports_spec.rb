@@ -97,4 +97,49 @@ RSpec.describe "Api::V1::Reports", type: :request do
       expect(response).to have_http_status(:unprocessable_entity)
     end
   end
+
+  describe "GET /api/v1/reports/top_services with data" do
+    it "returns top services by count" do
+      employee = create(:employee, business: business)
+      svc = create(:service, business: business, name: "Corte")
+      customer = create(:customer, business: business)
+      create(:appointment, business: business, employee: employee, service: svc, customer: customer, status: :completed)
+
+      get "/api/v1/reports/top_services", headers: headers
+      expect(response).to have_http_status(:ok)
+      data = response.parsed_body["data"]
+      expect(data.first["name"]).to eq("Corte")
+    end
+  end
+
+  describe "GET /api/v1/reports/top_employees with data" do
+    it "returns top employees by count" do
+      employee = create(:employee, business: business, name: "Carlos Barbero")
+      svc = create(:service, business: business)
+      customer = create(:customer, business: business)
+      create(:appointment, business: business, employee: employee, service: svc, customer: customer, status: :completed)
+
+      get "/api/v1/reports/top_employees", headers: headers
+      expect(response).to have_http_status(:ok)
+      data = response.parsed_body["data"]
+      expect(data.first["name"]).to eq("Carlos Barbero")
+    end
+  end
+
+  describe "GET /api/v1/reports/frequent_customers with data" do
+    it "returns frequent customers with visit count and total spent" do
+      employee = create(:employee, business: business)
+      svc = create(:service, business: business)
+      customer = create(:customer, business: business, name: "Frequent Customer", email: "freq@test.com")
+      create(:appointment, business: business, employee: employee, service: svc, customer: customer, status: :completed, price: 25_000)
+      create(:appointment, business: business, employee: employee, service: svc, customer: customer, status: :completed, price: 30_000)
+
+      get "/api/v1/reports/frequent_customers", headers: headers
+      expect(response).to have_http_status(:ok)
+      data = response.parsed_body["data"]
+      entry = data.find { |d| d["name"] == "Frequent Customer" }
+      expect(entry["visits"]).to eq(2)
+      expect(entry["total_spent"]).to eq(55_000.0)
+    end
+  end
 end

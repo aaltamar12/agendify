@@ -36,5 +36,27 @@ RSpec.describe Customer, type: :model do
         expect(described_class.with_birthday_on(3, 24)).not_to include(other_customer)
       end
     end
+
+    describe ".with_birthday_in_range" do
+      let!(:birthday_customer) { create(:customer, business: business, birth_date: Date.new(1990, 3, 24)) }
+
+      it "returns customers with birthday in range" do
+        from = Date.new(2000, 3, 20)
+        to = Date.new(2000, 3, 30)
+        expect(described_class.with_birthday_in_range(from, to)).to include(birthday_customer)
+      end
+    end
+  end
+
+  describe ".ransackable_attributes" do
+    it "returns allowed attributes" do
+      expect(described_class.ransackable_attributes).to include("name", "email")
+    end
+  end
+
+  describe ".ransackable_associations" do
+    it "returns allowed associations" do
+      expect(described_class.ransackable_associations).to include("business", "appointments")
+    end
   end
 end

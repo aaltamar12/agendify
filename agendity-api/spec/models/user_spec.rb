@@ -20,4 +20,16 @@ RSpec.describe User, type: :model do
     it { should have_many(:businesses).with_foreign_key(:owner_id).dependent(:destroy) }
     it { should have_many(:refresh_tokens).dependent(:destroy) }
   end
+
+  describe ".ransackable_attributes" do
+    it "returns allowed attributes" do
+      expect(described_class.ransackable_attributes).to include("name", "email", "role")
+    end
+  end
+
+  describe ".ransackable_associations" do
+    it "returns allowed associations" do
+      expect(described_class.ransackable_associations).to include("businesses")
+    end
+  end
 end

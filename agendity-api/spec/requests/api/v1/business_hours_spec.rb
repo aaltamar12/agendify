@@ -31,5 +31,15 @@ RSpec.describe "Api::V1::BusinessHours", type: :request do
       patch "/api/v1/business_hours", params: params, headers: headers
       expect(response).to have_http_status(:ok)
     end
+
+    it "returns 422 when update service fails" do
+      allow(Businesses::UpdateBusinessHoursService).to receive(:call).and_return(
+        ServiceResult.new(success: false, error: "Invalid hours", details: { day_of_week: ["is invalid"] })
+      )
+      patch "/api/v1/business_hours",
+            params: { business_hours: [{ day_of_week: 99 }] },
+            headers: headers
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
   end
 end

@@ -62,5 +62,22 @@ RSpec.describe RequestLog, type: :model do
       log = build(:request_log, status_code: 422)
       expect(log.server_error?).to be false
     end
+
+    it "#display_name returns method, path, and status" do
+      log = build(:request_log, method: "GET", path: "/api/v1/test", status_code: 200)
+      expect(log.display_name).to eq("GET /api/v1/test (200)")
+    end
+  end
+
+  describe ".ransackable_attributes" do
+    it "returns allowed attributes" do
+      expect(described_class.ransackable_attributes).to include("method", "path", "status_code")
+    end
+  end
+
+  describe ".ransackable_associations" do
+    it "returns allowed associations" do
+      expect(described_class.ransackable_associations).to include("business")
+    end
   end
 end

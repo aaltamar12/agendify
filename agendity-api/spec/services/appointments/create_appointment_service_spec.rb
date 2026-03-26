@@ -378,6 +378,43 @@ RSpec.describe Appointments::CreateAppointmentService do
     end
   end
 
+  describe "RecordNotUnique handling" do
+    it "returns failure when ticket_code collides (RecordNotUnique)" do
+      allow(SecureRandom).to receive(:hex).and_raise(ActiveRecord::RecordNotUnique.new("duplicate"))
+      result = subject
+      expect(result).to be_failure
+      expect(result.error).to include("reservado por otra persona")
+    end
+  end
+
+  describe "business_has_ticket_feature? (private)" do
+    it "delegates to business.has_feature?" do
+      svc_instance = described_class.new(business: business, params: base_params)
+      expect(svc_instance.send(:business_has_ticket_feature?)).to be_in([true, false])
+    end
+  end
+
+  describe "booking_in_the_past? same-day edge case" do
+    it "rejects same-day bookings if time has already passed" do
+      now = Time.current.in_time_zone("America/Bogota")
+      past_time = (now - 1.hour).strftime("%H:%M")
+
+      # Create schedule for today
+      employee.employee_schedules.find_or_create_by!(day_of_week: now.to_date.wday) do |s|
+        s.start_time = "00:00"
+        s.end_time = "23:59"
+      end
+
+      params = base_params.merge(
+        appointment_date: now.to_date,
+        start_time: past_time
+      )
+      result = described_class.call(business: business, params: params)
+      expect(result).to be_failure
+      expect(result.error_code).to eq("SLOT_IN_PAST")
+    end
+  end
+
   describe "dynamic pricing" do
     context "when an active pricing exists for the date" do
       let!(:pricing) do

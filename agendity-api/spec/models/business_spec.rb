@@ -163,6 +163,39 @@ RSpec.describe Business, type: :model do
 
         expect { create(:business, google_maps_url: "https://goo.gl/maps/badurl") }.not_to raise_error
       end
+
+      it "follows chained short URL redirects (maps.app redirect)" do
+        # First redirect to another maps.app URL, then to the final URL
+        first_response = double("first_response")
+        allow(first_response).to receive(:is_a?).with(anything).and_return(false)
+        allow(first_response).to receive(:is_a?).with(Net::HTTPRedirection).and_return(true)
+        allow(first_response).to receive(:[]).with("location").and_return("https://maps.app.goo.gl/chain123")
+
+        second_response = double("second_response")
+        allow(second_response).to receive(:is_a?).with(anything).and_return(false)
+        allow(second_response).to receive(:is_a?).with(Net::HTTPRedirection).and_return(true)
+        allow(second_response).to receive(:[]).with("location").and_return("https://www.google.com/maps/place/Test/@10.1234,-74.5678,17z")
+
+        call_count = 0
+        allow(Net::HTTP).to receive(:start) do
+          call_count += 1
+          call_count == 1 ? first_response : second_response
+        end
+
+        business = create(:business, google_maps_url: "https://goo.gl/maps/test123")
+        expect(business.latitude).to eq(10.1234)
+        expect(business.longitude).to eq(-74.5678)
+      end
+
+      it "returns original URL when response is not a redirect" do
+        non_redirect = double("non_redirect")
+        allow(non_redirect).to receive(:is_a?).with(anything).and_return(false)
+        allow(non_redirect).to receive(:is_a?).with(Net::HTTPRedirection).and_return(false)
+        allow(Net::HTTP).to receive(:start).and_return(non_redirect)
+
+        # URL without coords won't set lat/lng but should not error
+        expect { create(:business, google_maps_url: "https://goo.gl/maps/nocoords") }.not_to raise_error
+      end
     end
   end
 
@@ -340,6 +373,32 @@ RSpec.describe Business, type: :model do
           expect(business.has_feature?(:ai_features)).to be false
         end
       end
+    end
+  end
+
+  describe "AttachmentValidations" do
+    let(:business) { create(:business) }
+
+    it "rejects logo with invalid content type" do
+      blob = ActiveStorage::Blob.create_and_upload!(
+        io: StringIO.new("fake content"),
+        filename: "test.txt",
+        content_type: "text/plain"
+      )
+      business.logo.attach(blob)
+      business.validate
+      expect(business.errors[:logo]).to be_present
+    end
+
+    it "rejects logo that exceeds max size" do
+      blob = ActiveStorage::Blob.create_and_upload!(
+        io: StringIO.new("x" * 6.megabytes),
+        filename: "huge.png",
+        content_type: "image/png"
+      )
+      business.logo.attach(blob)
+      business.validate
+      expect(business.errors[:logo]).to be_present
     end
   end
 end

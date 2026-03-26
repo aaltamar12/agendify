@@ -390,5 +390,11 @@ RSpec.describe DynamicPricing, type: :model do
 
       expect(pricing.effective_adjustment(Date.current)).to eq(15)
     end
+
+    it "falls back to adjustment_value for unknown adjustment_mode" do
+      pricing = build(:dynamic_pricing, business: business, adjustment_mode: nil, adjustment_value: 10)
+      expect(pricing.effective_adjustment(Date.current)).to eq(10)
+    end
   end
+
 end

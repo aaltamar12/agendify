@@ -263,4 +263,96 @@ RSpec.describe "Api::V1::Appointments", type: :request do
       expect(response).to have_http_status(:unprocessable_entity)
     end
   end
+
+  describe "POST /api/v1/appointments (successful creation)" do
+    before do
+      employee.services << service
+      employee.employee_schedules.create!(
+        day_of_week: Date.tomorrow.wday,
+        start_time: "08:00",
+        end_time: "18:00"
+      )
+    end
+
+    it "returns 201 with appointment data" do
+      params = {
+        appointment: {
+          service_id: service.id,
+          employee_id: employee.id,
+          customer_name: "Carlos",
+          customer_phone: "3001234567",
+          customer_email: "carlos@test.com",
+          appointment_date: Date.tomorrow.to_s,
+          start_time: "10:00"
+        }
+      }
+      post "/api/v1/appointments", params: params, headers: headers
+      expect(response).to have_http_status(:created)
+      data = response.parsed_body["data"]
+      expect(data["id"]).to be_present
+    end
+  end
+
+  describe "PATCH /api/v1/appointments/:id (update failure)" do
+    it "returns 422 when update fails with invalid data" do
+      appointment = create(:appointment, business: business, employee: employee, service: service, customer: customer)
+      allow_any_instance_of(Appointment).to receive(:update).and_return(false)
+      allow_any_instance_of(Appointment).to receive_message_chain(:errors, :full_messages, :to_sentence).and_return("Invalid data")
+      allow_any_instance_of(Appointment).to receive_message_chain(:errors, :messages).and_return({ price: ["is invalid"] })
+      patch "/api/v1/appointments/#{appointment.id}",
+            params: { appointment: { notes: "Updated" } },
+            headers: headers
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+  end
+
+  describe "POST /api/v1/appointments/:id/checkin (success via checkin_by_code)" do
+    it "returns checkin success format with customer data" do
+      appointment = create(:appointment, business: business, employee: employee, service: service, customer: customer, status: :confirmed)
+      allow(Appointments::CheckinService).to receive(:call).and_return(
+        ServiceResult.new(success: true, data: {
+          appointment: appointment,
+          customer_name: customer.name,
+          last_visit: nil,
+          visit_count: 1
+        })
+      )
+      post "/api/v1/appointments/#{appointment.id}/checkin", headers: headers
+      expect(response).to have_http_status(:ok)
+      body = response.parsed_body
+      expect(body["customer_name"]).to eq(customer.name)
+      expect(body["visit_count"]).to eq(1)
+    end
+  end
+
+  describe "POST /api/v1/appointments/checkin_by_code (success)" do
+    it "returns checkin success format" do
+      appointment = create(:appointment, business: business, employee: employee, service: service, customer: customer, status: :confirmed)
+      allow(Appointments::CheckinService).to receive(:call).and_return(
+        ServiceResult.new(success: true, data: {
+          appointment: appointment,
+          customer_name: customer.name,
+          last_visit: Date.yesterday,
+          visit_count: 5
+        })
+      )
+      post "/api/v1/appointments/checkin_by_code", params: { ticket_code: appointment.ticket_code }, headers: headers
+      expect(response).to have_http_status(:ok)
+      body = response.parsed_body
+      expect(body["customer_name"]).to eq(customer.name)
+    end
+  end
+
+  describe "GET /api/v1/appointments/available_slots (success)" do
+    it "returns slot data" do
+      allow(Bookings::AvailabilityService).to receive(:call).and_return(
+        ServiceResult.new(success: true, data: [{ time: "10:00", available: true }])
+      )
+      get "/api/v1/appointments/available_slots",
+          params: { service_id: service.id, date: Date.tomorrow.to_s },
+          headers: headers
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body["data"]).to be_an(Array)
+    end
+  end
 end

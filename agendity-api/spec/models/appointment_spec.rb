@@ -30,4 +30,16 @@ RSpec.describe Appointment, type: :model do
     it { should belong_to(:customer) }
     it { should have_one(:payment).dependent(:destroy) }
   end
+
+  describe ".ransackable_attributes" do
+    it "returns allowed attributes" do
+      expect(described_class.ransackable_attributes).to include("status", "appointment_date")
+    end
+  end
+
+  describe ".ransackable_associations" do
+    it "returns allowed associations" do
+      expect(described_class.ransackable_associations).to include("business", "employee", "service", "customer", "payment")
+    end
+  end
 end

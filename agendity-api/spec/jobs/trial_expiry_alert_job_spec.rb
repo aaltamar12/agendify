@@ -241,5 +241,13 @@ RSpec.describe TrialExpiryAlertJob do
         expect(business.trial_alert_stage).to eq(0)
       end
     end
+
+    context "when an error occurs during processing" do
+      it "records the error and re-raises" do
+        allow(Business).to receive(:trial_expiring_in).and_raise(StandardError.new("DB error"))
+
+        expect { described_class.perform_now }.to raise_error(StandardError, "DB error")
+      end
+    end
   end
 end

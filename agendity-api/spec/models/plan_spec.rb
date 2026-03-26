@@ -13,4 +13,17 @@ RSpec.describe Plan, type: :model do
     it { is_expected.to validate_presence_of(:price_monthly) }
     it { is_expected.to validate_numericality_of(:price_monthly).is_greater_than_or_equal_to(0) }
   end
+
+  describe ".ransackable_attributes" do
+    it "returns allowed attributes" do
+      expect(described_class.ransackable_attributes).to be_an(Array)
+    end
+  end
+
+  describe ".ransackable_associations" do
+    it "returns allowed associations" do
+      expect(described_class.ransackable_associations).to be_an(Array)
+    end
+  end
+
 end

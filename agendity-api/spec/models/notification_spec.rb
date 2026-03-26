@@ -73,4 +73,16 @@ RSpec.describe Notification, type: :model do
       expect(notification.read).to be false
     end
   end
+
+  describe ".ransackable_attributes" do
+    it "returns allowed attributes" do
+      expect(described_class.ransackable_attributes).to include("title", "notification_type")
+    end
+  end
+
+  describe ".ransackable_associations" do
+    it "returns allowed associations" do
+      expect(described_class.ransackable_associations).to include("business")
+    end
+  end
 end

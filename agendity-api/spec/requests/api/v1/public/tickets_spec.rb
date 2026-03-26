@@ -102,6 +102,23 @@ RSpec.describe "Api::V1::Public::Tickets", type: :request do
       expect(response.parsed_body["data"]["status"]).to eq("submitted")
     end
 
+    it "submits payment with proof file upload" do
+      pending_appointment = create(:appointment,
+                                   business: business,
+                                   employee: employee,
+                                   service: service,
+                                   customer: customer,
+                                   status: :pending_payment)
+      allow(Payments::SubmitPaymentService).to receive(:call).and_return(
+        ServiceResult.new(success: true, data: pending_appointment)
+      )
+      file = fixture_file_upload(Rails.root.join("spec/fixtures/files/proof.png"), "image/png")
+      post "/api/v1/public/tickets/#{pending_appointment.ticket_code}/payment",
+           params: { customer_email: "test@test.com", payment_method: "transfer", proof: file }
+      expect(response).to have_http_status(:ok)
+      expect(pending_appointment.reload.proof_image).to be_attached
+    end
+
     it "returns 422 when payment service fails" do
       pending_appointment = create(:appointment,
                                    business: business,

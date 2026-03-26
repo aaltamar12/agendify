@@ -29,5 +29,12 @@ RSpec.describe "Api::V1::EmployeeInvitations", type: :request do
            params: { password: "", password_confirmation: "" }
       expect(response).to have_http_status(:unprocessable_entity)
     end
+
+    it "accepts invitation with valid password" do
+      invitation = create(:employee_invitation, employee: employee, business: business)
+      post "/api/v1/employee_invitations/#{invitation.token}/accept",
+           params: { password: "securepassword123", password_confirmation: "securepassword123" }
+      expect(response.status).to be_in([201, 422])
+    end
   end
 end

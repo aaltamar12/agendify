@@ -106,5 +106,13 @@ RSpec.describe Payments::ApprovePaymentService do
         expect(appointment.reload.ticket_code).to eq(original_code)
       end
     end
+
+    context "activity log on approval" do
+      it "logs payment_approved action" do
+        expect { subject }.to change(ActivityLog, :count).by(1)
+        log = ActivityLog.last
+        expect(log.action).to eq("payment_approved")
+      end
+    end
   end
 end

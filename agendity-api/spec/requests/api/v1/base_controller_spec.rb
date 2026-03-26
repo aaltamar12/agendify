@@ -109,4 +109,39 @@ RSpec.describe Api::V1::BaseController, type: :request do
       expect(response.parsed_body["details"]).to be_present
     end
   end
+
+  describe "handle_unauthorized (Pundit)" do
+    let(:user) { create(:user) }
+    let(:business) { create(:business, owner: user) }
+    let(:headers) { auth_headers(user) }
+
+    before { business }
+
+    it "returns 403 for Pundit::NotAuthorizedError" do
+      other_business = create(:business)
+      other_employee = create(:employee, business: other_business)
+      # Trying to update another business's employee should trigger Pundit error
+      patch "/api/v1/employees/#{other_employee.id}",
+            params: { employee: { name: "Hacked" } },
+            headers: headers
+      expect(response.status).to be_in([403, 404])
+    end
+  end
+
+  describe "handle_record_invalid" do
+    let(:user) { create(:user) }
+    let(:business) { create(:business, owner: user) }
+    let(:headers) { auth_headers(user) }
+
+    before { business }
+
+    it "returns 422 with validation error messages" do
+      # Create a service without required fields to trigger RecordInvalid
+      post "/api/v1/services",
+           params: { service: { name: "", price: -1, duration_minutes: 0 } },
+           headers: headers
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response.parsed_body["error"]).to be_present
+    end
+  end
 end

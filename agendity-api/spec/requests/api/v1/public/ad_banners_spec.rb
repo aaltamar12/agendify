@@ -8,6 +8,23 @@ RSpec.describe "Api::V1::Public::AdBanners", type: :request do
       get "/api/v1/public/ad_banners", params: { placement: "booking_summary" }
       expect(response).to have_http_status(:ok)
     end
+
+    it "returns banner data when an active banner exists" do
+      AdBanner.create!(
+        name: "Active Banner",
+        placement: "booking_summary",
+        image_url: "https://example.com/banner.jpg",
+        link_url: "https://example.com",
+        active: true,
+        priority: 10,
+        start_date: Date.current - 1,
+        end_date: Date.current + 30
+      )
+      get "/api/v1/public/ad_banners", params: { placement: "booking_summary" }
+      expect(response).to have_http_status(:ok)
+      data = response.parsed_body["data"]
+      expect(data["name"]).to eq("Active Banner")
+    end
   end
 
   describe "POST /api/v1/public/ad_banners/:id/impression" do

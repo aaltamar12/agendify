@@ -96,4 +96,39 @@ RSpec.describe RequestLogging, type: :request do
       expect(log.request_params).to include("email" => "test@test.com")
     end
   end
+
+  describe "detect_resource" do
+    it "detects service resource" do
+      service = create(:service, business: business)
+
+      get "/api/v1/services/#{service.id}", headers: headers
+
+      log = RequestLog.last
+      expect(log.resource_type).to eq("Service")
+      expect(log.resource_id).to eq(service.id)
+    end
+
+    it "detects employee resource" do
+      employee = create(:employee, business: business)
+
+      get "/api/v1/employees/#{employee.id}", headers: headers
+
+      log = RequestLog.last
+      expect(log.resource_type).to eq("Employee")
+      expect(log.resource_id).to eq(employee.id)
+    end
+  end
+
+  describe "filtered_request_params rescue" do
+    it "returns empty hash when params filtering fails" do
+      allow_any_instance_of(ActionController::Parameters).to receive(:to_unsafe_h).and_raise(StandardError.new("boom"))
+
+      expect {
+        get "/api/v1/appointments", headers: headers
+      }.not_to raise_error
+
+      log = RequestLog.last
+      expect(log.request_params).to eq({})
+    end
+  end
 end

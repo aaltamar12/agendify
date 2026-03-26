@@ -120,6 +120,14 @@ RSpec.describe "Api::V1::Businesses", type: :request do
     rescue Errno::ENOENT
       skip "Test fixture file not available"
     end
+
+    it "returns 422 when logo fails to attach" do
+      allow_any_instance_of(ActiveStorage::Attached::One).to receive(:attached?).and_return(false)
+      file = fixture_file_upload(Rails.root.join("spec/fixtures/files/test_image.png"), "image/png")
+      post "/api/v1/business/upload_logo", params: { logo: file }, headers: headers
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response.parsed_body["error"]).to include("Error al subir")
+    end
   end
 
   describe "POST /api/v1/business/upload_cover with file" do
@@ -129,6 +137,14 @@ RSpec.describe "Api::V1::Businesses", type: :request do
       expect(response).to have_http_status(:ok)
     rescue Errno::ENOENT
       skip "Test fixture file not available"
+    end
+
+    it "returns 422 when cover fails to attach" do
+      allow_any_instance_of(ActiveStorage::Attached::One).to receive(:attached?).and_return(false)
+      file = fixture_file_upload(Rails.root.join("spec/fixtures/files/test_image.png"), "image/png")
+      post "/api/v1/business/upload_cover", params: { cover: file }, headers: headers
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response.parsed_body["error"]).to include("Error al subir")
     end
   end
 
@@ -141,6 +157,56 @@ RSpec.describe "Api::V1::Businesses", type: :request do
            params: { name: "", business_type: "" },
            headers: headers
       expect(response).to have_http_status(:unprocessable_entity)
+    end
+  end
+
+  describe "POST /api/v1/business/select_cover with valid URL" do
+    it "downloads and attaches cover from Pexels URL" do
+      file_content = File.binread(Rails.root.join("spec/fixtures/files/test_image.png"))
+      fake_io = StringIO.new(file_content)
+      fake_io.define_singleton_method(:content_type) { "image/png" }
+
+      original_parse = URI.method(:parse)
+      allow(URI).to receive(:parse) do |url|
+        result = original_parse.call(url)
+        if url.include?("images.pexels.com")
+          allow(result).to receive(:open).and_return(fake_io)
+        end
+        result
+      end
+
+      post "/api/v1/business/select_cover",
+           params: { url: "https://images.pexels.com/photos/123/test.jpg" },
+           headers: headers
+      expect(response).to have_http_status(:ok)
+      expect(business.reload.cover_source).to eq("pexels")
+    end
+
+    it "returns 422 when download fails with HTTP error" do
+      require "open-uri"
+      original_parse = URI.method(:parse)
+      allow(URI).to receive(:parse) do |url|
+        result = original_parse.call(url)
+        if url.include?("images.pexels.com")
+          allow(result).to receive(:open).and_raise(OpenURI::HTTPError.new("404 Not Found", StringIO.new))
+        end
+        result
+      end
+
+      post "/api/v1/business/select_cover",
+           params: { url: "https://images.pexels.com/photos/invalid/bad.jpg" },
+           headers: headers
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response.parsed_body["error"]).to include("Error al descargar")
+    end
+  end
+
+  describe "PATCH /api/v1/business (cover_url mapping)" do
+    it "maps cover_url to cover_image_url" do
+      patch "/api/v1/business",
+            params: { business: { cover_url: "https://example.com/cover.jpg" } },
+            headers: headers
+      expect(response).to have_http_status(:ok)
     end
   end
 end

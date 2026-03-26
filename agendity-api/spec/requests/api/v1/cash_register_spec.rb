@@ -131,4 +131,38 @@ RSpec.describe "Api::V1::CashRegister", type: :request do
       expect(response).to have_http_status(:unprocessable_entity)
     end
   end
+
+  describe "GET /api/v1/cash_register/today (failure)" do
+    it "returns 422 when summary service fails" do
+      allow(CashRegister::DailySummaryService).to receive(:call).and_return(
+        ServiceResult.new(success: false, error: "No data available")
+      )
+      get "/api/v1/cash_register/today", headers: headers
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+  end
+
+  describe "POST /api/v1/cash_register/upload_proof" do
+    it "attaches proof to employee payment" do
+      close = create(:cash_register_close, business: business, closed_by_user: user)
+      emp = create(:employee, business: business)
+      payment = create(:employee_payment, cash_register_close: close, employee: emp)
+      file = fixture_file_upload(Rails.root.join("spec/fixtures/files/proof.png"), "image/png")
+      post "/api/v1/cash_register/upload_proof",
+           params: { employee_payment_id: payment.id, proof: file },
+           headers: headers
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body["data"]["attached"]).to be true
+    end
+
+    it "returns 422 when no file sent" do
+      close = create(:cash_register_close, business: business, closed_by_user: user)
+      emp = create(:employee, business: business)
+      payment = create(:employee_payment, cash_register_close: close, employee: emp)
+      post "/api/v1/cash_register/upload_proof",
+           params: { employee_payment_id: payment.id },
+           headers: headers
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+  end
 end

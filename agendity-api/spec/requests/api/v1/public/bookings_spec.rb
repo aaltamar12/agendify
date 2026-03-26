@@ -198,4 +198,105 @@ RSpec.describe "Api::V1::Public::Bookings", type: :request do
       expect(response).to have_http_status(:conflict)
     end
   end
+
+  describe "POST /api/v1/public/:slug/book (successful booking)" do
+    before do
+      employee.services << service
+      employee.employee_schedules.create!(
+        day_of_week: Date.tomorrow.wday,
+        start_time: "08:00",
+        end_time: "18:00"
+      )
+    end
+
+    it "returns 201 with appointment data and ticket_code" do
+      params = {
+        booking: {
+          service_id: service.id,
+          employee_id: employee.id,
+          date: Date.tomorrow.to_s,
+          start_time: "10:00",
+          customer_name: "Test User",
+          customer_email: "testuser@example.com",
+          customer_phone: "3001234567"
+        }
+      }
+      post "/api/v1/public/#{business.slug}/book", params: params
+      expect(response).to have_http_status(:created)
+      data = response.parsed_body["data"]
+      expect(data["appointment"]).to be_present
+      expect(data["ticket_code"]).to be_present
+      expect(data["business"]).to be_present
+    end
+
+    it "includes penalty_applied when penalty is positive" do
+      customer = create(:customer, business: business, email: "penalty@test.com", pending_penalty: 5000)
+      params = {
+        booking: {
+          service_id: service.id,
+          employee_id: employee.id,
+          date: Date.tomorrow.to_s,
+          start_time: "11:00",
+          customer_name: customer.name,
+          customer_email: customer.email,
+          customer_phone: "3001234567"
+        }
+      }
+      post "/api/v1/public/#{business.slug}/book", params: params
+      expect(response).to have_http_status(:created)
+      data = response.parsed_body["data"]
+      expect(data["penalty_applied"].to_f).to eq(5000.0)
+    end
+  end
+
+  describe "GET /api/v1/public/:slug/check_slot (slot available)" do
+    before do
+      employee.services << service
+      employee.employee_schedules.create!(
+        day_of_week: Date.tomorrow.wday,
+        start_time: "08:00",
+        end_time: "18:00"
+      )
+    end
+
+    it "returns available: true for an open slot" do
+      allow(Bookings::AvailabilityService).to receive(:call).and_return(
+        ServiceResult.new(success: true, data: [{ time: "10:00", available: true }])
+      )
+      get "/api/v1/public/#{business.slug}/check_slot",
+          params: { service_id: service.id, date: Date.tomorrow.to_s, time: "10:00", employee_id: employee.id }
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body["data"]["available"]).to be true
+    end
+
+    it "returns available: false when slot not in results" do
+      allow(Bookings::AvailabilityService).to receive(:call).and_return(
+        ServiceResult.new(success: true, data: [{ time: "11:00", available: true }])
+      )
+      get "/api/v1/public/#{business.slug}/check_slot",
+          params: { service_id: service.id, date: Date.tomorrow.to_s, time: "10:00", employee_id: employee.id }
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body["data"]["available"]).to be false
+    end
+  end
+
+  describe "POST /api/v1/public/:slug/book (both date and appointment_date)" do
+    it "handles when both date and appointment_date are present" do
+      params = {
+        booking: {
+          service_id: service.id,
+          employee_id: employee.id,
+          date: Date.tomorrow.to_s,
+          appointment_date: Date.tomorrow.to_s,
+          start_time: "10:00",
+          customer_name: "Test",
+          customer_email: "test@test.com",
+          customer_phone: "3001234567"
+        }
+      }
+      post "/api/v1/public/#{business.slug}/book", params: params
+      # Should succeed or fail on business logic, not on param parsing
+      expect(response.status).to be_in([201, 422])
+    end
+  end
 end

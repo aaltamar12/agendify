@@ -70,4 +70,16 @@ RSpec.describe Service, type: :model do
       expect(svc.errors[:name]).to be_present
     end
   end
+
+  describe ".ransackable_attributes" do
+    it "returns allowed attributes" do
+      expect(described_class.ransackable_attributes).to include("name", "price", "active")
+    end
+  end
+
+  describe ".ransackable_associations" do
+    it "returns allowed associations" do
+      expect(described_class.ransackable_associations).to include("business", "employees")
+    end
+  end
 end
