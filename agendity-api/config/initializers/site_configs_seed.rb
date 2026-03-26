@@ -32,6 +32,7 @@ Rails.application.config.after_initialize do
       c.description = attrs[:description]
     end
   end
-rescue ActiveRecord::StatementInvalid
-  # Table doesn't exist yet (before migrations)
+rescue ActiveRecord::StatementInvalid, ActiveRecord::ConnectionNotEstablished, PG::ConnectionBad => e
+  # DB not available yet (migrations pending, service starting, etc.)
+  Rails.logger.warn "[SiteConfigsSeed] Skipped: #{e.class}"
 end
