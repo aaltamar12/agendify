@@ -35,10 +35,26 @@ const profileSchema = z.object({
   city: z.string().optional(),
   state: z.string().optional(),
   country: z.string().optional(),
-  instagram_url: z.string().optional(),
-  facebook_url: z.string().optional(),
-  website_url: z.string().optional(),
-  google_maps_url: z.string().optional(),
+  instagram_url: z
+    .string()
+    .url('Ingresa una URL válida')
+    .optional()
+    .or(z.literal('')),
+  facebook_url: z
+    .string()
+    .url('Ingresa una URL válida')
+    .optional()
+    .or(z.literal('')),
+  website_url: z
+    .string()
+    .url('Ingresa una URL válida')
+    .optional()
+    .or(z.literal('')),
+  google_maps_url: z
+    .string()
+    .url('Ingresa una URL válida')
+    .optional()
+    .or(z.literal('')),
   nit: z.string().optional(),
   legal_representative_name: z.string().optional(),
   legal_representative_document: z.string().optional(),
@@ -1212,21 +1228,25 @@ function PaymentSection({
         <Input
           label="Nequi (teléfono)"
           placeholder="300 123 4567"
+          error={errors.nequi_phone?.message}
           {...register('nequi_phone')}
         />
         <Input
           label="Daviplata (teléfono)"
           placeholder="300 123 4567"
+          error={errors.daviplata_phone?.message}
           {...register('daviplata_phone')}
         />
         <Input
           label="Cuenta Bancolombia"
           placeholder="Número de cuenta"
+          error={errors.bancolombia_account?.message}
           {...register('bancolombia_account')}
         />
         <Input
           label="Llave Bre-B"
           placeholder="Ej: ABC123DEF456"
+          error={errors.breb_key?.message}
           {...register('breb_key')}
         />
         <div className="flex justify-end">

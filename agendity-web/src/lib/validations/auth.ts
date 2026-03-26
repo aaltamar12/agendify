@@ -27,6 +27,9 @@ export const registerSchema = z
     businessType: z.enum(['barbershop', 'salon', 'spa', 'nails', 'estetica', 'consultorio', 'other'], {
       error: 'Selecciona el tipo de negocio',
     }),
+    termsAccepted: z.literal(true, {
+      error: 'Debes aceptar los términos y condiciones',
+    }),
     referralCode: z.string().optional(),
   })
   .refine((data) => data.password === data.passwordConfirmation, {
@@ -45,7 +48,7 @@ export const resetPasswordSchema = z
   .object({
     password: z
       .string()
-      .min(8, 'La contraseña debe tener al menos 8 caracteres'),
+      .min(6, 'La contraseña debe tener al menos 6 caracteres'),
     passwordConfirmation: z
       .string()
       .min(1, 'Confirma tu contraseña'),

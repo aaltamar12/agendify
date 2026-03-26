@@ -19,7 +19,8 @@ export const createAppointmentSchema = z.object({
     .or(z.literal('')),
   customer_phone: z
     .string()
-    .min(7, 'El teléfono debe tener al menos 7 dígitos'),
+    .min(1, 'El teléfono es requerido')
+    .regex(/^3\d{9}$/, 'Ingresa un teléfono válido (10 dígitos, ej: 3001234567)'),
   appointment_date: z
     .string()
     .min(1, 'La fecha es requerida'),

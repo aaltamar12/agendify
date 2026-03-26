@@ -32,18 +32,21 @@ function RegisterForm() {
   const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [termsAccepted, setTermsAccepted] = useState(false);
 
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
       businessType: undefined,
+      termsAccepted: undefined as unknown as true,
     },
   });
+
+  const termsAccepted = watch('termsAccepted');
 
   // Capture referral code from URL and persist in localStorage
   useEffect(() => {
@@ -57,7 +60,7 @@ function RegisterForm() {
 
   const onSubmit = (data: RegisterFormData) => {
     const referralCode = localStorage.getItem('agendity_ref_code') || undefined;
-    registerMutation.mutate({ ...data, referralCode, termsAccepted });
+    registerMutation.mutate({ ...data, referralCode });
   };
 
   return (
@@ -131,24 +134,28 @@ function RegisterForm() {
           {...register('businessType')}
         />
 
-        <label className="flex items-start gap-2 text-sm text-gray-600">
-          <input
-            type="checkbox"
-            checked={termsAccepted}
-            onChange={(e) => setTermsAccepted(e.target.checked)}
-            className="mt-1 h-4 w-4 rounded border-gray-300 text-violet-600 focus:ring-violet-500"
-          />
-          <span>
-            Acepto los{' '}
-            <a href="/terms" target="_blank" className="text-violet-600 hover:underline">
-              Términos y Condiciones
-            </a>{' '}
-            y la{' '}
-            <a href="/privacy" target="_blank" className="text-violet-600 hover:underline">
-              Política de Privacidad
-            </a>
-          </span>
-        </label>
+        <div>
+          <label className="flex items-start gap-2 text-sm text-gray-600">
+            <input
+              type="checkbox"
+              {...register('termsAccepted')}
+              className="mt-1 h-4 w-4 rounded border-gray-300 text-violet-600 focus:ring-violet-500"
+            />
+            <span>
+              Acepto los{' '}
+              <a href="/terms" target="_blank" className="text-violet-600 hover:underline">
+                Términos y Condiciones
+              </a>{' '}
+              y la{' '}
+              <a href="/privacy" target="_blank" className="text-violet-600 hover:underline">
+                Política de Privacidad
+              </a>
+            </span>
+          </label>
+          {errors.termsAccepted && (
+            <p className="mt-1 text-sm text-red-600">{errors.termsAccepted.message}</p>
+          )}
+        </div>
 
         {registerMutation.isError && (
           <p className="text-sm text-red-600">
@@ -160,7 +167,6 @@ function RegisterForm() {
         <Button
           type="submit"
           fullWidth
-          disabled={!termsAccepted}
           loading={registerMutation.isPending}
         >
           Crear cuenta

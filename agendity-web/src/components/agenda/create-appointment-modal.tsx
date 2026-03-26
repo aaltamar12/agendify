@@ -360,7 +360,7 @@ export function CreateAppointmentModal({
                   if (!value) return 'La fecha es requerida';
                   const date = new Date(value + 'T00:00:00');
                   if (closedDays.includes(date.getDay() as DayOfWeek)) {
-                    return 'El negocio no opera este dia';
+                    return 'El negocio no opera este día';
                   }
                   return true;
                 },
@@ -368,7 +368,7 @@ export function CreateAppointmentModal({
             />
             {closedDays.length > 0 && (
               <p className="mt-1 text-xs text-gray-400">
-                Dias cerrados: {closedDays.map((d) => ['Dom','Lun','Mar','Mie','Jue','Vie','Sab'][d]).join(', ')}
+                Días cerrados: {closedDays.map((d) => ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'][d]).join(', ')}
               </p>
             )}
           </div>

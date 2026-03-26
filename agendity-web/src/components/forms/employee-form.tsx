@@ -217,7 +217,7 @@ export function EmployeeForm({ employee, onSubmit, loading }: EmployeeFormProps)
       {watchPaymentType === 'manual' && (
         <p className="!mt-1 flex items-center gap-1.5 text-xs text-amber-600">
           <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
-          Se recomienda configurar una comision o pago fijo para un mejor control en el cierre de caja.
+          Se recomienda configurar una comisión o pago fijo para un mejor control en el cierre de caja.
         </p>
       )}
 

@@ -10,10 +10,10 @@ import { useInvitationDetails, useAcceptInvitation } from '@/lib/hooks/use-emplo
 import { useAuthStore } from '@/lib/stores/auth-store';
 
 const schema = z.object({
-  password: z.string().min(8, 'Minimo 8 caracteres'),
-  password_confirmation: z.string().min(1, 'Confirma tu contrasena'),
+  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
+  password_confirmation: z.string().min(1, 'Confirma tu contraseña'),
 }).refine((d) => d.password === d.password_confirmation, {
-  message: 'Las contrasenas no coinciden',
+  message: 'Las contraseñas no coinciden',
   path: ['password_confirmation'],
 });
 
@@ -43,7 +43,7 @@ function EmployeeRegisterForm() {
   if (!token) {
     return (
       <Card>
-        <p className="text-center text-gray-500">Enlace de invitacion invalido.</p>
+        <p className="text-center text-gray-500">Enlace de invitación inválido.</p>
       </Card>
     );
   }
@@ -55,7 +55,7 @@ function EmployeeRegisterForm() {
   if (!invitation) {
     return (
       <Card>
-        <p className="text-center text-gray-500">Invitacion no encontrada.</p>
+        <p className="text-center text-gray-500">Invitación no encontrada.</p>
       </Card>
     );
   }
@@ -63,8 +63,8 @@ function EmployeeRegisterForm() {
   if (invitation.expired) {
     return (
       <Card>
-        <h2 className="mb-2 text-center text-xl font-semibold text-gray-900">Invitacion expirada</h2>
-        <p className="text-center text-sm text-gray-500">Pide al negocio que te envie una nueva invitacion.</p>
+        <h2 className="mb-2 text-center text-xl font-semibold text-gray-900">Invitación expirada</h2>
+        <p className="text-center text-sm text-gray-500">Pide al negocio que te envíe una nueva invitación.</p>
       </Card>
     );
   }
@@ -72,8 +72,8 @@ function EmployeeRegisterForm() {
   if (invitation.accepted) {
     return (
       <Card>
-        <h2 className="mb-2 text-center text-xl font-semibold text-gray-900">Invitacion ya aceptada</h2>
-        <p className="text-center text-sm text-gray-500">Ya tienes una cuenta. Inicia sesion.</p>
+        <h2 className="mb-2 text-center text-xl font-semibold text-gray-900">Invitación ya aceptada</h2>
+        <p className="text-center text-sm text-gray-500">Ya tienes una cuenta. Inicia sesión.</p>
       </Card>
     );
   }
@@ -98,7 +98,7 @@ function EmployeeRegisterForm() {
       <div className="mb-6 text-center">
         <h2 className="text-xl font-semibold text-gray-900">Unirte a {invitation.business_name}</h2>
         <p className="mt-1 text-sm text-gray-500">
-          Hola {invitation.employee_name}, crea tu contrasena para acceder a tu portal.
+          Hola {invitation.employee_name}, crea tu contraseña para acceder a tu portal.
         </p>
       </div>
 
@@ -110,16 +110,16 @@ function EmployeeRegisterForm() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <Input
-          label="Contrasena"
+          label="Contraseña"
           type="password"
-          placeholder="Minimo 8 caracteres"
+          placeholder="Mínimo 6 caracteres"
           error={errors.password?.message}
           {...register('password')}
         />
         <Input
-          label="Confirmar contrasena"
+          label="Confirmar contraseña"
           type="password"
-          placeholder="Repite tu contrasena"
+          placeholder="Repite tu contraseña"
           error={errors.password_confirmation?.message}
           {...register('password_confirmation')}
         />

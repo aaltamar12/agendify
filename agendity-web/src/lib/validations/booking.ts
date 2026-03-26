@@ -12,7 +12,7 @@ export const customerInfoSchema = z.object({
   phone: z
     .string()
     .min(1, 'El teléfono es obligatorio')
-    .regex(/^\d{7,}$/, 'Ingresa un teléfono válido (mínimo 7 dígitos)'),
+    .regex(/^3\d{9}$/, 'Ingresa un teléfono válido (10 dígitos, ej: 3001234567)'),
   birth_date: z
     .string()
     .optional()

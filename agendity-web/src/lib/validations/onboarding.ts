@@ -2,7 +2,10 @@ import { z } from 'zod';
 
 export const businessProfileSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
-  phone: z.string().min(1, 'El teléfono es requerido'),
+  phone: z
+    .string()
+    .min(1, 'El teléfono es requerido')
+    .regex(/^3\d{9}$/, 'Ingresa un teléfono válido (10 dígitos, ej: 3001234567)'),
   address: z.string().min(1, 'La dirección es requerida'),
   country: z.string().min(1, 'El país es requerido'),
   state: z.string().min(1, 'El departamento es requerido'),
