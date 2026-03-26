@@ -1,8 +1,18 @@
 # frozen_string_literal: true
 
-# Seed data for Agendity — realistic demo simulating barbershops and salons in Barranquilla.
+# Seed data for Agendity.
 # Run with: rails db:seed
 # Idempotent: safe to run multiple times.
+#
+# Production uses a minimal seed (plans + admin + site config).
+# Development uses full demo data (businesses, appointments, reviews, etc.)
+
+if Rails.env.production?
+  load Rails.root.join("db/seeds/production.rb")
+  return
+end
+
+# === DEVELOPMENT SEEDS === (demo data below)
 
 # Helper: create or update appointment using the unique index (employee, date, start_time)
 def seed_appointment!(employee:, appointment_date:, start_time:, **attrs)
