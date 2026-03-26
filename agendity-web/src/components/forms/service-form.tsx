@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -39,10 +40,13 @@ interface ServiceFormProps {
 
 export function ServiceForm({ service, onSubmit, loading }: ServiceFormProps) {
   const { data: categories = [] } = useServiceCategories();
+  const [showCustomCategory, setShowCustomCategory] = useState(false);
 
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<ServiceFormData>({
     resolver: zodResolver(serviceFormSchema),
@@ -77,17 +81,43 @@ export function ServiceForm({ service, onSubmit, loading }: ServiceFormProps) {
         <label className="mb-1.5 block text-sm font-medium text-gray-700">
           Categoría (opcional)
         </label>
-        <input
-          list="categories-list"
-          placeholder="Ej: Corte, Barba, Combo..."
-          className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-600/20"
-          {...register('category')}
-        />
-        <datalist id="categories-list">
-          {categories.map((cat) => (
-            <option key={cat} value={cat} />
-          ))}
-        </datalist>
+        {!showCustomCategory ? (
+          <select
+            className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 transition-colors focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-600/20"
+            value={watch('category') ?? ''}
+            onChange={(e) => {
+              if (e.target.value === '__new__') {
+                setShowCustomCategory(true);
+                setValue('category', '');
+              } else {
+                setValue('category', e.target.value);
+              }
+            }}
+          >
+            <option value="">Sin categoría</option>
+            {categories.map((cat) => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+            <option value="__new__">+ Nueva categoría...</option>
+          </select>
+        ) : (
+          <div className="flex gap-2">
+            <input
+              type="text"
+              placeholder="Nombre de la categoría"
+              autoFocus
+              className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-600/20"
+              {...register('category')}
+            />
+            <button
+              type="button"
+              onClick={() => { setShowCustomCategory(false); setValue('category', ''); }}
+              className="shrink-0 rounded-lg border border-gray-300 px-3 py-2 text-xs text-gray-500 hover:bg-gray-50"
+            >
+              Cancelar
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-4">
