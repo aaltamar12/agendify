@@ -30,7 +30,8 @@ RSpec.describe "Api::V1::Auth", type: :request do
         password_confirmation: "password123",
         phone: "3001234567",
         business_name: "Mi Barbería",
-        business_type: "barbershop"
+        business_type: "barbershop",
+        terms_accepted: true
       }
       post "/api/v1/auth/register", params: params
       expect(response).to have_http_status(:created)

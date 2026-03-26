@@ -26,7 +26,8 @@ RSpec.describe "Subscription Lifecycle", type: :model do
       phone: "3001234567",
       business_name: "Barberia Elite",
       business_type: "barbershop",
-      referral_code: "embajador"
+      referral_code: "embajador",
+      terms_accepted: true
     )
 
     expect(register_result).to be_success
@@ -54,7 +55,7 @@ RSpec.describe "Subscription Lifecycle", type: :model do
     # ============================================================
     # Step 3: Simulate trial expiring in 2 days
     # ============================================================
-    business.update!(trial_ends_at: 2.days.from_now.beginning_of_day)
+    business.update!(trial_ends_at: 5.days.from_now.beginning_of_day)
 
     # Step 4: Run TrialExpiryAlertJob -> Stage 1
     perform_enqueued_jobs { TrialExpiryAlertJob.perform_now }
