@@ -156,6 +156,68 @@ RSpec.describe SubscriptionExpiryAlertJob do
       end
     end
 
+    context "Stage 4: subscription expired 7 days ago" do
+      let!(:subscription) do
+        create(:subscription,
+          business: business,
+          plan: plan,
+          status: :active,
+          end_date: Date.current - 7,
+          expiry_alert_stage: 3)
+      end
+
+      it "sets expiry_alert_stage to 4" do
+        described_class.perform_now
+        subscription.reload
+        expect(subscription.expiry_alert_stage).to eq(4)
+      end
+
+      it "deactivates the business" do
+        described_class.perform_now
+        business.reload
+        expect(business.status).to eq("inactive")
+      end
+
+      it "creates an AdminNotification about the deactivation" do
+        expect { described_class.perform_now }.to change(AdminNotification, :count).by(1)
+
+        notification = AdminNotification.last
+        expect(notification.title).to include("desactivado")
+      end
+
+      it "logs business_deactivated activity" do
+        described_class.perform_now
+        log = ActivityLog.where(action: "business_deactivated").last
+        expect(log).to be_present
+        expect(log.business).to eq(business)
+      end
+    end
+
+    context "WhatsApp notification for Pro+ plan" do
+      let(:pro_plan) { create(:plan, name: "Pro+", price_monthly: 99_900, whatsapp_notifications: true) }
+      let(:owner) { business.owner }
+      let!(:subscription) do
+        create(:subscription,
+          business: business,
+          plan: pro_plan,
+          status: :active,
+          end_date: Date.current + 5,
+          expiry_alert_stage: 0)
+      end
+
+      before do
+        owner.update!(phone: "+573001234567")
+        allow(business).to receive(:current_plan).and_return(pro_plan)
+      end
+
+      it "sends WhatsApp notification when plan supports it and owner has phone" do
+        described_class.perform_now
+        expect(Notifications::WhatsAppChannel).to have_received(:deliver).with(
+          hash_including(template: :subscription_expiry_stage_1)
+        )
+      end
+    end
+
     context "when job is disabled" do
       before do
         allow(JobConfig).to receive(:enabled?).with("SubscriptionExpiryAlertJob").and_return(false)

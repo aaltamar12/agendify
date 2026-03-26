@@ -115,5 +115,116 @@ RSpec.describe CompleteAppointmentsJob, type: :job do
         expect(confirmed_appointment.reload.status).to eq("confirmed")
       end
     end
+
+    context "when cashback result has a positive amount" do
+      let!(:past_appointment) do
+        now = Time.current
+        create(:appointment,
+          business: business,
+          employee: employee,
+          customer: customer,
+          service: service,
+          appointment_date: Date.current,
+          start_time: (now - 2.hours).strftime("%H:%M"),
+          end_time: (now - 1.hour).strftime("%H:%M"),
+          status: :checked_in,
+          price: 25_000)
+      end
+
+      before do
+        allow(Credits::CashbackService).to receive(:call)
+          .and_return(ServiceResult.new(success: true, data: 2500))
+      end
+
+      it "enqueues SendCashbackNotificationJob with the cashback amount" do
+        expect(SendCashbackNotificationJob).to receive(:perform_later)
+          .with(past_appointment.id, 2500.0)
+        described_class.perform_now
+      end
+    end
+
+    context "when cashback result has no data" do
+      let!(:past_appointment) do
+        now = Time.current
+        create(:appointment,
+          business: business,
+          employee: employee,
+          customer: customer,
+          service: service,
+          appointment_date: Date.current,
+          start_time: (now - 2.hours).strftime("%H:%M"),
+          end_time: (now - 1.hour).strftime("%H:%M"),
+          status: :checked_in,
+          price: 25_000)
+      end
+
+      before do
+        allow(Credits::CashbackService).to receive(:call)
+          .and_return(ServiceResult.new(success: true, data: nil))
+      end
+
+      it "does NOT enqueue SendCashbackNotificationJob" do
+        expect(SendCashbackNotificationJob).not_to receive(:perform_later)
+        described_class.perform_now
+      end
+    end
+
+    context "when appointment end_time has passed" do
+      let!(:past_appointment) do
+        now = Time.current
+        create(:appointment,
+          business: business,
+          employee: employee,
+          customer: customer,
+          service: service,
+          appointment_date: Date.current,
+          start_time: (now - 2.hours).strftime("%H:%M"),
+          end_time: (now - 1.hour).strftime("%H:%M"),
+          status: :checked_in,
+          price: 25_000)
+      end
+
+      before do
+        allow(Credits::CashbackService).to receive(:call)
+          .and_return(ServiceResult.new(success: true, data: nil))
+      end
+
+      it "creates an activity log" do
+        expect { described_class.perform_now }.to change(ActivityLog, :count).by(1)
+        log = ActivityLog.last
+        expect(log.action).to eq("appointment_completed")
+      end
+
+      it "publishes a NATS real-time event" do
+        described_class.perform_now
+        expect(Realtime::NatsPublisher).to have_received(:publish).with(
+          hash_including(event: "appointment_completed", business_id: business.id)
+        )
+      end
+    end
+
+    context "when job is disabled" do
+      before do
+        allow(JobConfig).to receive(:enabled?).and_return(false)
+      end
+
+      let!(:past_appointment) do
+        create(:appointment,
+          business: business,
+          employee: employee,
+          customer: customer,
+          service: service,
+          appointment_date: Date.yesterday,
+          start_time: "10:00",
+          end_time: "10:30",
+          status: :checked_in,
+          price: 25_000)
+      end
+
+      it "skips processing and does not complete any appointments" do
+        described_class.perform_now
+        expect(past_appointment.reload.status).to eq("checked_in")
+      end
+    end
   end
 end

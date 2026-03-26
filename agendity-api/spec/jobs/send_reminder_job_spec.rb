@@ -38,6 +38,35 @@ RSpec.describe SendReminderJob, type: :job do
         described_class.perform_now(appointment.id)
         expect(Notifications::MultiChannelService).not_to have_received(:call)
       end
+
+      it "does not create an activity log" do
+        expect { described_class.perform_now(appointment.id) }.not_to change(ActivityLog, :count)
+      end
+    end
+
+    it "raises ActiveRecord::RecordNotFound for non-existent appointment" do
+      expect { described_class.perform_now(-1) }.to raise_error(ActiveRecord::RecordNotFound)
+    end
+
+    it "includes correct data in the MultiChannelService call" do
+      described_class.perform_now(appointment.id)
+      expect(Notifications::MultiChannelService).to have_received(:call).with(
+        hash_including(
+          business: business,
+          data: hash_including(
+            business_name: business.name,
+            service_name: service.name,
+            employee_name: employee.name
+          )
+        )
+      )
+    end
+
+    it "creates an activity log with reminder_sent action" do
+      described_class.perform_now(appointment.id)
+      log = ActivityLog.last
+      expect(log.action).to eq("reminder_sent")
+      expect(log.description).to include(customer.name)
     end
   end
 end

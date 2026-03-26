@@ -62,5 +62,62 @@ RSpec.describe GenerateSubscriptionPaymentOrdersJob, type: :job do
         expect { described_class.perform_now }.not_to change(SubscriptionPaymentOrder, :count)
       end
     end
+
+    context "when a paid order already exists for the next period" do
+      let!(:subscription) do
+        create(:subscription, business: business, plan: plan, status: :active,
+          end_date: 3.days.from_now.to_date)
+      end
+
+      before do
+        create(:subscription_payment_order,
+          subscription: subscription, business: business,
+          period_start: subscription.end_date + 1.day, status: "paid")
+      end
+
+      it "does not create a duplicate order" do
+        expect { described_class.perform_now }.not_to change(SubscriptionPaymentOrder, :count)
+      end
+    end
+
+    context "when subscription is not active (expired)" do
+      let!(:subscription) do
+        create(:subscription, business: business, plan: plan, status: :expired,
+          end_date: 3.days.from_now.to_date)
+      end
+
+      it "does not create a payment order" do
+        expect { described_class.perform_now }.not_to change(SubscriptionPaymentOrder, :count)
+      end
+    end
+
+    context "payment order attributes" do
+      let!(:subscription) do
+        create(:subscription, business: business, plan: plan, status: :active,
+          end_date: 3.days.from_now.to_date)
+      end
+
+      it "sets correct period_start and period_end" do
+        described_class.perform_now
+        order = SubscriptionPaymentOrder.last
+        expect(order.period_start).to eq(subscription.end_date + 1.day)
+        expect(order.period_end).to eq(subscription.end_date + 1.day + 1.month - 1.day)
+        expect(order.due_date).to eq(subscription.end_date)
+      end
+
+      it "creates notification with renewal information" do
+        described_class.perform_now
+        notification = Notification.last
+        expect(notification.title).to eq("Renovación de suscripción")
+        expect(notification.notification_type).to eq("reminder")
+      end
+
+      it "creates activity log with payment order details" do
+        described_class.perform_now
+        log = ActivityLog.last
+        expect(log.action).to eq("payment_order_created")
+        expect(log.description).to include("49900")
+      end
+    end
   end
 end

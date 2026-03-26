@@ -52,6 +52,64 @@ RSpec.describe CheckExpiredSubscriptionsJob, type: :job do
         subscription.reload
         expect(subscription.status).to eq("active")
       end
+
+      it "extends the end_date by 1 month" do
+        old_end_date = subscription.end_date
+        described_class.perform_now
+        subscription.reload
+        expect(subscription.end_date).to eq(old_end_date + 1.month)
+      end
+    end
+
+    context "when subscription is expired with no paid order" do
+      let!(:subscription) do
+        create(:subscription, business: business, plan: pro_plan, status: :active,
+          end_date: Date.yesterday)
+      end
+
+      it "marks pending payment orders as overdue" do
+        pending_order = create(:subscription_payment_order,
+          subscription: subscription, business: business,
+          status: "pending", period_start: Date.current, period_end: Date.current + 1.month)
+
+        described_class.perform_now
+        expect(pending_order.reload.status).to eq("overdue")
+      end
+
+      it "sends a subscription_expired email" do
+        expect { described_class.perform_now }
+          .to have_enqueued_mail(BusinessMailer, :subscription_expired)
+      end
+
+      it "creates an activity log for the downgrade" do
+        described_class.perform_now
+        log = ActivityLog.where(action: "subscription_expired").last
+        expect(log).to be_present
+        expect(log.business).to eq(business)
+      end
+    end
+
+    context "when subscription is not yet expired" do
+      let!(:subscription) do
+        create(:subscription, business: business, plan: pro_plan, status: :active,
+          end_date: Date.tomorrow)
+      end
+
+      it "does not downgrade the subscription" do
+        expect { described_class.perform_now }.not_to change(Subscription, :count)
+        expect(subscription.reload.status).to eq("active")
+      end
+    end
+
+    context "when subscription is already expired status" do
+      let!(:subscription) do
+        create(:subscription, business: business, plan: pro_plan, status: :expired,
+          end_date: Date.yesterday)
+      end
+
+      it "does not process already-expired subscriptions" do
+        expect { described_class.perform_now }.not_to change(Subscription, :count)
+      end
     end
   end
 end

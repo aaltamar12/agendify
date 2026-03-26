@@ -37,10 +37,36 @@ RSpec.describe SendBookingConfirmedJob, type: :job do
       )
     end
 
-    context "when appointment has no customer association loaded" do
-      it "performs without error for a valid appointment" do
-        expect { described_class.perform_now(appointment.id) }.not_to raise_error
-      end
+    it "raises ActiveRecord::RecordNotFound for non-existent appointment" do
+      expect { described_class.perform_now(-1) }.to raise_error(ActiveRecord::RecordNotFound)
+    end
+
+    it "includes correct data in the MultiChannelService call" do
+      described_class.perform_now(appointment.id)
+      expect(Notifications::MultiChannelService).to have_received(:call).with(
+        hash_including(
+          business: business,
+          data: hash_including(
+            business_name: business.name,
+            service_name: service.name,
+            employee_name: employee.name
+          )
+        )
+      )
+    end
+
+    it "includes correct data in the NATS event" do
+      described_class.perform_now(appointment.id)
+      expect(Realtime::NatsPublisher).to have_received(:publish).with(
+        hash_including(
+          business_id: business.id,
+          event: "booking_confirmed",
+          data: hash_including(
+            appointment_id: appointment.id,
+            customer_name: customer.name
+          )
+        )
+      )
     end
   end
 end

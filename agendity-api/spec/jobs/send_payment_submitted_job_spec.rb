@@ -32,5 +32,38 @@ RSpec.describe SendPaymentSubmittedJob, type: :job do
         hash_including(event: "payment_submitted")
       )
     end
+
+    it "sends BusinessMailer.payment_submitted email" do
+      mail_double = double(deliver_now: true)
+      allow(BusinessMailer).to receive(:payment_submitted).and_return(mail_double)
+
+      described_class.perform_now(payment.id)
+      expect(BusinessMailer).to have_received(:payment_submitted).with(payment)
+    end
+
+    it "includes correct data in the notification" do
+      described_class.perform_now(payment.id)
+      notification = Notification.last
+      expect(notification.title).to include(customer.name)
+      expect(notification.body).to include(service.name)
+      expect(notification.notification_type).to eq("payment_submitted")
+    end
+
+    it "includes correct data in the NATS event" do
+      described_class.perform_now(payment.id)
+      expect(Realtime::NatsPublisher).to have_received(:publish).with(
+        hash_including(
+          business_id: business.id,
+          data: hash_including(
+            payment_id: payment.id,
+            amount: 25_000
+          )
+        )
+      )
+    end
+
+    it "raises ActiveRecord::RecordNotFound for non-existent payment" do
+      expect { described_class.perform_now(-1) }.to raise_error(ActiveRecord::RecordNotFound)
+    end
   end
 end

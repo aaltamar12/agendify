@@ -272,4 +272,123 @@ RSpec.describe DynamicPricing, type: :model do
     it { should define_enum_for(:adjustment_mode).with_values(fixed_mode: 0, progressive_asc: 1, progressive_desc: 2) }
     it { should define_enum_for(:status).with_values(suggested: 0, active: 1, rejected: 2, expired: 3) }
   end
+
+  describe "scopes" do
+    let(:business) { create(:business) }
+
+    describe ".currently_active" do
+      it "returns active pricings that include today" do
+        current = create(:dynamic_pricing, business: business, status: :active,
+          start_date: Date.current - 5.days, end_date: Date.current + 5.days)
+        future = create(:dynamic_pricing, business: business, status: :active,
+          start_date: Date.current + 10.days, end_date: Date.current + 20.days)
+        past = create(:dynamic_pricing, business: business, status: :active,
+          start_date: Date.current - 20.days, end_date: Date.current - 10.days)
+        suggested = create(:dynamic_pricing, business: business, status: :suggested,
+          start_date: Date.current - 5.days, end_date: Date.current + 5.days)
+
+        expect(described_class.currently_active).to include(current)
+        expect(described_class.currently_active).not_to include(future)
+        expect(described_class.currently_active).not_to include(past)
+        expect(described_class.currently_active).not_to include(suggested)
+      end
+    end
+
+    describe ".for_date" do
+      it "returns active pricings that include the given date" do
+        pricing = create(:dynamic_pricing, business: business, status: :active,
+          start_date: Date.current, end_date: Date.current + 30.days)
+        target_date = Date.current + 15.days
+
+        expect(described_class.for_date(target_date)).to include(pricing)
+        expect(described_class.for_date(Date.current + 60.days)).not_to include(pricing)
+      end
+    end
+
+    describe ".pending_suggestions" do
+      it "returns suggestions created within the last 30 days" do
+        recent = create(:dynamic_pricing, business: business, status: :suggested)
+        expect(described_class.pending_suggestions).to include(recent)
+      end
+    end
+  end
+
+  describe "no overlapping active pricings with days_of_week" do
+    let(:business) { create(:business) }
+
+    it "allows overlapping dates if days_of_week don't overlap" do
+      create(:dynamic_pricing,
+        business: business,
+        days_of_week: [1, 2, 3], # Mon-Wed
+        start_date: Date.current,
+        end_date: Date.current + 30.days,
+        status: :active)
+
+      weekend_pricing = build(:dynamic_pricing,
+        business: business,
+        days_of_week: [5, 6], # Fri-Sat
+        start_date: Date.current,
+        end_date: Date.current + 30.days,
+        status: :active)
+
+      expect(weekend_pricing).to be_valid
+    end
+
+    it "prevents overlapping if days_of_week overlap" do
+      create(:dynamic_pricing,
+        business: business,
+        days_of_week: [1, 2, 3],
+        start_date: Date.current,
+        end_date: Date.current + 30.days,
+        status: :active)
+
+      overlapping_days = build(:dynamic_pricing,
+        business: business,
+        days_of_week: [3, 4, 5], # Wednesday overlaps
+        start_date: Date.current,
+        end_date: Date.current + 30.days,
+        status: :active)
+
+      expect(overlapping_days).not_to be_valid
+      expect(overlapping_days.errors[:base]).to be_present
+    end
+  end
+
+  describe "validations edge cases" do
+    it "is valid when end_date equals start_date" do
+      dp = build(:dynamic_pricing, start_date: Date.current, end_date: Date.current)
+      expect(dp.errors[:end_date]).to be_empty
+    end
+
+    it "requires adjustment_end_value for progressive_desc" do
+      dp = build(:dynamic_pricing,
+        adjustment_mode: :progressive_desc,
+        adjustment_value: nil,
+        adjustment_start_value: 20,
+        adjustment_end_value: nil)
+      expect(dp).not_to be_valid
+      expect(dp.errors[:adjustment_end_value]).to be_present
+    end
+  end
+
+  describe "#effective_adjustment" do
+    let(:business) { create(:business) }
+
+    it "returns 0 for fixed_mode with nil adjustment_value" do
+      pricing = build(:dynamic_pricing, business: business, adjustment_mode: :fixed_mode, adjustment_value: nil)
+      # Bypass validation for unit test
+      expect(pricing.effective_adjustment(Date.current)).to eq(0)
+    end
+
+    it "returns start value when start_date == end_date for progressive" do
+      pricing = create(:dynamic_pricing, :progressive_asc,
+        business: business,
+        start_date: Date.current,
+        end_date: Date.current,
+        adjustment_start_value: 15,
+        adjustment_end_value: 30)
+
+      expect(pricing.effective_adjustment(Date.current)).to eq(15)
+    end
+  end
 end

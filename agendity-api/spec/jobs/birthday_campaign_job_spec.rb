@@ -104,6 +104,49 @@ RSpec.describe BirthdayCampaignJob do
       end
     end
 
+    context "when business plan has ai_features enabled" do
+      let(:ai_plan) { create(:plan, name: "Pro+", ai_features: true) }
+      let!(:business) do
+        create(:business, birthday_campaign_enabled: true, birthday_discount_pct: 10, birthday_discount_days_valid: 7)
+      end
+      let!(:subscription) do
+        create(:subscription, business: business, plan: ai_plan, status: :active)
+      end
+      let!(:employee) { create(:employee, business: business) }
+      let!(:customer) do
+        create(:customer, business: business, birth_date: Date.current - 25.years)
+      end
+
+      it "creates an in-app notification for the business owner" do
+        expect { described_class.perform_now }.to change(Notification, :count).by(1)
+
+        notification = Notification.last
+        expect(notification.title).to include(customer.name)
+        expect(notification.notification_type).to eq("birthday")
+      end
+
+      it "publishes a NATS birthday event" do
+        described_class.perform_now
+        expect(Realtime::NatsPublisher).to have_received(:publish).with(
+          hash_including(event: "birthday", business_id: business.id)
+        )
+      end
+    end
+
+    context "when customer has no email" do
+      let!(:business) do
+        create(:business, birthday_campaign_enabled: true, birthday_discount_pct: 10, birthday_discount_days_valid: 7)
+      end
+      let!(:employee) { create(:employee, business: business) }
+      let!(:customer) do
+        create(:customer, business: business, birth_date: Date.current - 25.years, email: nil)
+      end
+
+      it "does not generate a discount code (requires email)" do
+        expect { described_class.perform_now }.not_to change(DiscountCode, :count)
+      end
+    end
+
     context "when job is disabled" do
       before do
         allow(JobConfig).to receive(:enabled?).with("BirthdayCampaignJob").and_return(false)

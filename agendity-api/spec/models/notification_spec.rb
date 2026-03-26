@@ -17,7 +17,7 @@ RSpec.describe Notification, type: :model do
     end
 
     it "accepts valid notification types" do
-      %w[new_booking payment_submitted payment_approved booking_cancelled reminder ai_suggestion subscription_expiry].each do |type|
+      %w[new_booking payment_submitted payment_approved booking_cancelled reminder ai_suggestion subscription_expiry birthday].each do |type|
         notification = build(:notification, business: business, notification_type: type)
         expect(notification).to be_valid
       end
@@ -40,6 +40,37 @@ RSpec.describe Notification, type: :model do
         create_list(:notification, 3, business: business)
         expect(described_class.recent.first.created_at).to be >= described_class.recent.last.created_at
       end
+
+      it "limits to 20 notifications" do
+        create_list(:notification, 25, business: business)
+        expect(described_class.recent.count).to eq(20)
+      end
+    end
+  end
+
+  describe "validations edge cases" do
+    it "is invalid without a title" do
+      notification = build(:notification, business: business, title: nil)
+      expect(notification).not_to be_valid
+      expect(notification.errors[:title]).to be_present
+    end
+
+    it "is invalid without a notification_type" do
+      notification = build(:notification, business: business, notification_type: nil)
+      expect(notification).not_to be_valid
+      expect(notification.errors[:notification_type]).to be_present
+    end
+
+    it "is invalid with empty string notification_type" do
+      notification = build(:notification, business: business, notification_type: "")
+      expect(notification).not_to be_valid
+    end
+  end
+
+  describe "default values" do
+    it "is unread by default" do
+      notification = create(:notification, business: business)
+      expect(notification.read).to be false
     end
   end
 end

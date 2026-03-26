@@ -29,9 +29,290 @@ RSpec.describe Appointments::CreateAppointmentService do
       start_time: "08:00",
       end_time: "18:00"
     )
+
+    # Stub slot lock service
+    allow(Bookings::SlotLockService).to receive(:locked?).and_return(false)
+    allow(Bookings::SlotLockService).to receive(:unlock)
   end
 
   subject { described_class.call(business: business, params: base_params) }
+
+  describe "happy path" do
+    it "creates an appointment successfully" do
+      result = subject
+      expect(result).to be_success
+      appointment = result.data[:appointment]
+      expect(appointment).to be_persisted
+      expect(appointment.service).to eq(service)
+      expect(appointment.employee).to eq(employee)
+      expect(appointment.price).to eq(25_000)
+      expect(appointment.appointment_date).to eq(tomorrow)
+      expect(appointment.start_time.strftime("%H:%M")).to eq("10:00")
+      expect(appointment.end_time.strftime("%H:%M")).to eq("10:30")
+    end
+
+    it "creates a customer record" do
+      expect { subject }.to change(Customer, :count).by(1)
+      customer = Customer.last
+      expect(customer.name).to eq("Carlos Test")
+      expect(customer.phone).to eq("3001234567")
+      expect(customer.email).to eq("carlos@test.com")
+    end
+
+    it "finds existing customer by email" do
+      existing = create(:customer, business: business, email: "carlos@test.com", name: "Carlos Existing", phone: "3009999999")
+      expect { subject }.not_to change(Customer, :count)
+      appointment = subject.data[:appointment]
+      expect(appointment.customer).to eq(existing)
+    end
+
+    it "generates a ticket_code" do
+      result = subject
+      expect(result.data[:appointment].ticket_code).to be_present
+    end
+
+    it "creates an activity log" do
+      expect { subject }.to change(ActivityLog, :count).by(1)
+      log = ActivityLog.last
+      expect(log.action).to eq("booking_created")
+    end
+
+    it "sets status to pending_payment by default" do
+      result = subject
+      expect(result.data[:appointment].status).to eq("pending_payment")
+    end
+  end
+
+  describe "validation errors" do
+    context "when booking in the past" do
+      let(:base_params) do
+        {
+          service_id: service.id,
+          employee_id: employee.id,
+          appointment_date: Date.yesterday,
+          start_time: "10:00",
+          customer_name: "Carlos Test",
+          customer_phone: "3001234567"
+        }
+      end
+
+      it "returns failure with SLOT_IN_PAST code" do
+        result = subject
+        expect(result).to be_failure
+        expect(result.error_code).to eq("SLOT_IN_PAST")
+      end
+    end
+
+    context "when business is closed on that day" do
+      it "returns failure with BUSINESS_CLOSED code" do
+        # Sunday is closed in :with_hours trait
+        sunday = Date.tomorrow
+        sunday += 1.day until sunday.wday == 0
+        params = base_params.merge(appointment_date: sunday)
+        result = described_class.call(business: business, params: params)
+        expect(result).to be_failure
+        expect(result.error_code).to eq("BUSINESS_CLOSED")
+      end
+    end
+
+    context "when service does not exist" do
+      it "returns failure with SERVICE_NOT_FOUND code" do
+        params = base_params.merge(service_id: 0)
+        result = described_class.call(business: business, params: params)
+        expect(result).to be_failure
+        expect(result.error_code).to eq("SERVICE_NOT_FOUND")
+      end
+    end
+
+    context "when employee does not exist" do
+      it "returns failure with NO_EMPLOYEE_AVAILABLE code" do
+        params = base_params.merge(employee_id: 0)
+        result = described_class.call(business: business, params: params)
+        expect(result).to be_failure
+        expect(result.error_code).to eq("NO_EMPLOYEE_AVAILABLE")
+      end
+    end
+
+    context "when employee cannot perform the service" do
+      let(:other_employee) { create(:employee, business: business) }
+
+      before do
+        other_employee.employee_schedules.create!(
+          day_of_week: tomorrow.wday,
+          start_time: "08:00",
+          end_time: "18:00"
+        )
+      end
+
+      it "returns failure with EMPLOYEE_SERVICE_MISMATCH code" do
+        params = base_params.merge(employee_id: other_employee.id)
+        result = described_class.call(business: business, params: params)
+        expect(result).to be_failure
+        expect(result.error_code).to eq("EMPLOYEE_SERVICE_MISMATCH")
+      end
+    end
+
+    context "when slot is already taken" do
+      before do
+        create(:appointment,
+          business: business,
+          employee: employee,
+          appointment_date: tomorrow,
+          start_time: "10:00",
+          end_time: "10:30",
+          status: :confirmed)
+      end
+
+      it "returns failure with SLOT_TAKEN code" do
+        result = subject
+        expect(result).to be_failure
+        expect(result.error_code).to eq("SLOT_TAKEN")
+      end
+    end
+
+    context "when slot is blocked" do
+      before do
+        create(:blocked_slot,
+          business: business,
+          employee: employee,
+          date: tomorrow,
+          start_time: "09:30",
+          end_time: "10:30")
+      end
+
+      it "returns failure with SLOT_BLOCKED code" do
+        result = subject
+        expect(result).to be_failure
+        expect(result.error_code).to eq("SLOT_BLOCKED")
+      end
+    end
+  end
+
+  describe "auto-assign employee" do
+    let(:base_params) do
+      {
+        service_id: service.id,
+        employee_id: nil,
+        appointment_date: tomorrow,
+        start_time: "10:00",
+        customer_name: "Carlos Test",
+        customer_phone: "3001234567"
+      }
+    end
+
+    it "assigns an available employee when employee_id is blank" do
+      result = subject
+      expect(result).to be_success
+      expect(result.data[:appointment].employee).to eq(employee)
+    end
+
+    context "when no employees are available" do
+      before do
+        create(:appointment,
+          business: business,
+          employee: employee,
+          appointment_date: tomorrow,
+          start_time: "10:00",
+          end_time: "10:30",
+          status: :confirmed)
+      end
+
+      it "returns failure with NO_EMPLOYEE_AVAILABLE code" do
+        result = subject
+        expect(result).to be_failure
+        expect(result.error_code).to eq("NO_EMPLOYEE_AVAILABLE")
+      end
+    end
+  end
+
+  describe "penalty from previous cancellations" do
+    let(:customer) { create(:customer, business: business, email: "carlos@test.com", pending_penalty: 5_000) }
+
+    before { customer } # ensure customer exists before the service runs
+
+    it "adds pending penalty to the price and resets it" do
+      result = subject
+      expect(result).to be_success
+      expect(result.data[:appointment].price).to eq(30_000) # 25,000 + 5,000 penalty
+      expect(result.data[:penalty_applied]).to eq(5_000)
+      expect(customer.reload.pending_penalty).to eq(0)
+    end
+  end
+
+  describe "discount codes" do
+    let!(:discount) do
+      create(:discount_code,
+        business: business,
+        code: "SAVE10",
+        discount_type: "percentage",
+        discount_value: 10,
+        active: true)
+    end
+
+    it "applies a valid discount code" do
+      params = base_params.merge(discount_code: "SAVE10")
+      result = described_class.call(business: business, params: params)
+      expect(result).to be_success
+      appointment = result.data[:appointment]
+      expect(appointment.discount_code_id).to eq(discount.id)
+      expect(appointment.discount_amount).to be > 0
+    end
+
+    it "ignores an invalid discount code" do
+      params = base_params.merge(discount_code: "INVALID")
+      result = described_class.call(business: business, params: params)
+      expect(result).to be_success
+      appointment = result.data[:appointment]
+      expect(appointment.discount_code_id).to be_nil
+      expect(appointment.discount_amount).to eq(0)
+    end
+  end
+
+  describe "credits" do
+    let(:customer) { create(:customer, business: business, email: "carlos@test.com") }
+
+    before do
+      customer
+      business.update!(credits_enabled: true)
+      CreditAccount.create!(customer: customer, business: business, balance: 50_000)
+    end
+
+    it "applies credits when requested" do
+      params = base_params.merge(apply_credits: "10000")
+      result = described_class.call(business: business, params: params)
+      expect(result).to be_success
+      appointment = result.data[:appointment]
+      expect(appointment.credits_applied).to eq(10_000)
+      expect(appointment.price).to eq(15_000) # 25,000 - 10,000
+    end
+
+    it "auto-confirms when credits cover full price" do
+      params = base_params.merge(apply_credits: "25000")
+      result = described_class.call(business: business, params: params)
+      expect(result).to be_success
+      appointment = result.data[:appointment]
+      expect(appointment.status).to eq("confirmed")
+      expect(appointment.credits_applied).to eq(25_000)
+      expect(appointment.price).to eq(0)
+    end
+
+    it "does not apply more credits than the balance" do
+      params = base_params.merge(apply_credits: "999999")
+      result = described_class.call(business: business, params: params)
+      expect(result).to be_success
+      appointment = result.data[:appointment]
+      # Should cap at min(999999, 50000 balance, 25000 price) = 25,000
+      expect(appointment.credits_applied).to eq(25_000)
+    end
+
+    it "does not apply credits when business has credits_enabled false" do
+      business.update!(credits_enabled: false)
+      params = base_params.merge(apply_credits: "10000")
+      result = described_class.call(business: business, params: params)
+      expect(result).to be_success
+      expect(result.data[:appointment].credits_applied).to eq(0)
+    end
+  end
 
   describe "dynamic pricing" do
     context "when an active pricing exists for the date" do

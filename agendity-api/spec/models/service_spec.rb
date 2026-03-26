@@ -15,4 +15,59 @@ RSpec.describe Service, type: :model do
     it { should have_many(:employees).through(:employee_services) }
     it { should have_many(:appointments).dependent(:restrict_with_error) }
   end
+
+  describe "scopes" do
+    describe ".active" do
+      it "returns only active services" do
+        business = create(:business)
+        active_svc = create(:service, business: business, active: true)
+        inactive_svc = create(:service, business: business, active: false)
+
+        expect(described_class.active).to include(active_svc)
+        expect(described_class.active).not_to include(inactive_svc)
+      end
+    end
+
+    describe ".for_business" do
+      it "returns services for the given business" do
+        business = create(:business)
+        svc = create(:service, business: business)
+        other = create(:service) # different business
+
+        expect(described_class.for_business(business.id)).to include(svc)
+        expect(described_class.for_business(business.id)).not_to include(other)
+      end
+    end
+  end
+
+  describe "validations edge cases" do
+    it "is invalid with negative price" do
+      svc = build(:service, price: -1)
+      expect(svc).not_to be_valid
+      expect(svc.errors[:price]).to be_present
+    end
+
+    it "is valid with zero price" do
+      svc = build(:service, price: 0)
+      expect(svc).to be_valid
+    end
+
+    it "is invalid with zero duration_minutes" do
+      svc = build(:service, duration_minutes: 0)
+      expect(svc).not_to be_valid
+      expect(svc.errors[:duration_minutes]).to be_present
+    end
+
+    it "is invalid with negative duration_minutes" do
+      svc = build(:service, duration_minutes: -5)
+      expect(svc).not_to be_valid
+      expect(svc.errors[:duration_minutes]).to be_present
+    end
+
+    it "is invalid without a name" do
+      svc = build(:service, name: nil)
+      expect(svc).not_to be_valid
+      expect(svc.errors[:name]).to be_present
+    end
+  end
 end

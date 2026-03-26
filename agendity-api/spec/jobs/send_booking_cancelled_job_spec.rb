@@ -46,5 +46,57 @@ RSpec.describe SendBookingCancelledJob, type: :job do
     it "creates an activity log" do
       expect { described_class.perform_now(appointment.id) }.to change(ActivityLog, :count).by(1)
     end
+
+    context "when cancelled_by is 'business'" do
+      before do
+        appointment.update_columns(cancelled_by: "business")
+      end
+
+      it "creates notification with business cancellation body" do
+        described_class.perform_now(appointment.id)
+        notification = Notification.last
+        expect(notification.body).to include(business.name)
+      end
+    end
+
+    context "when cancelled_by is 'customer' with a reason" do
+      before do
+        appointment.update_columns(cancelled_by: "customer", cancellation_reason: "No puedo asistir")
+      end
+
+      it "creates notification with customer cancellation reason" do
+        described_class.perform_now(appointment.id)
+        notification = Notification.last
+        expect(notification.body).to include("No puedo asistir")
+      end
+    end
+
+    context "when cancelled_by is 'customer' without a reason" do
+      before do
+        appointment.update_columns(cancelled_by: "customer", cancellation_reason: nil)
+      end
+
+      it "creates notification without a reason suffix" do
+        described_class.perform_now(appointment.id)
+        notification = Notification.last
+        expect(notification.body).to include("El cliente canceló")
+      end
+    end
+
+    context "when cancelled_by is nil and no cancellation_reason" do
+      before do
+        appointment.update_columns(cancelled_by: nil, cancellation_reason: nil)
+      end
+
+      it "creates notification with default 'Cancelada' body" do
+        described_class.perform_now(appointment.id)
+        notification = Notification.last
+        expect(notification.body).to eq("Cancelada")
+      end
+    end
+
+    it "raises ActiveRecord::RecordNotFound for non-existent appointment" do
+      expect { described_class.perform_now(-1) }.to raise_error(ActiveRecord::RecordNotFound)
+    end
   end
 end

@@ -104,4 +104,37 @@ RSpec.describe Credits::AdjustService do
       expect(tx.description).to eq("Ajuste manual")
     end
   end
+
+  describe "email notification" do
+    let(:amount) { 5_000 }
+
+    context "when customer has an email and adjustment is positive" do
+      before { customer.update!(email: "cliente@test.com") }
+
+      it "sends a credits_adjusted email" do
+        expect { subject }.to have_enqueued_mail(CustomerMailer, :credits_adjusted)
+      end
+    end
+
+    context "when adjustment is negative" do
+      let(:amount) { -1_000 }
+
+      before do
+        customer.update!(email: "cliente@test.com")
+        CreditAccount.create!(customer: customer, business: business, balance: 10_000)
+      end
+
+      it "does not send an email" do
+        expect { subject }.not_to have_enqueued_mail(CustomerMailer, :credits_adjusted)
+      end
+    end
+
+    context "when customer has no email" do
+      before { customer.update!(email: nil) }
+
+      it "does not send an email" do
+        expect { subject }.not_to have_enqueued_mail(CustomerMailer, :credits_adjusted)
+      end
+    end
+  end
 end

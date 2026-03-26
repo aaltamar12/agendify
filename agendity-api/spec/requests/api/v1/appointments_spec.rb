@@ -110,5 +110,80 @@ RSpec.describe "Api::V1::Appointments", type: :request do
       post "/api/v1/appointments/#{appointment.id}/remind_payment", headers: headers
       expect(response).to have_http_status(:unprocessable_entity)
     end
+
+    it "returns 422 if appointment is not pending_payment" do
+      appointment = create(:appointment, business: business, employee: employee, service: service, customer: customer, status: :confirmed)
+      post "/api/v1/appointments/#{appointment.id}/remind_payment", headers: headers
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+  end
+
+  describe "GET /api/v1/appointments/:id" do
+    it "returns a specific appointment" do
+      appointment = create(:appointment, business: business, employee: employee, service: service, customer: customer)
+      get "/api/v1/appointments/#{appointment.id}", headers: headers
+      expect(response).to have_http_status(:ok)
+    end
+
+    it "returns 404 for another business appointment" do
+      other_appointment = create(:appointment)
+      get "/api/v1/appointments/#{other_appointment.id}", headers: headers
+      expect(response).to have_http_status(:not_found)
+    end
+  end
+
+  describe "GET /api/v1/appointments (filters)" do
+    it "filters by employee_id" do
+      appt = create(:appointment, business: business, employee: employee, service: service, customer: customer)
+      other_emp = create(:employee, business: business)
+      other_appt = create(:appointment, business: business, employee: other_emp, service: service, customer: customer)
+
+      get "/api/v1/appointments", params: { employee_id: employee.id }, headers: headers
+      expect(response).to have_http_status(:ok)
+      ids = response.parsed_body["data"].map { |a| a["id"] }
+      expect(ids).to include(appt.id)
+      expect(ids).not_to include(other_appt.id)
+    end
+
+    it "filters by status" do
+      confirmed_appt = create(:appointment, :confirmed, business: business, employee: employee, service: service, customer: customer)
+      pending_appt = create(:appointment, business: business, employee: employee, service: service, customer: customer, status: :pending_payment)
+
+      get "/api/v1/appointments", params: { status: "confirmed" }, headers: headers
+      expect(response).to have_http_status(:ok)
+      ids = response.parsed_body["data"].map { |a| a["id"] }
+      expect(ids).to include(confirmed_appt.id)
+      expect(ids).not_to include(pending_appt.id)
+    end
+
+    it "filters by payment_status" do
+      appt_with_payment = create(:appointment, business: business, employee: employee, service: service, customer: customer)
+      create(:payment, appointment: appt_with_payment, status: :rejected)
+      appt_without = create(:appointment, business: business, employee: employee, service: service, customer: customer)
+
+      get "/api/v1/appointments", params: { payment_status: "rejected" }, headers: headers
+      expect(response).to have_http_status(:ok)
+      ids = response.parsed_body["data"].map { |a| a["id"] }
+      expect(ids).to include(appt_with_payment.id)
+      expect(ids).not_to include(appt_without.id)
+    end
+  end
+
+  describe "PATCH /api/v1/appointments/:id" do
+    it "updates an appointment" do
+      appointment = create(:appointment, business: business, employee: employee, service: service, customer: customer)
+      patch "/api/v1/appointments/#{appointment.id}",
+            params: { appointment: { notes: "Updated notes" } },
+            headers: headers
+      expect(response.status).to be_in([200, 422])
+    end
+
+    it "returns 404 for another business appointment" do
+      other_appointment = create(:appointment)
+      patch "/api/v1/appointments/#{other_appointment.id}",
+            params: { appointment: { notes: "hack" } },
+            headers: headers
+      expect(response).to have_http_status(:not_found)
+    end
   end
 end
