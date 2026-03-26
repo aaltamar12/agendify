@@ -30,6 +30,23 @@ RSpec.describe Business, type: :model do
     it { should have_many(:subscriptions).dependent(:destroy) }
   end
 
+  describe "encrypted attributes" do
+    let(:business) { create(:business, breb_key: "ABC123DEF456") }
+
+    it "encrypts breb_key" do
+      # Reading back should return the original value (transparent decryption)
+      expect(business.reload.breb_key).to eq("ABC123DEF456")
+    end
+
+    it "stores breb_key encrypted in the database" do
+      business.reload
+      raw = Business.connection.select_value(
+        "SELECT breb_key FROM businesses WHERE id = #{business.id}"
+      )
+      expect(raw).not_to eq("ABC123DEF456")
+    end
+  end
+
   describe "PlanEnforcement" do
     let(:business) { create(:business) }
 

@@ -118,16 +118,16 @@ Disponible desde ActiveAdmin > Subscriptions > "Renovar suscripcion"
 
 ### Contexto
 
-El trial dura **7 dias**. Al registrarse, `Business#trial_ends_at` se fija en `7.days.from_now`. Cuando el trial termina, el negocio debe elegir un plan y subir comprobante de pago para continuar.
+El trial dura **25 dias**. Al registrarse, `Business#trial_ends_at` se fija en `25.days.from_now`. Cuando el trial termina, el negocio debe elegir un plan y subir comprobante de pago para continuar.
 
 ### Flujo de alertas
 
 | Stage | Momento | Canales | Accion |
 |-------|---------|---------|--------|
-| 1 | 2 dias antes del fin del trial | Email + In-app + WhatsApp* | Aviso: "Tu trial termina en 2 dias, elige tu plan" |
+| 1 | 5 dias antes del fin del trial | Email + In-app + WhatsApp* | Aviso: "Tu trial termina en 5 dias, elige tu plan" |
 | 2 | Dia que termina el trial | Email + In-app + WhatsApp* | `trial_ended_thank_you` + enlace a elegir plan |
 | 3 | Dia +2 despues del fin del trial | Email + In-app + WhatsApp* | **Negocio suspendido** (`suspended`) |
-| 4 | Dia +7 despues del fin del trial | — | **Negocio desactivado** (`inactive`) — dashboard bloqueado total |
+| 4 | Dia +10 despues del fin del trial | — | **Negocio desactivado** (`inactive`) — dashboard bloqueado total |
 
 *WhatsApp solo si el plan del trial lo incluye.
 
@@ -135,7 +135,7 @@ El trial dura **7 dias**. Al registrarse, `Business#trial_ends_at` se fija en `7
 
 Campo `trial_alert_stage` en `businesses`:
 - `0` = ninguna alerta enviada
-- `1` = alerta de 2 dias antes enviada
+- `1` = alerta de 5 dias antes enviada
 - `2` = alerta del dia de fin enviada
 - `3` = alerta final + negocio suspendido (`suspended`)
 - `4` = negocio desactivado (`inactive`) — dashboard bloqueado total
@@ -151,8 +151,8 @@ class TrialExpiryAlertJob < ApplicationJob
   queue_as :default
 
   def perform
-    # Stage 1: 2 dias antes
-    Business.trial_expiring_in(2).where(trial_alert_stage: 0)
+    # Stage 1: 5 dias antes
+    Business.trial_expiring_in(5).where(trial_alert_stage: 0)
       .includes(:owner, :subscriptions).find_each { |b| send_alert(b, stage: 1) }
 
     # Stage 2: Dia que termina el trial
@@ -166,8 +166,8 @@ class TrialExpiryAlertJob < ApplicationJob
         suspend_business!(b)          # business.suspended!
       end
 
-    # Stage 4: 7 dias despues (desactivar — bloqueo total)
-    Business.trial_expired_since(7).where(trial_alert_stage: 3)
+    # Stage 4: 10 dias despues (desactivar — bloqueo total)
+    Business.trial_expired_since(10).where(trial_alert_stage: 3)
       .includes(:owner, :subscriptions).find_each do |b|
         deactivate_business!(b)       # business.update!(trial_alert_stage: 4) + business.inactive!
       end
@@ -183,7 +183,7 @@ def deactivate_business!(business)
 
   AdminNotification.notify!(
     title: "Negocio desactivado por trial vencido",
-    body: "#{business.name} fue desactivado (7 dias sin suscribirse)",
+    body: "#{business.name} fue desactivado (10 dias sin suscribirse)",
     notification_type: "business_deactivated",
     link: "/admin/businesses/#{business.id}"
   )
@@ -191,7 +191,7 @@ def deactivate_business!(business)
   ActivityLog.log(
     business: business,
     action: "business_deactivated",
-    description: "Negocio desactivado por trial vencido (7 dias sin suscribirse)",
+    description: "Negocio desactivado por trial vencido (10 dias sin suscribirse)",
     actor_type: "system",
     resource: business
   )
@@ -340,7 +340,7 @@ if Sidekiq.server?
       "class" => "TrialExpiryAlertJob",
       "cron"  => "0 8 * * *",    # Daily at 8:00 AM
       "queue" => "default",
-      "description" => "Alertas de trial (2d antes, dia de, +2d suspension, +7d inactivar)"
+      "description" => "Alertas de trial (5d antes, dia de, +2d suspension, +10d inactivar)"
     },
     "subscription_expiry_alerts" => {
       "class" => "SubscriptionExpiryAlertJob",

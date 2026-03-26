@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { MapPin, Upload, Loader2, Bell, Volume2, VolumeX, Clock, Coffee, Timer, Image, Search, X } from 'lucide-react';
+import { MapPin, Upload, Loader2, Bell, Volume2, VolumeX, Clock, Coffee, Timer, Image, Search, X, Camera } from 'lucide-react';
 import { Button, Card, Input, Textarea, Select, Skeleton } from '@/components/ui';
 import { MapEmbed } from '@/components/shared/map-embed';
 import { LocationPicker } from '@/components/shared/location-picker';
@@ -52,6 +52,7 @@ const paymentSchema = z.object({
   nequi_phone: z.string().optional(),
   daviplata_phone: z.string().optional(),
   bancolombia_account: z.string().optional(),
+  breb_key: z.string().optional(),
 });
 
 type PaymentFormData = z.infer<typeof paymentSchema>;
@@ -93,7 +94,7 @@ export default function SettingsPage() {
       <h1 className="mb-6 text-2xl font-bold text-gray-900">Configuración</h1>
 
       <div className="space-y-6">
-        {/* Logo upload */}
+        {/* Logo / Profile photo upload */}
         {loadingBusiness ? (
           <Skeleton className="h-40 w-full" />
         ) : (
@@ -101,12 +102,13 @@ export default function SettingsPage() {
             <LogoSection
               logoUrl={business.logo_url}
               businessName={business.name}
+              isIndependent={!!business.independent}
               onUpload={async (file) => {
                 try {
                   await uploadLogo.mutateAsync(file);
-                  addToast({ type: 'success', message: 'Logo actualizado' });
+                  addToast({ type: 'success', message: business.independent ? 'Foto de perfil actualizada' : 'Logo actualizado' });
                 } catch {
-                  addToast({ type: 'error', message: 'Error al subir el logo' });
+                  addToast({ type: 'error', message: business.independent ? 'Error al subir la foto de perfil' : 'Error al subir el logo' });
                 }
               }}
               loading={uploadLogo.isPending}
@@ -114,32 +116,34 @@ export default function SettingsPage() {
           )
         )}
 
-        {/* Cover image */}
-        {loadingBusiness ? (
-          <Skeleton className="h-48 w-full" />
-        ) : business && (
-          <CoverSection
-            coverUrl={business.cover_url}
-            coverSource={business.cover_source}
-            businessType={business.business_type}
-            onUpload={async (file) => {
-              try {
-                await uploadCover.mutateAsync(file);
-                addToast({ type: 'success', message: 'Portada actualizada' });
-              } catch {
-                addToast({ type: 'error', message: 'Error al subir la portada' });
-              }
-            }}
-            onSelectFromGallery={async (url) => {
-              try {
-                await selectCover.mutateAsync(url);
-                addToast({ type: 'success', message: 'Portada seleccionada' });
-              } catch {
-                addToast({ type: 'error', message: 'Error al seleccionar la portada' });
-              }
-            }}
-            loading={uploadCover.isPending || selectCover.isPending}
-          />
+        {/* Cover image — hidden for independent professionals */}
+        {!business?.independent && (
+          loadingBusiness ? (
+            <Skeleton className="h-48 w-full" />
+          ) : business && (
+            <CoverSection
+              coverUrl={business.cover_url}
+              coverSource={business.cover_source}
+              businessType={business.business_type}
+              onUpload={async (file) => {
+                try {
+                  await uploadCover.mutateAsync(file);
+                  addToast({ type: 'success', message: 'Portada actualizada' });
+                } catch {
+                  addToast({ type: 'error', message: 'Error al subir la portada' });
+                }
+              }}
+              onSelectFromGallery={async (url) => {
+                try {
+                  await selectCover.mutateAsync(url);
+                  addToast({ type: 'success', message: 'Portada seleccionada' });
+                } catch {
+                  addToast({ type: 'error', message: 'Error al seleccionar la portada' });
+                }
+              }}
+              loading={uploadCover.isPending || selectCover.isPending}
+            />
+          )
         )}
 
         {/* Business Profile */}
@@ -308,11 +312,13 @@ export default function SettingsPage() {
 function LogoSection({
   logoUrl,
   businessName,
+  isIndependent,
   onUpload,
   loading,
 }: {
   logoUrl: string | null;
   businessName: string;
+  isIndependent: boolean;
   onUpload: (file: File) => Promise<void>;
   loading: boolean;
 }) {
@@ -340,6 +346,75 @@ function LogoSection({
     }
   };
 
+  // Independent professional: circular profile photo layout
+  if (isIndependent) {
+    return (
+      <Card>
+        <h2 className="text-lg font-semibold text-gray-900">Foto de perfil</h2>
+        <p className="mt-1 text-sm text-gray-500">Esta foto se muestra en tu página de reservas</p>
+        <div className="mt-4 flex items-center gap-4">
+          {/* Circular photo preview */}
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="group relative h-24 w-24 shrink-0 overflow-hidden rounded-full border-2 border-gray-200 hover:border-violet-400 transition-colors"
+            disabled={loading}
+          >
+            {logoUrl ? (
+              <img
+                src={logoUrl}
+                alt={businessName}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-gray-100 text-gray-400 group-hover:text-violet-500">
+                <Camera className="h-8 w-8" />
+              </div>
+            )}
+
+            {/* Overlay on hover */}
+            {!loading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
+                <Camera className="h-5 w-5 text-white" />
+              </div>
+            )}
+
+            {/* Loading spinner */}
+            {loading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full">
+                <Loader2 className="h-5 w-5 animate-spin text-white" />
+              </div>
+            )}
+          </button>
+
+          <div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => fileInputRef.current?.click()}
+              loading={loading}
+            >
+              Cambiar foto
+            </Button>
+            <p className="mt-1.5 text-xs text-gray-500">
+              JPG, PNG o WebP. Máximo {MAX_FILE_SIZE_MB}MB.
+            </p>
+          </div>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            className="hidden"
+          />
+        </div>
+      </Card>
+    );
+  }
+
+  // Establishment: standard logo layout
   return (
     <Card>
       <h2 className="mb-4 text-lg font-semibold text-gray-900">Logo</h2>
@@ -1091,6 +1166,7 @@ function PaymentSection({
     nequi_phone: string | null;
     daviplata_phone: string | null;
     bancolombia_account: string | null;
+    breb_key: string | null;
   };
   onSave: (data: PaymentFormData) => Promise<void>;
   loading: boolean;
@@ -1105,6 +1181,7 @@ function PaymentSection({
       nequi_phone: business.nequi_phone ?? '',
       daviplata_phone: business.daviplata_phone ?? '',
       bancolombia_account: business.bancolombia_account ?? '',
+      breb_key: business.breb_key ?? '',
     },
   });
 
@@ -1126,6 +1203,11 @@ function PaymentSection({
           label="Cuenta Bancolombia"
           placeholder="Número de cuenta"
           {...register('bancolombia_account')}
+        />
+        <Input
+          label="Llave Bre-B"
+          placeholder="Ej: ABC123DEF456"
+          {...register('breb_key')}
         />
         <div className="flex justify-end">
           <Button type="submit" loading={loading}>

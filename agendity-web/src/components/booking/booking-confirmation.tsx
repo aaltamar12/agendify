@@ -71,7 +71,7 @@ export function BookingConfirmation({
   const activeBusiness = bookedBusiness ?? business;
 
   const hasPaymentMethods =
-    activeBusiness.nequi_phone || activeBusiness.daviplata_phone || activeBusiness.bancolombia_account;
+    activeBusiness.nequi_phone || activeBusiness.daviplata_phone || activeBusiness.bancolombia_account || activeBusiness.breb_key;
 
   function handleCopy(text: string, field: string) {
     navigator.clipboard.writeText(text);
@@ -338,6 +338,29 @@ export function BookingConfirmation({
                   </button>
                 </div>
               )}
+              {activeBusiness.breb_key && (
+                <div className="flex items-center justify-between rounded-lg bg-white px-3 py-2 border border-violet-100">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-xs font-bold text-white">BB</div>
+                    <div>
+                      <p className="text-xs text-gray-500">Bre-B</p>
+                      <p className="text-sm font-medium text-gray-900">
+                        {activeBusiness.breb_key}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleCopy(activeBusiness.breb_key!, 'breb-confirm')}
+                    className="rounded-lg p-2 text-violet-400 hover:bg-violet-100 transition-colors"
+                  >
+                    {copiedField === 'breb-confirm' ? (
+                      <Check className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+              )}
             </div>
             <p className="mt-3 text-xs text-violet-600 text-center">
               Sube tu comprobante desde la página del ticket para confirmar tu cita
@@ -569,7 +592,8 @@ export function BookingConfirmation({
       {/* Payment instructions */}
       {(business.nequi_phone ||
         business.daviplata_phone ||
-        business.bancolombia_account) && (
+        business.bancolombia_account ||
+        business.breb_key) && (
         <Card className="bg-violet-50 border-violet-200">
           <h3 className="font-medium text-violet-900">
             Instrucciones de pago
@@ -594,6 +618,12 @@ export function BookingConfirmation({
               <li>
                 <span className="font-medium">Bancolombia:</span>{' '}
                 {business.bancolombia_account}
+              </li>
+            )}
+            {business.breb_key && (
+              <li>
+                <span className="font-medium">Bre-B:</span>{' '}
+                {business.breb_key}
               </li>
             )}
           </ul>

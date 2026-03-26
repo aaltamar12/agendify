@@ -29,7 +29,7 @@ module Auth
 
         AdminNotification.notify!(
           title: "Nuevo negocio registrado",
-          body: "#{business.name} (#{user.email}) — Trial 7 dias",
+          body: "#{business.name} (#{user.email}) — Trial 25 dias",
           notification_type: "new_business",
           link: "/admin/businesses/#{business.id}",
           icon: "🆕"
@@ -60,7 +60,7 @@ module Auth
         name:           @business_name.presence || "#{@name}'s Business",
         business_type:  @business_type,
         status:         :active,
-        trial_ends_at:  7.days.from_now,
+        trial_ends_at:  25.days.from_now,
         cancellation_policy_pct:     0,
         cancellation_deadline_hours: 0,
         rating_average:              0

@@ -57,6 +57,7 @@ export const paymentMethodsSchema = z.object({
   nequi_phone: z.string().optional(),
   daviplata_phone: z.string().optional(),
   bancolombia_account: z.string().optional(),
+  breb_key: z.string().optional(),
 });
 
 export const cancellationPolicySchema = z.object({

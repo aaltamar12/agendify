@@ -31,7 +31,7 @@ RSpec.describe Auth::RegisterService do
         expect(user.role).to eq("owner")
       end
 
-      it "creates a Business with trial_ends_at = 7 days from now" do
+      it "creates a Business with trial_ends_at = 25 days from now" do
         freeze_time do
           result = subject
           business = Business.last
@@ -39,7 +39,7 @@ RSpec.describe Auth::RegisterService do
           expect(business.name).to eq("Barberia Elite")
           expect(business.business_type).to eq("barbershop")
           expect(business.status).to eq("active")
-          expect(business.trial_ends_at).to be_within(1.second).of(7.days.from_now)
+          expect(business.trial_ends_at).to be_within(1.second).of(25.days.from_now)
         end
       end
 

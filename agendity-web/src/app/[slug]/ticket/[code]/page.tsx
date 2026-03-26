@@ -177,7 +177,7 @@ export default function TicketPage() {
   const status: AppointmentStatus = appointment.status;
 
   const hasPaymentMethods =
-    business.nequi_phone || business.daviplata_phone || business.bancolombia_account;
+    business.nequi_phone || business.daviplata_phone || business.bancolombia_account || business.breb_key;
 
   // Check if the appointment can be cancelled by the customer
   const canCancel =
@@ -249,6 +249,24 @@ export default function TicketPage() {
                   className="cursor-pointer rounded-lg p-2 text-gray-400 hover:bg-gray-700 hover:text-white transition-colors"
                 >
                   {copiedField === 'bancolombia' ? (
+                    <Check className="h-4 w-4 text-green-400" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
+            )}
+            {business.breb_key && (
+              <div className="flex items-center justify-between rounded-lg bg-gray-800/50 px-3 py-2">
+                <div>
+                  <p className="text-xs text-gray-500">Bre-B</p>
+                  <p className="text-sm font-medium text-white">{business.breb_key}</p>
+                </div>
+                <button
+                  onClick={() => handleCopy(business.breb_key!, 'breb')}
+                  className="cursor-pointer rounded-lg p-2 text-gray-400 hover:bg-gray-700 hover:text-white transition-colors"
+                >
+                  {copiedField === 'breb' ? (
                     <Check className="h-4 w-4 text-green-400" />
                   ) : (
                     <Copy className="h-4 w-4" />

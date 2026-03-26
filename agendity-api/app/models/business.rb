@@ -17,6 +17,7 @@ class Business < ApplicationRecord
   encrypts :nequi_phone, deterministic: true
   encrypts :daviplata_phone, deterministic: true
   encrypts :bancolombia_account, deterministic: true
+  encrypts :breb_key, deterministic: true
 
   # -- Enums --
   enum :business_type, { barbershop: 0, salon: 1, spa: 2, nails: 3, other: 4, estetica: 5, consultorio: 6 }

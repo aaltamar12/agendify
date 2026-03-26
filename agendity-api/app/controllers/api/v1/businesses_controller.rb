@@ -108,7 +108,7 @@ module Api
           :address, :city, :state, :country, :latitude, :longitude,
           :logo_url, :cover_url, :instagram_url, :facebook_url, :website_url,
           :google_maps_url, :timezone, :currency,
-          :nequi_phone, :daviplata_phone, :bancolombia_account,
+          :nequi_phone, :daviplata_phone, :bancolombia_account, :breb_key,
           :primary_color, :secondary_color,
           :cancellation_policy_pct, :cancellation_deadline_hours,
           :lunch_start_time, :lunch_end_time, :lunch_enabled,

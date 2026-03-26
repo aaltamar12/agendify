@@ -156,6 +156,7 @@ barberia_elite = Business.find_or_create_by!(slug: "barberia-elite") do |b|
   b.nequi_phone = "+573001234567"
   b.daviplata_phone = "+573001234567"
   b.bancolombia_account = "12345678901"
+  b.breb_key = "ABC123DEF456"
   b.cancellation_policy_pct = 50
   b.cancellation_deadline_hours = 24
   b.trial_ends_at = 30.days.from_now

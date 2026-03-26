@@ -64,6 +64,13 @@ export function StepPaymentMethods({
         {...register('bancolombia_account')}
       />
 
+      <Input
+        label="Llave Bre-B"
+        placeholder="Ej: ABC123DEF456"
+        error={errors.breb_key?.message}
+        {...register('breb_key')}
+      />
+
       {mutation.isError && (
         <p className="text-sm text-red-600">
           Error al guardar. Intenta de nuevo.

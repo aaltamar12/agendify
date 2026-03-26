@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
-# Sends trial expiry alerts at three stages:
-#   Stage 1: 2 days before trial ends — reminder to subscribe
+# Sends trial expiry alerts at four stages:
+#   Stage 1: 5 days before trial ends — reminder to subscribe
 #   Stage 2: Day trial ends — thank you + plans info
 #   Stage 3: 2 days after trial ends — suspend business
+#   Stage 4: 10 days after trial ends — deactivate business
 #
 # Uses trial_alert_stage on business to avoid duplicate sends.
 # Skips businesses that already have an active subscription.
@@ -16,8 +17,8 @@ class TrialExpiryAlertJob < ApplicationJob
 
     counts = { stage_1: 0, stage_2: 0, stage_3: 0 }
 
-    # Stage 1: 2 days before trial ends
-    Business.trial_expiring_in(2).where(trial_alert_stage: 0)
+    # Stage 1: 5 days before trial ends
+    Business.trial_expiring_in(5).where(trial_alert_stage: 0)
       .includes(:owner, :subscriptions).find_each do |business|
       next if has_active_subscription?(business)
 
@@ -44,8 +45,8 @@ class TrialExpiryAlertJob < ApplicationJob
       counts[:stage_3] += 1
     end
 
-    # Stage 4: 7 days after trial ends — deactivate (full block)
-    Business.trial_expired_since(7).where(trial_alert_stage: 3)
+    # Stage 4: 10 days after trial ends — deactivate (full block)
+    Business.trial_expired_since(10).where(trial_alert_stage: 3)
       .includes(:owner, :subscriptions).find_each do |business|
       next if has_active_subscription?(business)
 
@@ -54,7 +55,7 @@ class TrialExpiryAlertJob < ApplicationJob
     end
 
     record_success!(
-      "Alerts sent — 2-day-before: #{counts[:stage_1]}, trial-end: #{counts[:stage_2]}, suspended: #{counts[:stage_3]}, deactivated: #{counts[:stage_4] || 0}"
+      "Alerts sent — 5-day-before: #{counts[:stage_1]}, trial-end: #{counts[:stage_2]}, suspended: #{counts[:stage_3]}, deactivated: #{counts[:stage_4] || 0}"
     )
   rescue StandardError => e
     record_error!(e.message)
@@ -150,7 +151,7 @@ class TrialExpiryAlertJob < ApplicationJob
 
     AdminNotification.notify!(
       title: "Negocio desactivado por trial vencido",
-      body: "#{business.name} fue desactivado (7 dias sin suscribirse)",
+      body: "#{business.name} fue desactivado (10 dias sin suscribirse)",
       notification_type: "business_deactivated",
       link: "/admin/businesses/#{business.id}",
       icon: "⛔"
@@ -159,7 +160,7 @@ class TrialExpiryAlertJob < ApplicationJob
     ActivityLog.log(
       business: business,
       action: "business_deactivated",
-      description: "Negocio desactivado por trial vencido (7 dias sin suscribirse)",
+      description: "Negocio desactivado por trial vencido (10 dias sin suscribirse)",
       actor_type: "system",
       resource: business
     )
@@ -167,7 +168,7 @@ class TrialExpiryAlertJob < ApplicationJob
 
   def alert_title(stage)
     case stage
-    when 1 then "Tu periodo de prueba termina en 2 dias"
+    when 1 then "Tu periodo de prueba termina en 5 dias"
     when 2 then "Tu periodo de prueba termina hoy"
     when 3 then "Tu cuenta ha sido suspendida"
     end
@@ -188,7 +189,7 @@ class TrialExpiryAlertJob < ApplicationJob
 
   def alert_log_description(business, stage)
     case stage
-    when 1 then "Alerta de trial enviada (2 dias antes) — #{business.name}"
+    when 1 then "Alerta de trial enviada (5 dias antes) — #{business.name}"
     when 2 then "Alerta de trial enviada (dia de vencimiento) — #{business.name}"
     when 3 then "Alerta final enviada + negocio suspendido — #{business.name}"
     end

@@ -397,7 +397,7 @@ El sistema debe estar preparado para incluir IA.
 
 ## 19. Planes de suscripción
 
-**Trial:** 7 días gratis con acceso completo al Plan Profesional. Después elige un plan y paga via checkout P2P.
+**Trial:** 25 días gratis con acceso completo al Plan Profesional. Después elige un plan y paga via checkout P2P.
 
 **Estrategia de pricing:** El plan Inteligente debe ser el más atractivo. La diferencia de solo $6 USD ($24k COP) con el Profesional incentiva a elegir el plan con IA.
 
@@ -537,9 +537,9 @@ El producto está funcional de punta a punta. Todas las features core están imp
 - [x] CheckoutService + ApprovePaymentService (crea Subscription, activa referral, reactiva business)
 - [x] SiteConfig (modelo key/value para datos de contacto y pago; editable desde ActiveAdmin > Configuración)
 - [x] Mailers usan SiteConfig.get() en vez de valores hardcoded
-- [x] Trial de 7 días (antes 30) — Business#trial_ends_at = 7.days.from_now al registrar
-- [x] TrialExpiryAlertJob (diario 8am, 3 stages: aviso 2 días antes, día de fin, suspensión 2 días después)
-- [x] trial_alert_stage en Business para anti-duplicados de alertas de trial (0=ninguna, 1=2d aviso, 2=dia fin, 3=suspendido, 4=inactivo)
+- [x] Trial de 25 días — Business#trial_ends_at = 25.days.from_now al registrar
+- [x] TrialExpiryAlertJob (diario 8am, 4 stages: aviso 5 días antes, día de fin, +2d suspensión, +10d desactivación)
+- [x] trial_alert_stage en Business para anti-duplicados de alertas de trial (0=ninguna, 1=5d aviso, 2=dia fin, 3=suspendido, 4=inactivo)
 - [x] Tipo de pago de empleado: payment_type (manual/commission/fixed_daily) + fixed_daily_pay; cierre de caja calcula según tipo; alerta naranja en formulario para empleados manuales
 - [x] Error codes en API: ServiceResult con error_code, render_error con code: param; códigos definidos en appointments, auth, bookings, cash register, credits, invitations
 - [x] Copys industry-agnostic: landing, SEO, registro y explore ya no dicen "barberías y salones" sino "negocios que trabajan con citas"; nuevos tipos de negocio en registro (spa, estudio de uñas, consultorio, masajes, etc.)
@@ -561,7 +561,7 @@ El producto está funcional de punta a punta. Todas las features core están imp
 
 ### Cambios recientes — nuevas features (marzo 2026)
 - [x] Sistema de referidos (ReferralCode + Referral, link ?ref=CODE → localStorage → registro → activación al aprobar pago, panel ActiveAdmin)
-- [x] Trial reducido a 7 días + TrialExpiryAlertJob con 4 stages (2d aviso, dia fin, +2d suspension, +7d inactive) + trial_alert_stage en Business
+- [x] Trial de 25 días + TrialExpiryAlertJob con 4 stages (5d aviso, dia fin, +2d suspension, +10d inactive) + trial_alert_stage en Business
 - [x] Checkout de suscripción P2P (página /dashboard/subscription/checkout, CheckoutService, ApprovePaymentService)
 - [x] SiteConfig: configuración de plataforma en DB (key/value, 7 claves), seeds con datos de contacto, pago y app_url, editable desde ActiveAdmin
 - [x] Tipo de pago de empleado (payment_type: manual/commission/fixed_daily, fixed_daily_pay, cierre de caja adaptado)
@@ -602,7 +602,7 @@ El producto está funcional de punta a punta. Todas las features core están imp
 - El `ticket_code` se genera SIEMPRE al crear la cita (no al aprobar el pago). Permite identificar la cita en todo el flujo. La visualización VIP (boarding pass + QR + descarga PNG) es exclusiva del plan Profesional+.
 - Activity Logs y Request Logs están disponibles en el panel de SuperAdmin para auditoría completa.
 - Las órdenes de pago de suscripción se generan automáticamente y el superadmin las confirma manualmente.
-- El trial dura 7 días. Al vencer, el negocio debe pagar via checkout P2P. `ApprovePaymentService` reactiva el negocio y activa el referral si corresponde.
+- El trial dura 25 días. Al vencer, el negocio debe pagar via checkout P2P. `ApprovePaymentService` reactiva el negocio y activa el referral si corresponde.
 - `SiteConfig` centraliza todos los datos de contacto y pago de la plataforma (7 claves: support_email, support_whatsapp, admin_email, payment_nequi, payment_bancolombia, payment_daviplata, app_url); los mailers no tienen valores hardcoded.
 - Los error codes en API permiten que el frontend maneje errores específicos sin depender solo del mensaje de texto.
 - `BusinessMailer#welcome` se dispara en `RegisterService` con mini-onboarding y datos de contacto desde SiteConfig.
@@ -616,7 +616,7 @@ El producto está funcional de punta a punta. Todas las features core están imp
 - Ver `docs/tech/codigos-descuento-cumpleanos.md` para la documentación técnica de códigos de descuento y campañas de cumpleaños.
 - Ver `docs/tech/sidekiq-jobs.md` para la lista completa de jobs, queues, schedules y config de sidekiq-cron.
 - Ver `docs/tech/email-bienvenida.md` para el email de bienvenida post-registro (BusinessMailer#welcome).
-- Ver `docs/tech/alertas-suscripcion.md` para el flujo de alertas de trial y suscripción con los 4 stages (incluyendo Stage 4: inactive en día +7).
+- Ver `docs/tech/alertas-suscripcion.md` para el flujo de alertas de trial y suscripción con los 4 stages (incluyendo Stage 4: inactive en día +10).
 
 ### Pendiente para lanzamiento
 - [ ] CI/CD (GitHub Actions) — nice to have

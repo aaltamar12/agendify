@@ -97,6 +97,7 @@ export interface Business {
   nequi_phone: string | null;
   daviplata_phone: string | null;
   bancolombia_account: string | null;
+  breb_key: string | null;
   cashback_enabled?: boolean;
   cashback_percentage?: number;
   cancellation_refund_as_credit?: boolean;

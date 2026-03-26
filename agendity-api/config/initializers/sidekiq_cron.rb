@@ -16,7 +16,7 @@ if Sidekiq.server?
       "class" => "TrialExpiryAlertJob",
       "cron" => "0 8 * * *",           # Daily at 8:00 AM
       "queue" => "default",
-      "description" => "Alertas de trial por vencer (2d antes, dia de, +2d suspension)"
+      "description" => "Alertas de trial por vencer (5d antes, dia de, +2d suspension, +10d inactivar)"
     },
     "subscription_expiry_alerts" => {
       "class" => "SubscriptionExpiryAlertJob",

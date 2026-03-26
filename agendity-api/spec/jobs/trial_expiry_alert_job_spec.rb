@@ -14,10 +14,10 @@ RSpec.describe TrialExpiryAlertJob do
   end
 
   describe "#perform" do
-    context "Stage 1: trial expiring in 2 days" do
+    context "Stage 1: trial expiring in 5 days" do
       let!(:business) do
         create(:business,
-          trial_ends_at: 2.days.from_now.beginning_of_day,
+          trial_ends_at: 5.days.from_now.beginning_of_day,
           trial_alert_stage: 0,
           status: :active)
       end
@@ -35,7 +35,7 @@ RSpec.describe TrialExpiryAlertJob do
 
         notification = Notification.last
         expect(notification.business).to eq(business)
-        expect(notification.title).to include("2 dias")
+        expect(notification.title).to include("5 dias")
       end
 
       it "publishes a real-time event" do
@@ -117,7 +117,7 @@ RSpec.describe TrialExpiryAlertJob do
     context "skips businesses with active subscription" do
       let!(:business) do
         create(:business,
-          trial_ends_at: 2.days.from_now.beginning_of_day,
+          trial_ends_at: 5.days.from_now.beginning_of_day,
           trial_alert_stage: 0,
           status: :active)
       end
@@ -141,7 +141,7 @@ RSpec.describe TrialExpiryAlertJob do
     context "anti-duplicates: skips businesses that already received the alert" do
       let!(:business_stage_1_done) do
         create(:business,
-          trial_ends_at: 2.days.from_now.beginning_of_day,
+          trial_ends_at: 5.days.from_now.beginning_of_day,
           trial_alert_stage: 1,
           status: :active)
       end
@@ -177,7 +177,7 @@ RSpec.describe TrialExpiryAlertJob do
 
       let!(:business) do
         create(:business,
-          trial_ends_at: 2.days.from_now.beginning_of_day,
+          trial_ends_at: 5.days.from_now.beginning_of_day,
           trial_alert_stage: 0,
           status: :active)
       end
