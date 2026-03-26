@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe Notifications::WhatsAppChannel do
+RSpec.describe Notifications::WhatsappChannel do
   let(:customer) { build(:customer, phone: "3001234567") }
 
   describe ".deliver" do

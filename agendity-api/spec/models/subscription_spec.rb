@@ -52,7 +52,7 @@ RSpec.describe Subscription, type: :model do
     before do
       allow(BusinessMailer).to receive_message_chain(:subscription_renewed, :deliver_later)
       allow(Realtime::NatsPublisher).to receive(:publish)
-      allow(Notifications::WhatsAppChannel).to receive(:deliver)
+      allow(Notifications::WhatsappChannel).to receive(:deliver)
     end
 
     it "extends the end_date by 1 month" do
@@ -107,7 +107,7 @@ RSpec.describe Subscription, type: :model do
       business.owner.update!(phone: "3001234567") unless business.owner.phone.present?
 
       subscription.process_renewal!
-      expect(Notifications::WhatsAppChannel).to have_received(:deliver).with(
+      expect(Notifications::WhatsappChannel).to have_received(:deliver).with(
         hash_including(template: :subscription_renewed)
       )
     end

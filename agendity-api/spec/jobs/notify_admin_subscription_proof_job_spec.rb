@@ -10,7 +10,7 @@ RSpec.describe NotifyAdminSubscriptionProofJob, type: :job do
 
   before do
     allow(Realtime::NatsPublisher).to receive(:publish)
-    allow(Notifications::WhatsAppChannel).to receive(:deliver)
+    allow(Notifications::WhatsappChannel).to receive(:deliver)
     allow(JobConfig).to receive(:enabled?).and_return(true)
     allow(JobConfig).to receive(:record_run!)
     allow(SiteConfig).to receive(:get).and_return(nil)
@@ -30,7 +30,7 @@ RSpec.describe NotifyAdminSubscriptionProofJob, type: :job do
 
       it "sends a WhatsApp notification" do
         described_class.perform_now(order.id)
-        expect(Notifications::WhatsAppChannel).to have_received(:deliver).with(
+        expect(Notifications::WhatsappChannel).to have_received(:deliver).with(
           hash_including(template: :subscription_proof_received)
         )
       end
@@ -39,7 +39,7 @@ RSpec.describe NotifyAdminSubscriptionProofJob, type: :job do
     context "when admin_whatsapp is not configured" do
       it "does not send a WhatsApp notification" do
         described_class.perform_now(order.id)
-        expect(Notifications::WhatsAppChannel).not_to have_received(:deliver)
+        expect(Notifications::WhatsappChannel).not_to have_received(:deliver)
       end
     end
   end

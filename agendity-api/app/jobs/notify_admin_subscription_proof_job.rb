@@ -15,7 +15,7 @@ class NotifyAdminSubscriptionProofJob < ApplicationJob
     admin_phone = SiteConfig.get("admin_whatsapp")
     if admin_phone.present?
       admin_recipient = OpenStruct.new(phone: admin_phone)
-      Notifications::WhatsAppChannel.deliver(
+      Notifications::WhatsappChannel.deliver(
         recipient: admin_recipient,
         template: :subscription_proof_received,
         data: {

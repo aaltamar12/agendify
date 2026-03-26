@@ -38,7 +38,7 @@ module Notifications
       when :email
         Notifications::EmailChannel.deliver(recipient: @recipient, template: @template, data: @data)
       when :whatsapp
-        Notifications::WhatsAppChannel.deliver(recipient: @recipient, template: @template, data: @data)
+        Notifications::WhatsappChannel.deliver(recipient: @recipient, template: @template, data: @data)
       else
         false
       end

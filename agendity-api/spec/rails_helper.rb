@@ -11,8 +11,8 @@ require 'rspec/rails'
 require 'pundit/rspec'
 # Add additional requires below this line. Rails is not loaded until this point!
 
-# Force-load WhatsAppChannel — Zeitwerk maps whatsapp_channel.rb to WhatsappChannel,
-# but the class is defined as WhatsAppChannel (camelCase). This explicit require
+# Force-load WhatsappChannel — Zeitwerk maps whatsapp_channel.rb to WhatsappChannel,
+# but the class is defined as WhatsappChannel (camelCase). This explicit require
 # ensures the constant is available for stubbing in specs.
 require_relative '../app/services/notifications/whatsapp_channel'
 

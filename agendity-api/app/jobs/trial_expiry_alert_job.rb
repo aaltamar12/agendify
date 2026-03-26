@@ -103,7 +103,7 @@ class TrialExpiryAlertJob < ApplicationJob
 
     # WhatsApp to business owner
     if owner.phone.present?
-      Notifications::WhatsAppChannel.deliver(
+      Notifications::WhatsappChannel.deliver(
         recipient: owner,
         template: :"trial_expiry_stage_#{stage}",
         data: {

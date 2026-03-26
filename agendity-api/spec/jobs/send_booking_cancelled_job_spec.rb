@@ -13,7 +13,7 @@ RSpec.describe SendBookingCancelledJob, type: :job do
 
   before do
     allow(Realtime::NatsPublisher).to receive(:publish)
-    allow(Notifications::WhatsAppChannel).to receive(:deliver)
+    allow(Notifications::WhatsappChannel).to receive(:deliver)
     allow(Notifications::MultiChannelService).to receive(:call)
     allow(JobConfig).to receive(:enabled?).and_return(true)
     allow(JobConfig).to receive(:record_run!)

@@ -82,7 +82,7 @@ class Subscription < ApplicationRecord
     # WhatsApp (if plan includes it)
     owner = business.owner
     if business.current_plan&.whatsapp_notifications? && owner.phone.present?
-      Notifications::WhatsAppChannel.deliver(
+      Notifications::WhatsappChannel.deliver(
         recipient: owner,
         template: :subscription_renewed,
         data: {

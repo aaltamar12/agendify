@@ -3,7 +3,7 @@ require "rails_helper"
 RSpec.describe BirthdayCampaignJob do
   before do
     allow(Realtime::NatsPublisher).to receive(:publish)
-    allow(Notifications::WhatsAppChannel).to receive(:deliver)
+    allow(Notifications::WhatsappChannel).to receive(:deliver)
     allow(JobConfig).to receive(:enabled?).with("BirthdayCampaignJob").and_return(true)
     allow(JobConfig).to receive(:record_run!)
     allow(SiteConfig).to receive(:get).and_return(nil)

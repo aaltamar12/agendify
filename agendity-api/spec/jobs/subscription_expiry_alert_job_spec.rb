@@ -6,7 +6,7 @@ RSpec.describe SubscriptionExpiryAlertJob do
 
   before do
     allow(Realtime::NatsPublisher).to receive(:publish)
-    allow(Notifications::WhatsAppChannel).to receive(:deliver)
+    allow(Notifications::WhatsappChannel).to receive(:deliver)
     allow(JobConfig).to receive(:enabled?).with("SubscriptionExpiryAlertJob").and_return(true)
     allow(JobConfig).to receive(:record_run!)
   end
@@ -212,7 +212,7 @@ RSpec.describe SubscriptionExpiryAlertJob do
 
       it "sends WhatsApp notification when plan supports it and owner has phone" do
         described_class.perform_now
-        expect(Notifications::WhatsAppChannel).to have_received(:deliver).with(
+        expect(Notifications::WhatsappChannel).to have_received(:deliver).with(
           hash_including(template: :subscription_expiry_stage_1)
         )
       end

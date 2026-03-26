@@ -87,7 +87,7 @@ class SubscriptionExpiryAlertJob < ApplicationJob
 
     # WhatsApp (if plan includes it)
     if business.current_plan&.whatsapp_notifications? && owner.phone.present?
-      Notifications::WhatsAppChannel.deliver(
+      Notifications::WhatsappChannel.deliver(
         recipient: owner,
         template: :"subscription_expiry_stage_#{stage}",
         data: {

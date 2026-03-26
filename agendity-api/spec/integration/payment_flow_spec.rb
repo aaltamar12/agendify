@@ -11,7 +11,7 @@ RSpec.describe "Payment Flow", type: :model do
 
   before do
     allow(Realtime::NatsPublisher).to receive(:publish)
-    allow(Notifications::WhatsAppChannel).to receive(:deliver)
+    allow(Notifications::WhatsappChannel).to receive(:deliver)
     allow(Notifications::MultiChannelService).to receive(:call).and_return(
       ServiceResult.new(success: true, data: nil)
     )

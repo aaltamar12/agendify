@@ -5,7 +5,7 @@ RSpec.describe TrialExpiryAlertJob do
 
   before do
     allow(Realtime::NatsPublisher).to receive(:publish)
-    allow(Notifications::WhatsAppChannel).to receive(:deliver)
+    allow(Notifications::WhatsappChannel).to receive(:deliver)
     # Ensure the job is enabled
     allow(JobConfig).to receive(:enabled?).with("TrialExpiryAlertJob").and_return(true)
     allow(JobConfig).to receive(:record_run!)
@@ -159,7 +159,7 @@ RSpec.describe TrialExpiryAlertJob do
       it "sends WhatsApp notification to owner" do
         described_class.perform_now
 
-        expect(Notifications::WhatsAppChannel).to have_received(:deliver).with(
+        expect(Notifications::WhatsappChannel).to have_received(:deliver).with(
           hash_including(template: :"trial_expiry_stage_3")
         ).at_least(:once)
       end

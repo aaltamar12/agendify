@@ -6,7 +6,7 @@ RSpec.describe Notifications::MultiChannelService do
 
   before do
     allow(Notifications::EmailChannel).to receive(:deliver).and_return(true)
-    allow(Notifications::WhatsAppChannel).to receive(:deliver).and_return(true)
+    allow(Notifications::WhatsappChannel).to receive(:deliver).and_return(true)
   end
 
   describe "#call" do
@@ -19,7 +19,7 @@ RSpec.describe Notifications::MultiChannelService do
         result = described_class.call(recipient: customer, template: :rating_request, data: {}, business: business)
         expect(result).to be_success
         expect(Notifications::EmailChannel).to have_received(:deliver)
-        expect(Notifications::WhatsAppChannel).not_to have_received(:deliver)
+        expect(Notifications::WhatsappChannel).not_to have_received(:deliver)
       end
     end
 
