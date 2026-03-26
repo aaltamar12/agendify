@@ -63,6 +63,39 @@ module Api
         render_success({ message: "Servicio desactivado exitosamente" })
       end
 
+      # GET /api/v1/services/categories
+      def categories
+        cats = current_business.services
+                               .where.not(category: [nil, ""])
+                               .distinct
+                               .pluck(:category)
+                               .sort
+        render_success(cats)
+      end
+
+      # PATCH /api/v1/services/rename_category
+      def rename_category
+        old_name = params[:old_name]
+        new_name = params[:new_name]
+        unless old_name.present? && new_name.present?
+          return render_error("Nombre requerido", status: :unprocessable_entity)
+        end
+
+        updated = current_business.services.where(category: old_name).update_all(category: new_name)
+        render_success({ updated: updated, new_name: new_name })
+      end
+
+      # DELETE /api/v1/services/delete_category
+      def delete_category
+        name = params[:name]
+        unless name.present?
+          return render_error("Nombre requerido", status: :unprocessable_entity)
+        end
+
+        updated = current_business.services.where(category: name).update_all(category: nil)
+        render_success({ updated: updated })
+      end
+
       private
 
       def set_service

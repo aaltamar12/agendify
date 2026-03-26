@@ -30,6 +30,9 @@ export const ENDPOINTS = {
     show: (id: number) => `${BASE}/services/${id}`,
     update: (id: number) => `${BASE}/services/${id}`,
     delete: (id: number) => `${BASE}/services/${id}`,
+    categories: `${BASE}/services/categories`,
+    renameCategory: `${BASE}/services/rename_category`,
+    deleteCategory: `${BASE}/services/delete_category`,
   },
 
   EMPLOYEES: {

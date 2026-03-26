@@ -45,7 +45,13 @@ Rails.application.routes.draw do
       end
 
       # Resources scoped to business
-      resources :services
+      resources :services do
+        collection do
+          get :categories
+          patch :rename_category
+          delete :delete_category
+        end
+      end
       resources :employees do
         member do
           post :upload_avatar

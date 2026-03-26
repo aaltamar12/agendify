@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button, Input, Textarea, Select } from '@/components/ui';
+import { useServiceCategories } from '@/lib/hooks/use-services';
 import type { Service } from '@/lib/api/types';
 
 const serviceFormSchema = z.object({
@@ -16,6 +17,7 @@ const serviceFormSchema = z.object({
     .number({ error: 'Selecciona una duración' })
     .min(15, 'Mínimo 15 minutos'),
   active: z.boolean(),
+  category: z.string().optional(),
 });
 
 type ServiceFormData = z.infer<typeof serviceFormSchema>;
@@ -36,6 +38,8 @@ interface ServiceFormProps {
 }
 
 export function ServiceForm({ service, onSubmit, loading }: ServiceFormProps) {
+  const { data: categories = [] } = useServiceCategories();
+
   const {
     register,
     handleSubmit,
@@ -48,6 +52,7 @@ export function ServiceForm({ service, onSubmit, loading }: ServiceFormProps) {
       price: service?.price ?? 0,
       duration_minutes: service?.duration_minutes ?? 30,
       active: service?.active ?? true,
+      category: service?.category ?? '',
     },
   });
 
@@ -67,6 +72,23 @@ export function ServiceForm({ service, onSubmit, loading }: ServiceFormProps) {
         error={errors.description?.message}
         {...register('description')}
       />
+
+      <div>
+        <label className="mb-1.5 block text-sm font-medium text-gray-700">
+          Categoría (opcional)
+        </label>
+        <input
+          list="categories-list"
+          placeholder="Ej: Corte, Barba, Combo..."
+          className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-600/20"
+          {...register('category')}
+        />
+        <datalist id="categories-list">
+          {categories.map((cat) => (
+            <option key={cat} value={cat} />
+          ))}
+        </datalist>
+      </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
