@@ -197,7 +197,7 @@ export default function BusinessPage() {
         {/* About */}
         {business.description && (
           <Card>
-            <h2 className="font-semibold text-gray-900">Sobre nosotros</h2>
+            <h2 className="font-semibold text-gray-900">{isIndependent ? 'Sobre mí' : 'Sobre nosotros'}</h2>
             <p className="mt-2 text-sm text-gray-600 leading-relaxed">
               {business.description}
             </p>
@@ -411,7 +411,7 @@ export default function BusinessPage() {
         {/* Business owner CTA */}
         <div className="rounded-xl border border-violet-200 bg-violet-50 p-6 text-center">
           <p className="mb-2 text-lg font-bold text-gray-900">
-            ¿Tienes un negocio y quieres organizarlo así?
+            ¿Eres negocio o independiente? ¡Organízate así!
           </p>
           <p className="mb-4 text-sm text-gray-600">
             Optimiza tu agenda, controla tus finanzas y recibe reservas online 24/7.
@@ -423,7 +423,7 @@ export default function BusinessPage() {
             Registra tu negocio gratis
           </a>
           <p className="mt-2 text-xs text-gray-500">
-            30 días gratis — Sin tarjeta de crédito
+            25 días gratis — Sin tarjeta de crédito
           </p>
         </div>
 
