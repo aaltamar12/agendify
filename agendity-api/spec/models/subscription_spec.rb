@@ -73,5 +73,79 @@ RSpec.describe Subscription, type: :model do
         subscription.process_renewal!
       }.to change(Notification, :count).by(1)
     end
+
+    it "accepts a custom new_end_date" do
+      custom_date = Date.current + 3.months
+      subscription.process_renewal!(new_end_date: custom_date)
+      expect(subscription.reload.end_date).to eq(custom_date)
+    end
+
+    it "reactivates a suspended business" do
+      business.suspended!
+      subscription.process_renewal!
+      expect(business.reload.status).to eq("active")
+    end
+
+    it "publishes a real-time event via NATS" do
+      subscription.process_renewal!
+      expect(Realtime::NatsPublisher).to have_received(:publish).with(
+        hash_including(event: "subscription_expiry")
+      )
+    end
+
+    it "creates an activity log" do
+      expect { subscription.process_renewal! }.to change(ActivityLog, :count).by(1)
+      log = ActivityLog.last
+      expect(log.action).to eq("subscription_renewed")
+    end
+
+    it "sends WhatsApp when plan has whatsapp_notifications and owner has phone" do
+      plan.update!(whatsapp_notifications: true)
+      # Ensure the subscription is current so current_plan returns this plan
+      subscription.update!(end_date: Date.current + 1.month, status: :active)
+      # Ensure owner has a phone number
+      business.owner.update!(phone: "3001234567") unless business.owner.phone.present?
+
+      subscription.process_renewal!
+      expect(Notifications::WhatsAppChannel).to have_received(:deliver).with(
+        hash_including(template: :subscription_renewed)
+      )
+    end
+  end
+
+  describe "scopes" do
+    describe ".expiring_in" do
+      let!(:expiring) { create(:subscription, business: business, plan: plan, status: :active, end_date: Date.current + 5) }
+      let!(:not_expiring) { create(:subscription, business: create(:business), plan: plan, status: :active, end_date: Date.current + 10) }
+
+      it "returns subscriptions expiring in N days" do
+        expect(Subscription.expiring_in(5)).to include(expiring)
+        expect(Subscription.expiring_in(5)).not_to include(not_expiring)
+      end
+    end
+
+    describe ".expired_since" do
+      let!(:expired) do
+        sub = create(:subscription, business: business, plan: plan, status: :active)
+        sub.update_column(:end_date, Date.current - 3)
+        sub
+      end
+
+      it "returns subscriptions expired N days ago" do
+        expect(Subscription.expired_since(3)).to include(expired)
+      end
+    end
+  end
+
+  describe ".ransackable_attributes" do
+    it "returns expected attributes" do
+      expect(Subscription.ransackable_attributes).to include("status", "start_date", "end_date")
+    end
+  end
+
+  describe ".ransackable_associations" do
+    it "returns expected associations" do
+      expect(Subscription.ransackable_associations).to include("business", "plan")
+    end
   end
 end

@@ -50,6 +50,10 @@ RSpec.describe ServicePolicy do
     it "denies destroy" do
       expect(subject.destroy?).to be false
     end
+
+    it "denies create when user has no business" do
+      expect(subject.create?).to be false
+    end
   end
 
   describe "Scope" do

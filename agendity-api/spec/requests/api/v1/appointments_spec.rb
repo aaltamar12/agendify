@@ -186,4 +186,81 @@ RSpec.describe "Api::V1::Appointments", type: :request do
       expect(response).to have_http_status(:not_found)
     end
   end
+
+  describe "POST /api/v1/appointments/:id/remind_payment (success)" do
+    it "sends payment reminder when appointment is pending_payment and customer has email" do
+      appointment = create(:appointment, business: business, employee: employee, service: service, customer: customer, status: :pending_payment)
+      allow(Notifications::MultiChannelService).to receive(:call)
+      post "/api/v1/appointments/#{appointment.id}/remind_payment", headers: headers
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body["data"]["message"]).to include("Recordatorio")
+    end
+  end
+
+  describe "POST /api/v1/appointments/:id/confirm (failure)" do
+    it "returns 422 when confirmation service fails" do
+      appointment = create(:appointment, business: business, employee: employee, service: service, customer: customer, status: :confirmed)
+      allow(Appointments::ConfirmPaymentService).to receive(:call).and_return(
+        ServiceResult.new(success: false, error: "Cannot confirm", details: {})
+      )
+      post "/api/v1/appointments/#{appointment.id}/confirm", headers: headers
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+  end
+
+  describe "POST /api/v1/appointments/:id/checkin (failure)" do
+    it "returns 422 when checkin service fails" do
+      appointment = create(:appointment, business: business, employee: employee, service: service, customer: customer, status: :pending_payment)
+      allow(Appointments::CheckinService).to receive(:call).and_return(
+        ServiceResult.new(success: false, error: "Cannot check in", details: {})
+      )
+      post "/api/v1/appointments/#{appointment.id}/checkin", headers: headers
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+  end
+
+  describe "POST /api/v1/appointments/checkin_by_code (failure)" do
+    it "returns 422 when checkin by code fails" do
+      appointment = create(:appointment, business: business, employee: employee, service: service, customer: customer, status: :pending_payment)
+      allow(Appointments::CheckinService).to receive(:call).and_return(
+        ServiceResult.new(success: false, error: "Invalid status", details: {})
+      )
+      post "/api/v1/appointments/checkin_by_code", params: { ticket_code: appointment.ticket_code }, headers: headers
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+  end
+
+  describe "POST /api/v1/appointments/:id/cancel (failure)" do
+    it "returns 422 when cancel service fails" do
+      appointment = create(:appointment, business: business, employee: employee, service: service, customer: customer, status: :cancelled)
+      allow(Appointments::CancelAppointmentService).to receive(:call).and_return(
+        ServiceResult.new(success: false, error: "Already cancelled", details: {})
+      )
+      post "/api/v1/appointments/#{appointment.id}/cancel", headers: headers
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+  end
+
+  describe "POST /api/v1/appointments/:id/complete (failure)" do
+    it "returns 422 when complete service fails" do
+      appointment = create(:appointment, business: business, employee: employee, service: service, customer: customer, status: :confirmed)
+      allow(Appointments::CompleteService).to receive(:call).and_return(
+        ServiceResult.new(success: false, error: "Not checked in", details: {})
+      )
+      post "/api/v1/appointments/#{appointment.id}/complete", headers: headers
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+  end
+
+  describe "GET /api/v1/appointments/available_slots (failure)" do
+    it "returns 422 when availability service fails" do
+      allow(Bookings::AvailabilityService).to receive(:call).and_return(
+        ServiceResult.new(success: false, error: "Service not found")
+      )
+      get "/api/v1/appointments/available_slots",
+          params: { service_id: 99999, date: Date.tomorrow.to_s },
+          headers: headers
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+  end
 end

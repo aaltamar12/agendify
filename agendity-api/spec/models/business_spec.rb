@@ -47,6 +47,144 @@ RSpec.describe Business, type: :model do
     end
   end
 
+  describe "scopes" do
+    describe ".active" do
+      let!(:active_biz) { create(:business, status: :active) }
+      let!(:suspended_biz) { create(:business, status: :suspended) }
+
+      it "returns only active businesses" do
+        expect(Business.active).to include(active_biz)
+        expect(Business.active).not_to include(suspended_biz)
+      end
+    end
+
+    describe ".independent" do
+      let!(:independent_biz) { create(:business, independent: true) }
+      let!(:establishment_biz) { create(:business, independent: false) }
+
+      it "returns only independent businesses" do
+        expect(Business.independent).to include(independent_biz)
+        expect(Business.independent).not_to include(establishment_biz)
+      end
+    end
+
+    describe ".establishments" do
+      let!(:independent_biz) { create(:business, independent: true) }
+      let!(:establishment_biz) { create(:business, independent: false) }
+
+      it "returns only non-independent businesses" do
+        expect(Business.establishments).to include(establishment_biz)
+        expect(Business.establishments).not_to include(independent_biz)
+      end
+    end
+
+    describe ".in_trial" do
+      let!(:in_trial) { create(:business, trial_ends_at: 5.days.from_now) }
+      let!(:trial_over) { create(:business, trial_ends_at: 1.day.ago) }
+
+      it "returns businesses with active trial" do
+        expect(Business.in_trial).to include(in_trial)
+        expect(Business.in_trial).not_to include(trial_over)
+      end
+    end
+
+    describe ".trial_expiring_in" do
+      let!(:expiring_in_5) { create(:business, trial_ends_at: (Date.current + 5).beginning_of_day) }
+      let!(:expiring_in_10) { create(:business, trial_ends_at: (Date.current + 10).beginning_of_day) }
+
+      it "returns businesses whose trial expires in N days" do
+        expect(Business.trial_expiring_in(5)).to include(expiring_in_5)
+        expect(Business.trial_expiring_in(5)).not_to include(expiring_in_10)
+      end
+    end
+
+    describe ".trial_expired_since" do
+      let!(:expired_2_days) { create(:business, trial_ends_at: (Date.current - 2).beginning_of_day) }
+      let!(:expired_5_days) { create(:business, trial_ends_at: (Date.current - 5).beginning_of_day) }
+
+      it "returns businesses whose trial expired N days ago" do
+        expect(Business.trial_expired_since(2)).to include(expired_2_days)
+        expect(Business.trial_expired_since(2)).not_to include(expired_5_days)
+      end
+    end
+  end
+
+  describe "callbacks" do
+    describe "#extract_coords_from_google_maps_url" do
+      it "extracts coordinates from /@lat,lng pattern" do
+        business = create(:business, google_maps_url: "https://www.google.com/maps/place/Test/@10.9878,-74.7889,17z/data=blah")
+        expect(business.latitude).to eq(10.9878)
+        expect(business.longitude).to eq(-74.7889)
+      end
+
+      it "extracts coordinates from ?q=lat,lng pattern" do
+        business = create(:business, google_maps_url: "https://maps.google.com/?q=10.9878,-74.7889")
+        expect(business.latitude).to eq(10.9878)
+        expect(business.longitude).to eq(-74.7889)
+      end
+
+      it "extracts coordinates from /search/lat,lng pattern" do
+        business = create(:business, google_maps_url: "https://www.google.com/maps/search/10.9878,-74.7889")
+        expect(business.latitude).to eq(10.9878)
+        expect(business.longitude).to eq(-74.7889)
+      end
+
+      it "extracts coordinates from !3d!4d pattern" do
+        business = create(:business, google_maps_url: "https://www.google.com/maps/!3d10.9878!4d-74.7889")
+        expect(business.latitude).to eq(10.9878)
+        expect(business.longitude).to eq(-74.7889)
+      end
+
+      it "extracts coordinates from /place/lat,lng pattern" do
+        business = create(:business, google_maps_url: "https://www.google.com/maps/place/10.9878,-74.7889")
+        expect(business.latitude).to eq(10.9878)
+        expect(business.longitude).to eq(-74.7889)
+      end
+
+      it "does not crash on blank google_maps_url" do
+        business = create(:business, google_maps_url: "")
+        expect(business).to be_valid
+      end
+
+      it "handles short URLs by attempting to resolve them" do
+        redirect_response = double("redirect_response")
+        allow(redirect_response).to receive(:is_a?).and_return(false)
+        allow(redirect_response).to receive(:is_a?).with(Net::HTTPRedirection).and_return(true)
+        allow(redirect_response).to receive(:[]).with("location").and_return("https://www.google.com/maps/place/Test/@10.9878,-74.7889,17z")
+        allow(Net::HTTP).to receive(:start).and_return(redirect_response)
+
+        business = create(:business, google_maps_url: "https://goo.gl/maps/abc123")
+        expect(business.latitude).to eq(10.9878)
+        expect(business.longitude).to eq(-74.7889)
+      end
+
+      it "gracefully handles resolution errors for short URLs" do
+        allow(Net::HTTP).to receive(:start).and_raise(StandardError.new("DNS failure"))
+
+        expect { create(:business, google_maps_url: "https://goo.gl/maps/badurl") }.not_to raise_error
+      end
+    end
+  end
+
+  describe ".ransackable_attributes" do
+    it "returns expected attributes" do
+      expect(Business.ransackable_attributes).to include("name", "slug", "business_type", "status")
+    end
+  end
+
+  describe ".ransackable_associations" do
+    it "returns expected associations" do
+      expect(Business.ransackable_associations).to include("owner", "employees")
+    end
+  end
+
+  describe "#full_address (private)" do
+    it "concatenates address, city, country" do
+      business = build(:business, address: "Calle 50", city: "Barranquilla", country: "CO")
+      expect(business.send(:full_address)).to eq("Calle 50, Barranquilla, CO")
+    end
+  end
+
   describe "PlanEnforcement" do
     let(:business) { create(:business) }
 

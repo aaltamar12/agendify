@@ -30,6 +30,22 @@ RSpec.describe AppointmentPolicy do
     it "allows update" do
       expect(subject.update?).to be true
     end
+
+    it "allows confirm" do
+      expect(subject.confirm?).to be true
+    end
+
+    it "allows checkin" do
+      expect(subject.checkin?).to be true
+    end
+
+    it "allows cancel" do
+      expect(subject.cancel?).to be true
+    end
+
+    it "allows complete" do
+      expect(subject.complete?).to be true
+    end
   end
 
   context "when user does not own the business" do
@@ -42,6 +58,22 @@ RSpec.describe AppointmentPolicy do
 
     it "denies show" do
       expect(subject.show?).to be false
+    end
+
+    it "denies confirm" do
+      expect(subject.confirm?).to be false
+    end
+
+    it "denies checkin" do
+      expect(subject.checkin?).to be false
+    end
+
+    it "denies cancel" do
+      expect(subject.cancel?).to be false
+    end
+
+    it "denies complete" do
+      expect(subject.complete?).to be false
     end
   end
 

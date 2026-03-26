@@ -253,4 +253,74 @@ RSpec.describe DiscountCode, type: :model do
       expect(code.code).to eq("LOWERCASE")
     end
   end
+
+  describe "#percentage?" do
+    it "returns true for percentage type" do
+      code = build(:discount_code, business: business, discount_type: "percentage")
+      expect(code.percentage?).to be true
+    end
+
+    it "returns false for fixed type" do
+      code = build(:discount_code, business: business, discount_type: "fixed", discount_value: 5_000)
+      expect(code.percentage?).to be false
+    end
+  end
+
+  describe "#fixed?" do
+    it "returns true for fixed type" do
+      code = build(:discount_code, business: business, discount_type: "fixed", discount_value: 5_000)
+      expect(code.fixed?).to be true
+    end
+
+    it "returns false for percentage type" do
+      code = build(:discount_code, business: business, discount_type: "percentage")
+      expect(code.fixed?).to be false
+    end
+  end
+
+  describe "#expired?" do
+    it "returns false when valid_until is nil" do
+      code = build(:discount_code, business: business, valid_until: nil)
+      expect(code.expired?).to be false
+    end
+
+    it "returns true when valid_until is in the past" do
+      code = build(:discount_code, business: business, valid_until: 1.day.ago)
+      expect(code.expired?).to be true
+    end
+
+    it "returns false when valid_until is in the future" do
+      code = build(:discount_code, business: business, valid_until: 1.day.from_now)
+      expect(code.expired?).to be false
+    end
+  end
+
+  describe "#exhausted?" do
+    it "returns false when max_uses is nil" do
+      code = build(:discount_code, business: business, max_uses: nil, current_uses: 999)
+      expect(code.exhausted?).to be false
+    end
+
+    it "returns true when current_uses >= max_uses" do
+      code = build(:discount_code, business: business, max_uses: 5, current_uses: 5)
+      expect(code.exhausted?).to be true
+    end
+
+    it "returns false when current_uses < max_uses" do
+      code = build(:discount_code, business: business, max_uses: 5, current_uses: 3)
+      expect(code.exhausted?).to be false
+    end
+  end
+
+  describe ".ransackable_attributes" do
+    it "returns expected attributes" do
+      expect(DiscountCode.ransackable_attributes).to include("code", "discount_type", "active")
+    end
+  end
+
+  describe ".ransackable_associations" do
+    it "returns expected associations" do
+      expect(DiscountCode.ransackable_associations).to include("business", "customer")
+    end
+  end
 end

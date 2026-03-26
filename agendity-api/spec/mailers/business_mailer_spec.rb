@@ -137,4 +137,40 @@ RSpec.describe BusinessMailer, type: :mailer do
       expect(mail.subject).to include("Recordatorio")
     end
   end
+
+  describe "#subscription_expired" do
+    let(:mail) { described_class.subscription_expired(business, subscription) }
+
+    it "sends to the owner email" do
+      expect(mail.to).to eq([business.owner.email])
+    end
+
+    it "has the correct subject" do
+      expect(mail.subject).to include("expirado")
+    end
+  end
+
+  describe "#subscription_expiry_alert stage 2" do
+    let(:mail) { described_class.subscription_expiry_alert(business, subscription, 2) }
+
+    it "has the correct subject for stage 2" do
+      expect(mail.subject).to include("vence hoy")
+    end
+  end
+
+  describe "#subscription_expiry_alert stage 3" do
+    let(:mail) { described_class.subscription_expiry_alert(business, subscription, 3) }
+
+    it "has the correct subject for stage 3" do
+      expect(mail.subject).to include("suspendida")
+    end
+  end
+
+  describe "#trial_expiry_alert stage 3" do
+    let(:mail) { described_class.trial_expiry_alert(business, 3) }
+
+    it "has the correct subject for stage 3" do
+      expect(mail.subject).to include("suspendida")
+    end
+  end
 end

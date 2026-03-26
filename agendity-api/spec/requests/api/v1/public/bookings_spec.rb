@@ -165,4 +165,37 @@ RSpec.describe "Api::V1::Public::Bookings", type: :request do
       expect(response).to have_http_status(:not_found)
     end
   end
+
+  describe "GET /api/v1/public/:slug/check_slot (availability failure)" do
+    it "returns available: false when availability service fails" do
+      allow(Bookings::AvailabilityService).to receive(:call).and_return(
+        ServiceResult.new(success: false, error: "No available slots")
+      )
+      get "/api/v1/public/#{business.slug}/check_slot",
+          params: { service_id: service.id, date: Date.tomorrow.to_s, time: "10:00" }
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body["data"]["available"]).to be false
+    end
+  end
+
+  describe "GET /api/v1/public/customer_lookup (credits enabled)" do
+    it "returns credit balance when credits are enabled" do
+      business.update!(credits_enabled: true)
+      cust = create(:customer, business: business, email: "credit@test.com")
+      create(:credit_account, business: business, customer: cust, balance: 15_000)
+      get "/api/v1/public/customer_lookup",
+          params: { slug: business.slug, email: "credit@test.com" }
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body["data"]["credit_balance"]).to eq(15_000.0)
+    end
+  end
+
+  describe "POST /api/v1/public/:slug/lock_slot (conflict)" do
+    it "returns 409 when slot is already locked" do
+      allow(Bookings::SlotLockService).to receive(:lock).and_return(nil)
+      post "/api/v1/public/#{business.slug}/lock_slot",
+           params: { employee_id: employee.id, date: Date.tomorrow.to_s, time: "10:00" }
+      expect(response).to have_http_status(:conflict)
+    end
+  end
 end

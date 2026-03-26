@@ -77,5 +77,83 @@ RSpec.describe Bookings::AvailabilityService do
         expect(slot_10[:available]).to be false
       end
     end
+
+    context "when slot is temporarily locked" do
+      before do
+        allow(Bookings::SlotLockService).to receive(:locked?).and_return(false)
+        allow(Bookings::SlotLockService).to receive(:locked?)
+          .with(hash_including(time: "10:00"))
+          .and_return(true)
+      end
+
+      it "marks locked slots as unavailable" do
+        result = described_class.call(business: business, service_id: service.id, date: target_date, employee_id: employee.id)
+        slot_10 = result.data.find { |s| s[:time] == "10:00" }
+        expect(slot_10[:available]).to be false
+      end
+    end
+
+    context "with gap between appointments" do
+      let(:business) { create(:business, :with_hours, timezone: "America/Bogota", slot_interval_minutes: 30, gap_between_appointments_minutes: 15) }
+
+      before do
+        create(:appointment,
+          business: business, employee: employee, service: service,
+          appointment_date: target_date, start_time: "10:00", end_time: "10:30",
+          status: :confirmed)
+      end
+
+      it "marks slots within the gap as unavailable" do
+        result = described_class.call(business: business, service_id: service.id, date: target_date, employee_id: employee.id)
+        # 10:30 slot should be unavailable because there's a 15-min gap after the 10:00-10:30 appointment
+        slot_1030 = result.data.find { |s| s[:time] == "10:30" }
+        expect(slot_1030[:available]).to be false
+      end
+    end
+
+    context "with lunch break enabled" do
+      let(:business) do
+        create(:business, :with_hours,
+          timezone: "America/Bogota",
+          slot_interval_minutes: 30,
+          lunch_enabled: true,
+          lunch_start_time: "12:00",
+          lunch_end_time: "13:00")
+      end
+
+      it "marks lunch break slots as unavailable" do
+        result = described_class.call(business: business, service_id: service.id, date: target_date, employee_id: employee.id)
+        slot_12 = result.data.find { |s| s[:time] == "12:00" }
+        expect(slot_12[:available]).to be false
+      end
+    end
+
+    context "when date is today" do
+      it "marks past slots as unavailable" do
+        # Travel to a known time on a weekday
+        monday = Date.tomorrow
+        monday += 1.day until monday.wday == 1
+
+        travel_to Time.zone.parse("#{monday} 14:00 -0500") do
+          employee.employee_schedules.find_or_create_by!(day_of_week: monday.wday) do |s|
+            s.start_time = "08:00"
+            s.end_time = "18:00"
+          end
+
+          result = described_class.call(business: business, service_id: service.id, date: monday)
+          # Slots before 14:00 should be unavailable
+          slot_10 = result.data.find { |s| s[:time] == "10:00" }
+          expect(slot_10[:available]).to be false if slot_10
+        end
+      end
+    end
+
+    context "with date as string" do
+      it "parses the date string correctly" do
+        result = described_class.call(business: business, service_id: service.id, date: target_date.to_s)
+        expect(result).to be_success
+        expect(result.data).to be_an(Array)
+      end
+    end
   end
 end

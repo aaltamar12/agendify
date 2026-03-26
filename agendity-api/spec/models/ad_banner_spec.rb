@@ -56,5 +56,25 @@ RSpec.describe AdBanner, type: :model do
       banner = build(:ad_banner, image_url: "https://example.com/img.jpg")
       expect(banner.display_image_url).to eq("https://example.com/img.jpg")
     end
+
+    it "returns ActiveStorage URL when image is attached" do
+      banner = create(:ad_banner)
+      banner.image.attach(io: StringIO.new("fake-image"), filename: "test.png", content_type: "image/png")
+
+      url = banner.display_image_url
+      expect(url).to include("test.png")
+    end
+  end
+
+  describe ".ransackable_attributes" do
+    it "returns expected attributes" do
+      expect(AdBanner.ransackable_attributes).to include("name", "placement", "active")
+    end
+  end
+
+  describe ".ransackable_associations" do
+    it "returns expected associations" do
+      expect(AdBanner.ransackable_associations).to include("image_attachment")
+    end
   end
 end

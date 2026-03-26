@@ -90,5 +90,29 @@ RSpec.describe CreditAccount, type: :model do
       account.debit!(10_000, transaction_type: :redemption, description: "All")
       expect(account.balance).to eq(0)
     end
+
+    it "accepts an optional appointment" do
+      appointment = create(:appointment)
+      account.debit!(1_000, transaction_type: :redemption, description: "Test", appointment: appointment)
+      expect(account.credit_transactions.last.appointment).to eq(appointment)
+    end
+
+    it "accepts an optional performed_by user" do
+      user = create(:user)
+      account.debit!(1_000, transaction_type: :manual_adjustment, description: "Admin fix", performed_by: user)
+      expect(account.credit_transactions.last.performed_by_user).to eq(user)
+    end
+  end
+
+  describe ".ransackable_attributes" do
+    it "returns expected attributes" do
+      expect(CreditAccount.ransackable_attributes).to include("balance", "business_id", "customer_id")
+    end
+  end
+
+  describe ".ransackable_associations" do
+    it "returns expected associations" do
+      expect(CreditAccount.ransackable_associations).to include("business", "customer", "credit_transactions")
+    end
   end
 end

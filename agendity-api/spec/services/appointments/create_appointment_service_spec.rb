@@ -314,6 +314,70 @@ RSpec.describe Appointments::CreateAppointmentService do
     end
   end
 
+  describe "additional services" do
+    let(:extra_service) { create(:service, business: business, price: 10_000, duration_minutes: 15) }
+
+    it "adds additional services to the appointment" do
+      params = base_params.merge(additional_service_ids: [extra_service.id])
+      result = described_class.call(business: business, params: params)
+      expect(result).to be_success
+      appointment = result.data[:appointment]
+      expect(appointment.appointment_services.count).to eq(1)
+      expect(appointment.end_time.strftime("%H:%M")).to eq("10:45") # 30 + 15 min
+      expect(appointment.price).to eq(35_000) # 25,000 + 10,000
+    end
+  end
+
+  describe "lock token release" do
+    it "releases the slot lock when lock_token is provided" do
+      expect(Bookings::SlotLockService).to receive(:unlock).with(
+        hash_including(token: "my-lock-token")
+      )
+      result = described_class.call(business: business, params: base_params, lock_token: "my-lock-token")
+      expect(result).to be_success
+    end
+
+    it "does not attempt unlock when lock_token is blank" do
+      expect(Bookings::SlotLockService).not_to receive(:unlock)
+      result = described_class.call(business: business, params: base_params, lock_token: nil)
+      expect(result).to be_success
+    end
+  end
+
+  describe "customer with birth_date" do
+    let(:customer) { create(:customer, business: business, email: "carlos@test.com", birth_date: nil) }
+
+    before { customer }
+
+    it "updates birth_date when provided and not yet set" do
+      params = base_params.merge(customer_birth_date: "1990-05-15")
+      result = described_class.call(business: business, params: params)
+      expect(result).to be_success
+      expect(customer.reload.birth_date.to_s).to eq("1990-05-15")
+    end
+  end
+
+  describe "customer-specific discount code" do
+    let(:other_customer) { create(:customer, business: business, email: "other@test.com") }
+    let!(:discount) do
+      create(:discount_code,
+        business: business,
+        code: "VIP10",
+        discount_type: "percentage",
+        discount_value: 10,
+        active: true,
+        customer: other_customer)
+    end
+
+    it "rejects discount code assigned to a different customer" do
+      params = base_params.merge(discount_code: "VIP10")
+      result = described_class.call(business: business, params: params)
+      expect(result).to be_success
+      appointment = result.data[:appointment]
+      expect(appointment.discount_code_id).to be_nil
+    end
+  end
+
   describe "dynamic pricing" do
     context "when an active pricing exists for the date" do
       let!(:pricing) do

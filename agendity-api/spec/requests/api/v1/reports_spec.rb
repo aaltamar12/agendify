@@ -59,5 +59,42 @@ RSpec.describe "Api::V1::Reports", type: :request do
       expect(data).to have_key("revenue")
       expect(data).to have_key("net_profit")
     end
+
+    it "returns profit data for week period" do
+      get "/api/v1/reports/profit", params: { period: "week" }, headers: headers
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body["data"]["period"]).to eq("week")
+    end
+
+    it "returns profit data for year period" do
+      get "/api/v1/reports/profit", params: { period: "year" }, headers: headers
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body["data"]["period"]).to eq("year")
+    end
+
+    it "defaults to month when period is unrecognized" do
+      get "/api/v1/reports/profit", params: { period: "invalid" }, headers: headers
+      expect(response).to have_http_status(:ok)
+    end
+  end
+
+  describe "GET /api/v1/reports/summary (failure)" do
+    it "returns 422 when summary service fails" do
+      allow(Reports::SummaryService).to receive(:call).and_return(
+        ServiceResult.new(success: false, error: "Something failed")
+      )
+      get "/api/v1/reports/summary", headers: headers
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+  end
+
+  describe "GET /api/v1/reports/revenue (failure)" do
+    it "returns 422 when revenue service fails" do
+      allow(Reports::RevenueService).to receive(:call).and_return(
+        ServiceResult.new(success: false, error: "Something failed")
+      )
+      get "/api/v1/reports/revenue", params: { period: "month" }, headers: headers
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
   end
 end

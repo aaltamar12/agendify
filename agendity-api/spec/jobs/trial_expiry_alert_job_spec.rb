@@ -114,6 +114,57 @@ RSpec.describe TrialExpiryAlertJob do
       end
     end
 
+    context "Stage 4: trial expired 10 days ago" do
+      let!(:business) do
+        create(:business,
+          trial_ends_at: 10.days.ago.beginning_of_day,
+          trial_alert_stage: 3,
+          status: :suspended)
+      end
+
+      it "deactivates the business and sets trial_alert_stage to 4" do
+        described_class.perform_now
+
+        business.reload
+        expect(business.trial_alert_stage).to eq(4)
+        expect(business.status).to eq("inactive")
+      end
+
+      it "creates an AdminNotification about deactivation" do
+        expect { described_class.perform_now }.to change(AdminNotification, :count).by(1)
+
+        notification = AdminNotification.last
+        expect(notification.title).to include("desactivado")
+      end
+
+      it "logs a business_deactivated activity" do
+        described_class.perform_now
+
+        log = ActivityLog.where(action: "business_deactivated").last
+        expect(log).to be_present
+        expect(log.business).to eq(business)
+      end
+    end
+
+    context "Stage 3: sends WhatsApp when owner has phone" do
+      let(:owner_with_phone) { create(:user, phone: "3001234567") }
+      let!(:business) do
+        create(:business,
+          owner: owner_with_phone,
+          trial_ends_at: 2.days.ago.beginning_of_day,
+          trial_alert_stage: 2,
+          status: :active)
+      end
+
+      it "sends WhatsApp notification to owner" do
+        described_class.perform_now
+
+        expect(Notifications::WhatsAppChannel).to have_received(:deliver).with(
+          hash_including(template: :"trial_expiry_stage_3")
+        ).at_least(:once)
+      end
+    end
+
     context "skips businesses with active subscription" do
       let!(:business) do
         create(:business,
