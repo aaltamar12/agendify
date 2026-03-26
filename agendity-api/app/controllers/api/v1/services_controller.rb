@@ -9,7 +9,7 @@ module Api
 
       # GET /api/v1/services
       def index
-        services = current_business.services
+        services = current_business.services.order(created_at: :desc)
         render_success(ServiceSerializer.render_as_hash(services))
       end
 
