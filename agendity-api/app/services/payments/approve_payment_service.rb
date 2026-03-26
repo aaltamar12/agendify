@@ -23,6 +23,7 @@ module Payments
         end
 
         ::SendBookingConfirmedJob.perform_later(appointment.id)
+        schedule_30min_reminder(appointment)
 
         ActivityLog.log(
           business: appointment.business,
@@ -38,6 +39,14 @@ module Payments
     end
 
     private
+
+    def schedule_30min_reminder(appointment)
+      reminder_time = appointment.appointment_date.in_time_zone(appointment.business.timezone || "America/Bogota")
+                        .change(hour: appointment.start_time.hour, min: appointment.start_time.min) - 30.minutes
+      return unless reminder_time > Time.current
+
+      ::SendAppointmentReminder30minJob.set(wait_until: reminder_time).perform_later(appointment.id)
+    end
 
     def generate_ticket_code
       loop do

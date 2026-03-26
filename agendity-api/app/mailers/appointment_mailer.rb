@@ -116,6 +116,22 @@ class AppointmentMailer < ApplicationMailer
     )
   end
 
+  # Send a 30-minute-before reminder to the customer.
+  def reminder_30min(appointment)
+    @appointment = appointment
+    @business    = appointment.business
+    @customer    = appointment.customer
+    @service     = appointment.service
+    @employee    = appointment.employee
+
+    return unless @customer.email.present?
+
+    mail(
+      to: @customer.email,
+      subject: "Tu cita en #{@business.name} es en 30 minutos"
+    )
+  end
+
   # Send a reminder to the customer 24 hours before the appointment.
   def reminder(appointment)
     @appointment = appointment

@@ -17,6 +17,7 @@ module Notifications
       #   :rating_request        (MARKETING) — post-service rating
       #   :booking_confirmed     (UTILITY)   — payment approved, ticket ready
       #   :appointment_reminder  (UTILITY)   — 24h before appointment
+      #   :appointment_reminder_30min (UTILITY) — 30min before appointment
       #   :booking_cancelled     (UTILITY)   — appointment cancelled
       #   :payment_reminder      (UTILITY)   — pending payment reminder
       #   :payment_rejected      (UTILITY)   — proof of payment rejected

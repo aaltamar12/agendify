@@ -2,7 +2,11 @@
 
 <p>Hola, <strong><%= @customer.name %></strong>.</p>
 
-<p>Gracias por visitar <strong><%= @business_name %></strong>. Nos encantaría saber cómo fue tu experiencia con el servicio <strong><%= @service_name %></strong>.</p>
+<% if @employee_name.present? %>
+  <p>Gracias por visitar <strong><%= @business_name %></strong>. Nos encantaría saber cómo fue tu experiencia con <strong><%= @employee_name %></strong> en el servicio <strong><%= @service_name %></strong>.</p>
+<% else %>
+  <p>Gracias por visitar <strong><%= @business_name %></strong>. Nos encantaría saber cómo fue tu experiencia con el servicio <strong><%= @service_name %></strong>.</p>
+<% end %>
 
 <p>Tu opinión nos ayuda a mejorar y ayuda a otros clientes a elegir con confianza.</p>
 

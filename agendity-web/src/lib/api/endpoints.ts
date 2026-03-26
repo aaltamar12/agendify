@@ -213,5 +213,7 @@ export const ENDPOINTS = {
     adBannerImpression: (id: number) => `${BASE}/public/ad_banners/${id}/impression`,
     adBannerClick: (id: number) => `${BASE}/public/ad_banners/${id}/click`,
     validateCode: (slug: string) => `${BASE}/public/${slug}/validate_code`,
+    rate: (slug: string) => `${BASE}/public/${slug}/rate`,
+    createReview: (slug: string) => `${BASE}/public/${slug}/reviews`,
   },
 } as const;

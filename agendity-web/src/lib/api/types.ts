@@ -141,6 +141,8 @@ export interface Employee {
   pending_balance?: number;
   score?: number | null;
   rating_avg?: number | null;
+  rating_average?: number;
+  total_reviews?: number;
   created_at: string;
   updated_at: string;
 }

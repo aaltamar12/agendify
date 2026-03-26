@@ -1,8 +1,9 @@
 'use client';
 
-import { Users } from 'lucide-react';
+import { Users, Star } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { Card, Avatar } from '@/components/ui';
+import { StarRating } from '@/components/shared/star-rating';
 import { useBookingStore } from '@/lib/stores/booking-store';
 import type { Employee } from '@/lib/api/types';
 
@@ -113,6 +114,14 @@ export function EmployeeSelector({ employees }: EmployeeSelectorProps) {
                   <h4 className="font-medium text-gray-900">
                     {employee.name}
                   </h4>
+                  {(employee.rating_average ?? 0) > 0 && (
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <StarRating rating={employee.rating_average ?? 0} size="sm" />
+                      <span className="text-xs text-gray-500">
+                        ({employee.total_reviews ?? 0})
+                      </span>
+                    </div>
+                  )}
                   {employee.bio && (
                     <p className="text-sm text-gray-500 line-clamp-1">
                       {employee.bio}

@@ -16,6 +16,8 @@ class Review < ApplicationRecord
   # -- Callbacks --
   after_create :update_business_rating
   after_destroy :update_business_rating
+  after_create :update_employee_rating
+  after_destroy :update_employee_rating
 
   # -- Ransack (ActiveAdmin filters) --
   def self.ransackable_attributes(_auth_object = nil)
@@ -32,5 +34,13 @@ class Review < ApplicationRecord
     avg = business.reviews.average(:rating).to_f.round(2)
     count = business.reviews.count
     business.update_columns(rating_average: avg, total_reviews: count)
+  end
+
+  def update_employee_rating
+    return unless employee_id.present?
+
+    avg = Review.where(employee_id: employee_id).average(:rating)&.round(2) || 0
+    count = Review.where(employee_id: employee_id).count
+    Employee.where(id: employee_id).update_all(rating_average: avg, total_reviews: count)
   end
 end

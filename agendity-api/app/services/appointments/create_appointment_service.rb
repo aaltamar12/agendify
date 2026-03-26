@@ -144,6 +144,9 @@ module Appointments
         # Release the temporary slot lock now that the appointment is persisted
         release_slot_lock(appointment)
 
+        # Schedule 30-min reminder if auto-confirmed (credits covered full price)
+        schedule_30min_reminder(appointment) if appointment.confirmed?
+
         ActivityLog.log(
           business: @business,
           action: "booking_created",
@@ -301,6 +304,14 @@ module Appointments
       start_time = @params[:start_time]
       time_str = start_time.is_a?(String) ? start_time : start_time.strftime("%H:%M")
       time_str <= now.strftime("%H:%M")
+    end
+
+    def schedule_30min_reminder(appointment)
+      reminder_time = appointment.appointment_date.in_time_zone(@business.timezone || "America/Bogota")
+                        .change(hour: appointment.start_time.hour, min: appointment.start_time.min) - 30.minutes
+      return unless reminder_time > Time.current
+
+      ::SendAppointmentReminder30minJob.set(wait_until: reminder_time).perform_later(appointment.id)
     end
   end
 end

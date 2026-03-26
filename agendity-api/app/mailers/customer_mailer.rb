@@ -6,6 +6,7 @@ class CustomerMailer < ApplicationMailer
     @customer = customer
     @business_name = data[:business_name]
     @service_name = data[:service_name]
+    @employee_name = data[:employee_name]
     @review_url = data[:review_url]
 
     mail(

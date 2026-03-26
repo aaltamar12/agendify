@@ -6,7 +6,7 @@ class SendRatingRequestJob < ApplicationJob
   queue_as :notifications
 
   def perform(appointment_id)
-    appointment = Appointment.includes(:customer, :service, :business).find(appointment_id)
+    appointment = Appointment.includes(:customer, :service, :employee, :business).find(appointment_id)
     customer = appointment.customer
     return unless customer.present?
 
@@ -19,8 +19,9 @@ class SendRatingRequestJob < ApplicationJob
       data: {
         business_name: business.name,
         service_name: appointment.service.name,
+        employee_name: appointment.employee&.name,
         appointment_date: appointment.appointment_date,
-        review_url: "#{ENV.fetch('FRONTEND_URL', 'http://localhost:3000')}/#{business.slug}#reviews"
+        review_url: "#{ENV.fetch('FRONTEND_URL', 'http://localhost:3000')}/#{business.slug}/rate?appointment=#{appointment.id}"
       }
     )
   end

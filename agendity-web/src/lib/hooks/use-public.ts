@@ -266,6 +266,53 @@ export function useSubmitTicketPayment() {
   });
 }
 
+// --- Rating page ---
+
+interface RatingPageData {
+  appointment: {
+    id: number;
+    service_name: string;
+    employee_name: string | null;
+    appointment_date: string;
+    customer_name: string | null;
+  };
+  business_name: string;
+  business_logo_url: string | null;
+  already_reviewed: boolean;
+}
+
+interface CreateReviewPayload {
+  slug: string;
+  appointment_id: number;
+  rating: number;
+  comment?: string;
+  customer_name?: string;
+}
+
+export function useRatingPage(slug: string, appointmentId: string | null) {
+  return useQuery({
+    queryKey: ['public', 'rate', slug, appointmentId],
+    queryFn: () =>
+      get<ApiResponse<RatingPageData>>(ENDPOINTS.PUBLIC.rate(slug), {
+        params: { appointment: appointmentId },
+      }),
+    select: (res) => res.data,
+    enabled: !!slug && !!appointmentId,
+  });
+}
+
+export function useCreateReview() {
+  return useMutation({
+    mutationFn: (payload: CreateReviewPayload) => {
+      const { slug, ...data } = payload;
+      return post<ApiResponse<{ review: Review }>>(
+        ENDPOINTS.PUBLIC.createReview(slug),
+        data,
+      );
+    },
+  });
+}
+
 // --- Discount code validation ---
 
 export interface ValidateCodeResponse {

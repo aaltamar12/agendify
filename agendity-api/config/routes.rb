@@ -223,6 +223,8 @@ Rails.application.routes.draw do
         post ":slug/book",         to: "bookings#create"
         post ":slug/lock_slot",    to: "bookings#lock_slot"
         post ":slug/unlock_slot",  to: "bookings#unlock_slot"
+        get  ":slug/rate",         to: "reviews#show"
+        post ":slug/reviews",      to: "reviews#create"
       end
     end
   end

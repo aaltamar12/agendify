@@ -7,6 +7,7 @@ class EmployeeSerializer < Blueprinter::Base
          :bio, :active, :commission_percentage,
          :payment_type, :fixed_daily_pay,
          :document_number, :document_type, :fiscal_address,
+         :rating_average, :total_reviews,
          :created_at, :updated_at
 
   # Frontend expects avatar_url — prefer ActiveStorage avatar, fallback to legacy photo_url
@@ -47,6 +48,7 @@ class EmployeeSerializer < Blueprinter::Base
     excludes :business_id, :user_id, :phone, :email, :bio,
              :commission_percentage, :score, :rating_avg,
              :document_number, :document_type, :fiscal_address,
-             :created_at, :updated_at
+             :created_at, :updated_at,
+             :payment_type, :fixed_daily_pay
   end
 end

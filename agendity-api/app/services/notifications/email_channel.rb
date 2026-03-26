@@ -13,6 +13,8 @@ module Notifications
         AppointmentMailer.booking_confirmed(data[:appointment]).deliver_now
       when :appointment_reminder
         AppointmentMailer.reminder(data[:appointment]).deliver_now
+      when :appointment_reminder_30min
+        AppointmentMailer.reminder_30min(data[:appointment]).deliver_now
       when :booking_cancelled
         AppointmentMailer.booking_cancelled_to_customer(data[:appointment]).deliver_now
       when :payment_reminder

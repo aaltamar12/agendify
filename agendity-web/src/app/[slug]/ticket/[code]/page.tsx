@@ -28,6 +28,7 @@ import {
   Info,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
+import { CountdownTimer } from '@/components/shared/countdown-timer';
 import { Button, Badge, Spinner, Card, Input } from '@/components/ui';
 import { usePublicTicket, useCancelBooking, useCancelPreview, useSubmitTicketPayment } from '@/lib/hooks/use-public';
 import { getSavedCustomer } from '@/lib/utils/saved-customer';
@@ -957,6 +958,13 @@ export default function TicketPage() {
             )}
           </div>
 
+          {/* Countdown timer */}
+          {appointment.date && appointment.start_time && (
+            <div className="mt-6">
+              <CountdownTimer targetDate={`${appointment.date}T${appointment.start_time}`} />
+            </div>
+          )}
+
           {/* Ticket code */}
           <div className="mt-6 text-center">
             <p className="text-xs text-gray-500">Codigo de tu cita</p>
@@ -1074,6 +1082,13 @@ export default function TicketPage() {
           <div className="mt-6">
             {renderAppointmentDetails()}
           </div>
+
+          {/* Countdown timer */}
+          {appointment.date && appointment.start_time && (
+            <div className="mt-5">
+              <CountdownTimer targetDate={`${appointment.date}T${appointment.start_time}`} dark />
+            </div>
+          )}
         </div>
 
         {/* Divider — perforated line effect */}

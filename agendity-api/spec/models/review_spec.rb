@@ -45,5 +45,33 @@ RSpec.describe Review, type: :model do
       expect(business.rating_average).to eq(3.0)
       expect(business.total_reviews).to eq(1)
     end
+
+    context "employee rating" do
+      let(:employee) { create(:employee, business: business) }
+      let(:customer) { create(:customer, business: business) }
+
+      it "updates employee rating_average and total_reviews after create" do
+        create(:review, business: business, customer: customer, employee: employee, rating: 5)
+        create(:review, business: business, customer: customer, employee: employee, rating: 3)
+        employee.reload
+        expect(employee.rating_average).to eq(4.0)
+        expect(employee.total_reviews).to eq(2)
+      end
+
+      it "recalculates employee rating after destroy" do
+        review = create(:review, business: business, customer: customer, employee: employee, rating: 5)
+        create(:review, business: business, customer: customer, employee: employee, rating: 3)
+        review.destroy
+        employee.reload
+        expect(employee.rating_average).to eq(3.0)
+        expect(employee.total_reviews).to eq(1)
+      end
+
+      it "does not fail when review has no employee" do
+        expect {
+          create(:review, business: business, customer: customer, employee: nil, rating: 4)
+        }.not_to raise_error
+      end
+    end
   end
 end
