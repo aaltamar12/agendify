@@ -105,6 +105,8 @@ export interface Business {
   owner_id: number;
   created_at: string;
   updated_at: string;
+  // Whether credits and cashback are enabled for this business
+  credits_enabled?: boolean;
   // True when this is an independent professional (no physical establishment)
   independent?: boolean;
   // True when the business operates virtually (shows additional_info field on payment)

@@ -21,6 +21,12 @@ RSpec.describe "Api::V1::Credits", type: :request do
       get "/api/v1/credits/summary"
       expect(response).to have_http_status(:unauthorized)
     end
+
+    it "returns 403 when credits are disabled" do
+      business.update!(credits_enabled: false)
+      get "/api/v1/credits/summary", headers: headers
+      expect(response).to have_http_status(:forbidden)
+    end
   end
 
   describe "GET /api/v1/customers/:id/credits" do

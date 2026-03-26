@@ -3,6 +3,8 @@
 module Api
   module V1
     class CreditsController < BaseController
+      before_action :require_credits_enabled!
+
       # GET /api/v1/credits/summary
       def summary
         accounts = current_business.credit_accounts
@@ -82,6 +84,14 @@ module Api
         customer = current_business.customers.find(params[:id])
         account = CreditAccount.find_by(customer: customer, business: current_business)
         render_success({ balance: account&.balance.to_f || 0 })
+      end
+
+      private
+
+      def require_credits_enabled!
+        return if current_business.credits_enabled?
+
+        render_error("Los creditos estan desactivados para este negocio", status: :forbidden, code: "CREDITS_DISABLED")
       end
     end
   end

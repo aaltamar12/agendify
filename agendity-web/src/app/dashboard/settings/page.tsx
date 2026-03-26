@@ -264,6 +264,26 @@ export default function SettingsPage() {
         )}
 
 
+        {/* Credits & Cashback toggle */}
+        {loadingBusiness ? (
+          <Skeleton className="h-32 w-full" />
+        ) : (
+          business && (
+            <CreditsToggleSection
+              enabled={business.credits_enabled !== false}
+              onToggle={async (enabled) => {
+                try {
+                  await updateBusiness.mutateAsync({ credits_enabled: enabled } as any);
+                  addToast({ type: 'success', message: enabled ? 'Créditos activados' : 'Créditos desactivados' });
+                } catch {
+                  addToast({ type: 'error', message: 'Error al actualizar la configuración de créditos' });
+                }
+              }}
+              loading={updateBusiness.isPending}
+            />
+          )
+        )}
+
         {/* Notification preferences */}
         {loadingBusiness ? (
           <Skeleton className="h-48 w-full" />
@@ -1215,6 +1235,48 @@ function PaymentSection({
           </Button>
         </div>
       </form>
+    </Card>
+  );
+}
+
+function CreditsToggleSection({
+  enabled,
+  onToggle,
+  loading,
+}: {
+  enabled: boolean;
+  onToggle: (enabled: boolean) => Promise<void>;
+  loading: boolean;
+}) {
+  return (
+    <Card>
+      <h2 className="text-lg font-semibold text-gray-900">Créditos y Cashback</h2>
+      <p className="mt-1 text-sm text-gray-500">
+        Controla si tus clientes pueden acumular y usar créditos en tu negocio
+      </p>
+
+      <div className="mt-4 flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium text-gray-700">
+            {enabled ? 'Activado' : 'Desactivado'}
+          </p>
+          {!enabled && (
+            <p className="mt-1 text-xs text-amber-600">
+              Al desactivar, tus clientes no podrán usar créditos ni acumular cashback
+            </p>
+          )}
+        </div>
+        <label className="relative inline-flex cursor-pointer items-center">
+          <input
+            type="checkbox"
+            className="peer sr-only"
+            checked={enabled}
+            disabled={loading}
+            onChange={() => onToggle(!enabled)}
+          />
+          <div className="peer h-6 w-11 rounded-full bg-gray-200 peer-checked:bg-violet-600 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-violet-300 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:shadow after:transition-all after:content-[''] peer-checked:after:translate-x-full" />
+        </label>
+      </div>
     </Card>
   );
 }

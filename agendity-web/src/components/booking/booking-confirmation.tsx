@@ -140,7 +140,7 @@ export function BookingConfirmation({
         ...(additionalServiceIds.length > 0 && {
           additional_service_ids: additionalServiceIds,
         }),
-        ...(applyCredits && creditsToApply > 0 && {
+        ...(applyCredits && creditsToApply > 0 && business.credits_enabled !== false && {
           apply_credits: creditsToApply,
         }),
         ...(discountCode && { discount_code: discountCode }),
@@ -645,8 +645,8 @@ export function BookingConfirmation({
 
         return (
           <div className="space-y-3">
-            {/* Credits section */}
-            {creditBalance > 0 && (
+            {/* Credits section — hidden when business has credits disabled */}
+            {creditBalance > 0 && business.credits_enabled !== false && (
               <div className="rounded-xl border border-green-200 bg-green-50 px-5 py-4">
                 <div className="flex items-center justify-between">
                   <div>

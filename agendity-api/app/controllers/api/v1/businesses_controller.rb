@@ -114,7 +114,8 @@ module Api
           :lunch_start_time, :lunch_end_time, :lunch_enabled,
           :slot_interval_minutes, :gap_between_appointments_minutes,
           :nit, :legal_representative_name, :legal_representative_document, :legal_representative_document_type,
-          :birthday_campaign_enabled, :birthday_discount_pct, :birthday_discount_days_valid
+          :birthday_campaign_enabled, :birthday_discount_pct, :birthday_discount_days_valid,
+          :credits_enabled
         )
         # Map frontend cover_url to DB column cover_image_url
         if permitted.key?(:cover_url)

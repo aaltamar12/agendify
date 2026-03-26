@@ -10,6 +10,8 @@ module Credits
     end
 
     def call
+      return success(nil) unless @business.credits_enabled?
+
       plan = @business.current_plan
       return success(nil) unless plan&.cashback_enabled?
       return success(nil) unless plan.cashback_percentage&.positive?

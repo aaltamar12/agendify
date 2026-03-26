@@ -598,6 +598,24 @@ El producto está funcional de punta a punta. Todas las features core están imp
 - [x] Banner "Oculto" en dashboard para negocios suspended
 - [x] Seeds de ejemplo: Barber King (suspended) y Glamour Studio (inactive)
 
+### Cambios recientes (marzo 2026 — Sprints 1-5)
+- [x] Trial 25 días (trial_ends_at = 25.days.from_now al registrar, TrialExpiryAlertJob con 4 stages)
+- [x] Nuevos precios de planes ($9/$22/$27 USD — $37k/$75k/$99k COP)
+- [x] Método de pago Bre-B (breb_key encriptado en Business, formulario en settings)
+- [x] T&C + Privacy Policy pages (páginas estáticas legales)
+- [x] Programa de referidos público (ReferralCode + Referral, link ?ref=CODE, activación al aprobar pago)
+- [x] Check-in mejorado (saludo personalizado + última visita del cliente)
+- [x] Smart dynamic pricing (DynamicPricing con tarifas por fecha/día, DemandAnalysisService con sugerencias IA)
+- [x] Countdown timer en ticket (cuenta regresiva visual hasta la hora de la cita)
+- [x] Rating page dedicada con calificación de profesional y negocio (flujo post-cita)
+- [x] Employee payment receipt (recibo PDF vía Grover + envío por email)
+- [x] Birthday one-click greeting (BirthdayCampaignJob + DiscountCode automático para cumpleaños)
+- [x] Virtual business + additional info (negocio virtual sin local físico, campo info adicional en pago)
+- [x] Service categories CRUD (categorías de servicio con agrupamiento en booking flow)
+- [x] Componente compartido PlanCard (reutilizable en checkout y settings)
+- [x] Credits toggle per business (`credits_enabled` en Business, guards en booking/cashback/controller/frontend)
+- [x] Subscription banners mejorados (azul para trial info, lógica de ocultar después de cerrar, estados amarillo/rojo/rojo oscuro)
+
 ### Notas técnicas importantes
 - El `ticket_code` se genera SIEMPRE al crear la cita (no al aprobar el pago). Permite identificar la cita en todo el flujo. La visualización VIP (boarding pass + QR + descarga PNG) es exclusiva del plan Profesional+.
 - Activity Logs y Request Logs están disponibles en el panel de SuperAdmin para auditoría completa.
@@ -611,6 +629,7 @@ El producto está funcional de punta a punta. Todas las features core están imp
 - `BirthdayCampaignJob` corre diario a las 8am y genera códigos de descuento para clientes con cumpleaños hoy.
 - `formatCurrency` usa `Intl.NumberFormat('es-CO')` — separadores de miles con punto, sin decimales.
 - `DemandAnalysisService` genera sugerencias en español (MONTH_NAMES_ES) para meses de alta demanda (incremento) y baja demanda (descuento), ademas de fines de semana y temporada navideña.
+- `credits_enabled` (boolean, default true) en Business permite al negocio desactivar créditos y cashback. Cuando está en false: no se aplican créditos en booking, no se otorga cashback, el controller de créditos retorna 403, y customer_lookup devuelve balance 0.
 - Ver `docs/tech/flujos-completos.md` para diagramas detallados de todos los flujos del sistema.
 - Ver `docs/tech/sistema-referidos.md` para el flujo técnico del sistema de referidos y checkout de suscripción.
 - Ver `docs/tech/codigos-descuento-cumpleanos.md` para la documentación técnica de códigos de descuento y campañas de cumpleaños.

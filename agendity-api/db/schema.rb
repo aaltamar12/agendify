@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_26_043432) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_26_044654) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "unaccent"
@@ -240,6 +240,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_26_043432) do
     t.integer "birthday_discount_days_valid", default: 7
     t.string "breb_key"
     t.boolean "virtual_business", default: false, null: false
+    t.boolean "credits_enabled", default: true, null: false
     t.index ["city"], name: "index_businesses_on_city"
     t.index ["independent"], name: "index_businesses_on_independent"
     t.index ["latitude", "longitude"], name: "index_businesses_on_latitude_and_longitude"

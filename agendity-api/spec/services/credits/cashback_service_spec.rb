@@ -125,6 +125,32 @@ RSpec.describe Credits::CashbackService do
     end
   end
 
+  context "when business has credits_enabled false" do
+    before do
+      business.update!(credits_enabled: false)
+      create(:subscription,
+        business: business,
+        plan: plan_with_cashback,
+        status: :active,
+        start_date: Date.current,
+        end_date: 30.days.from_now)
+    end
+
+    it "returns success with nil (no cashback)" do
+      result = subject
+      expect(result).to be_success
+      expect(result.data).to be_nil
+    end
+
+    it "does not create a CreditAccount" do
+      expect { subject }.not_to change(CreditAccount, :count)
+    end
+
+    it "does not create a CreditTransaction" do
+      expect { subject }.not_to change(CreditTransaction, :count)
+    end
+  end
+
   context "when business has no active subscription" do
     it "returns success with nil" do
       result = subject

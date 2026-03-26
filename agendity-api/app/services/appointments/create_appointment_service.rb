@@ -98,9 +98,9 @@ module Appointments
           customer.update!(pending_penalty: 0)
         end
 
-        # Apply credits if requested
+        # Apply credits if requested (only when credits are enabled for the business)
         credits_applied = 0
-        if @params[:apply_credits].present? && @params[:apply_credits].to_d > 0
+        if @business.credits_enabled? && @params[:apply_credits].present? && @params[:apply_credits].to_d > 0
           credit_account = CreditAccount.find_by(customer: customer, business: @business)
           if credit_account && credit_account.balance > 0
             credits_to_use = [@params[:apply_credits].to_d, credit_account.balance, final_price].min

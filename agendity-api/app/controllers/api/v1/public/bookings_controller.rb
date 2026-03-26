@@ -114,12 +114,16 @@ module Api
           customer = business.customers.find_by("LOWER(email) = ?", params[:email].to_s.downcase.strip)
 
           if customer
-            credit_account = CreditAccount.find_by(customer: customer, business: business)
+            credit_balance = 0
+            if business.credits_enabled?
+              credit_account = CreditAccount.find_by(customer: customer, business: business)
+              credit_balance = credit_account&.balance.to_f || 0
+            end
             render_success({
               name: customer.name,
               email: customer.email,
               phone: customer.phone,
-              credit_balance: credit_account&.balance.to_f || 0
+              credit_balance: credit_balance
             })
           else
             render_error("No encontramos una reserva anterior con ese correo.", status: :not_found)
