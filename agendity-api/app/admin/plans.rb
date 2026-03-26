@@ -111,65 +111,6 @@ ActiveAdmin.register Plan do
     end
 
     f.actions
-
-    # Auto-calculation JS for COP <-> USD conversion
-    # NOTE: Script runs immediately (not on DOMContentLoaded) because ActiveAdmin
-    # renders this after the DOM is ready, so the event would never fire.
-    f.template.concat(
-      f.template.content_tag(:script, <<~JS.html_safe)
-        (function() {
-          var trm = #{trm};
-          var copField = document.getElementById('plan_price_monthly');
-          var usdField = document.getElementById('plan_price_monthly_usd');
-
-          if (!copField || !usdField) return;
-
-          var updating = false;
-
-          copField.addEventListener('input', function() {
-            if (updating) return;
-            updating = true;
-            var cop = parseFloat(this.value) || 0;
-            usdField.value = cop > 0 ? Math.round(cop / trm) : '';
-            updating = false;
-          });
-
-          usdField.addEventListener('input', function() {
-            if (updating) return;
-            updating = true;
-            var usd = parseFloat(this.value) || 0;
-            copField.value = usd > 0 ? Math.round(usd * trm) : '';
-            updating = false;
-          });
-        })();
-
-        // Features dynamic add/remove
-        (function() {
-          var container = document.getElementById('features-container');
-          var addBtn = document.getElementById('add-feature-btn');
-          if (!container || !addBtn) return;
-
-          function createRow(value) {
-            var row = document.createElement('div');
-            row.className = 'feature-row';
-            row.style = 'display:flex;gap:8px;margin-bottom:8px;align-items:center;';
-            row.innerHTML = '<input type="text" name="plan[features][]" value="' + (value || '') + '" style="flex:1;padding:6px 10px;border:1px solid #ccc;border-radius:4px;" placeholder="Ej: Agenda y calendario" />' +
-              '<button type="button" class="remove-feature" style="background:#ef4444;color:white;border:none;border-radius:4px;padding:4px 10px;cursor:pointer;">✕</button>';
-            return row;
-          }
-
-          addBtn.addEventListener('click', function() {
-            container.appendChild(createRow(''));
-            container.lastElementChild.querySelector('input').focus();
-          });
-
-          container.addEventListener('click', function(e) {
-            if (e.target.classList.contains('remove-feature')) {
-              e.target.parentElement.remove();
-            }
-          });
-        })();
-      JS
-    )
+    # JS for TRM auto-calc and features add/remove is in app/assets/javascripts/active_admin.js
   end
 end
