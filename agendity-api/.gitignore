@@ -31,3 +31,6 @@
 # Ignore master key for decrypting credentials and more.
 /config/master.key
 coverage/
+
+# Node modules (puppeteer for Grover PDF generation)
+/node_modules/

@@ -124,6 +124,7 @@ interface SubmitTicketPaymentPayload {
   payment_method?: string;
   proof: File;
   customer_email: string;
+  additional_info?: string;
 }
 
 // --- Hooks ---
@@ -248,6 +249,9 @@ export function useSubmitTicketPayment() {
       formData.append('payment_method', payload.payment_method ?? 'transfer');
       formData.append('proof', payload.proof);
       formData.append('customer_email', payload.customer_email);
+      if (payload.additional_info) {
+        formData.append('additional_info', payload.additional_info);
+      }
 
       return post<ApiResponse<{ status: string; message: string }>>(
         ENDPOINTS.PUBLIC.submitTicketPayment(payload.code),

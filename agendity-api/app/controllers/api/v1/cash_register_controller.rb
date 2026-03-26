@@ -67,6 +67,23 @@ module Api
         render_success({ attached: payment.proof.attached?, employee_payment_id: payment.id })
       end
 
+      # GET /api/v1/cash_register/:id/employee_payments/:employee_payment_id/receipt
+      def employee_payment_receipt
+        close = current_business.cash_register_closes.find(params[:id])
+        payment = close.employee_payments.find(params[:employee_payment_id])
+
+        result = CashRegister::GeneratePaymentReceiptService.call(employee_payment: payment)
+
+        if result.success?
+          send_data result.data,
+            filename: "recibo-#{payment.employee.name.parameterize}-#{close.date}.pdf",
+            type: "application/pdf",
+            disposition: "attachment"
+        else
+          render_error(result.error, status: :unprocessable_entity)
+        end
+      end
+
       # DELETE /api/v1/cash_register/delete_proof
       def delete_proof
         payment = EmployeePayment.joins(:cash_register_close)

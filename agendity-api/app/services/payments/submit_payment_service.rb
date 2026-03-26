@@ -4,11 +4,12 @@ module Payments
   # Creates a payment record attached to an appointment and moves
   # the appointment to the payment_sent status.
   class SubmitPaymentService < BaseService
-    def initialize(appointment:, payment_method:, amount:, proof_image_url: nil)
+    def initialize(appointment:, payment_method:, amount:, proof_image_url: nil, additional_info: nil)
       @appointment     = appointment
       @payment_method  = payment_method
       @amount          = amount
       @proof_image_url = proof_image_url
+      @additional_info = additional_info
     end
 
     def call
@@ -17,6 +18,7 @@ module Payments
           payment_method:  @payment_method,
           amount:          @amount,
           proof_image_url: @proof_image_url,
+          additional_info: @additional_info,
           status:          :submitted
         )
 

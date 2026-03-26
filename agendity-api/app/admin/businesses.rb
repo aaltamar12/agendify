@@ -19,7 +19,8 @@ ActiveAdmin.register Business do
                 :trial_ends_at, :onboarding_completed, :primary_color, :secondary_color,
                 :nit, :legal_representative_name, :legal_representative_document,
                 :legal_representative_document_type, :independent,
-                :birthday_campaign_enabled, :birthday_discount_pct, :birthday_discount_days_valid
+                :birthday_campaign_enabled, :birthday_discount_pct, :birthday_discount_days_valid,
+                :virtual_business
 
   # -- Index --
   includes :owner
@@ -35,6 +36,11 @@ ActiveAdmin.register Business do
         status_tag("Independiente", class: "", style: "background: #8b5cf6; color: white; border-radius: 9999px; padding: 2px 10px; font-size: 11px;")
       else
         status_tag("Establecimiento", class: "", style: "background: #6b7280; color: white; border-radius: 9999px; padding: 2px 10px; font-size: 11px;")
+      end
+    end
+    column(:virtual_business) do |b|
+      if b.virtual_business?
+        status_tag("Virtual", class: "", style: "background: #06b6d4; color: white; border-radius: 9999px; padding: 2px 10px; font-size: 11px;")
       end
     end
     column(:status) do |b|
@@ -127,6 +133,13 @@ ActiveAdmin.register Business do
       row(:independent) do |b|
         if b.independent?
           status_tag("Si - Profesional Independiente", class: "", style: "background: #8b5cf6; color: white; border-radius: 9999px; padding: 2px 10px; font-size: 11px;")
+        else
+          "No"
+        end
+      end
+      row(:virtual_business) do |b|
+        if b.virtual_business?
+          status_tag("Si - Negocio Virtual", class: "", style: "background: #06b6d4; color: white; border-radius: 9999px; padding: 2px 10px; font-size: 11px;")
         else
           "No"
         end
@@ -286,6 +299,7 @@ ActiveAdmin.register Business do
     end
     f.inputs "Legal / Independiente" do
       f.input :independent
+      f.input :virtual_business, label: "Negocio Virtual (solicita info adicional en pago)"
       f.input :nit
       f.input :legal_representative_name
       f.input :legal_representative_document

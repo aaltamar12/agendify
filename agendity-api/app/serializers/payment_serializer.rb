@@ -4,7 +4,7 @@ class PaymentSerializer < Blueprinter::Base
   identifier :id
 
   fields :appointment_id, :payment_method, :amount,
-         :status, :reference,
+         :status, :reference, :additional_info,
          :submitted_at, :approved_at, :rejected_at, :rejection_reason,
          :created_at, :updated_at
 

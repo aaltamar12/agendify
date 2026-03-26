@@ -107,6 +107,8 @@ export interface Business {
   updated_at: string;
   // True when this is an independent professional (no physical establishment)
   independent?: boolean;
+  // True when the business operates virtually (shows additional_info field on payment)
+  virtual_business?: boolean;
   // Legal fields (admin-managed)
   nit?: string | null;
   legal_representative_name?: string | null;
@@ -226,6 +228,7 @@ export interface Payment {
   status: PaymentStatus;
   payment_method: string | null;
   reference: string | null;
+  additional_info: string | null;
   proof_url: string | null;
   submitted_at: string | null;
   approved_at: string | null;
@@ -391,7 +394,8 @@ export type NotificationType =
   | 'payment_submitted'
   | 'payment_approved'
   | 'booking_cancelled'
-  | 'reminder';
+  | 'reminder'
+  | 'birthday';
 
 export interface Notification {
   id: number;
@@ -400,6 +404,7 @@ export interface Notification {
   notification_type: NotificationType;
   link: string | null;
   read: boolean;
+  metadata: Record<string, unknown> | null;
   created_at: string;
 }
 

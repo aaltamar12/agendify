@@ -11,6 +11,8 @@ import {
   CheckCheck,
   ChevronLeft,
   ChevronRight,
+  Cake,
+  Send,
 } from 'lucide-react';
 import { Card, Button, Skeleton, EmptyState } from '@/components/ui';
 import {
@@ -19,6 +21,8 @@ import {
   useMarkAllRead,
   useUnreadCount,
 } from '@/lib/hooks/use-notifications';
+import { useSendBirthdayGreeting } from '@/lib/hooks/use-customers';
+import { useUIStore } from '@/lib/stores/ui-store';
 import type { Notification, NotificationType } from '@/lib/api/types';
 
 // --- Icon config by notification type ---
@@ -51,6 +55,11 @@ const typeConfig: Record<
     icon: Clock,
     colorClass: 'text-amber-600',
     bgClass: 'bg-amber-100',
+  },
+  birthday: {
+    icon: Cake,
+    colorClass: 'text-pink-600',
+    bgClass: 'bg-pink-100',
   },
 };
 
@@ -87,12 +96,20 @@ function NotificationSkeleton() {
 function NotificationCard({
   notification,
   onClickItem,
+  onSendBirthdayGreeting,
+  isSendingGreeting,
 }: {
   notification: Notification;
   onClickItem: (n: Notification) => void;
+  onSendBirthdayGreeting?: (customerId: number) => void;
+  isSendingGreeting?: boolean;
 }) {
   const config = typeConfig[notification.notification_type] ?? typeConfig.reminder;
   const Icon = config.icon;
+  const customerId =
+    notification.notification_type === 'birthday'
+      ? (notification.metadata?.customer_id as number | undefined)
+      : undefined;
 
   return (
     <Card
@@ -130,6 +147,21 @@ function NotificationCard({
           {notification.body && (
             <p className="mt-1 text-sm text-gray-500">{notification.body}</p>
           )}
+          {notification.notification_type === 'birthday' && customerId && onSendBirthdayGreeting && (
+            <Button
+              variant="primary"
+              size="sm"
+              className="mt-2"
+              disabled={isSendingGreeting}
+              onClick={(e) => {
+                e.stopPropagation();
+                onSendBirthdayGreeting(customerId);
+              }}
+            >
+              <Send className="mr-1.5 h-3.5 w-3.5" />
+              {isSendingGreeting ? 'Enviando...' : 'Enviar saludo'}
+            </Button>
+          )}
         </div>
       </div>
     </Card>
@@ -143,6 +175,8 @@ export default function NotificationsPage() {
   const { data: countData } = useUnreadCount();
   const markRead = useMarkRead();
   const markAllRead = useMarkAllRead();
+  const sendGreeting = useSendBirthdayGreeting();
+  const addToast = useUIStore((s) => s.addToast);
 
   const notifications = response?.data;
   const meta = response?.meta;
@@ -159,6 +193,17 @@ export default function NotificationsPage() {
 
   function handleMarkAllRead() {
     markAllRead.mutate();
+  }
+
+  function handleSendBirthdayGreeting(customerId: number) {
+    sendGreeting.mutate(customerId, {
+      onSuccess: () => {
+        addToast({ type: 'success', message: 'Saludo de cumpleaños enviado' });
+      },
+      onError: () => {
+        addToast({ type: 'error', message: 'Error al enviar el saludo' });
+      },
+    });
   }
 
   return (
@@ -218,6 +263,8 @@ export default function NotificationsPage() {
               key={notification.id}
               notification={notification}
               onClickItem={handleClickNotification}
+              onSendBirthdayGreeting={handleSendBirthdayGreeting}
+              isSendingGreeting={sendGreeting.isPending}
             />
           ))}
         </div>

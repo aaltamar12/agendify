@@ -7,7 +7,7 @@ class Notification < ApplicationRecord
   # -- Validations --
   validates :title, presence: true
   validates :notification_type, presence: true,
-    inclusion: { in: %w[new_booking payment_submitted payment_approved booking_cancelled reminder ai_suggestion subscription_expiry] }
+    inclusion: { in: %w[new_booking payment_submitted payment_approved booking_cancelled reminder ai_suggestion subscription_expiry birthday] }
 
   # -- Scopes --
   scope :unread, -> { where(read: false) }

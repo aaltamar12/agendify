@@ -9,5 +9,8 @@ Fecha de cita: <%= @appointment.appointment_date.strftime("%d/%m/%Y") %>
 Hora: <%= @appointment.start_time.strftime("%I:%M %p") %>
 Monto: $<%= @payment.amount.to_i %> COP
 Método de pago: <%= @payment.cash? ? "Efectivo" : "Transferencia" %>
+<% if @payment.additional_info.present? %>
+Información adicional: <%= @payment.additional_info %>
+<% end %>
 
 Revisa el comprobante en tu panel de Agendity y aprueba o rechaza el pago.

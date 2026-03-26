@@ -48,6 +48,7 @@ export default function TicketPage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [verifyEmail, setVerifyEmail] = useState('');
+  const [additionalInfo, setAdditionalInfo] = useState('');
   const [downloading, setDownloading] = useState(false);
   const [cancellationResult, setCancellationResult] = useState<{
     creditAmount: number;
@@ -146,9 +147,11 @@ export default function TicketPage() {
         payment_method: 'transfer',
         proof: selectedFile,
         customer_email: customerEmail,
+        additional_info: additionalInfo || undefined,
       });
       setSelectedFile(null);
       setPreviewUrl(null);
+      setAdditionalInfo('');
     } catch {
       // Error handled by mutation state
     }
@@ -778,6 +781,25 @@ export default function TicketPage() {
                     />
                     <p className="mt-1 text-xs text-gray-500">
                       Ingresa tu correo electrónico para verificar tu identidad
+                    </p>
+                  </div>
+                )}
+
+                {/* Additional info — only for virtual businesses */}
+                {business.virtual_business && (
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-300 mb-1">
+                      Información adicional
+                    </label>
+                    <textarea
+                      value={additionalInfo}
+                      onChange={(e) => setAdditionalInfo(e.target.value)}
+                      placeholder="Ej: nombre completo, dirección de envío, notas especiales..."
+                      rows={3}
+                      className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 resize-none"
+                    />
+                    <p className="mt-1 text-xs text-gray-500">
+                      Agrega cualquier dato que el negocio necesite para procesar tu pago
                     </p>
                   </div>
                 )}

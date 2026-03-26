@@ -36,6 +36,7 @@ interface DailySummary {
 }
 
 interface EmployeePaymentData {
+  id?: number;
   employee_id: number;
   employee_name?: string;
   appointments_count: number;
@@ -132,6 +133,25 @@ export function useCashRegisterHistory(filters?: { from?: string; to?: string })
         params: filters,
       }),
     select: (res) => res.data,
+  });
+}
+
+export function useDownloadPaymentReceipt() {
+  return useMutation({
+    mutationFn: async ({ closeId, paymentId, employeeName }: { closeId: number; paymentId: number; employeeName: string }) => {
+      const response = await apiClient.get(
+        ENDPOINTS.CASH_REGISTER.employeePaymentReceipt(closeId, paymentId),
+        { responseType: 'blob' },
+      );
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `recibo-${employeeName.toLowerCase().replace(/\s+/g, '-')}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    },
   });
 }
 

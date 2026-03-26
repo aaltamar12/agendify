@@ -9,6 +9,7 @@ import {
   XCircle,
   Clock,
   CheckCheck,
+  Cake,
 } from 'lucide-react';
 import {
   useNotifications,
@@ -48,6 +49,11 @@ const typeConfig: Record<
     icon: Clock,
     colorClass: 'text-amber-600',
     bgClass: 'bg-amber-100',
+  },
+  birthday: {
+    icon: Cake,
+    colorClass: 'text-pink-600',
+    bgClass: 'bg-pink-100',
   },
 };
 

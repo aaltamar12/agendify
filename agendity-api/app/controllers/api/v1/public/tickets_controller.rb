@@ -55,7 +55,8 @@ module Api
             appointment: appointment,
             payment_method: params[:payment_method] || "transfer",
             amount: appointment.price,
-            proof_image_url: proof_url
+            proof_image_url: proof_url,
+            additional_info: params[:additional_info]
           )
 
           if result.success?

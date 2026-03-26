@@ -31,6 +31,29 @@ RSpec.describe Payments::SubmitPaymentService do
       end
     end
 
+    context "with additional_info" do
+      it "saves additional_info on the payment" do
+        result = described_class.call(
+          appointment: appointment,
+          payment_method: "transfer",
+          amount: 25_000,
+          additional_info: "Nombre: Juan Pérez, Dirección: Calle 50 #20"
+        )
+        expect(result).to be_success
+        expect(result.data.additional_info).to eq("Nombre: Juan Pérez, Dirección: Calle 50 #20")
+      end
+
+      it "works without additional_info" do
+        result = described_class.call(
+          appointment: appointment,
+          payment_method: "transfer",
+          amount: 25_000
+        )
+        expect(result).to be_success
+        expect(result.data.additional_info).to be_nil
+      end
+    end
+
     context "with invalid payment data" do
       it "returns failure when amount is invalid" do
         result = described_class.call(

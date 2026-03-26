@@ -70,6 +70,7 @@ Rails.application.routes.draw do
           get :credits, to: "credits#show"
           post "credits/adjust", to: "credits#adjust"
           get :credit_balance, to: "credits#balance"
+          post :send_birthday_greeting
         end
       end
 
@@ -156,6 +157,9 @@ Rails.application.routes.draw do
           get :history
           post :upload_proof
           delete :delete_proof
+        end
+        member do
+          get "employee_payments/:employee_payment_id/receipt", action: :employee_payment_receipt, as: :employee_payment_receipt
         end
       end
 

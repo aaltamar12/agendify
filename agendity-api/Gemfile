@@ -47,6 +47,9 @@ gem "aws-sdk-s3", require: false
 # QR code generation for emails
 gem "rqrcode"
 
+# PDF generation (HTML → PDF via Chromium)
+gem "grover"
+
 # Rate limiting
 gem "rack-attack"
 

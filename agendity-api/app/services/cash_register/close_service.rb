@@ -85,6 +85,9 @@ module CashRegister
         resource: close
       )
 
+      # Send payment receipts to employees with email
+      SendEmployeePaymentReceiptJob.perform_later(close.id)
+
       success(close.reload)
     end
   end

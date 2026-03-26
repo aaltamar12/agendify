@@ -22,6 +22,42 @@ RSpec.describe BusinessMailer, type: :mailer do
     end
   end
 
+  describe "#payment_submitted" do
+    let(:customer) { create(:customer, business: business) }
+    let(:service)  { create(:service, business: business) }
+    let(:employee) { create(:employee, business: business) }
+    let(:appointment) do
+      create(:appointment, business: business, customer: customer,
+             service: service, employee: employee)
+    end
+
+    context "without additional_info" do
+      let(:payment) { create(:payment, appointment: appointment, amount: 25_000) }
+      let(:mail)    { described_class.payment_submitted(payment) }
+
+      it "sends to the business owner" do
+        expect(mail.to).to eq([business.owner.email])
+      end
+
+      it "does not include additional info section" do
+        expect(mail.body.encoded).not_to include("adicional")
+      end
+    end
+
+    context "with additional_info" do
+      let(:payment) do
+        create(:payment, appointment: appointment, amount: 25_000,
+               additional_info: "Nombre: Juan, Dirección: Calle 50")
+      end
+      let(:mail) { described_class.payment_submitted(payment) }
+
+      it "includes additional_info in the email body" do
+        expect(mail.body.encoded).to include("Nombre: Juan")
+        expect(mail.body.encoded).to include("Calle 50")
+      end
+    end
+  end
+
   describe "#trial_expiry_alert" do
     let(:mail) { described_class.trial_expiry_alert(business, 1) }
 

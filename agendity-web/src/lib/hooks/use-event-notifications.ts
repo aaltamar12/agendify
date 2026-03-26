@@ -27,6 +27,7 @@ const FALLBACK_CONFIG: Record<string, { title: string; body_template: string; br
   booking_confirmed: { title: 'Pago confirmado', body_template: 'Pago confirmado para {{customer_name}}', browser_notification: true, sound_enabled: true },
   appointment_completed: { title: 'Cita completada', body_template: '{{customer_name}} completó su cita', browser_notification: false, sound_enabled: false },
   ai_suggestion: { title: 'Sugerencia inteligente', body_template: 'Detectamos oportunidades para optimizar tus precios', browser_notification: false, sound_enabled: false },
+  birthday: { title: 'Cumpleaños', body_template: 'Hoy es cumpleaños de {{customer_name}}', browser_notification: true, sound_enabled: true },
 };
 
 // Replace {{variable}} placeholders with data values

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_26_042223) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_26_043432) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "unaccent"
@@ -239,6 +239,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_26_042223) do
     t.decimal "birthday_discount_pct", precision: 5, scale: 2, default: "10.0"
     t.integer "birthday_discount_days_valid", default: 7
     t.string "breb_key"
+    t.boolean "virtual_business", default: false, null: false
     t.index ["city"], name: "index_businesses_on_city"
     t.index ["independent"], name: "index_businesses_on_independent"
     t.index ["latitude", "longitude"], name: "index_businesses_on_latitude_and_longitude"
@@ -487,6 +488,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_26_042223) do
     t.boolean "read", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.jsonb "metadata", default: {}
     t.index ["business_id", "created_at"], name: "index_notifications_on_business_id_and_created_at"
     t.index ["business_id", "read"], name: "index_notifications_on_business_id_and_read"
     t.index ["business_id"], name: "index_notifications_on_business_id"
@@ -505,6 +507,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_26_042223) do
     t.datetime "approved_at"
     t.datetime "rejected_at"
     t.string "rejection_reason"
+    t.text "additional_info"
     t.index ["appointment_id"], name: "index_payments_on_appointment_id"
   end
 

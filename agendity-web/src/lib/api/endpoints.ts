@@ -66,6 +66,7 @@ export const ENDPOINTS = {
     credits: (id: number) => `${BASE}/customers/${id}/credits`,
     adjustCredits: (id: number) => `${BASE}/customers/${id}/credits/adjust`,
     creditBalance: (id: number) => `${BASE}/customers/${id}/credit_balance`,
+    sendBirthdayGreeting: (id: number) => `${BASE}/customers/${id}/send_birthday_greeting`,
   },
 
   CREDITS: {
@@ -130,6 +131,8 @@ export const ENDPOINTS = {
     show: (id: number) => `${BASE}/cash_register/${id}`,
     uploadProof: `${BASE}/cash_register/upload_proof`,
     deleteProof: `${BASE}/cash_register/delete_proof`,
+    employeePaymentReceipt: (closeId: number, paymentId: number) =>
+      `${BASE}/cash_register/${closeId}/employee_payments/${paymentId}/receipt`,
   },
 
   EMPLOYEE_INVITATIONS: {

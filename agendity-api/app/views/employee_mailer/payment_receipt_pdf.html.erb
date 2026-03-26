@@ -1,0 +1,60 @@
+<h2>Recibo de pago</h2>
+
+<p><strong><%= @business.name %></strong></p>
+<p>Fecha: <%= @date.strftime("%d/%m/%Y") %></p>
+
+<table class="detail-table">
+  <tr>
+    <td>Empleado</td>
+    <td><%= @employee.name %></td>
+  </tr>
+  <tr>
+    <td>Citas atendidas</td>
+    <td><%= @employee_payment.appointments_count %></td>
+  </tr>
+  <tr>
+    <td>Total generado</td>
+    <td>$<%= number_with_delimiter(@employee_payment.total_earned.to_i) %></td>
+  </tr>
+  <tr>
+    <td>Comisi&oacute;n (<%= @employee_payment.commission_pct %>%)</td>
+    <td>$<%= number_with_delimiter(@employee_payment.commission_amount.to_i) %></td>
+  </tr>
+  <% if @employee_payment.pending_from_previous.to_d > 0 %>
+    <tr>
+      <td>Saldo pendiente anterior</td>
+      <td>$<%= number_with_delimiter(@employee_payment.pending_from_previous.to_i) %></td>
+    </tr>
+  <% end %>
+  <tr class="total-row">
+    <td>Total a pagar</td>
+    <td>$<%= number_with_delimiter(@employee_payment.total_owed.to_i) %></td>
+  </tr>
+  <tr>
+    <td>Monto pagado</td>
+    <td><strong>$<%= number_with_delimiter(@employee_payment.amount_paid.to_i) %></strong></td>
+  </tr>
+  <tr>
+    <td>M&eacute;todo de pago</td>
+    <td><%= @employee_payment.cash? ? "Efectivo" : "Transferencia" %></td>
+  </tr>
+</table>
+
+<% remaining = @employee_payment.remaining_debt %>
+<% if remaining > 0 %>
+  <p class="status-pending">
+    Saldo pendiente: $<%= number_with_delimiter(remaining.to_i) %>
+  </p>
+<% else %>
+  <p class="status-paid">
+    Pago completo &mdash; sin saldo pendiente.
+  </p>
+<% end %>
+
+<% if @employee_payment.notes.present? %>
+  <p><strong>Notas:</strong> <%= @employee_payment.notes %></p>
+<% end %>
+
+<p style="color: #888888; font-size: 12px; margin-top: 20px;">
+  Generado autom&aacute;ticamente el <%= Time.current.strftime("%d/%m/%Y %H:%M") %>
+</p>

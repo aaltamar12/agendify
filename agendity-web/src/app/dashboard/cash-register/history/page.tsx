@@ -1,10 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { ArrowLeft, Calendar, DollarSign } from 'lucide-react';
+import { ArrowLeft, Calendar, DollarSign, Download } from 'lucide-react';
 import Link from 'next/link';
 import { Button, Card, Spinner, Badge, Modal } from '@/components/ui';
-import { useCashRegisterHistory } from '@/lib/hooks/use-cash-register';
+import { useCashRegisterHistory, useDownloadPaymentReceipt } from '@/lib/hooks/use-cash-register';
 import { formatCurrency } from '@/lib/utils/format';
 import type { CashRegisterClose } from '@/lib/hooks/use-cash-register';
 
@@ -15,6 +15,7 @@ export default function CashRegisterHistoryPage() {
     from || to ? { from: from || undefined, to: to || undefined } : undefined,
   );
   const [selectedClose, setSelectedClose] = useState<CashRegisterClose | null>(null);
+  const downloadReceipt = useDownloadPaymentReceipt();
 
   const totalRevenue = closes?.reduce((sum, c) => sum + c.total_revenue, 0) ?? 0;
   const totalAppointments = closes?.reduce((sum, c) => sum + c.total_appointments, 0) ?? 0;
@@ -156,6 +157,7 @@ export default function CashRegisterHistoryPage() {
                         <th className="pb-2 font-medium">Comisión</th>
                         <th className="pb-2 font-medium">Pagado</th>
                         <th className="pb-2 font-medium">Método</th>
+                        <th className="pb-2 font-medium">Recibo</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -166,6 +168,24 @@ export default function CashRegisterHistoryPage() {
                           <td className="py-2">{formatCurrency(ep.commission_amount)}</td>
                           <td className="py-2">{formatCurrency(ep.amount_paid)}</td>
                           <td className="py-2 capitalize">{ep.payment_method === 'cash' ? 'Efectivo' : 'Transferencia'}</td>
+                          <td className="py-2">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                downloadReceipt.mutate({
+                                  closeId: selectedClose!.id,
+                                  paymentId: ep.id!,
+                                  employeeName: ep.employee_name || 'empleado',
+                                })
+                              }
+                              disabled={downloadReceipt.isPending}
+                              className="inline-flex items-center gap-1 rounded-md bg-violet-50 px-2 py-1 text-xs font-medium text-violet-700 hover:bg-violet-100 disabled:opacity-50"
+                              title="Descargar recibo PDF"
+                            >
+                              <Download className="h-3 w-3" />
+                              Recibo
+                            </button>
+                          </td>
                         </tr>
                       ))}
                     </tbody>

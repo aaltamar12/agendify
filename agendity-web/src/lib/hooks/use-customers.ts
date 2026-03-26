@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import { get } from '@/lib/api/client';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { get, post } from '@/lib/api/client';
 import { ENDPOINTS } from '@/lib/api/endpoints';
 import type { ApiResponse, PaginatedResponse, Customer } from '@/lib/api/types';
 
@@ -25,5 +25,14 @@ export function useCustomer(id: number | null) {
       ),
     select: (res) => res.data,
     enabled: id !== null,
+  });
+}
+
+export function useSendBirthdayGreeting() {
+  return useMutation({
+    mutationFn: (customerId: number) =>
+      post<ApiResponse<{ message: string }>>(
+        ENDPOINTS.CUSTOMERS.sendBirthdayGreeting(customerId)
+      ),
   });
 }

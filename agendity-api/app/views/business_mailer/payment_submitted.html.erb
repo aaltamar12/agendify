@@ -27,6 +27,12 @@
     <td>Método de pago</td>
     <td><%= @payment.cash? ? "Efectivo" : "Transferencia" %></td>
   </tr>
+  <% if @payment.additional_info.present? %>
+  <tr>
+    <td>Información adicional</td>
+    <td><%= @payment.additional_info %></td>
+  </tr>
+  <% end %>
 </table>
 
 <p>Revisa el comprobante en tu panel de Agendity y aprueba o rechaza el pago.</p>

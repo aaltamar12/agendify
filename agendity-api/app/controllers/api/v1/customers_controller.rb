@@ -21,6 +21,28 @@ module Api
         customer = current_business.customers.find(params[:id])
         render_success(CustomerSerializer.render_as_hash(customer, view: :with_appointments))
       end
+
+      # POST /api/v1/customers/:id/send_birthday_greeting
+      def send_birthday_greeting
+        customer = current_business.customers.find(params[:id])
+
+        unless current_business.has_feature?(:ai_features)
+          return render_error("Disponible solo en Plan Inteligente", status: :forbidden)
+        end
+
+        Notifications::MultiChannelService.call(
+          business: current_business,
+          recipient: customer,
+          template: :birthday_greeting_manual,
+          data: {
+            customer_name: customer.name,
+            business_name: current_business.name,
+            booking_url: "#{SiteConfig.get('app_url')}/#{current_business.slug}"
+          }
+        )
+
+        render_success({ message: "Saludo de cumpleaños enviado" })
+      end
     end
   end
 end

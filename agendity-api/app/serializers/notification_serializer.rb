@@ -3,5 +3,5 @@
 class NotificationSerializer < Blueprinter::Base
   identifier :id
 
-  fields :title, :body, :notification_type, :link, :read, :created_at
+  fields :title, :body, :notification_type, :link, :read, :metadata, :created_at
 end

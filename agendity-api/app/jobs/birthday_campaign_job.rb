@@ -18,6 +18,7 @@ class BirthdayCampaignJob < ApplicationJob
       business.customers.with_email.with_birthday_on(month, day).find_each do |customer|
         code = generate_birthday_code(business, customer)
         send_birthday_greeting(business, customer, code)
+        notify_business_owner(business, customer) if business.current_plan&.ai_features?
         log_activity(business, customer, code)
         total_codes += 1
       end
@@ -58,6 +59,27 @@ class BirthdayCampaignJob < ApplicationJob
         code: code.code,
         valid_until: code.valid_until,
         booking_url: booking_url
+      }
+    )
+  end
+
+  def notify_business_owner(business, customer)
+    notification = Notification.create!(
+      business: business,
+      title: "Cumpleaños de #{customer.name}",
+      body: "Hoy es cumpleaños de #{customer.name}. ¿Enviar saludo personalizado?",
+      notification_type: "birthday",
+      link: "/dashboard/customers",
+      metadata: { customer_id: customer.id, customer_name: customer.name }
+    )
+
+    Realtime::NatsPublisher.publish(
+      business_id: business.id,
+      event: "birthday",
+      data: {
+        notification_id: notification.id,
+        customer_id: customer.id,
+        customer_name: customer.name
       }
     )
   end

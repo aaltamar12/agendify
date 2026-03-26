@@ -1,20 +1,27 @@
 # Sprint 5 — Features grandes parte 2 (2-3 días)
 
-- [ ] **5.1** Comprobante de pago para empleado al cierre del día
-  - `agendity-api/app/mailers/employee_mailer.rb` — `#payment_receipt`
-  - `agendity-api/app/services/cash_register/generate_payment_receipt_service.rb` (nuevo)
-  - `agendity-api/app/jobs/send_employee_payment_receipt_job.rb` (nuevo)
-  - Endpoint: `GET /api/v1/cash_register/:id/employee_payments/:id/receipt.pdf`
-  - `agendity-web/` botón "Descargar recibo" en history + employee portal
+- [x] **5.1** Comprobante de pago para empleado al cierre del día
+  - EmployeeMailer#payment_receipt + template HTML estilo recibo
+  - PDF via Grover (HTML→PDF) con layout dedicado
+  - SendEmployeePaymentReceiptJob — se enqueue al cerrar caja
+  - Endpoint: `GET /api/v1/cash_register/:id/employee_payments/:id/receipt` (PDF)
+  - Frontend: botón "Descargar recibo" en historial de cierres
+  - Specs: 9 passing (mailer + job + PDF service)
 
-- [ ] **5.2** Birthday: notificación al negocio + one-click send (Plan Inteligente)
-  - `agendity-api/app/jobs/birthday_campaign_job.rb` — notificación in-app al owner
+- [x] **5.2** Birthday: notificación al negocio + one-click send (Plan Inteligente)
+  - BirthdayCampaignJob: crea notificación in-app al owner con metadata {customer_id}
   - Endpoint: `POST /api/v1/customers/:id/send_birthday_greeting`
-  - Plan enforcement: solo Plan Inteligente
-  - `agendity-web/` botón "Enviar saludo" en notificaciones
+  - Plan enforcement: solo ai_features? (Plan Inteligente + trial)
+  - Frontend: botón "Enviar saludo" en notificaciones tipo birthday
+  - Icono torta (Cake) + color rosa en notification bell
+  - NATS event + browser notification para birthday
+  - Specs: 4 passing (endpoint con/sin plan + trial + 404)
 
-- [ ] **5.3** Info adicional al confirmar comprobante + flag virtual business
-  - `agendity-api/` migrations: `virtual_business` en businesses, `additional_info` en payments
-  - `agendity-api/app/mailers/` incluir `additional_info` en email de comprobante
-  - `agendity-web/` campo de texto en upload de comprobante (si `virtual_business`)
-  - ActiveAdmin: checkbox "Negocio virtual"
+- [x] **5.3** Info adicional al confirmar comprobante + flag virtual business
+  - Migrations: `virtual_business` (boolean) en businesses, `additional_info` (text) en payments
+  - SubmitPaymentService acepta y guarda additional_info
+  - Email de comprobante incluye additional_info si presente
+  - ActiveAdmin: checkbox "Negocio virtual" en businesses
+  - Frontend: textarea "Información adicional" solo cuando business.virtual_business
+  - Serializer: virtual_business excluido de vistas public/explore
+  - Specs: 5 passing (service + mailer)
