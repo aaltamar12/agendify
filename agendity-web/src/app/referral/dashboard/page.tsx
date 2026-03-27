@@ -281,12 +281,12 @@ function DashboardContent() {
         </div>
 
         {/* Referral link + QR */}
-        <Card className="mb-8">
-          <div className="flex flex-col items-center gap-6 sm:flex-row">
-            <div className="flex-1">
+        <Card className="mb-8 overflow-hidden">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
+            <div className="min-w-0 flex-1">
               <h2 className="mb-2 text-lg font-semibold text-gray-900">Tu enlace de referido</h2>
-              <div className="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 p-3">
-                <span className="flex-1 truncate text-sm text-gray-600">{referral_link}</span>
+              <div className="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 p-3 overflow-hidden">
+                <span className="flex-1 truncate text-xs sm:text-sm text-gray-600">{referral_link}</span>
                 <button
                   onClick={() => handleCopy(referral_link)}
                   className="flex shrink-0 items-center gap-1 rounded-md bg-violet-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-violet-700 transition-colors"

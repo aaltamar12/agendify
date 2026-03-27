@@ -139,6 +139,11 @@ Rails.application.routes.draw do
         get :status
       end
 
+      # Onboarding progress
+      namespace :onboarding do
+        get :progress, to: "progress#show"
+      end
+
       # Employee portal
       namespace :employee do
         get :dashboard, to: "dashboard#show"

@@ -18,6 +18,8 @@ import { CreateAppointmentModal } from '@/components/agenda/create-appointment-m
 import { BlockSlotModal } from '@/components/agenda/block-slot-modal';
 import { useAppointments, useUpdateAppointment } from '@/lib/hooks/use-appointments';
 import { useBlockedSlots } from '@/lib/hooks/use-blocked-slots';
+import { useOnboardingProgress } from '@/lib/hooks/use-onboarding';
+import { OnboardingChecklist } from '@/components/dashboard/onboarding-checklist';
 import { get } from '@/lib/api/client';
 import { ENDPOINTS } from '@/lib/api/endpoints';
 import { now, parseDate } from '@/lib/utils/date';
@@ -88,6 +90,7 @@ function AgendaContent() {
   } = useBlockedSlots(queryParams);
 
   const updateAppointment = useUpdateAppointment();
+  const { data: onboardingData } = useOnboardingProgress();
 
   const appointments = appointmentsData?.data ?? [];
   const blockedSlots = blockedSlotsData?.data ?? [];
@@ -163,6 +166,9 @@ function AgendaContent() {
 
   return (
     <div className="flex h-full flex-col">
+      {/* Onboarding checklist */}
+      {onboardingData && !onboardingData.all_complete && <OnboardingChecklist />}
+
       {/* Top bar */}
       <div className="flex flex-col gap-3 border-b border-gray-200 bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
         {/* Left: Date navigation */}

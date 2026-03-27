@@ -186,6 +186,10 @@ export const ENDPOINTS = {
     stopImpersonation: `${BASE}/admin/stop_impersonation`,
   },
 
+  ONBOARDING: {
+    progress: `${BASE}/onboarding/progress`,
+  },
+
   SUBSCRIPTION: {
     plans: `${BASE}/subscription/plans`,
     paymentInfo: `${BASE}/subscription/payment_info`,

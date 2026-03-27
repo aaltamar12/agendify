@@ -185,6 +185,29 @@ ActiveAdmin.register_page "Dashboard" do
       end
     end
 
+    # -- Storage usage --
+    columns do
+      column do
+        panel "Almacenamiento" do
+          total_bytes = ActiveStorage::Blob.sum(:byte_size)
+          file_count = ActiveStorage::Blob.count
+
+          formatted = if total_bytes > 1.gigabyte
+            "#{(total_bytes / 1.gigabyte.to_f).round(2)} GB"
+          elsif total_bytes > 1.megabyte
+            "#{(total_bytes / 1.megabyte.to_f).round(2)} MB"
+          else
+            "#{(total_bytes / 1.kilobyte.to_f).round(2)} KB"
+          end
+
+          div do
+            h3 formatted, style: "font-size: 24px; margin: 0;"
+            para "#{file_count} archivos almacenados", style: "color: #666;"
+          end
+        end
+      end
+    end
+
     # -- Recent signups (kept from original) --
     columns do
       column do

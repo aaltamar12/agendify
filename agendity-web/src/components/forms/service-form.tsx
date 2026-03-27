@@ -41,6 +41,10 @@ interface ServiceFormProps {
 export function ServiceForm({ service, onSubmit, loading }: ServiceFormProps) {
   const { data: categories = [] } = useServiceCategories();
   const [showCustomCategory, setShowCustomCategory] = useState(false);
+  const [customDuration, setCustomDuration] = useState(
+    !!service?.duration_minutes && !durationOptions.some((o) => Number(o.value) === service.duration_minutes)
+  );
+  const [durationUnit, setDurationUnit] = useState<'min' | 'hrs'>('min');
 
   const {
     register,
@@ -143,12 +147,68 @@ export function ServiceForm({ service, onSubmit, loading }: ServiceFormProps) {
           )}
         </div>
 
-        <Select
-          label="Duración"
-          options={durationOptions}
-          error={errors.duration_minutes?.message}
-          {...register('duration_minutes', { valueAsNumber: true })}
-        />
+        <div>
+          <div className="mb-1.5 flex items-center justify-between">
+            <label className="text-sm font-medium text-gray-700">Duración</label>
+            <label className="flex items-center gap-1.5 cursor-pointer">
+              <span className="text-xs text-gray-500">Personalizada</span>
+              <input
+                type="checkbox"
+                checked={customDuration}
+                onChange={(e) => {
+                  setCustomDuration(e.target.checked);
+                  if (!e.target.checked) {
+                    setValue('duration_minutes', 30);
+                    setDurationUnit('min');
+                  }
+                }}
+                className="h-3.5 w-3.5 rounded border-gray-300 text-violet-600 focus:ring-violet-600"
+              />
+            </label>
+          </div>
+          {!customDuration ? (
+            <select
+              className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 transition-colors focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-600/20"
+              {...register('duration_minutes', { valueAsNumber: true })}
+            >
+              {durationOptions.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
+          ) : (
+            <div className="flex gap-2">
+              <input
+                type="number"
+                min={1}
+                placeholder={durationUnit === 'min' ? '45' : '2'}
+                className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-600/20"
+                value={durationUnit === 'hrs' ? Math.round((watch('duration_minutes') || 60) / 60) : (watch('duration_minutes') || 30)}
+                onChange={(e) => {
+                  const val = Number(e.target.value) || 0;
+                  setValue('duration_minutes', durationUnit === 'hrs' ? val * 60 : val);
+                }}
+              />
+              <select
+                value={durationUnit}
+                onChange={(e) => {
+                  const newUnit = e.target.value as 'min' | 'hrs';
+                  const current = watch('duration_minutes') || 30;
+                  if (newUnit === 'hrs' && durationUnit === 'min') {
+                    setValue('duration_minutes', Math.round(current / 60) * 60 || 60);
+                  }
+                  setDurationUnit(newUnit);
+                }}
+                className="w-24 shrink-0 rounded-lg border border-gray-300 bg-white px-2 py-2 text-sm text-gray-700 focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-600/20"
+              >
+                <option value="min">min</option>
+                <option value="hrs">hrs</option>
+              </select>
+            </div>
+          )}
+          {errors.duration_minutes && (
+            <p className="mt-1.5 text-sm text-red-600">{errors.duration_minutes.message}</p>
+          )}
+        </div>
       </div>
 
       {/* Active toggle */}

@@ -1,6 +1,6 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { post, put } from '@/lib/api/client';
+import { get, post, put } from '@/lib/api/client';
 import { ENDPOINTS } from '@/lib/api/endpoints';
 import type { ApiResponse, Business, BusinessHour, Service, Employee } from '@/lib/api/types';
 import type {
@@ -71,5 +71,30 @@ export function useCompleteOnboarding() {
       queryClient.invalidateQueries({ queryKey: ['business'] });
       router.push('/dashboard/agenda');
     },
+  });
+}
+
+// --- Onboarding progress checklist ---
+
+export interface OnboardingStep {
+  key: string;
+  label: string;
+  completed: boolean;
+  link: string;
+}
+
+export interface OnboardingProgress {
+  completed: number;
+  total: number;
+  all_complete: boolean;
+  steps: OnboardingStep[];
+}
+
+export function useOnboardingProgress() {
+  return useQuery({
+    queryKey: ['onboarding-progress'],
+    queryFn: () => get<ApiResponse<OnboardingProgress>>(ENDPOINTS.ONBOARDING.progress),
+    select: (res) => res.data,
+    staleTime: 5 * 60 * 1000, // 5 min cache
   });
 }

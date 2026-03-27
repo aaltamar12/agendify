@@ -1119,11 +1119,13 @@ function HoursSection({
     register,
     handleSubmit,
     watch,
+    setValue,
   } = useForm({
     defaultValues: { rows: defaultRows },
   });
 
   const rows = watch('rows');
+  const watchRows = watch('rows');
 
   const handleSave = (data: { rows: typeof defaultRows }) => {
     onSave(
@@ -1136,52 +1138,56 @@ function HoursSection({
       <h2 className="mb-4 text-lg font-semibold text-gray-900">Horarios</h2>
       <form onSubmit={handleSubmit(handleSave)}>
         <div className="space-y-3">
-          {rows.map((row, idx) => (
-            <div
-              key={row.day_of_week}
-              className="flex flex-wrap items-center gap-3 rounded-lg border border-gray-100 p-3"
-            >
-              <div className="w-24">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    {...register(`rows.${idx}.closed`)}
-                    className="h-4 w-4 rounded border-gray-300 text-violet-600 focus:ring-violet-600"
-                  />
-                  <span className="text-sm font-medium text-gray-700">
-                    {row.label}
-                  </span>
-                </label>
-              </div>
-              {!rows[idx].closed ? (
-                <div className="flex items-center gap-2">
-                  <select
-                    {...register(`rows.${idx}.open_time`)}
-                    className="rounded-lg border border-gray-300 bg-white px-2 py-1.5 pr-8 text-sm text-gray-700 appearance-none focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-600/20"
-                  >
-                    {timeOptions.map((t) => (
-                      <option key={t.value} value={t.value}>
-                        {t.label}
-                      </option>
-                    ))}
-                  </select>
-                  <span className="text-sm text-gray-500">a</span>
-                  <select
-                    {...register(`rows.${idx}.close_time`)}
-                    className="rounded-lg border border-gray-300 bg-white px-2 py-1.5 pr-8 text-sm text-gray-700 appearance-none focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-600/20"
-                  >
-                    {timeOptions.map((t) => (
-                      <option key={t.value} value={t.value}>
-                        {t.label}
-                      </option>
-                    ))}
-                  </select>
+          {rows.map((row, idx) => {
+            const isClosed = watchRows?.[idx]?.closed;
+            return (
+              <div
+                key={row.day_of_week}
+                className={`flex flex-wrap items-center gap-3 rounded-lg border p-3 transition-colors ${isClosed ? 'border-gray-100 bg-gray-50' : 'border-gray-200'}`}
+              >
+                <div className="w-28">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={!isClosed}
+                      onChange={(e) => setValue(`rows.${idx}.closed`, !e.target.checked)}
+                      className="h-4 w-4 rounded border-gray-300 text-violet-600 focus:ring-violet-600"
+                    />
+                    <span className={`text-sm font-medium ${isClosed ? 'text-gray-400' : 'text-gray-700'}`}>
+                      {row.label}
+                    </span>
+                  </label>
                 </div>
-              ) : (
-                <span className="text-sm text-gray-400">Cerrado</span>
-              )}
-            </div>
-          ))}
+                {!isClosed ? (
+                  <div className="flex items-center gap-2">
+                    <select
+                      {...register(`rows.${idx}.open_time`)}
+                      className="rounded-lg border border-gray-300 bg-white px-2 py-1.5 pr-8 text-sm text-gray-700 appearance-none focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-600/20"
+                    >
+                      {timeOptions.map((t) => (
+                        <option key={t.value} value={t.value}>
+                          {t.label}
+                        </option>
+                      ))}
+                    </select>
+                    <span className="text-sm text-gray-500">a</span>
+                    <select
+                      {...register(`rows.${idx}.close_time`)}
+                      className="rounded-lg border border-gray-300 bg-white px-2 py-1.5 pr-8 text-sm text-gray-700 appearance-none focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-600/20"
+                    >
+                      {timeOptions.map((t) => (
+                        <option key={t.value} value={t.value}>
+                          {t.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ) : (
+                  <span className="text-xs text-gray-400">No laboral</span>
+                )}
+              </div>
+            );
+          })}
         </div>
         <div className="mt-4 flex justify-end">
           <Button type="submit" loading={loading}>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_27_190148) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_27_212900) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "unaccent"
@@ -351,6 +351,21 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_27_190148) do
     t.index ["business_id", "status"], name: "index_dynamic_pricings_on_business_id_and_status"
     t.index ["business_id"], name: "index_dynamic_pricings_on_business_id"
     t.index ["service_id"], name: "index_dynamic_pricings_on_service_id"
+  end
+
+  create_table "email_logs", force: :cascade do |t|
+    t.string "recipient"
+    t.string "subject"
+    t.string "mailer_class"
+    t.string "mailer_action"
+    t.text "body_html"
+    t.string "status"
+    t.text "error_message"
+    t.datetime "sent_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_at"], name: "index_email_logs_on_created_at"
+    t.index ["recipient"], name: "index_email_logs_on_recipient"
   end
 
   create_table "employee_balance_adjustments", force: :cascade do |t|
