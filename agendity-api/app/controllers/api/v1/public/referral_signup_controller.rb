@@ -35,6 +35,8 @@ module Api
             status: :active
           )
 
+          ReferralMailer.welcome(referral_code).deliver_later
+
           render_success({
             code: referral_code.code,
             message: "Tu código de referido ha sido creado"

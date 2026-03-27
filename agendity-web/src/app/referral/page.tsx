@@ -162,9 +162,18 @@ export default function ReferralPage() {
                 </button>
               </div>
 
-              <Link href="/">
-                <Button variant="outline">Volver al inicio</Button>
-              </Link>
+              <p className="mb-4 text-sm text-gray-500">
+                Revisa tu email para mas detalles sobre el programa.
+              </p>
+
+              <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+                <Link href={`/referral/dashboard?code=${result.code}`}>
+                  <Button>Ver mi dashboard</Button>
+                </Link>
+                <Link href="/">
+                  <Button variant="outline">Volver al inicio</Button>
+                </Link>
+              </div>
             </div>
           ) : (
             <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">

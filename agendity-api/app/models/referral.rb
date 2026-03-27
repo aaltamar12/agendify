@@ -9,6 +9,8 @@ class Referral < ApplicationRecord
   belongs_to :business
   belongs_to :subscription, optional: true
 
+  has_one_attached :disbursement_proof_file
+
   validates :business_id, uniqueness: { scope: :referral_code_id }
 
   def activate!(subscription)
@@ -20,12 +22,24 @@ class Referral < ApplicationRecord
     )
   end
 
-  def mark_paid!
-    update!(status: :paid, paid_at: Date.current)
+  def mark_paid!(notes: nil, proof_file: nil)
+    self.status = :paid
+    self.paid_at = Date.current
+    self.disbursement_paid_at = Time.current
+    self.disbursement_notes = notes if notes.present?
+    self.disbursement_proof_file.attach(proof_file) if proof_file.present?
+    save!
+  end
+
+  def disbursement_proof_url
+    return nil unless disbursement_proof_file.attached?
+
+    Rails.application.routes.url_helpers.rails_blob_url(disbursement_proof_file, only_path: false,
+      host: SiteConfig.get("api_url") || "http://localhost:4000")
   end
 
   def self.ransackable_attributes(_auth_object = nil)
-    %w[status referral_code_id business_id created_at activated_at paid_at]
+    %w[status referral_code_id business_id created_at activated_at paid_at disbursement_requested_at disbursement_paid_at]
   end
 
   def self.ransackable_associations(_auth_object = nil)

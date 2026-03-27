@@ -203,6 +203,11 @@ Rails.application.routes.draw do
         # Public referral signup
         post "referral_codes", to: "referral_signup#create"
 
+        # Referral dashboard
+        get "referral_codes/:code/dashboard", to: "referral_dashboard#show"
+        patch "referral_codes/:code", to: "referral_dashboard#update"
+        post "referral_codes/:code/request_disbursement", to: "referral_dashboard#request_disbursement"
+
         # Platform config (contact info, payment data)
         get "site_config", to: "site_config#show"
 

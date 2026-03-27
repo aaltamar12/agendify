@@ -45,7 +45,7 @@
 <p>Luego, sube tu comprobante desde la app y en minutos activamos tu plan.</p>
 
 <% if @app_url.present? %>
-  <p><a href="<%= @app_url %>/dashboard/subscription/checkout" style="display: inline-block; background-color: #7c3aed; color: #ffffff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600;">Elegir plan y pagar</a></p>
+  <div style="text-align: center; margin: 20px 0;"><a href="<%= @app_url %>/dashboard/subscription/checkout" style="display: inline-block; background-color: #7c3aed; color: #ffffff; padding: 12px 32px; border-radius: 6px; font-size: 16px; font-weight: 600; text-decoration: none;">Elegir plan y pagar</a></div>
 <% end %>
 
 <% if @support_whatsapp.present? %>

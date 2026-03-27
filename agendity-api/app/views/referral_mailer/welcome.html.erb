@@ -1,0 +1,57 @@
+<h2>Hola, <%= @referral_code.referrer_name %>!</h2>
+
+<p>Bienvenido al <strong>Programa de Referidos de Agendity</strong>. Ahora puedes ganar comisiones recomendando Agendity a negocios que trabajen con citas.</p>
+
+<h3>Tu codigo de referido</h3>
+
+<p style="text-align: center;">
+  <span class="ticket-code"><%= @referral_code.code %></span>
+</p>
+
+<h3>Tu enlace de referido</h3>
+
+<p>Comparte este enlace con negocios que trabajen con citas:</p>
+
+<p style="text-align: center; word-break: break-all;">
+  <a href="<%= @referral_link %>" style="color: #7c3aed; font-weight: 600;"><%= @referral_link %></a>
+</p>
+
+<div style="text-align: center; margin: 16px 0;">
+  <%= image_tag attachments['referral_qr.png'].url, alt: 'QR de referido', style: 'width: 200px; height: 200px;' %>
+  <p style="font-size: 12px; color: #999;">Comparte este QR con negocios interesados</p>
+</div>
+
+<h3>Asi funciona</h3>
+
+<table class="detail-table">
+  <tr>
+    <td><strong>1. Comparte</strong></td>
+    <td>Envia tu enlace o codigo de referido a negocios que trabajen con citas (barberias, salones, spas, etc.).</td>
+  </tr>
+  <tr>
+    <td><strong>2. Se suscriben</strong></td>
+    <td>Cuando un negocio se registra con tu enlace y completa su periodo de prueba, activa una suscripcion de pago.</td>
+  </tr>
+  <tr>
+    <td><strong>3. Ganas comision</strong></td>
+    <td>Recibes el <strong><%= @commission_percentage.to_i %>%</strong> del primer pago de cada negocio que se suscriba con tu referido.</td>
+  </tr>
+</table>
+
+<h3>Condiciones</h3>
+
+<p><%= @conditions %></p>
+
+<h3>Tu dashboard de referidos</h3>
+
+<p>Consulta el estado de tus referidos, comisiones ganadas y actualiza tus datos de pago en cualquier momento:</p>
+
+<div style="text-align: center; margin: 20px 0;">
+  <a href="<%= @dashboard_link %>" style="display: inline-block; background-color: #7c3aed; color: #ffffff; padding: 12px 32px; border-radius: 6px; font-size: 16px; font-weight: 600; text-decoration: none;">Ver mi dashboard</a>
+</div>
+
+<h3>Contacto</h3>
+
+<p>Si tienes preguntas sobre el programa, escribenos a <strong>soporte@agendity.com</strong>.</p>
+
+<p>— El equipo de Agendity</p>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_26_044654) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_27_190148) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "unaccent"
@@ -561,6 +561,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_26_044654) do
     t.text "notes"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "disbursement_requested_at"
+    t.datetime "disbursement_paid_at"
+    t.string "disbursement_proof"
+    t.text "disbursement_notes"
     t.index ["business_id"], name: "index_referrals_on_business_id"
     t.index ["referral_code_id", "business_id"], name: "index_referrals_on_referral_code_id_and_business_id", unique: true
     t.index ["referral_code_id"], name: "index_referrals_on_referral_code_id"

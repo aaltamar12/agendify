@@ -6,6 +6,12 @@ require "rqrcode"
 module QrCodeHelper
   # Generate a QR code PNG as binary string.
   # The QR encodes the ticket URL: {frontend_url}/{slug}/ticket/{code}
+  # Generate a QR code PNG as binary string for any URL.
+  def self.url_qr_png(url, size: 280)
+    qr = RQRCode::QRCode.new(url, level: :m)
+    qr.as_png(size: size, border_modules: 2).to_s
+  end
+
   def self.ticket_qr_png(appointment)
     frontend_url = ENV.fetch("FRONTEND_URL", "http://localhost:3000")
     slug = appointment.business.slug
