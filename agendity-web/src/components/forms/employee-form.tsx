@@ -57,11 +57,14 @@ function parseTime(value: string): string {
   return value.slice(0, 5);
 }
 
-// Default schedule: Mon-Sat 08:00-18:00, Sunday off
-// DAYS_OF_WEEK is ordered Mon(1)..Sat(6), Dom(0)
+// Build schedules for the form.
+// If employee has saved schedules: use them, mark missing days as inactive.
+// If employee is new (no schedules): default Mon-Sat 08-18 active, Sunday off.
 const buildDefaultSchedules = (
   existing?: EmployeeSchedule[]
 ): EmployeeFormData['schedules'] => {
+  const hasExisting = existing && existing.length > 0;
+
   return DAYS_OF_WEEK.map((day) => {
     const found = existing?.find((s) => s.day_of_week === day.value);
     if (found) {
@@ -76,7 +79,7 @@ const buildDefaultSchedules = (
       day_of_week: day.value,
       start_time: '08:00',
       end_time: '18:00',
-      active: day.value !== 0, // Sunday off
+      active: hasExisting ? false : day.value !== 0,
     };
   });
 };
