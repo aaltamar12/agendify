@@ -79,7 +79,7 @@ services:
       SMTP_DOMAIN: ${SMTP_DOMAIN:-agendity.co}
       SMTP_AUTHENTICATION: ${SMTP_AUTHENTICATION:-login}
       SMTP_ENABLE_STARTTLS: ${SMTP_ENABLE_STARTTLS:-true}
-      MAILER_FROM: ${MAILER_FROM:-}
+      MAILER_FROM: "${MAILER_FROM:-Agendity <contacto@agendity.co>}"
     volumes:
       - storage_data:/rails/storage
     ports:
@@ -119,7 +119,7 @@ services:
       SMTP_DOMAIN: ${SMTP_DOMAIN:-agendity.co}
       SMTP_AUTHENTICATION: ${SMTP_AUTHENTICATION:-login}
       SMTP_ENABLE_STARTTLS: ${SMTP_ENABLE_STARTTLS:-true}
-      MAILER_FROM: ${MAILER_FROM:-}
+      MAILER_FROM: "${MAILER_FROM:-Agendity <contacto@agendity.co>}"
     volumes:
       - storage_data:/rails/storage
     command: bundle exec sidekiq -C config/sidekiq.yml

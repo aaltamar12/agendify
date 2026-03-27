@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
 class ApplicationMailer < ActionMailer::Base
-  default from: -> { ENV["MAILER_FROM"] || "Agendity <#{SiteConfig.get('support_email') || 'contacto@agendity.co'}>" }
+  default from: -> { ENV.fetch("MAILER_FROM", "Agendity <contacto@agendity.co>") }
   layout "mailer"
 end
