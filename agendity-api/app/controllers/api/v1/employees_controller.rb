@@ -200,11 +200,19 @@ module Api
           if sched[:active] == false || sched[:active] == "false"
             es.destroy if es.persisted?
           else
-            es.start_time = sched[:start_time]
-            es.end_time = sched[:end_time]
+            es.start_time = parse_time(sched[:start_time])
+            es.end_time = parse_time(sched[:end_time])
             es.save!
           end
         end
+      end
+
+      def parse_time(value)
+        return value if value.blank?
+        return value if value.to_s.match?(/\A\d{2}:\d{2}\z/)
+        Time.parse(value.to_s).strftime("%H:%M")
+      rescue ArgumentError
+        value
       end
 
       def require_intelligent_plan!

@@ -45,6 +45,18 @@ const employeeFormSchema = z.object({
 
 type EmployeeFormData = z.infer<typeof employeeFormSchema>;
 
+// Parse time from various formats: "08:00", "2000-01-01T08:00:00.000Z", etc.
+function parseTime(value: string): string {
+  if (!value) return '08:00';
+  // Already HH:MM
+  if (/^\d{2}:\d{2}$/.test(value)) return value;
+  // ISO format — extract HH:MM
+  const match = value.match(/T(\d{2}:\d{2})/);
+  if (match) return match[1];
+  // Fallback
+  return value.slice(0, 5);
+}
+
 // Default schedule: Mon-Sat 08:00-18:00, Sunday off
 // DAYS_OF_WEEK is ordered Mon(1)..Sat(6), Dom(0)
 const buildDefaultSchedules = (
@@ -55,9 +67,9 @@ const buildDefaultSchedules = (
     if (found) {
       return {
         day_of_week: found.day_of_week,
-        start_time: found.start_time.slice(0, 5), // ensure "HH:MM"
-        end_time: found.end_time.slice(0, 5),
-        active: found.active,
+        start_time: parseTime(found.start_time),
+        end_time: parseTime(found.end_time),
+        active: found.active ?? true,
       };
     }
     return {

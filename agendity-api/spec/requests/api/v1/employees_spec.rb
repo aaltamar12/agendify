@@ -272,4 +272,73 @@ RSpec.describe "Api::V1::Employees", type: :request do
       expect(types).to include("payment", "adjustment")
     end
   end
+
+  describe "Employee schedules" do
+    let(:employee) { create(:employee, business: business) }
+
+    before do
+      # Create business hours Mon-Fri
+      (1..5).each do |day|
+        create(:business_hour, business: business, day_of_week: day, open_time: "08:00", close_time: "18:00", closed: false)
+      end
+    end
+
+    it "auto-creates schedules from business hours on create" do
+      params = { employee: { name: "Nuevo", phone: "3001234567", active: true, service_ids: [] } }
+      post "/api/v1/employees", params: params, headers: headers
+      expect(response).to have_http_status(:created)
+
+      new_employee = Employee.last
+      expect(new_employee.employee_schedules.count).to eq(5)
+    end
+
+    it "persists schedules on update" do
+      # First create schedules
+      employee.employee_schedules.create!(day_of_week: 1, start_time: "08:00", end_time: "18:00")
+      employee.employee_schedules.create!(day_of_week: 2, start_time: "08:00", end_time: "18:00")
+
+      params = {
+        employee: {
+          name: employee.name,
+          schedules: [
+            { day_of_week: 1, start_time: "09:00", end_time: "17:00", active: true },
+            { day_of_week: 2, start_time: "08:00", end_time: "18:00", active: false },
+            { day_of_week: 3, start_time: "10:00", end_time: "19:00", active: true }
+          ]
+        }
+      }
+
+      patch "/api/v1/employees/#{employee.id}", params: params, headers: headers
+      expect(response).to have_http_status(:ok)
+
+      employee.reload
+      # Day 1: updated to 09:00-17:00
+      day1 = employee.employee_schedules.find_by(day_of_week: 1)
+      expect(day1.start_time).to eq("09:00")
+      expect(day1.end_time).to eq("17:00")
+
+      # Day 2: active=false → destroyed
+      expect(employee.employee_schedules.find_by(day_of_week: 2)).to be_nil
+
+      # Day 3: new schedule created
+      day3 = employee.employee_schedules.find_by(day_of_week: 3)
+      expect(day3).to be_present
+      expect(day3.start_time).to eq("10:00")
+    end
+
+    it "returns schedules in serializer" do
+      employee.employee_schedules.create!(day_of_week: 1, start_time: "09:00", end_time: "17:00")
+      employee.employee_schedules.create!(day_of_week: 5, start_time: "10:00", end_time: "20:00")
+
+      get "/api/v1/employees/#{employee.id}", headers: headers
+      expect(response).to have_http_status(:ok)
+
+      data = response.parsed_body["data"]
+      schedules = data["schedules"]
+      expect(schedules.length).to eq(2)
+      expect(schedules.first["day_of_week"]).to eq(1)
+      expect(schedules.first["start_time"]).to include("09:00")
+      expect(schedules.last["day_of_week"]).to eq(5)
+    end
+  end
 end

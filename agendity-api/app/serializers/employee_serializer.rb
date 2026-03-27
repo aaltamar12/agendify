@@ -43,7 +43,12 @@ class EmployeeSerializer < Blueprinter::Base
   # Work schedules for the employee form
   field :schedules do |employee, _options|
     employee.employee_schedules.order(:day_of_week).map do |s|
-      { day_of_week: s.day_of_week, start_time: s.start_time, end_time: s.end_time, active: true }
+      {
+        day_of_week: s.day_of_week,
+        start_time: s.start_time.strftime("%H:%M"),
+        end_time: s.end_time.strftime("%H:%M"),
+        active: true
+      }
     end
   end
 
