@@ -41,7 +41,7 @@ export function OnboardingChecklist() {
   }
 
   return (
-    <div className="mx-4 mt-4 rounded-xl border border-violet-200 bg-white p-5 shadow-sm">
+    <div className="mx-4 mb-6 mt-4 rounded-xl border border-violet-200 bg-white p-6 shadow-sm">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
