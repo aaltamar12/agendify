@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register_page "Independent Professionals" do
-  menu label: "Profesionales Independientes", parent: "Businesses", priority: 1
+  menu parent: "Negocios", priority: 2, label: "Profesionales Independientes"
 
   content do
     # Show list of existing independent professionals

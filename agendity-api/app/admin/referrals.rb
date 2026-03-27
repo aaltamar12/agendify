@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register Referral do
-  menu priority: 12, label: "Referrals"
+  menu parent: "Referidos", priority: 2, label: "Referidos"
   actions :index, :show
 
   # -- Eager loading --

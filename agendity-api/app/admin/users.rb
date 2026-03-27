@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register User do
+  menu parent: "Configuración", priority: 3, label: "Usuarios"
+
   permit_params :name, :email, :role, :phone, :password, :password_confirmation
 
   # -- Index --

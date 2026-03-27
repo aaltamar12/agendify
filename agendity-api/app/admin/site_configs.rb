@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register SiteConfig do
-  menu priority: 13, label: "Configuracion"
+  menu parent: "Configuración", priority: 1, label: "Configuración General"
   permit_params :value
 
   actions :index, :show, :edit, :update

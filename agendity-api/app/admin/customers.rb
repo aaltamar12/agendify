@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register Customer do
+  menu parent: "Negocios", priority: 3, label: "Clientes"
+
   actions :index, :show
 
   # -- Eager loading --

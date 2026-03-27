@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register JobConfig do
-  menu priority: 14, label: "Jobs"
+  menu parent: "Configuración", priority: 4, label: "Jobs"
 
   permit_params :enabled
 

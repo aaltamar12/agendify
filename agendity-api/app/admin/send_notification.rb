@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register_page "Send Notification" do
-  menu priority: 12, label: "Enviar Notificacion"
+  menu parent: "Herramientas", priority: 1, label: "Enviar Notificación"
 
   NOTIFICATION_TYPES = %w[new_booking payment_submitted payment_approved booking_cancelled reminder ai_suggestion subscription_expiry].freeze
 

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register_page "Reconciliacion" do
-  menu priority: 13, label: "Reconciliacion"
+  menu parent: "Finanzas", priority: 6, label: "Reconciliación"
 
   content do
     if params[:business_id].present?

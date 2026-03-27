@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register RequestLog do
-  menu priority: 9, label: "Request Logs"
+  menu parent: "Citas", priority: 3, label: "Request Logs"
   actions :index, :show, :destroy
 
   # -- Eager loading --

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register DiscountCode do
-  menu priority: 12, label: "Discount Codes"
+  menu parent: "Planes y Suscripciones", priority: 3, label: "Códigos de Descuento"
 
   permit_params :business_id, :code, :name, :discount_type, :discount_value,
                 :max_uses, :valid_from, :valid_until, :active, :source, :customer_id

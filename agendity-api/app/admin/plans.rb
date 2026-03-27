@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register Plan do
+  menu parent: "Planes y Suscripciones", priority: 1, label: "Planes"
+
   permit_params :name, :price_monthly, :price_monthly_usd, :max_employees, :max_services,
                 :max_reservations_month, :max_customers,
                 :ai_features, :ticket_digital, :advanced_reports,

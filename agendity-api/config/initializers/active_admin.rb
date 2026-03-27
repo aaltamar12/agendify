@@ -10,4 +10,16 @@ ActiveAdmin.setup do |config|
   config.comments = false
   config.filter_attributes = [:encrypted_password, :password, :password_confirmation]
   config.localize_format = :long
+
+  config.namespace :admin do |admin|
+    admin.build_menu do |menu|
+      menu.add label: "Negocios", priority: 4
+      menu.add label: "Citas", priority: 5
+      menu.add label: "Finanzas", priority: 6
+      menu.add label: "Planes y Suscripciones", priority: 7
+      menu.add label: "Referidos", priority: 8
+      menu.add label: "Configuración", priority: 9
+      menu.add label: "Herramientas", priority: 10
+    end
+  end
 end

@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register Appointment do
+  menu parent: "Citas", priority: 1, label: "Citas"
+
   actions :index, :show
 
   # -- Eager loading --

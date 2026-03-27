@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register NotificationEventConfig do
-  menu label: "Notification Events", parent: "Settings", priority: 1
+  menu parent: "Configuración", priority: 2, label: "Eventos de Notificación"
 
   permit_params :event_key, :title, :body_template,
                 :browser_notification, :sound_enabled, :in_app_notification, :active

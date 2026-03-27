@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register EmployeeBalanceAdjustment do
-  menu priority: 12, label: "Ajustes de Saldo"
+  menu parent: "Finanzas", priority: 5, label: "Ajustes de Saldo"
   actions :index, :show
 
   includes :business, :employee, :performed_by_user

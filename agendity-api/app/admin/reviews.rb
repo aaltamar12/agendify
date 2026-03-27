@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register Review do
+  menu parent: "Configuración", priority: 5, label: "Reseñas"
+
   actions :index, :show
 
   # -- Eager loading --

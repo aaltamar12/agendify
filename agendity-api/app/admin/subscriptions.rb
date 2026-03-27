@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register Subscription do
+  menu parent: "Planes y Suscripciones", priority: 2, label: "Suscripciones"
+
   permit_params :plan_id, :status, :start_date, :end_date
 
   actions :index, :show, :edit, :update

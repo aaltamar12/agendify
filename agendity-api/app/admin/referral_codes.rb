@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register ReferralCode do
-  menu priority: 11, label: "Referral Codes"
+  menu parent: "Referidos", priority: 1, label: "Códigos de Referido"
   permit_params :code, :referrer_name, :referrer_email, :referrer_phone,
                 :commission_percentage, :status, :notes,
                 :bank_account, :bank_name, :breb_key

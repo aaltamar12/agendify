@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register Business do
+  menu parent: "Negocios", priority: 1, label: "Negocios"
+
   # -- friendly_id support --
   controller do
     def find_resource

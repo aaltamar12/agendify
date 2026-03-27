@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register ActivityLog do
-  menu priority: 8, label: "Activity Log"
+  menu priority: 3, label: "Activity Log"
   actions :index, :show, :destroy
 
   # -- Eager loading --

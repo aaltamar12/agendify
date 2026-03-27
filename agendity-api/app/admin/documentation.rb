@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register_page "Documentation" do
-  menu priority: 15, label: "Documentacion"
+  menu parent: "Herramientas", priority: 2, label: "Documentación"
 
   content do
     renderer_html = Redcarpet::Render::HTML.new(

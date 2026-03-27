@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register SubscriptionPaymentOrder do
-  menu priority: 9, label: "Payment Orders"
+  menu parent: "Citas", priority: 2, label: "Órdenes de Pago"
   actions :index, :show
 
   # -- Eager loading --

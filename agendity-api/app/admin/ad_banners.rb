@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register AdBanner do
+  menu parent: "Configuración", priority: 6, label: "Banners"
+
   permit_params :name, :placement, :image_url, :link_url, :alt_text,
                 :active, :priority, :start_date, :end_date, :image
 
