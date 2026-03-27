@@ -34,7 +34,7 @@ export function OnboardingChecklist() {
   if (minimized) {
     return (
       <div
-        className="mx-4 mb-4 mt-4 cursor-pointer rounded-xl border border-violet-200 bg-white px-5 py-3 shadow-sm transition-colors hover:bg-violet-50"
+        className="mb-4 cursor-pointer rounded-xl border border-violet-200 bg-white px-5 py-3 shadow-sm transition-colors hover:bg-violet-50"
         onClick={toggleMinimize}
       >
         <div className="flex items-center justify-between">
@@ -60,7 +60,7 @@ export function OnboardingChecklist() {
 
   // Expanded: full checklist
   return (
-    <div className="mx-4 mb-6 mt-4 rounded-xl border border-violet-200 bg-white p-6 shadow-sm">
+    <div className="mb-6 rounded-xl border border-violet-200 bg-white p-6 shadow-sm">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
