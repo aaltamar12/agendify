@@ -38,13 +38,13 @@ describe('loginSchema', () => {
     expect(result.success).toBe(false);
   });
 
-  it('rejects password shorter than 6 characters', () => {
+  it('rejects password shorter than 8 characters', () => {
     const result = loginSchema.safeParse({ email: 'test@test.com', password: '12345' });
     expect(result.success).toBe(false);
   });
 
-  it('accepts password with exactly 6 characters', () => {
-    const result = loginSchema.safeParse({ email: 'test@test.com', password: '123456' });
+  it('accepts password with exactly 8 characters', () => {
+    const result = loginSchema.safeParse({ email: 'test@test.com', password: '12345678' });
     expect(result.success).toBe(true);
   });
 });
@@ -84,7 +84,7 @@ describe('registerSchema', () => {
     expect(registerSchema.safeParse({ ...validRegister, email: 'bad' }).success).toBe(false);
   });
 
-  it('rejects short password (< 6 chars)', () => {
+  it('rejects short password (< 8 chars)', () => {
     expect(
       registerSchema.safeParse({ ...validRegister, password: '123', passwordConfirmation: '123' }).success,
     ).toBe(false);
@@ -151,13 +151,13 @@ describe('forgotPasswordSchema', () => {
 // ── resetPasswordSchema ──────────────────────────────────────
 
 describe('resetPasswordSchema', () => {
-  it('accepts valid matching passwords (min 6 chars)', () => {
+  it('accepts valid matching passwords (min 8 chars)', () => {
     expect(
-      resetPasswordSchema.safeParse({ password: 'newpas', passwordConfirmation: 'newpas' }).success,
+      resetPasswordSchema.safeParse({ password: 'newpasswd', passwordConfirmation: 'newpasswd' }).success,
     ).toBe(true);
   });
 
-  it('rejects password shorter than 6 characters', () => {
+  it('rejects password shorter than 8 characters', () => {
     expect(
       resetPasswordSchema.safeParse({ password: '12345', passwordConfirmation: '12345' }).success,
     ).toBe(false);

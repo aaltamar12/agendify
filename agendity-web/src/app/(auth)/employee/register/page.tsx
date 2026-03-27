@@ -112,7 +112,7 @@ function EmployeeRegisterForm() {
         <Input
           label="Contraseña"
           type="password"
-          placeholder="Mínimo 6 caracteres"
+          placeholder="Mínimo 8 caracteres"
           error={errors.password?.message}
           {...register('password')}
         />

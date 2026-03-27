@@ -102,7 +102,7 @@ function RegisterForm() {
         <Input
           label="Contraseña"
           type={showPassword ? 'text' : 'password'}
-          placeholder="Mínimo 6 caracteres"
+          placeholder="Mínimo 8 caracteres"
           error={errors.password?.message}
           rightElement={
             <button
@@ -173,8 +173,14 @@ function RegisterForm() {
 
         {registerMutation.isError && (
           <p className="text-sm text-red-600">
-            {(registerMutation.error as any)?.response?.data?.error ||
-              'Hubo un error al crear la cuenta. Intenta de nuevo.'}
+            {(() => {
+              const data = (registerMutation.error as any)?.response?.data;
+              if (data?.details) {
+                const msgs = Object.values(data.details).flat() as string[];
+                return msgs.join('. ');
+              }
+              return data?.error || 'Hubo un error al crear la cuenta. Intenta de nuevo.';
+            })()}
           </p>
         )}
 

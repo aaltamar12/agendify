@@ -7,7 +7,7 @@ export const loginSchema = z.object({
     .email('Ingresa un correo válido'),
   password: z
     .string()
-    .min(6, 'La contraseña debe tener al menos 6 caracteres'),
+    .min(8, 'La contraseña debe tener al menos 8 caracteres'),
 });
 
 export const registerSchema = z
@@ -19,7 +19,7 @@ export const registerSchema = z
       .email('Ingresa un correo válido'),
     password: z
       .string()
-      .min(6, 'La contraseña debe tener al menos 6 caracteres'),
+      .min(8, 'La contraseña debe tener al menos 8 caracteres'),
     passwordConfirmation: z
       .string()
       .min(1, 'Confirma tu contraseña'),
@@ -48,7 +48,7 @@ export const resetPasswordSchema = z
   .object({
     password: z
       .string()
-      .min(6, 'La contraseña debe tener al menos 6 caracteres'),
+      .min(8, 'La contraseña debe tener al menos 8 caracteres'),
     passwordConfirmation: z
       .string()
       .min(1, 'Confirma tu contraseña'),
