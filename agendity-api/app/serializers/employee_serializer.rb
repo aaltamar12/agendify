@@ -40,6 +40,13 @@ class EmployeeSerializer < Blueprinter::Base
     employee.employee_services.pluck(:service_id)
   end
 
+  # Work schedules for the employee form
+  field :schedules do |employee, _options|
+    employee.employee_schedules.order(:day_of_week).map do |s|
+      { day_of_week: s.day_of_week, start_time: s.start_time, end_time: s.end_time, active: true }
+    end
+  end
+
   view :with_services do
     association :services, blueprint: ServiceSerializer
   end
