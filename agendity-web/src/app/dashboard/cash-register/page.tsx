@@ -406,7 +406,7 @@ function EmployeeRow({
         <div className="border-t border-gray-100 bg-gray-50 px-4 py-3">
           {/* Appointment details */}
           {emp.appointments && emp.appointments.length > 0 && (
-            <div className="mb-4">
+            <div className="mb-4 overflow-x-auto">
               <table className="w-full text-xs">
                 <thead>
                   <tr className="text-left text-gray-400">

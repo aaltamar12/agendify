@@ -12,6 +12,11 @@ services:
       POSTGRES_DB: agendity_production
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agendity"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: unless-stopped
 
   # Redis (Sidekiq + slot locking)
@@ -21,6 +26,11 @@ services:
       - redis_data:/data
     ports:
       - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: unless-stopped
 
   # NATS (real-time messaging)
@@ -42,9 +52,12 @@ services:
       context: ./agendity-api
       dockerfile: Dockerfile
     depends_on:
-      - postgres
-      - redis
-      - nats
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      nats:
+        condition: service_started
     environment:
       RAILS_ENV: production
       DATABASE_URL: postgres://agendity:${POSTGRES_PASSWORD:-agendity_dev}@postgres:5432/agendity_production
@@ -80,9 +93,12 @@ services:
       context: ./agendity-api
       dockerfile: Dockerfile
     depends_on:
-      - postgres
-      - redis
-      - nats
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      nats:
+        condition: service_started
     environment:
       RAILS_ENV: production
       DATABASE_URL: postgres://agendity:${POSTGRES_PASSWORD:-agendity_dev}@postgres:5432/agendity_production
@@ -90,10 +106,12 @@ services:
       NATS_URL: nats://${NATS_AUTH_TOKEN:-dev_nats_token}@nats:4222
       DEVISE_JWT_SECRET_KEY: ${DEVISE_JWT_SECRET_KEY}
       SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+      AGENDITY_WEB_URL: ${AGENDITY_WEB_URL:-http://localhost:3000}
       API_HOST: ${API_HOST:-http://localhost:3001}
       ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY: ${ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY}
       ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY: ${ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY}
       ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT: ${ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT}
+      PEXELS_API_KEY: ${PEXELS_API_KEY:-}
       SMTP_ADDRESS: ${SMTP_ADDRESS:-}
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USERNAME: ${SMTP_USERNAME:-}
@@ -104,7 +122,7 @@ services:
       MAILER_FROM: ${MAILER_FROM:-}
     volumes:
       - storage_data:/rails/storage
-    command: bundle exec sidekiq
+    command: bundle exec sidekiq -C config/sidekiq.yml
     restart: unless-stopped
 
   # Next.js frontend

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { ArrowRight, Copy, Check, Users, DollarSign, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 const STEPS = [
   {

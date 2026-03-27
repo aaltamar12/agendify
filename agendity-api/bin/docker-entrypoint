@@ -6,8 +6,9 @@ if [ -z "${LD_PRELOAD+x}" ]; then
     export LD_PRELOAD
 fi
 
-# If running the rails server then create or migrate existing database
-if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
+# If running the web server (puma or rails server), prepare the database.
+# The CMD in Dockerfile uses "bundle exec puma", not "bin/rails server".
+if echo "$@" | grep -qE '(puma|rails server|rails s)'; then
   ./bin/rails db:prepare
 fi
 

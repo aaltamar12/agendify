@@ -15,7 +15,9 @@ interface EmployeePayload {
   email?: string;
   phone?: string;
   active?: boolean;
+  payment_type?: 'manual' | 'commission' | 'fixed_daily';
   commission_percentage?: number;
+  fixed_daily_pay?: number;
   service_ids?: number[];
   schedules?: ScheduleEntry[];
 }

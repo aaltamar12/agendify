@@ -34,7 +34,8 @@ module AgendityApi
     # These settings can be overridden in specific environments using the files
     # in config/environments, which are processed later.
     #
-    # config.time_zone = "Central Time (US & Canada)"
+    # Barranquilla, Colombia (UTC-5)
+    config.time_zone = "Bogota"
     # config.eager_load_paths << Rails.root.join("extras")
 
     # Use Sidekiq for background job processing
