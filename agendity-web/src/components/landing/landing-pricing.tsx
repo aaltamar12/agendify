@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui';
 import { PlanCard } from '@/components/shared/plan-card';
-import { getPlanSlug } from '@/lib/constants';
+import { getPlanSlug, DEFAULT_TRIAL_DAYS } from '@/lib/constants';
 import type { Plan } from '@/lib/api/types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
@@ -28,7 +28,7 @@ export function LandingPricing() {
           Planes simples, sin sorpresas
         </h2>
         <p className="mx-auto mb-12 max-w-2xl text-center text-gray-500">
-          25 días gratis con acceso completo al Plan Inteligente. Sin tarjeta de crédito.
+          {DEFAULT_TRIAL_DAYS} días gratis con acceso completo al Plan Inteligente. Sin tarjeta de crédito.
         </p>
 
         <div className="grid gap-6 sm:grid-cols-3">

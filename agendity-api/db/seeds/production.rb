@@ -135,7 +135,9 @@ puts "\n⚙️  Site configs created via initializer on boot"
   "admin_url" => ENV.fetch("API_HOST", "https://api.agendity.co"),
   "support_email" => "soporte@agendity.com",
   "support_whatsapp" => "+573001234567",
-  "trm_rate" => "3667"
+  "trm_rate" => "3667",
+  "default_trial_days" => "7",
+  "referral_trial_days" => "25"
 }.each do |key, value|
   config = SiteConfig.find_by(key: key)
   config&.update!(value: value) if config

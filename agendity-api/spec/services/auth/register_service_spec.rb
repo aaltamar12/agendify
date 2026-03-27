@@ -32,7 +32,7 @@ RSpec.describe Auth::RegisterService do
         expect(user.role).to eq("owner")
       end
 
-      it "creates a Business with trial_ends_at = 25 days from now" do
+      it "creates a Business with trial_ends_at = 7 days from now (no referral)" do
         freeze_time do
           result = subject
           business = Business.last
@@ -40,7 +40,7 @@ RSpec.describe Auth::RegisterService do
           expect(business.name).to eq("Barberia Elite")
           expect(business.business_type).to eq("barbershop")
           expect(business.status).to eq("active")
-          expect(business.trial_ends_at).to be_within(1.second).of(25.days.from_now)
+          expect(business.trial_ends_at).to be_within(1.second).of(7.days.from_now)
         end
       end
 
@@ -83,6 +83,15 @@ RSpec.describe Auth::RegisterService do
 
       subject { described_class.call(**base_params.merge(referral_code: "amigo2024")) }
 
+      it "creates a Business with trial_ends_at = 25 days from now" do
+        freeze_time do
+          subject
+          business = Business.last
+
+          expect(business.trial_ends_at).to be_within(1.second).of(25.days.from_now)
+        end
+      end
+
       it "creates a Referral in pending status" do
         expect { subject }.to change(Referral, :count).by(1)
 
@@ -111,6 +120,15 @@ RSpec.describe Auth::RegisterService do
 
     context "with an invalid referral code" do
       subject { described_class.call(**base_params.merge(referral_code: "NOEXISTE")) }
+
+      it "creates a Business with trial_ends_at = 7 days from now (invalid code)" do
+        freeze_time do
+          subject
+          business = Business.last
+
+          expect(business.trial_ends_at).to be_within(1.second).of(7.days.from_now)
+        end
+      end
 
       it "still registers the user and business successfully" do
         result = subject

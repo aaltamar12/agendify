@@ -22,7 +22,7 @@ import { BookingFlow } from '@/components/booking/booking-flow';
 import { usePublicBusiness } from '@/lib/hooks/use-public';
 import { WelcomeModal } from '@/components/shared/welcome-modal';
 import { formatCurrency, formatPhone, truncate } from '@/lib/utils/format';
-import { DAYS_OF_WEEK, BUSINESS_TYPES } from '@/lib/constants';
+import { DAYS_OF_WEEK, BUSINESS_TYPES, DEFAULT_TRIAL_DAYS } from '@/lib/constants';
 import type { DayOfWeek } from '@/lib/api/types';
 
 export default function BusinessPage() {
@@ -429,7 +429,7 @@ export default function BusinessPage() {
             Registra tu negocio gratis
           </a>
           <p className="mt-2 text-xs text-gray-500">
-            25 días gratis — Sin tarjeta de crédito
+            {DEFAULT_TRIAL_DAYS} días gratis — Sin tarjeta de crédito
           </p>
         </div>
 

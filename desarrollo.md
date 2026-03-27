@@ -397,7 +397,7 @@ El sistema debe estar preparado para incluir IA.
 
 ## 19. Planes de suscripción
 
-**Trial:** 25 días gratis con acceso completo al Plan Profesional. Después elige un plan y paga via checkout P2P.
+**Trial:** 7 días gratis por defecto (25 días con código de referido) con acceso completo al Plan Profesional. Después elige un plan y paga via checkout P2P.
 
 **Estrategia de pricing:** El plan Inteligente debe ser el más atractivo. La diferencia de solo $5 USD ($17k COP) con el Profesional incentiva a elegir el plan con IA. Los precios se definen en USD en la DB y se convierten a COP usando la TRM configurable desde `SiteConfig.get(:trm)`. El campo `features` (jsonb) en Plan es editable desde ActiveAdmin.
 
@@ -537,7 +537,7 @@ El producto está funcional de punta a punta. Todas las features core están imp
 - [x] CheckoutService + ApprovePaymentService (crea Subscription, activa referral, reactiva business)
 - [x] SiteConfig (modelo key/value para datos de contacto y pago; editable desde ActiveAdmin > Configuración)
 - [x] Mailers usan SiteConfig.get() en vez de valores hardcoded
-- [x] Trial de 25 días — Business#trial_ends_at = 25.days.from_now al registrar
+- [x] Trial dinámico — 7 días por defecto, 25 días con código de referido (Business#trial_ends_at)
 - [x] TrialExpiryAlertJob (diario 8am, 4 stages: aviso 5 días antes, día de fin, +2d suspensión, +10d desactivación)
 - [x] trial_alert_stage en Business para anti-duplicados de alertas de trial (0=ninguna, 1=5d aviso, 2=dia fin, 3=suspendido, 4=inactivo)
 - [x] Tipo de pago de empleado: payment_type (manual/commission/fixed_daily) + fixed_daily_pay; cierre de caja calcula según tipo; alerta naranja en formulario para empleados manuales
@@ -561,7 +561,7 @@ El producto está funcional de punta a punta. Todas las features core están imp
 
 ### Cambios recientes — nuevas features (marzo 2026)
 - [x] Sistema de referidos (ReferralCode + Referral, link ?ref=CODE → localStorage → registro → activación al aprobar pago, panel ActiveAdmin)
-- [x] Trial de 25 días + TrialExpiryAlertJob con 4 stages (5d aviso, dia fin, +2d suspension, +10d inactive) + trial_alert_stage en Business
+- [x] Trial dinámico (7d default, 25d con referido) + TrialExpiryAlertJob con 4 stages (5d aviso, dia fin, +2d suspension, +10d inactive) + trial_alert_stage en Business
 - [x] Checkout de suscripción P2P (página /dashboard/subscription/checkout, CheckoutService, ApprovePaymentService)
 - [x] SiteConfig: configuración de plataforma en DB (key/value, 7 claves), seeds con datos de contacto, pago y app_url, editable desde ActiveAdmin
 - [x] Tipo de pago de empleado (payment_type: manual/commission/fixed_daily, fixed_daily_pay, cierre de caja adaptado)
@@ -610,7 +610,7 @@ El producto está funcional de punta a punta. Todas las features core están imp
 - [x] Auto-scroll calendario a hora actual
 
 **Sprint 2 — Features pequeñas:**
-- [x] Trial 25 días (trial_ends_at = 25.days.from_now al registrar, TrialExpiryAlertJob con 4 stages: 5d antes, día fin, +2d suspensión, +10d desactivación)
+- [x] Trial dinámico 7d/25d (trial_ends_at según referral code, TrialExpiryAlertJob con 4 stages: 5d antes, día fin, +2d suspensión, +10d desactivación)
 - [x] Precios dinámicos desde API ($9/$22/$27 USD — $33k/$82k/$99k COP). TRM configurable desde SiteConfig
 - [x] Método de pago Bre-B (breb_key encriptado en Business, formulario en settings/onboarding/booking/ticket)
 - [x] Profesional independiente: foto de perfil circular (no logo/cover), CoverSection oculta
@@ -647,13 +647,13 @@ El producto está funcional de punta a punta. Todas las features core están imp
 
 **Adicional:**
 - [x] Credits toggle per business (`credits_enabled` boolean en Business, default true; cuando false: no aplica créditos en booking, no otorga cashback, controller retorna 403, customer_lookup devuelve balance 0)
-- [x] Subscription banners refactored (banner azul informativo para trial días 5-20, amber/rojo para urgencia, lógica de visibilidad mejorada)
+- [x] Subscription banners refactored (banner azul informativo para todo el trial >5d, amber/rojo para urgencia, lógica de visibilidad mejorada)
 
 ### Notas técnicas importantes
 - El `ticket_code` se genera SIEMPRE al crear la cita (no al aprobar el pago). Permite identificar la cita en todo el flujo. La visualización VIP (boarding pass + QR + descarga PNG) es exclusiva del plan Profesional+.
 - Activity Logs y Request Logs están disponibles en el panel de SuperAdmin para auditoría completa.
 - Las órdenes de pago de suscripción se generan automáticamente y el superadmin las confirma manualmente.
-- El trial dura 25 días. Al vencer, el negocio debe pagar via checkout P2P. `ApprovePaymentService` reactiva el negocio y activa el referral si corresponde.
+- El trial dura 7 días por defecto (25 días con código de referido). Al vencer, el negocio debe pagar via checkout P2P. `ApprovePaymentService` reactiva el negocio y activa el referral si corresponde.
 - `SiteConfig` centraliza todos los datos de contacto y pago de la plataforma (7 claves: support_email, support_whatsapp, admin_email, payment_nequi, payment_bancolombia, payment_daviplata, app_url); los mailers no tienen valores hardcoded.
 - Los error codes en API permiten que el frontend maneje errores específicos sin depender solo del mensaje de texto.
 - `BusinessMailer#welcome` se dispara en `RegisterService` con mini-onboarding y datos de contacto desde SiteConfig.

@@ -118,7 +118,7 @@ Disponible desde ActiveAdmin > Subscriptions > "Renovar suscripcion"
 
 ### Contexto
 
-El trial dura **25 dias**. Al registrarse, `Business#trial_ends_at` se fija en `25.days.from_now`. Cuando el trial termina, el negocio debe elegir un plan y subir comprobante de pago para continuar.
+El trial dura **7 dias por defecto** (25 dias con codigo de referido). Al registrarse, `Business#trial_ends_at` se fija en `7.days.from_now` (o `25.days.from_now` si tiene un codigo de referido valido). Cuando el trial termina, el negocio debe elegir un plan y subir comprobante de pago para continuar.
 
 ### Flujo de alertas
 
@@ -262,12 +262,12 @@ Cubre **tanto trial como suscripcion pagada**. Se basa en `daysUntilExpiry` que 
 
 | Condicion | Color | Icono | Mensaje | CTA |
 |-----------|-------|-------|---------|-----|
-| Trial, 6-20 dias restantes | Azul (`bg-blue-500`) | Info | "Estas en tu periodo de prueba. Te quedan {X} dias." | Ver planes → checkout |
+| Trial, >5 dias restantes | Azul (`bg-blue-500`) | Info | "Estas en tu periodo de prueba. Te quedan {X} dias." | Ver planes → checkout |
 | 1-5 dias antes de vencer | Amber (`bg-amber-500`) | Clock | "Tu plan {plan} vence en {X} dias. Renueva para mantener tus funcionalidades." | Renovar → checkout |
 | Dia de vencimiento (0 dias) | Rojo (`bg-red-500`) | AlertTriangle | "Tu plan {plan} vence hoy. Renueva ahora para no perder acceso." | Renovar → checkout |
 | Vencido (dias negativos) | Rojo oscuro (`bg-red-600`) | AlertTriangle | "Tu plan {plan} vencio hace {X} dias. Tu negocio no aparece para usuarios hasta que renueves." | Renovar → checkout |
 
-El banner azul informativo aparece a partir del dia 5 del trial (con 20 dias restantes, asumiendo trial de 25 dias). A partir de 5 dias restantes cambia a los colores de urgencia (amber/rojo).
+El banner azul informativo aparece para todos los negocios en trial con mas de 5 dias restantes. A partir de 5 dias restantes cambia a los colores de urgencia (amber/rojo).
 
 El banner completo es un `<Link>` clickeable a `/dashboard/subscription/checkout`.
 
@@ -285,8 +285,7 @@ Este caso solo ocurre cuando:
 
 | Escenario | Status negocio | Banner visible | Color |
 |-----------|---------------|---------------|-------|
-| Trial activo, >20 dias restantes | `active` | Ninguno | — |
-| Trial activo, 6-20 dias restantes | `active` | SubscriptionBanner | Azul (info) |
+| Trial activo, >5 dias restantes | `active` | SubscriptionBanner | Azul (info) |
 | Trial activo, 3 dias restantes | `active` | SubscriptionBanner | Amber |
 | Trial vence hoy | `active` | SubscriptionBanner | Rojo |
 | Trial vencio hace 1 dia (gracia) | `active` | SubscriptionBanner | Rojo oscuro |

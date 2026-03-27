@@ -118,6 +118,7 @@ class BusinessMailer < ApplicationMailer
     @business          = business
     @owner             = business.owner
     @trial_ends_at     = business.trial_ends_at
+    @trial_days        = ((business.trial_ends_at - Time.current) / 1.day).round
     @support_email     = SiteConfig.get("support_email")
     @support_whatsapp  = SiteConfig.get("support_whatsapp")
     @app_url           = SiteConfig.get("app_url")

@@ -11,6 +11,8 @@ export interface SiteConfigData {
   payment_bancolombia: string | null;
   payment_daviplata: string | null;
   company_name: string;
+  default_trial_days: number;
+  referral_trial_days: number;
 }
 
 /**

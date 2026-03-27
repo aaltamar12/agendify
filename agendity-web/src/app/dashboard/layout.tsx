@@ -62,9 +62,9 @@ export default function DashboardLayout({
   const isCheckoutPage = pathname?.startsWith('/dashboard/subscription');
   const shouldBlockTrialExpired = !isAdmin && !isCheckoutPage && trialExpired && !hasPendingOrder && !isBusinessSuspended;
   const isDemo = isDemoMode();
-  // Show subscription banner: trial info (≤20 days), urgency (≤5 days), or expired (negative)
+  // Show subscription banner: trial info (all trialing), urgency (≤5 days), or expired (negative)
   const isTrialing = !subscriptionStatus?.subscription;
-  const showSubscriptionBanner = daysUntilExpiry !== null && (daysUntilExpiry <= 5 || (isTrialing && daysUntilExpiry <= 20));
+  const showSubscriptionBanner = daysUntilExpiry !== null && (daysUntilExpiry <= 5 || isTrialing);
   // Show "Oculto" banner only for non-subscription suspensions (e.g. manual admin action)
   const isBusinessHidden = isBusinessSuspended && !showSubscriptionBanner;
 

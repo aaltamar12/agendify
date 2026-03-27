@@ -30,9 +30,10 @@ module Auth
 
         BusinessMailer.welcome(business).deliver_later
 
+        trial_days = ((business.trial_ends_at - Time.current) / 1.day).round
         AdminNotification.notify!(
           title: "Nuevo negocio registrado",
-          body: "#{business.name} (#{user.email}) — Trial 25 dias",
+          body: "#{business.name} (#{user.email}) — Trial #{trial_days} dias",
           notification_type: "new_business",
           link: "/admin/businesses/#{business.id}",
           icon: "🆕"
@@ -64,11 +65,20 @@ module Auth
         name:           @business_name.presence || "#{@name}'s Business",
         business_type:  @business_type,
         status:         :active,
-        trial_ends_at:  25.days.from_now,
+        trial_ends_at:  trial_duration.from_now,
         cancellation_policy_pct:     0,
         cancellation_deadline_hours: 0,
         rating_average:              0
       )
+    end
+
+    def trial_duration
+      if @referral_code.present? &&
+         ReferralCode.active.where("LOWER(code) = ?", @referral_code.downcase).exists?
+        (SiteConfig.get("referral_trial_days") || "25").to_i.days
+      else
+        (SiteConfig.get("default_trial_days") || "7").to_i.days
+      end
     end
 
     def associate_referral!(business)

@@ -9,6 +9,7 @@ import { Eye, EyeOff } from 'lucide-react';
 import { Button, Input, Select, Card } from '@/components/ui';
 import { registerSchema, type RegisterFormData } from '@/lib/validations/auth';
 import { useRegister } from '@/lib/hooks/use-auth';
+import { REFERRAL_TRIAL_DAYS } from '@/lib/constants';
 
 const businessTypeOptions = [
   { value: 'barbershop', label: 'Barbería' },
@@ -32,6 +33,7 @@ function RegisterForm() {
   const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [referralCode, setReferralCode] = useState<string | null>(null);
 
   const {
     register,
@@ -53,6 +55,10 @@ function RegisterForm() {
     const ref = searchParams.get('ref');
     if (ref) {
       localStorage.setItem('agendity_ref_code', ref);
+      setReferralCode(ref);
+    } else {
+      const stored = localStorage.getItem('agendity_ref_code');
+      if (stored) setReferralCode(stored);
     }
   }, [searchParams]);
 
@@ -68,6 +74,14 @@ function RegisterForm() {
       <h2 className="mb-6 text-center text-xl font-semibold text-gray-900">
         Crear cuenta
       </h2>
+
+      {referralCode && (
+        <div className="rounded-lg bg-green-50 border border-green-200 p-3 text-center">
+          <p className="text-sm font-medium text-green-800">
+            🎉 ¡Código de referido aplicado! Recibirás {REFERRAL_TRIAL_DAYS} días de prueba gratis
+          </p>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <Input

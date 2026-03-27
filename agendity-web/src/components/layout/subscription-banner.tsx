@@ -4,16 +4,13 @@ import Link from 'next/link';
 import { AlertTriangle, Clock, Info } from 'lucide-react';
 import { useCurrentSubscription } from '@/lib/hooks/use-subscription';
 
-/** Trial info banner shows from day 5 onwards (20 days remaining) */
-const TRIAL_INFO_THRESHOLD = 20;
-
 export function SubscriptionBanner() {
   const { daysUntilExpiry, planLabel, isTrialing, isLoading } = useCurrentSubscription();
 
   if (isLoading || daysUntilExpiry === null) return null;
 
-  // Trial informative banner: show between 6-20 days remaining
-  const showTrialInfo = isTrialing && daysUntilExpiry > 5 && daysUntilExpiry <= TRIAL_INFO_THRESHOLD;
+  // Trial informative banner: show for all trialing businesses with more than 5 days remaining
+  const showTrialInfo = isTrialing && daysUntilExpiry > 5;
   // Urgency banner: ≤5 days or expired
   const showUrgency = daysUntilExpiry <= 5;
 
