@@ -67,6 +67,8 @@ services:
       SMTP_AUTHENTICATION: ${SMTP_AUTHENTICATION:-login}
       SMTP_ENABLE_STARTTLS: ${SMTP_ENABLE_STARTTLS:-true}
       MAILER_FROM: ${MAILER_FROM:-}
+    volumes:
+      - storage_data:/rails/storage
     ports:
       - "3001:3001"
     command: bundle exec puma -C config/puma.rb -p 3001
@@ -100,6 +102,8 @@ services:
       SMTP_AUTHENTICATION: ${SMTP_AUTHENTICATION:-login}
       SMTP_ENABLE_STARTTLS: ${SMTP_ENABLE_STARTTLS:-true}
       MAILER_FROM: ${MAILER_FROM:-}
+    volumes:
+      - storage_data:/rails/storage
     command: bundle exec sidekiq
     restart: unless-stopped
 
@@ -137,3 +141,4 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  storage_data:

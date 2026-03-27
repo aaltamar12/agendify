@@ -40,6 +40,9 @@ Rails.application.configure do
   # Don't log any deprecations.
   config.active_support.report_deprecations = false
 
+  # ActiveStorage: use local disk (persisted via Docker volume)
+  config.active_storage.service = :local
+
   # Use Redis for cache (Solid Cache requires separate gem not included)
   config.cache_store = :redis_cache_store, { url: ENV.fetch("REDIS_URL", "redis://localhost:6379/1") }
 
