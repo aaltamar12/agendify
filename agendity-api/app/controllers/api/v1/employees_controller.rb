@@ -33,12 +33,15 @@ module Api
 
         if employee.save
           employee.service_ids = employee_params[:service_ids] if employee_params[:service_ids].present?
+          sync_schedules!(employee)
 
-          # Auto-create employee schedules from business hours
-          current_business.business_hours.where(closed: false).each do |bh|
-            employee.employee_schedules.find_or_create_by!(day_of_week: bh.day_of_week) do |es|
-              es.start_time = bh.open_time.strftime("%H:%M")
-              es.end_time = bh.close_time.strftime("%H:%M")
+          # Auto-create from business hours if no schedules were sent
+          if employee.employee_schedules.empty?
+            current_business.business_hours.where(closed: false).each do |bh|
+              employee.employee_schedules.find_or_create_by!(day_of_week: bh.day_of_week) do |es|
+                es.start_time = bh.open_time.strftime("%H:%M")
+                es.end_time = bh.close_time.strftime("%H:%M")
+              end
             end
           end
 
@@ -56,8 +59,9 @@ module Api
       def update
         authorize @employee
 
-        if @employee.update(employee_params.except(:service_ids))
+        if @employee.update(employee_params.except(:service_ids, :schedules))
           @employee.service_ids = employee_params[:service_ids] if employee_params.key?(:service_ids)
+          sync_schedules!(@employee)
           render_success(EmployeeSerializer.render_as_hash(@employee, view: :with_services))
         else
           render_error(
@@ -178,7 +182,29 @@ module Api
       end
 
       def employee_params
-        params.require(:employee).permit(:name, :phone, :email, :photo_url, :active, :payment_type, :commission_percentage, :fixed_daily_pay, service_ids: [])
+        params.require(:employee).permit(
+          :name, :phone, :email, :photo_url, :active,
+          :payment_type, :commission_percentage, :fixed_daily_pay,
+          service_ids: [],
+          schedules: [:day_of_week, :start_time, :end_time, :active]
+        )
+      end
+
+      def sync_schedules!(employee)
+        return unless params.dig(:employee, :schedules).present?
+
+        schedules = params[:employee][:schedules]
+        schedules.each do |sched|
+          day = sched[:day_of_week].to_i
+          es = employee.employee_schedules.find_or_initialize_by(day_of_week: day)
+          if sched[:active] == false || sched[:active] == "false"
+            es.destroy if es.persisted?
+          else
+            es.start_time = sched[:start_time]
+            es.end_time = sched[:end_time]
+            es.save!
+          end
+        end
       end
 
       def require_intelligent_plan!
