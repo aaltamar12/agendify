@@ -458,6 +458,46 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Referral Program */}
+        <section className="bg-gray-50 px-6 py-20">
+          <div className="mx-auto max-w-4xl text-center">
+            <h2 className="mb-4 text-3xl font-bold text-gray-900">
+              Programa de Referidos
+            </h2>
+            <p className="mx-auto mb-10 max-w-2xl text-gray-500">
+              Recomienda Agendity y gana comisiones por cada negocio que se suscriba con tu código.
+            </p>
+            <div className="grid gap-8 sm:grid-cols-3">
+              <div className="rounded-xl bg-white p-6 shadow-sm">
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-violet-100 text-2xl font-bold text-violet-600">
+                  1
+                </div>
+                <h3 className="mb-2 font-semibold text-gray-900">Obtén tu código</h3>
+                <p className="text-sm text-gray-500">Regístrate gratis y recibe tu código de referido al instante.</p>
+              </div>
+              <div className="rounded-xl bg-white p-6 shadow-sm">
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-violet-100 text-2xl font-bold text-violet-600">
+                  2
+                </div>
+                <h3 className="mb-2 font-semibold text-gray-900">Comparte</h3>
+                <p className="text-sm text-gray-500">Recomienda Agendity a negocios que trabajen con citas.</p>
+              </div>
+              <div className="rounded-xl bg-white p-6 shadow-sm">
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-violet-100 text-2xl font-bold text-violet-600">
+                  3
+                </div>
+                <h3 className="mb-2 font-semibold text-gray-900">Gana</h3>
+                <p className="text-sm text-gray-500">Recibe comisión por cada negocio que se suscriba con tu código.</p>
+              </div>
+            </div>
+            <Link href="/referral" className="mt-8 inline-block">
+              <Button variant="outline" size="lg">
+                Quiero ser referido
+              </Button>
+            </Link>
+          </div>
+        </section>
+
         {/* Final CTA */}
         <section className="bg-violet-600 px-6 py-20 text-center">
           <div className="mx-auto max-w-2xl">

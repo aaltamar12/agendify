@@ -43,6 +43,20 @@ Rails.application.configure do
   # Use Redis for cache (Solid Cache requires separate gem not included)
   config.cache_store = :redis_cache_store, { url: ENV.fetch("REDIS_URL", "redis://localhost:6379/1") }
 
+  # SMTP email delivery
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.perform_deliveries = true
+  config.action_mailer.default_url_options = { host: ENV.fetch("API_HOST", "https://api.agendity.co").gsub(%r{https?://}, "") }
+  config.action_mailer.smtp_settings = {
+    address: ENV.fetch("SMTP_ADDRESS", "smtpout.secureserver.net"),
+    port: ENV.fetch("SMTP_PORT", 587).to_i,
+    user_name: ENV["SMTP_USERNAME"],
+    password: ENV["SMTP_PASSWORD"],
+    domain: ENV.fetch("SMTP_DOMAIN", "agendity.co"),
+    authentication: ENV.fetch("SMTP_AUTHENTICATION", "login").to_sym,
+    enable_starttls_auto: ENV.fetch("SMTP_ENABLE_STARTTLS", "true") == "true"
+  }
+
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).
   config.i18n.fallbacks = true

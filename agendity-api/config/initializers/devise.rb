@@ -4,7 +4,7 @@
 # Uses JWT for stateless authentication.
 
 Devise.setup do |config|
-  config.mailer_sender = "noreply@agendity.com"
+  config.mailer_sender = ENV.fetch("MAILER_FROM", "Agendity <contacto@agendity.co>")
 
   require "devise/orm/active_record"
 

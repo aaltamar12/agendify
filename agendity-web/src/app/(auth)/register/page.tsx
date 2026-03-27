@@ -41,7 +41,7 @@ function RegisterForm() {
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      businessType: undefined,
+      businessType: '' as unknown as RegisterFormData['businessType'],
       termsAccepted: undefined as unknown as true,
     },
   });
