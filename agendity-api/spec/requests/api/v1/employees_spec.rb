@@ -314,8 +314,8 @@ RSpec.describe "Api::V1::Employees", type: :request do
       employee.reload
       # Day 1: updated to 09:00-17:00
       day1 = employee.employee_schedules.find_by(day_of_week: 1)
-      expect(day1.start_time).to eq("09:00")
-      expect(day1.end_time).to eq("17:00")
+      expect(day1.start_time.strftime("%H:%M")).to eq("09:00")
+      expect(day1.end_time.strftime("%H:%M")).to eq("17:00")
 
       # Day 2: active=false → destroyed
       expect(employee.employee_schedules.find_by(day_of_week: 2)).to be_nil
@@ -323,7 +323,7 @@ RSpec.describe "Api::V1::Employees", type: :request do
       # Day 3: new schedule created
       day3 = employee.employee_schedules.find_by(day_of_week: 3)
       expect(day3).to be_present
-      expect(day3.start_time).to eq("10:00")
+      expect(day3.start_time.strftime("%H:%M")).to eq("10:00")
     end
 
     it "returns schedules in serializer" do
