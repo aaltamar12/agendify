@@ -115,7 +115,7 @@ puts "  ✅ Plans: #{Plan.count}"
 # ============================================================================
 puts "\n👤 Creating admin user..."
 
-admin = User.find_or_initialize_by(email: "admin@agendity.com")
+admin = User.find_or_initialize_by(email: "admin@agendity.co")
 admin.update!(
   name: "Admin Agendity",
   password: ENV.fetch("ADMIN_PASSWORD", "AgendityAdmin2026!"),
