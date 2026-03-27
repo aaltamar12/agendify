@@ -96,8 +96,6 @@ module Bookings
 
       # Check overlapping appointments (including gap between appointments)
       gap = gap_minutes
-      query_start = end_time.strftime("%H:%M")
-      query_end   = start_time.strftime("%H:%M")
 
       active_appointments = @business.appointments
         .for_employee(employee.id)
@@ -105,15 +103,15 @@ module Bookings
         .active
 
       has_overlap = active_appointments
-        .where("start_time < ? AND end_time > ?", query_start, query_end)
+        .where("start_time < ? AND end_time > ?", end_time, start_time)
         .exists?
       return false if has_overlap
 
       # Check gap: no appointment should end within gap_minutes before our start
       if gap > 0
-        gap_boundary = (start_time - gap.minutes).strftime("%H:%M")
+        gap_boundary = start_time - gap.minutes
         has_gap_conflict = active_appointments
-          .where("end_time > ? AND end_time <= ?", gap_boundary, start_time.strftime("%H:%M"))
+          .where("end_time > ? AND end_time <= ?", gap_boundary, start_time)
           .exists?
         return false if has_gap_conflict
       end
@@ -122,7 +120,7 @@ module Bookings
       has_block = BlockedSlot.on_date(@date)
         .where(business: @business)
         .where("employee_id IS NULL OR employee_id = ?", employee.id)
-        .where("start_time < ? AND end_time > ?", end_time.strftime("%H:%M"), start_time.strftime("%H:%M"))
+        .where("start_time < ? AND end_time > ?", end_time, start_time)
         .exists?
       return false if has_block
 

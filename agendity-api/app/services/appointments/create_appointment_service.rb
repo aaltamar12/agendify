@@ -228,7 +228,7 @@ module Appointments
         .for_employee(employee.id)
         .on_date(date)
         .active
-        .where("start_time < ? AND end_time > ?", end_time, start_time)
+        .where("start_time < ? AND end_time > ?", parse_time(end_time), parse_time(start_time))
         .exists?
     end
 
@@ -236,8 +236,16 @@ module Appointments
       BlockedSlot.on_date(date)
         .where(business: @business)
         .where("employee_id IS NULL OR employee_id = ?", employee.id)
-        .where("start_time < ? AND end_time > ?", end_time, start_time)
+        .where("start_time < ? AND end_time > ?", parse_time(end_time), parse_time(start_time))
         .exists?
+    end
+
+    # Convert a time string (e.g. "10:30") into a Time object so
+    # ActiveRecord applies the correct UTC offset for time-column queries.
+    def parse_time(value)
+      return value unless value.is_a?(String)
+
+      Time.zone.parse(value)
     end
 
     def find_or_create_customer

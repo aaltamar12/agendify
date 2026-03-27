@@ -109,8 +109,9 @@ RSpec.describe "Cancellation Credits", type: :model do
     # ============================================================
     # Step 4: Create new booking applying credits
     # ============================================================
-    # Need a different day to avoid conflict
+    # Need a different day to avoid conflict (skip Sunday which is closed)
     day_after = tomorrow + 1.day
+    day_after += 1.day while day_after.wday == 0
     employee.employee_schedules.create!(
       day_of_week: day_after.wday,
       start_time: "08:00",

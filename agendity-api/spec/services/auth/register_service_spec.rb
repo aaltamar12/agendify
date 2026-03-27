@@ -131,11 +131,8 @@ RSpec.describe Auth::RegisterService do
       end
 
       it "still registers the user and business successfully" do
-        result = subject
-
-        expect(result).to be_success
-        expect(User.count).to eq(1)
-        expect(Business.count).to eq(1)
+        expect { subject }.to change(User, :count).by(1).and change(Business, :count).by(1)
+        expect(subject).to be_success
       end
 
       it "does not create a Referral" do

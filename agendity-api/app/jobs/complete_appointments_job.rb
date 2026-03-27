@@ -8,11 +8,17 @@ class CompleteAppointmentsJob < ApplicationJob
   def perform
     return record_success!("Skipped — disabled") unless job_enabled?
 
+    now = Time.current
+    tz = "America/Bogota"
+    local_time_sql = "(end_time AT TIME ZONE 'UTC' AT TIME ZONE '#{tz}')::time"
+
     appointments = Appointment
       .includes(:business, :service, :employee, :customer)
       .where(status: :checked_in)
-      .where("appointment_date < ? OR (appointment_date = ? AND end_time < ?)",
-             Date.current, Date.current, Time.current.strftime("%H:%M"))
+      .where(
+        "appointment_date < :today OR (appointment_date = :today AND #{local_time_sql} < :now)",
+        today: now.to_date, now: now.strftime("%H:%M")
+      )
 
     appointments.find_each do |appointment|
       appointment.update!(status: :completed)
