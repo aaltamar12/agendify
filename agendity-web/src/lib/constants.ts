@@ -222,7 +222,7 @@ export const SUPPORT_CHANNELS_BY_PLAN: Record<PlanSlug, string[]> = {
   basico: ['email'],
   profesional: ['email', 'whatsapp'],
   inteligente: ['email', 'whatsapp', 'chat'],
-  trial: ['email', 'whatsapp'],
+  trial: ['email', 'whatsapp', 'chat'],
 };
 
 // --- Misc ---
