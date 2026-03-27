@@ -33,6 +33,15 @@ module Api
 
         if employee.save
           employee.service_ids = employee_params[:service_ids] if employee_params[:service_ids].present?
+
+          # Auto-create employee schedules from business hours
+          current_business.business_hours.where(closed: false).each do |bh|
+            employee.employee_schedules.find_or_create_by!(day_of_week: bh.day_of_week) do |es|
+              es.start_time = bh.open_time.strftime("%H:%M")
+              es.end_time = bh.close_time.strftime("%H:%M")
+            end
+          end
+
           render_success(EmployeeSerializer.render_as_hash(employee, view: :with_services), status: :created)
         else
           render_error(
