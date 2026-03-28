@@ -104,6 +104,7 @@ plan_inteligente.update!(
   brand_customization: true,
   featured_listing: true,
   priority_support: true,
+  live_chat: true,
   cashback_enabled: true,
   cashback_percentage: 5,
   whatsapp_notifications: true,

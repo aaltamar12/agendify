@@ -89,6 +89,7 @@ Plan.find_or_initialize_by(name: "Inteligente").tap do |p|
     brand_customization: true,
     featured_listing: true,
     priority_support: true,
+    live_chat: true,
     whatsapp_notifications: true,
     cashback_enabled: true,
     cashback_percentage: 5,

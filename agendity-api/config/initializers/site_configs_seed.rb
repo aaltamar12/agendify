@@ -23,6 +23,9 @@ Rails.application.config.after_initialize do
     { key: "admin_email",        value: "admin@agendity.com",    description: "Email del admin. Uso interno: destinatario de AdminMailer (notificacion cuando suben comprobante de suscripcion)" },
     { key: "admin_whatsapp",     value: "+573001234567",         description: "WhatsApp del admin. Uso interno: NotifyAdminSubscriptionProofJob envia mensaje cuando suben comprobante" },
 
+    # --- Live Chat (Tawk.to) ---
+    { key: "tawkto_property_id", value: "",  description: "Tawk.to Property ID para chat en vivo. Se obtiene de tawk.to > Admin > Property Settings. Solo Plan Inteligente y trial." },
+
     # --- Trial ---
     { key: "default_trial_days",   value: "7",  description: "Dias de trial por defecto (sin referido). Visible en: landing, registro, emails de bienvenida" },
     { key: "referral_trial_days",  value: "25", description: "Dias de trial con codigo de referido. Visible en: registro (banner), email de bienvenida" },

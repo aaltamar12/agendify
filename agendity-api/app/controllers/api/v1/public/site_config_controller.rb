@@ -21,7 +21,8 @@ module Api
             payment_daviplata: SiteConfig.get("payment_daviplata"),
             company_name: SiteConfig.get("company_name") || "Agendity",
             default_trial_days: (SiteConfig.get("default_trial_days") || "7").to_i,
-            referral_trial_days: (SiteConfig.get("referral_trial_days") || "25").to_i
+            referral_trial_days: (SiteConfig.get("referral_trial_days") || "25").to_i,
+            tawkto_property_id: SiteConfig.get("tawkto_property_id")
           })
         end
       end

@@ -11,6 +11,7 @@ import { MobileNav } from '@/components/layout/mobile-nav';
 import { ImpersonationBanner } from '@/components/layout/impersonation-banner';
 import { PlanCard } from '@/components/shared/plan-card';
 import { SubscriptionBanner } from '@/components/layout/subscription-banner';
+import { TawktoChat } from '@/components/layout/tawkto-chat';
 import { ToastContainer } from '@/components/ui';
 import { useUIStore } from '@/lib/stores/ui-store';
 import { useImpersonationStore } from '@/lib/stores/impersonation-store';
@@ -217,6 +218,9 @@ export default function DashboardLayout({
 
       {/* Toasts */}
       <ToastContainer />
+
+      {/* Live chat (Tawk.to — Plan Inteligente + trial) */}
+      <TawktoChat />
     </div>
   );
 }
