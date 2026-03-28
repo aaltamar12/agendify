@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { HelpCircle, Mail, Phone, MessageCircle, Lock } from 'lucide-react';
+import { openTawktoChat } from '@/components/layout/tawkto-chat';
 import { useCurrentSubscription } from '@/lib/hooks/use-subscription';
 import { useCurrentBusiness } from '@/lib/hooks/use-business';
 import { useSiteConfig } from '@/lib/hooks/use-site-config';
@@ -74,9 +75,13 @@ export function HelpButton() {
     const def = CHANNEL_DEFINITIONS[channelKey as keyof typeof CHANNEL_DEFINITIONS];
     if (!def) return;
 
-    const href = channelKey === 'chat' ? getChatHref() : def.href;
-    if (href) {
-      window.open(href, '_blank', 'noopener,noreferrer');
+    if (channelKey === 'chat') {
+      openTawktoChat();
+    } else {
+      const href = def.href;
+      if (href) {
+        window.open(href, '_blank', 'noopener,noreferrer');
+      }
     }
     setOpen(false);
   }
@@ -120,7 +125,7 @@ export function HelpButton() {
                   <button
                     key={channelKey}
                     onClick={() => handleChannelClick(channelKey)}
-                    className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-gray-50"
+                    className="flex w-full cursor-pointer items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-gray-50"
                   >
                     <div
                       className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${def.bgClass}`}
