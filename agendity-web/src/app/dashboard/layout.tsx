@@ -72,6 +72,32 @@ export default function DashboardLayout({
   // Real-time updates via NATS WebSocket
   useRealtime();
 
+  // Dynamic page title based on route
+  useEffect(() => {
+    const titles: Record<string, string> = {
+      '/dashboard/agenda': 'Agenda',
+      '/dashboard/services': 'Servicios',
+      '/dashboard/employees': 'Empleados',
+      '/dashboard/customers': 'Clientes',
+      '/dashboard/payments': 'Pagos',
+      '/dashboard/checkin': 'Check-in',
+      '/dashboard/credits': 'Créditos',
+      '/dashboard/dynamic-pricing': 'Tarifas dinámicas',
+      '/dashboard/cash-register': 'Cierre de caja',
+      '/dashboard/goals': 'Metas',
+      '/dashboard/reconciliation': 'Reconciliación',
+      '/dashboard/reports': 'Reportes',
+      '/dashboard/reviews': 'Reseñas',
+      '/dashboard/qr': 'Código QR',
+      '/dashboard/settings': 'Configuración',
+      '/dashboard/notifications': 'Notificaciones',
+      '/dashboard/subscription/checkout': 'Planes',
+      '/dashboard/discount-codes': 'Códigos de descuento',
+    };
+    const title = titles[pathname ?? ''] || 'Dashboard';
+    document.title = `${title} — Agendity`;
+  }, [pathname]);
+
   // Request browser notification permission on first dashboard load
   useEffect(() => {
     requestNotificationPermission();

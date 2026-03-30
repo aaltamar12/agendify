@@ -41,22 +41,37 @@ export function TawktoChat() {
     const script = document.createElement('script');
     script.id = 'tawkto-script';
     script.async = true;
-    script.src = `https://embed.tawk.to/${propertyId}/default`;
+    script.src = `https://embed.tawk.to/${propertyId}`;
     script.charset = 'UTF-8';
     script.setAttribute('crossorigin', '*');
 
     window.Tawk_API = window.Tawk_API || {};
     window.Tawk_LoadStart = new Date();
 
-    // Set business metadata when widget loads
-    window.Tawk_API.onLoad = () => {
-      window.Tawk_API?.setAttributes({
-        name: business.name,
-        email: business.email || '',
-        business_slug: business.slug,
-        plan: planSlug,
-        phone: business.phone || '',
-      });
+    // Set visitor name before load
+    window.Tawk_API.visitor = {
+      name: business.name,
+      email: business.email || '',
+      phone: business.phone || '',
+    };
+
+    // Set custom attributes after widget loads
+    window.Tawk_API.onLoad = function() {
+      try {
+        window.Tawk_API?.setAttributes({
+          'business-id': String(business.id),
+          'business-name': business.name,
+          'business-slug': business.slug,
+          'business-type': business.business_type || '',
+          'plan': planSlug,
+          'email': business.email || '',
+          'phone': business.phone || '',
+        }, function(error: unknown) {
+          if (error) console.warn('[Tawk.to] setAttributes error:', error);
+        });
+      } catch (e) {
+        console.warn('[Tawk.to] onLoad error:', e);
+      }
     };
 
     document.head.appendChild(script);
@@ -75,5 +90,11 @@ export function TawktoChat() {
  * Used by the help button.
  */
 export function openTawktoChat() {
-  window.Tawk_API?.maximize();
+  if (window.Tawk_API && typeof window.Tawk_API.maximize === 'function') {
+    window.Tawk_API.maximize();
+  } else {
+    // Widget not loaded yet — open WhatsApp as fallback
+    const url = document.querySelector<HTMLAnchorElement>('a[href*="wa.me"]')?.href;
+    if (url) window.open(url, '_blank');
+  }
 }
