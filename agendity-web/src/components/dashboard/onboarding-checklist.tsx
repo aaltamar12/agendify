@@ -17,7 +17,7 @@ export function OnboardingChecklist() {
     }
   }, []);
 
-  if (isLoading || !data) return null;
+  if (isLoading || !data || !data.steps) return null;
   if (data.all_complete) return null;
 
   const progressPercent = Math.round((data.completed / data.total) * 100);
