@@ -1,58 +1,93 @@
 # Copys — Marca y Posicionamiento
 
-> **Última actualización:** 2026-03-16
-> **Estado:** Textos base del equipo fundador — pendientes de pulir para cada canal
+> **Última actualización:** 2026-03-29
+> **Estado:** Actualizado — doble posicionamiento (portafolio + administración)
 
 ---
 
 ## Hero / Landing principal
 
-### Opción A (enfocada en el dolor)
-> ¿Sabías que un barbero o esteticista promedio pierde hasta 5 horas a la semana solo gestionando citas por WhatsApp? Creamos Agendity, una plataforma premium diseñada para que tus clientes agenden en segundos sin que tú muevas un dedo.
+### Para usuarios finales (quien reserva)
 
-### Opción B (enfocada en la aspiración)
-> Tu tiempo es un activo de lujo. Reserva tu próxima sesión de forma rápida y privada. Agendity: Gestión de citas para quienes no aceptan menos que la perfección.
+**Opción A (descubrimiento):**
+> Encuentra a los mejores profesionales de tu ciudad. Conoce sus servicios, sus precios y reserva tu cita en segundos.
+
+**Opción B (directo):**
+> Reserva con tu profesional favorito sin llamadas ni WhatsApp. Servicios, precios y disponibilidad — todo en un solo lugar.
+
+### Para negocios (quien se registra)
+
+**Opción A (administración):**
+> Administra tu negocio de servicios desde un solo lugar: citas, empleados, pagos y reportes. Deja de gestionar por WhatsApp.
+
+**Opción B (crecimiento):**
+> Tu negocio merece más que un cuaderno y un chat. Agendity organiza tus citas, impulsa tu marca y te da los datos para crecer.
 
 ---
 
-## Propuesta de valor (párrafo completo)
+## Propuesta de valor
 
-> No somos solo una agenda; somos el asistente digital que profesionaliza tu marca, elimina las inasistencias y te devuelve el control de tu tiempo para que te enfoques en lo que mejor haces: crear estilo.
+### Para el usuario final
+> La forma más fácil de encontrar profesionales, ver qué ofrecen y reservar al instante. Sin llamadas, sin esperas.
+
+### Para el negocio
+> No somos solo una agenda. Somos la plataforma que administra tu negocio completo: citas, equipo, pagos, clientes y reportes — todo en un lugar, todo automatizado.
 
 ---
 
-## Posicionamiento — Exclusividad
+## Posicionamiento por audiencia
 
-### El conserje digital
-> No permitas que cualquiera interrumpa tu flujo de trabajo. Agendity actúa como tu conserje digital personal, permitiendo que solo los clientes que valoran tu tiempo accedan a tu agenda. Transforma un simple chat de WhatsApp en una experiencia de reserva de alto nivel, donde la disponibilidad es un privilegio, no una opción abierta.
+### Para el usuario final: Portafolio de servicios
 
-### Disponibilidad como recurso valioso
-> La exclusividad se basa en la disponibilidad limitada. Con nuestro sistema de gestión inteligente, tus clientes verán tu agenda como un recurso valioso. Agendity te permite proyectar una imagen de alta demanda, automatizando confirmaciones y recordatorios que refuerzan la importancia de cada cita. Si no están en Agendity, no tienen un espacio en tu día.
+> ¿Buscas un corte, un tratamiento o un servicio profesional? En Agendity encuentras los mejores profesionales de tu zona. Ves sus servicios, sus precios, su disponibilidad — y reservas en segundos. Sin escribir por WhatsApp, sin esperar respuesta.
 
-### Experiencia premium end-to-end
-> Tus clientes premium esperan un servicio impecable desde antes de llegar a tu local. Agendity ofrece una interfaz minimalista, rápida y elegante que elimina la fricción. Al automatizar el proceso de reserva con una estética de lujo, le dices a tu cliente que cada detalle de su experiencia —desde el primer clic hasta el servicio final— ha sido diseñado para su comodidad absoluta.
+### Para el negocio: Centro de administración
+
+> Tu negocio necesita más que una agenda. Necesita control. Con Agendity gestionas tus citas, tu equipo, tus pagos y tus clientes desde un solo dashboard. Ves reportes, configuras metas, recibes pagos — y todo funciona en automático mientras tú te enfocas en atender.
 
 ---
 
 ## Los 3 pilares (versión copy)
 
-### Prestigio de Marca
-> Tu link de reserva es tu carta de presentación digital. Cuando un cliente hace clic en tu enlace de Agendity, siente que está entrando a un establecimiento de lujo antes de cruzar la puerta física.
+### Portafolio Profesional
+> Tu página en Agendity es tu vitrina digital. Tus clientes ven tus servicios, tus precios y reservan al instante. Se ve profesional porque tú eres profesional.
+
+### Administración Completa
+> Citas, empleados, horarios, pagos, reportes, metas — todo en un solo lugar. Deja de buscar en chats y cuadernos. Aquí tienes todo.
 
 ### Eficiencia Silenciosa
-> La tecnología que trabaja para ti, no al revés. Es como tener un recepcionista de guante blanco trabajando 24/7 en segundo plano.
-
-### Filtro de Exclusividad
-> Protegemos tu activo más valioso: tu tiempo. Tu agenda estará llena solo de personas comprometidas con tu servicio. Menos "No-Shows", más ingresos reales.
+> Recordatorios automáticos, confirmaciones, penalizaciones por cancelación. Tu negocio funciona solo mientras tú haces lo tuyo.
 
 ---
 
 ## Frases clave reutilizables
 
-- "Tu tiempo es un activo de lujo"
-- "Si no están en Agendity, no tienen un espacio en tu día"
-- "La disponibilidad es un privilegio, no una opción abierta"
-- "Crear estilo, no gestionar chats"
-- "Recepcionista de guante blanco, 24/7"
-- "Cada detalle diseñado para su comodidad absoluta"
-- "Privacidad total, prestigio de marca, eficiencia silenciosa"
+**Para usuario final:**
+- "Encuentra, conoce y reserva"
+- "Servicios, precios y disponibilidad en un solo lugar"
+- "Reserva en segundos, sin llamadas"
+- "Los mejores profesionales de tu ciudad"
+
+**Para negocio:**
+- "Tu negocio, siempre organizado"
+- "Deja de gestionar por WhatsApp"
+- "Todo tu negocio en un solo lugar"
+- "Datos para crecer, no intuición para sobrevivir"
+- "Menos no-shows, más ingresos reales"
+- "Tu vitrina digital que impulsa tu marca"
+
+**Universales:**
+- "Profesionalismo que se nota desde el primer clic"
+- "La tecnología que trabaja para ti, no al revés"
+
+---
+
+## Qué NO decir
+
+- ❌ "Solución innovadora" / "revolucionario" / "sinergias" (palabras vacías)
+- ❌ "App de citas" (suena a dating app)
+- ❌ "Software de gestión" (suena corporativo e intimidante)
+- ❌ "Agenda online" (reduce todo a una sola función)
+- ✅ "Plataforma de servicios profesionales"
+- ✅ "Tu portafolio profesional"
+- ✅ "Centro de administración de tu negocio"

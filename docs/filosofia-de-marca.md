@@ -1,83 +1,107 @@
 # Filosofía de Marca — Agendity
 
-> **Última actualización:** 2026-03-16
-> **Estado:** Base fundacional — definida con el equipo fundador
+> **Última actualización:** 2026-03-29
+> **Estado:** Actualizada — doble posicionamiento (usuario final vs cliente)
 
 ---
 
 ## Qué es Agendity
 
-No somos solo una agenda. Somos la infraestructura premium de agendamiento inteligente que escala negocios de servicios.
+Agendity tiene dos caras según quién la mira:
 
-**Elevator pitch:**
-> Creamos Agendity, una plataforma premium diseñada para que tus clientes agenden en segundos sin que tú muevas un dedo. Somos el asistente digital que profesionaliza tu marca, elimina las inasistencias y te devuelve el control de tu tiempo para que te enfoques en lo que mejor haces: crear estilo.
+### Para el usuario final (quien reserva)
+Agendity es un **portafolio de servicios profesionales** — una plataforma donde descubres profesionales, ves su trabajo, sus servicios y reservas en segundos. No es "una app de citas", es la vitrina digital del profesional que impulsa su marca.
 
-**Pitch para inversores:**
-> El mercado de servicios personales está fragmentado y atrapado en procesos manuales. Agendity es una S.A.S. de agendamiento inteligente que elimina la fricción entre el profesional y el cliente. Empezamos con el sector de belleza y bienestar por su alta recurrencia, pero nuestra arquitectura es totalmente agnóstica: estamos construyendo la infraestructura de reservas para cualquier industria de servicios que valore la exclusividad y la eficiencia.
+### Para el negocio (quien paga)
+Agendity es una **plataforma de administración del negocio** — gestión completa de citas, empleados, pagos, clientes, reportes e inteligencia de negocio. Todo lo que necesitas para operar tu negocio de servicios desde un solo lugar.
+
+---
+
+## Elevator pitches
+
+**Para usuarios finales:**
+> Encuentra a los mejores profesionales de tu ciudad, conoce sus servicios y reserva tu cita en segundos. Sin llamadas, sin WhatsApp, sin esperas.
+
+**Para negocios:**
+> Agendity es la plataforma que administra tu negocio de servicios: citas, empleados, pagos, clientes y reportes en un solo lugar. Deja de gestionar por WhatsApp y enfócate en lo que mejor haces.
+
+**Para inversores:**
+> El mercado de servicios personales está fragmentado y atrapado en procesos manuales. Agendity es una plataforma de administración y visibilidad que conecta negocios de servicios con sus clientes. Para el negocio somos su sistema operativo; para el usuario final somos el portafolio donde descubre y reserva servicios profesionales.
 
 **Tagline:**
-> Agendity: La infraestructura premium para agendar citas que escala tu negocio de servicios.
+> Agendity: Tu negocio, siempre organizado.
 
 ---
 
 ## El problema que resolvemos
 
-Un barbero o esteticista promedio pierde hasta 5 horas a la semana solo gestionando citas por WhatsApp. Su imagen de marca depende de un chat desordenado. Sus clientes cancelan sin consecuencias. Su tiempo — su activo más valioso — no está protegido.
+### Para el negocio
+Un barbero o esteticista promedio pierde hasta 5 horas a la semana gestionando citas por WhatsApp. No tiene control sobre sus ingresos, no sabe qué empleado rinde más, no puede proyectar su imagen profesional más allá de un chat desordenado. Su negocio depende de la memoria y el celular.
+
+### Para el usuario final
+El cliente quiere ver qué servicios ofrece un profesional, cuánto cuestan, y reservar sin tener que escribir por WhatsApp y esperar respuesta. Quiere una experiencia directa, visual y profesional.
 
 ---
 
 ## Los 3 pilares de Agendity
 
-### Pilar 1: Prestigio de Marca (Brand Authority)
+### Pilar 1: Portafolio Profesional (para el usuario final)
 
-**"Tu link de reserva es tu carta de presentación digital."**
+**"Tu vitrina digital que impulsa tu marca."**
 
-- La mayoría de las apps de citas llenan la pantalla de publicidad, logos de terceros o diseños genéricos que abaratan la imagen del barbero o el spa.
-- **Promesa:** Ofrecemos una interfaz limpia, minimalista y de alta gama. Cuando un cliente hace clic en tu enlace de Agendity, siente que está entrando a un establecimiento de lujo antes de cruzar la puerta física. Elevamos la percepción de valor de tu negocio para que puedas cobrar lo que realmente vales.
+- La página pública de cada negocio en Agendity es un portafolio profesional: servicios, precios, disponibilidad, reseñas.
+- **Promesa:** Cuando un cliente accede a tu link de Agendity, ve un negocio profesional y organizado. Elevamos la percepción de valor de tu marca para que puedas cobrar lo que realmente vales.
 
-### Pilar 2: Eficiencia Silenciosa (Silent Operations)
+### Pilar 2: Administración Completa (para el negocio)
+
+**"Todo tu negocio en un solo lugar."**
+
+- Agenda, empleados, servicios, pagos, reportes, horarios, créditos, metas — todo centralizado.
+- **Promesa:** Dejás de depender de WhatsApp, cuadernos y la memoria. Agendity es el centro de operaciones de tu negocio: ves qué pasa, tomas decisiones con datos, y todo funciona automáticamente.
+
+### Pilar 3: Eficiencia Silenciosa (para ambos)
 
 **"La tecnología que trabaja para ti, no al revés."**
 
-- Un dueño de negocio premium no debería estar pegado al celular respondiendo "sí, tengo cita a las 4". Eso quita tiempo y resta exclusividad.
-- **Promesa:** Nuestra plataforma gestiona tu disponibilidad, envía recordatorios elegantes y confirma citas de forma autónoma. Es como tener un recepcionista de guante blanco trabajando 24/7 en segundo plano, permitiéndote concentrarte al 100% en la experiencia del cliente sin interrupciones.
-
-### Pilar 3: Filtro de Exclusividad (Client Commitment)
-
-**"Protegemos tu activo más valioso: tu tiempo."**
-
-- El cliente premium respeta las reglas. El cliente que cancela a última hora o no llega daña la rentabilidad y el aura de exclusividad del negocio.
-- **Promesa:** Implementamos sistemas de confirmación inteligente y, si lo deseas, depósitos de reserva. Esto educa al cliente sobre el valor de tu tiempo y asegura que tu agenda esté llena solo de personas comprometidas con tu servicio. Menos "No-Shows", más ingresos reales.
+- Recordatorios automáticos, confirmaciones, penalizaciones por cancelación, notificaciones.
+- **Promesa:** Tu negocio funciona en piloto automático. Menos no-shows, menos tiempo en el celular, más ingresos reales.
 
 ---
 
 ## Enfoque de diseño: Minimalista Moderno
 
-**Directo y Premium.**
-
-> "Tu tiempo es un activo de lujo. Reserva tu próxima sesión de forma rápida y privada. Agendity: Gestión de citas para quienes no aceptan menos que la perfección."
+**Limpio, profesional y directo.**
 
 ### 3 atributos clave del producto
 
-1. **Privacidad Total** — Sin publicidad, sin distracciones
-2. **Prestigio de Marca** — Tu link de reserva se ve mejor que el de la competencia
-3. **Eficiencia Silenciosa** — Todo funciona en segundo plano sin que el dueño haga nada
+1. **Profesionalismo** — Tu página de reservas se ve como un negocio de primer nivel
+2. **Simplicidad** — Tanto el negocio como el cliente entienden todo al primer vistazo
+3. **Eficiencia** — Todo funciona en segundo plano sin que el dueño haga nada
 
 ---
 
-## Paleta de identidad visual (dirección)
+## Paleta de identidad visual
 
-- **Colores primarios:** Violeta + Negro (premium, exclusivo)
-- **Estilo:** Minimalista, limpio, de alta gama
-- **Sensación:** Entrar a un establecimiento de lujo antes de cruzar la puerta física
+- **Color primario:** Violeta (#7c3aed) — profesional, moderno, diferenciador
+- **Color secundario:** Negro/Gris oscuro — premium, serio
+- **Estilo:** Minimalista, limpio, espacios amplios
+- **Sensación:** Profesionalismo accesible — no intimidante, no informal
 
 ---
 
-## Cómo se posiciona Agendity frente a la competencia
+## Cómo se posiciona Agendity
 
+### Ante el usuario final
 | Competencia | Agendity |
 |---|---|
-| Diseños genéricos con publicidad | Interfaz limpia, sin ads, premium |
-| El negocio sigue pegado al celular | Eficiencia silenciosa, todo automatizado |
-| Clientes cancelan sin consecuencias | Depósitos de reserva + confirmación inteligente |
-| Link de reserva genérico | Link de marca que eleva la percepción de valor |
+| Buscar en Instagram y escribir por WhatsApp | Portafolio profesional con reserva directa |
+| No saber precios hasta preguntar | Servicios, precios y disponibilidad transparentes |
+| Esperar respuesta del negocio | Reserva instantánea 24/7 |
+
+### Ante el negocio
+| Competencia | Agendity |
+|---|---|
+| Apps solo de agenda | Plataforma completa de administración |
+| Gestión manual por WhatsApp/cuaderno | Todo automatizado y centralizado |
+| Sin datos ni reportes | Inteligencia de negocio con reportes y metas |
+| Link de reserva genérico | Portafolio profesional que impulsa la marca |
