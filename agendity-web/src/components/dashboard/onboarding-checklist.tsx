@@ -2,14 +2,26 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { CheckCircle2, Circle, ChevronDown, ChevronUp } from 'lucide-react';
+import { CheckCircle2, Circle, ChevronDown, ChevronUp, Play, X } from 'lucide-react';
 import { useOnboardingProgress } from '@/lib/hooks/use-onboarding';
 
 const MINIMIZED_KEY = 'onboarding_minimized';
 
+// YouTube video IDs for each onboarding step
+// Replace these with the actual YouTube video IDs after uploading
+const STEP_VIDEOS: Record<string, string> = {
+  profile: 'M-JyAQWf7E4',
+  hours: 'lxc2np-3NQw',
+  services: 'cxPXZnu0CAw',
+  employees: 'AGVvXPppGtU',
+  employee_services: 'z4hEG5ylr2I',
+  payment_methods: 'QLKZx7uQCvg',
+};
+
 export function OnboardingChecklist() {
   const { data, isLoading } = useOnboardingProgress();
   const [minimized, setMinimized] = useState(false);
+  const [videoKey, setVideoKey] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -92,28 +104,72 @@ export function OnboardingChecklist() {
       <ul className="mt-4 space-y-2">
         {data.steps.map((step) => (
           <li key={step.key}>
-            <Link
-              href={step.link}
-              className="flex items-center gap-3 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-gray-50"
-            >
-              {step.completed ? (
-                <CheckCircle2 className="h-5 w-5 flex-shrink-0 text-violet-600" />
-              ) : (
-                <Circle className="h-5 w-5 flex-shrink-0 text-gray-300" />
-              )}
-              <span
-                className={
-                  step.completed
-                    ? 'text-gray-400 line-through'
-                    : 'text-gray-700'
-                }
+            <div className="flex items-center gap-3 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-gray-50">
+              <Link
+                href={step.link}
+                className="flex flex-1 items-center gap-3"
               >
-                {step.label}
-              </span>
-            </Link>
+                {step.completed ? (
+                  <CheckCircle2 className="h-5 w-5 flex-shrink-0 text-violet-600" />
+                ) : (
+                  <Circle className="h-5 w-5 flex-shrink-0 text-gray-300" />
+                )}
+                <span
+                  className={
+                    step.completed
+                      ? 'text-gray-400 line-through'
+                      : 'text-gray-700'
+                  }
+                >
+                  {step.label}
+                </span>
+              </Link>
+              {STEP_VIDEOS[step.key] && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setVideoKey(step.key);
+                  }}
+                  className="flex cursor-pointer items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-violet-600 transition-colors hover:bg-violet-50"
+                >
+                  <Play className="h-3 w-3" />
+                  Ver video
+                </button>
+              )}
+            </div>
           </li>
         ))}
       </ul>
+
+      {/* Video modal */}
+      {videoKey && STEP_VIDEOS[videoKey] && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60"
+          onClick={() => setVideoKey(null)}
+        >
+          <div
+            className="relative w-full max-w-3xl mx-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setVideoKey(null)}
+              className="absolute -top-10 right-0 rounded-lg p-1 text-white/80 transition-colors hover:text-white"
+            >
+              <X className="h-6 w-6" />
+            </button>
+            <div className="aspect-video w-full overflow-hidden rounded-xl bg-black shadow-2xl">
+              <iframe
+                src={`https://www.youtube.com/embed/${STEP_VIDEOS[videoKey]}?autoplay=1&rel=0`}
+                title="Tutorial"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="h-full w-full"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

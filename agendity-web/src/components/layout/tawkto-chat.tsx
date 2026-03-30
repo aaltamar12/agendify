@@ -31,9 +31,10 @@ export function TawktoChat() {
 
   const propertyId = siteConfig?.tawkto_property_id;
   const hasAccess = planSlug === 'inteligente' || isTrialing;
+  const isConfigured = propertyId && propertyId !== '-';
 
   useEffect(() => {
-    if (!propertyId || !hasAccess || !business) return;
+    if (!isConfigured || !hasAccess || !business) return;
 
     // Don't load twice
     if (document.getElementById('tawkto-script')) return;
