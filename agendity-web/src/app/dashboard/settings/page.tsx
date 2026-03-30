@@ -805,6 +805,7 @@ function ProfileSection({
       ? { lat: Number(business.latitude), lng: Number(business.longitude) }
       : null
   );
+  const openPicker = () => setShowLocationPicker(true);
 
   const {
     register,
@@ -877,21 +878,11 @@ function ProfileSection({
           error={errors.description?.message}
           {...register('description')}
         />
-        <div className={`grid grid-cols-1 gap-4 ${isIndependent ? '' : 'sm:grid-cols-2'}`}>
-          <Input
-            label="Teléfono"
-            error={errors.phone?.message}
-            {...register('phone')}
-          />
-          {!isIndependent && (
-            <Input
-              label="Dirección"
-              placeholder="Calle 84 #53-120"
-              error={errors.address?.message}
-              {...register('address')}
-            />
-          )}
-        </div>
+        <Input
+          label="Teléfono"
+          error={errors.phone?.message}
+          {...register('phone')}
+        />
         {!isIndependent && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <Select
@@ -946,6 +937,15 @@ function ProfileSection({
         )}
 
         {!isIndependent && (
+          <Input
+            label="Dirección"
+            placeholder="Calle 84 #53-120"
+            error={errors.address?.message}
+            {...register('address')}
+          />
+        )}
+
+        {!isIndependent && (
         <>
         {/* Location picker */}
         <div className="space-y-3">
@@ -958,7 +958,7 @@ function ProfileSection({
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => setShowLocationPicker(true)}
+              onClick={openPicker}
             >
               {pickedCoords ? 'Cambiar ubicación' : 'Seleccionar ubicación'}
             </Button>
