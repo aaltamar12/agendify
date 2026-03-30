@@ -57,9 +57,10 @@ export function TawktoChat() {
       phone: business.phone || '',
     };
 
-    // Set custom attributes after widget loads
+    // Minimize widget on load (prevent auto-popup greeting)
     window.Tawk_API.onLoad = function() {
       try {
+        window.Tawk_API?.minimize?.();
         window.Tawk_API?.setAttributes?.({
           'business-id': String(business.id),
           'business-name': business.name,
