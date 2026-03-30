@@ -38,6 +38,7 @@ export function useCreateEmployee() {
       post<ApiResponse<Employee>>(ENDPOINTS.EMPLOYEES.create, { employee: data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employees'] });
+      queryClient.invalidateQueries({ queryKey: ['onboarding-progress'] });
     },
   });
 }
@@ -50,6 +51,7 @@ export function useUpdateEmployee() {
       put<ApiResponse<Employee>>(ENDPOINTS.EMPLOYEES.update(id), { employee: data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employees'] });
+      queryClient.invalidateQueries({ queryKey: ['onboarding-progress'] });
     },
   });
 }
@@ -67,6 +69,7 @@ export function useUploadEmployeeAvatar() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employees'] });
+      queryClient.invalidateQueries({ queryKey: ['onboarding-progress'] });
     },
   });
 }
@@ -79,6 +82,7 @@ export function useInviteEmployee() {
       post<ApiResponse<{ message: string; register_url: string }>>(ENDPOINTS.EMPLOYEES.invite(id), { email, send_email }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employees'] });
+      queryClient.invalidateQueries({ queryKey: ['onboarding-progress'] });
     },
   });
 }
@@ -91,6 +95,7 @@ export function useDeleteEmployee() {
       del<ApiResponse<null>>(ENDPOINTS.EMPLOYEES.delete(id)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employees'] });
+      queryClient.invalidateQueries({ queryKey: ['onboarding-progress'] });
     },
   });
 }

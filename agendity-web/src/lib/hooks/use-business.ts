@@ -28,6 +28,7 @@ export function useUpdateBusiness() {
       put<ApiResponse<Business>>(ENDPOINTS.BUSINESS.current, { business: data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['business'] });
+      queryClient.invalidateQueries({ queryKey: ['onboarding-progress'] });
     },
   });
 }
@@ -48,6 +49,7 @@ export function useUploadLogo() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['business'] });
+      queryClient.invalidateQueries({ queryKey: ['onboarding-progress'] });
     },
   });
 }
@@ -68,6 +70,7 @@ export function useUploadCover() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['business'] });
+      queryClient.invalidateQueries({ queryKey: ['onboarding-progress'] });
     },
   });
 }
@@ -92,6 +95,7 @@ export function useSelectCover() {
       post<ApiResponse<Business>>(ENDPOINTS.BUSINESS.selectCover, { url }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['business'] });
+      queryClient.invalidateQueries({ queryKey: ['onboarding-progress'] });
     },
   });
 }
@@ -122,6 +126,7 @@ export function useUpdateBusinessHours() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['businessHours'] });
+      queryClient.invalidateQueries({ queryKey: ['onboarding-progress'] });
     },
   });
 }

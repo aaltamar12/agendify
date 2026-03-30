@@ -28,6 +28,7 @@ export function useCreateService() {
       post<ApiResponse<Service>>(ENDPOINTS.SERVICES.create, { service: data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['services'] });
+      queryClient.invalidateQueries({ queryKey: ['onboarding-progress'] });
     },
   });
 }
@@ -40,6 +41,7 @@ export function useUpdateService() {
       put<ApiResponse<Service>>(ENDPOINTS.SERVICES.update(id), { service: data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['services'] });
+      queryClient.invalidateQueries({ queryKey: ['onboarding-progress'] });
     },
   });
 }
@@ -52,6 +54,7 @@ export function useDeleteService() {
       del<ApiResponse<null>>(ENDPOINTS.SERVICES.delete(id)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['services'] });
+      queryClient.invalidateQueries({ queryKey: ['onboarding-progress'] });
     },
   });
 }
@@ -75,6 +78,7 @@ export function useRenameCategory() {
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['services'] });
+      queryClient.invalidateQueries({ queryKey: ['onboarding-progress'] });
       queryClient.invalidateQueries({ queryKey: ['service-categories'] });
     },
   });
@@ -90,6 +94,7 @@ export function useDeleteCategory() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['services'] });
+      queryClient.invalidateQueries({ queryKey: ['onboarding-progress'] });
       queryClient.invalidateQueries({ queryKey: ['service-categories'] });
     },
   });
