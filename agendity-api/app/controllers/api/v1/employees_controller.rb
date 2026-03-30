@@ -28,7 +28,7 @@ module Api
           )
         end
 
-        employee = current_business.employees.build(employee_params.except(:service_ids))
+        employee = current_business.employees.build(employee_params.except(:service_ids, :schedules))
         authorize employee
 
         if employee.save
