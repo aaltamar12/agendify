@@ -13,6 +13,7 @@ export interface SiteConfigData {
   company_name: string;
   default_trial_days: number;
   referral_trial_days: number;
+  tawkto_property_id: string | null;
 }
 
 /**

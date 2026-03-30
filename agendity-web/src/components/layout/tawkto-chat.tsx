@@ -7,13 +7,14 @@ import { useSiteConfig } from '@/lib/hooks/use-site-config';
 
 declare global {
   interface Window {
-    Tawk_API?: {
+    Tawk_API?: Partial<{
       maximize: () => void;
       minimize: () => void;
       toggle: () => void;
       setAttributes: (attrs: Record<string, string>, callback?: (error: unknown) => void) => void;
-      onLoad?: () => void;
-    };
+      onLoad: () => void;
+      visitor: { name: string; email: string; phone: string };
+    }>;
     Tawk_LoadStart?: Date;
   }
 }
@@ -58,7 +59,7 @@ export function TawktoChat() {
     // Set custom attributes after widget loads
     window.Tawk_API.onLoad = function() {
       try {
-        window.Tawk_API?.setAttributes({
+        window.Tawk_API?.setAttributes?.({
           'business-id': String(business.id),
           'business-name': business.name,
           'business-slug': business.slug,
