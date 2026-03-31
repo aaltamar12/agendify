@@ -22,35 +22,52 @@ import { Suspense } from 'react';
 import { Button } from '@/components/ui/button';
 import { LandingPricing } from '@/components/landing/landing-pricing';
 import { RegisterLink } from '@/components/landing/register-link';
+import { RefCapture } from '@/components/landing/ref-capture';
 
-export const metadata: Metadata = {
-  title: 'Agendity — Reservas online para tu negocio',
-  description:
-    'Administra citas, empleados y pagos de tu negocio de servicios. Presencial o virtual. Tus clientes reservan online 24/7. Gratis.',
-  keywords: [
-    'agenda de citas online',
-    'reservas online barbería',
-    'sistema de reservas para barbería',
-    'administrar barbería online',
-    'software citas salón de belleza',
-    'gestión de citas Colombia',
-    'reservar cita barbería Barranquilla',
-    'plataforma reservas online gratis',
-    'agenda consultorios médicos',
-    'sistema citas psicólogo online',
-    'reservas entrenador personal',
-    'agenda para coaches y consultores',
-  ],
-  alternates: {
-    canonical: 'https://agendity.co',
-  },
-  openGraph: {
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ ref?: string }>;
+}): Promise<Metadata> {
+  const { ref } = await searchParams;
+  const ogImage = ref ? '/og-referral.jpg' : '/og-image.png';
+
+  return {
     title: 'Agendity — Reservas online para tu negocio',
     description:
-      'Administra citas, empleados y pagos. Tus clientes reservan online 24/7. 7 días gratis.',
-    url: 'https://agendity.co',
-  },
-};
+      'Administra citas, empleados y pagos de tu negocio de servicios. Presencial o virtual. Tus clientes reservan online 24/7. Gratis.',
+    keywords: [
+      'agenda de citas online',
+      'reservas online barbería',
+      'sistema de reservas para barbería',
+      'administrar barbería online',
+      'software citas salón de belleza',
+      'gestión de citas Colombia',
+      'reservar cita barbería Barranquilla',
+      'plataforma reservas online gratis',
+      'agenda consultorios médicos',
+      'sistema citas psicólogo online',
+      'reservas entrenador personal',
+      'agenda para coaches y consultores',
+    ],
+    alternates: {
+      canonical: 'https://agendity.co',
+    },
+    openGraph: {
+      title: 'Agendity — Reservas online para tu negocio',
+      description:
+        'Administra citas, empleados y pagos. Tus clientes reservan online 24/7. 7 días gratis.',
+      url: 'https://agendity.co',
+      images: [{ url: ogImage, width: 1200, height: 630, alt: 'Agendity' }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: 'Agendity — Reservas online para tu negocio',
+      description: 'Administra citas, empleados y pagos. Tus clientes reservan online 24/7.',
+      images: [ogImage],
+    },
+  };
+}
 
 const FEATURES = [
   {
@@ -214,6 +231,7 @@ const jsonLd = [
 export default function Home() {
   return (
     <>
+      <Suspense><RefCapture /></Suspense>
       {jsonLd.map((ld, i) => (
         <script
           key={i}
