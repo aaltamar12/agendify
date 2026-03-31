@@ -1,0 +1,19 @@
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Programa de Referidos — Gana dinero con Agendity',
+  description:
+    'Refiere negocios a Agendity y gana el 10% de cada suscripción. Sin límite de referidos, comisiones recurrentes.',
+  alternates: {
+    canonical: 'https://agendity.co/referral',
+  },
+  openGraph: {
+    title: 'Gana dinero refiriendo negocios — Agendity',
+    description: 'Refiere negocios y gana el 10% de cada suscripción. Comisiones recurrentes.',
+    url: 'https://agendity.co/referral',
+  },
+};
+
+export default function ReferralLayout({ children }: { children: React.ReactNode }) {
+  return children;
+}

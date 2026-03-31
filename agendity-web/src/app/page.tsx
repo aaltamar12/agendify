@@ -22,27 +22,29 @@ import { Button } from '@/components/ui/button';
 import { LandingPricing } from '@/components/landing/landing-pricing';
 
 export const metadata: Metadata = {
-  title: 'Agendity — Agenda de citas para tu negocio | Reservas online 24/7',
+  title: 'Agendity — Reservas online para tu negocio',
   description:
-    'Software de gestión de citas para barberías, salones, consultorios y cualquier negocio que trabaje con reservas. Reservas online 24/7, agenda digital, control de ingresos, recordatorios automáticos y reportes. 7 días gratis.',
+    'Administra citas, empleados y pagos de tu barbería o salón. Tus clientes reservan online 24/7. 7 días gratis.',
   keywords: [
-    'agenda de citas para negocios',
+    'agenda de citas online',
     'reservas online barbería',
-    'software gestión de citas',
-    'sistema de citas online',
-    'agenda digital para negocios',
+    'sistema de reservas para barbería',
+    'administrar barbería online',
+    'software citas salón de belleza',
     'gestión de citas Colombia',
-    'reservar cita online',
+    'reservar cita barbería Barranquilla',
+    'plataforma reservas online gratis',
     'app reservas negocios',
+    'agendar cita salón Barranquilla',
   ],
   alternates: {
-    canonical: '/',
+    canonical: 'https://agendity.co',
   },
   openGraph: {
-    title: 'Agendity — Tu negocio, siempre lleno',
+    title: 'Agendity — Reservas online para tu negocio',
     description:
-      'Gestiona las citas de tu negocio. Tus clientes reservan en segundos, tú te enfocas en lo que mejor haces. Empieza gratis.',
-    url: '/',
+      'Administra citas, empleados y pagos. Tus clientes reservan online 24/7. 7 días gratis.',
+    url: 'https://agendity.co',
   },
 };
 
@@ -161,36 +163,60 @@ const FAQ = [
 ];
 
 // JSON-LD structured data for SEO
-const jsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'SoftwareApplication',
-  name: 'Agendity',
-  applicationCategory: 'BusinessApplication',
-  operatingSystem: 'Web',
-  description:
-    'Software de gestión de citas para negocios que trabajan con reservas. Reservas online 24/7, agenda digital, control de ingresos y reportes.',
-  url: 'https://agendity.co',
-  offers: {
-    '@type': 'Offer',
-    price: '0',
-    priceCurrency: 'COP',
-    description: '7 días de prueba gratis',
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: 'Agendity',
+    applicationCategory: 'BusinessApplication',
+    operatingSystem: 'Web',
+    description:
+      'Administra citas, empleados y pagos de tu barbería o salón. Tus clientes reservan online 24/7.',
+    url: 'https://agendity.co',
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'COP',
+      description: '7 días de prueba gratis',
+    },
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: '5',
+      ratingCount: '3',
+      bestRating: '5',
+    },
   },
-  aggregateRating: {
-    '@type': 'AggregateRating',
-    ratingValue: '5',
-    ratingCount: '3',
-    bestRating: '5',
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: FAQ.map((faq) => ({
+      '@type': 'Question',
+      name: faq.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: faq.answer,
+      },
+    })),
   },
-};
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'Agendity',
+    url: 'https://agendity.co',
+    sameAs: ['https://www.instagram.com/agendity.co'],
+  },
+];
 
 export default function Home() {
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      {jsonLd.map((ld, i) => (
+        <script
+          key={i}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }}
+        />
+      ))}
 
       <div className="flex min-h-screen flex-col">
         {/* Navbar */}
@@ -234,11 +260,11 @@ export default function Home() {
             7 días gratis — Sin tarjeta de crédito
           </span>
           <h1 className="max-w-3xl text-5xl font-bold tracking-tight text-gray-900 sm:text-6xl">
-            Tu negocio,{' '}
-            <span className="text-violet-600">siempre lleno</span>
+            Reservas online{' '}
+            <span className="text-violet-600">para tu negocio</span>
           </h1>
           <p className="max-w-xl text-lg leading-relaxed text-gray-500 sm:text-xl">
-            Agendity gestiona las citas de tu negocio.
+            Administra citas, empleados y pagos de tu barbería o salón.
             Tus clientes reservan en segundos, tú te enfocas en lo que mejor haces.
           </p>
           <div className="flex flex-col gap-4 sm:flex-row">
@@ -540,6 +566,15 @@ export default function Home() {
               <p className="mt-1 text-xs text-gray-300">
                 Hecho en Barranquilla, Colombia
               </p>
+              <a
+                href="https://www.instagram.com/agendity.co"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 inline-flex cursor-pointer items-center gap-1.5 text-sm text-gray-400 transition-colors hover:text-violet-600"
+              >
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                @agendity.co
+              </a>
             </div>
             <nav aria-label="Producto" className="flex flex-col gap-2 text-sm text-gray-500">
               <p className="text-xs font-semibold uppercase tracking-wider text-gray-900">Producto</p>

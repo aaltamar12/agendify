@@ -29,7 +29,8 @@ Cuando la conversación toque estos temas, sugiere o usa la skill correspondient
 - `/marca` — Cualquier tema sobre: identidad, branding, tono de voz, nombre de features, tagline, misión, visión, valores, paleta de colores, personalidad de marca, cómo se ve Agendity, cómo se comunica
 - `/docs` — Cualquier tema sobre: documentar decisiones, flujos de usuario, reglas de negocio, pricing, planes, roadmap, procesos, estrategia, modelo de negocio, competencia, métricas, KPIs
 - `/tech` — Cualquier tema sobre: documentar arquitectura, API, endpoints, base de datos, modelos, migraciones, setup, deploy, decisiones técnicas, diagramas, ERD, convenciones de código
-- `/copys` — Cualquier tema sobre: textos de la app, landing page, emails, mensajes de WhatsApp, notificaciones, onboarding, botones, CTAs, marketing, redes sociales, SEO, descripciones
+- `/copys` — Cualquier tema sobre: textos de la app, landing page, emails, mensajes de WhatsApp, notificaciones, onboarding, botones, CTAs, marketing, redes sociales, descripciones
+- `/seo` — Cualquier tema sobre: SEO, keywords, metadata, structured data, sitemap, robots.txt, indexación, Core Web Vitals, posicionamiento en Google, auditoría SEO
 
 ## Principios de desarrollo
 - MVP first: lanzar rápido, iterar después
