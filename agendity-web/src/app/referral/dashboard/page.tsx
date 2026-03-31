@@ -3,8 +3,8 @@
 import { Suspense, useEffect, useState, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { QRCodeSVG } from 'qrcode.react';
 import { Copy, Check, Users, DollarSign, Clock, ExternalLink, Save, Share2, Download, Banknote, FileText } from 'lucide-react';
+import { ReferralShare } from '@/components/shared/referral-share';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -88,7 +88,6 @@ function DashboardContent() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [copied, setCopied] = useState(false);
 
   // Editable form
   const [editForm, setEditForm] = useState({
@@ -141,12 +140,6 @@ function DashboardContent() {
   useEffect(() => {
     fetchDashboard();
   }, [fetchDashboard]);
-
-  const handleCopy = async (text: string) => {
-    await navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEditForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -280,62 +273,10 @@ function DashboardContent() {
           </p>
         </div>
 
-        {/* Referral link + QR */}
-        <Card className="mb-8 overflow-hidden">
-          <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
-            <div className="min-w-0 flex-1">
-              <h2 className="mb-2 text-lg font-semibold text-gray-900">Tu enlace de referido</h2>
-              <div className="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 p-3 overflow-hidden">
-                <span className="flex-1 truncate text-xs sm:text-sm text-gray-600">{referral_link}</span>
-                <button
-                  onClick={() => handleCopy(referral_link)}
-                  className="flex shrink-0 items-center gap-1 rounded-md bg-violet-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-violet-700 transition-colors"
-                >
-                  {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-                  {copied ? 'Copiado' : 'Copiar'}
-                </button>
-              </div>
-            </div>
-            <div className="flex flex-col items-center gap-3">
-              <div id="referral-qr" className="rounded-lg bg-white p-3">
-                <QRCodeSVG value={referral_link} size={120} />
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={async () => {
-                    const canvas = document.querySelector('#referral-qr svg') as SVGElement;
-                    if (!canvas) return;
-                    // Convert SVG to PNG blob
-                    const svgData = new XMLSerializer().serializeToString(canvas);
-                    const img = new Image();
-                    img.onload = async () => {
-                      const c = document.createElement('canvas');
-                      c.width = 400; c.height = 400;
-                      const ctx = c.getContext('2d')!;
-                      ctx.fillStyle = '#ffffff';
-                      ctx.fillRect(0, 0, 400, 400);
-                      ctx.drawImage(img, 20, 20, 360, 360);
-                      const blob = await new Promise<Blob>((r) => c.toBlob((b) => r(b!), 'image/png'));
-                      if (navigator.share) {
-                        const file = new File([blob], 'agendity-referido.png', { type: 'image/png' });
-                        navigator.share({ title: 'Agendity - Código de referido', text: `Registrate con mi código y obtén 25 días gratis: ${referral_link}`, files: [file] }).catch(() => {});
-                      } else {
-                        const url = URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url; a.download = 'agendity-referido.png'; a.click();
-                        URL.revokeObjectURL(url);
-                      }
-                    };
-                    img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
-                  }}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-violet-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-violet-700"
-                >
-                  <Share2 className="h-3.5 w-3.5" />
-                  Compartir QR
-                </button>
-              </div>
-            </div>
-          </div>
+        {/* Referral link + QR + Social share */}
+        <Card className="mb-8">
+          <h2 className="mb-4 text-lg font-semibold text-gray-900">Tu enlace de referido</h2>
+          <ReferralShare code={referrer.code} referralLink={referral_link} />
         </Card>
 
         {/* Stat cards */}

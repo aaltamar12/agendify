@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Copy, Check, Users, DollarSign, Share2 } from 'lucide-react';
+import { ArrowRight, Check, Users, DollarSign, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ReferralShare } from '@/components/shared/referral-share';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -37,7 +38,6 @@ export default function ReferralPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [result, setResult] = useState<{ code: string; message: string } | null>(null);
-  const [copied, setCopied] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -74,11 +74,6 @@ export default function ReferralPage() {
     ? `${typeof window !== 'undefined' ? window.location.origin : ''}/r/${result.code}`
     : '';
 
-  const handleCopy = async (text: string) => {
-    await navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -142,31 +137,15 @@ export default function ReferralPage() {
                 <Check className="h-8 w-8 text-green-600" />
               </div>
               <h2 className="mb-2 text-2xl font-bold text-gray-900">{result.message}</h2>
-              <p className="mb-6 text-gray-500">Comparte tu enlace con negocios que trabajen con citas:</p>
+              <p className="mb-6 text-gray-500">Comparte tu enlace con negocios de servicios:</p>
 
-              {/* Code */}
-              <div className="mb-4 rounded-xl bg-violet-50 p-4">
-                <p className="mb-1 text-xs font-medium uppercase tracking-wider text-violet-600">Tu codigo</p>
-                <p className="text-3xl font-bold tracking-widest text-violet-700">{result.code}</p>
-              </div>
+              <ReferralShare code={result.code} referralLink={referralLink} />
 
-              {/* Link */}
-              <div className="mb-6 flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 p-3">
-                <span className="flex-1 truncate text-sm text-gray-600">{referralLink}</span>
-                <button
-                  onClick={() => handleCopy(referralLink)}
-                  className="flex shrink-0 items-center gap-1 rounded-md bg-violet-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-violet-700 transition-colors"
-                >
-                  {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-                  {copied ? 'Copiado' : 'Copiar'}
-                </button>
-              </div>
-
-              <p className="mb-4 text-sm text-gray-500">
+              <p className="mt-6 text-sm text-gray-500">
                 Revisa tu email para mas detalles sobre el programa.
               </p>
 
-              <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+              <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:justify-center">
                 <Link href={`/referral/dashboard?code=${result.code}`}>
                   <Button>Ver mi dashboard</Button>
                 </Link>
