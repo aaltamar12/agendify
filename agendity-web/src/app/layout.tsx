@@ -49,7 +49,7 @@ export const metadata: Metadata = {
     url: SITE_URL,
     images: [
       {
-        url: "/og",
+        url: "/og-image.png",
         width: 1200,
         height: 630,
         alt: "Agendity — Gestiona tu negocio, simplifica tus citas",
@@ -61,7 +61,7 @@ export const metadata: Metadata = {
     title: "Agendity — Agenda de citas para tu negocio",
     description:
       "Tus clientes reservan en segundos, tú te enfocas en lo que mejor haces. Empieza gratis.",
-    images: ["/og"],
+    images: ["/og-image.png"],
   },
   robots: {
     index: true,

@@ -50,13 +50,13 @@ export const metadata: Metadata = {
     description:
       'Administra citas, empleados y pagos. Tus clientes reservan online 24/7. 7 días gratis.',
     url: 'https://agendity.co',
-    images: [{ url: 'https://www.agendity.co/og', width: 1200, height: 630, alt: 'Agendity' }],
+    images: [{ url: 'https://www.agendity.co/og-image.png', width: 1200, height: 630, alt: 'Agendity' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Agendity — Reservas online para tu negocio',
     description: 'Administra citas, empleados y pagos. Tus clientes reservan online 24/7.',
-      images: ['https://www.agendity.co/og'],
+      images: ['https://www.agendity.co/og-image.png'],
     },
   };
 
