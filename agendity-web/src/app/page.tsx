@@ -16,6 +16,7 @@ import {
   Shield,
   Star,
   Zap,
+  Gift,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { LandingPricing } from '@/components/landing/landing-pricing';
@@ -208,7 +209,15 @@ export default function Home() {
               <Link href="/explore" className="hidden text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors sm:inline">
                 Explorar
               </Link>
-              <Link href="/login" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+              <Link
+                href="/referral"
+                className="inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700 ring-1 ring-inset ring-amber-300 transition-colors hover:bg-amber-100 sm:text-sm"
+              >
+                <Gift className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Gana dinero</span>
+                <span className="sm:hidden">Referidos</span>
+              </Link>
+              <Link href="/login" className="hidden text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors sm:inline">
                 Iniciar sesión
               </Link>
               <Link href="/register">
@@ -245,9 +254,10 @@ export default function Home() {
               </Button>
             </Link>
           </div>
-          <p className="text-sm text-gray-400">
-            Ya lo usan negocios de citas en Barranquilla
-          </p>
+          <div className="text-center leading-snug">
+            <p className="text-sm text-gray-400">¿No tienes negocio? <Link href="/referral" className="cursor-pointer font-medium text-violet-600 underline underline-offset-2 transition-colors hover:text-violet-700">Gana dinero refiriendo</Link></p>
+            <p className="text-xs text-gray-400">Ya lo usan negocios de citas en Barranquilla</p>
+          </div>
         </section>
 
         {/* Features */}
