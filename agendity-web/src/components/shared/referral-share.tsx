@@ -24,7 +24,7 @@ export function ReferralShare({ code, referralLink }: ReferralShareProps) {
   const [copied, setCopied] = useState(false);
 
   const shareTitle = 'Administra tu negocio de servicios con Agendity';
-  const shareText = `Administra citas, empleados y pagos de tu negocio con Agendity. Pruébalo gratis: ${referralLink}`;
+  const shareText = 'Administra citas, empleados y pagos de tu negocio con Agendity. Pruébalo gratis:';
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(referralLink);
@@ -135,21 +135,19 @@ export function ReferralShare({ code, referralLink }: ReferralShareProps) {
         </button>
       </div>
 
-      {/* Native Share (mobile) */}
-      {'share' in navigator && (
-        <Button onClick={handleNativeShare} className="w-full" variant="outline">
-          <Share2 className="mr-2 h-4 w-4" />
-          Compartir
-        </Button>
-      )}
+      {/* Share button — uses native Share API (sends QR image + text) */}
+      <Button onClick={handleNativeShare} className="w-full cursor-pointer">
+        <Share2 className="mr-2 h-4 w-4" />
+        Compartir QR e invitación
+      </Button>
 
-      {/* Social share buttons */}
+      {/* Social share buttons (text + link only, no image) */}
       <div className="space-y-3">
         <p className="text-center text-xs font-medium text-gray-400 uppercase tracking-wider">
-          Compartir en redes
+          O comparte el link directamente
         </p>
         <div className="flex justify-center gap-3">
-          <WhatsappShareButton url={referralLink} title={shareText} separator="">
+          <WhatsappShareButton url={referralLink} title={shareText} separator=" ">
             <WhatsappIcon size={44} round />
           </WhatsappShareButton>
 
