@@ -11,13 +11,13 @@ export const metadata: Metadata = {
     title: 'Gana dinero refiriendo negocios — Agendity',
     description: 'Refiere negocios y gana el 10% de cada suscripción. Comisiones recurrentes.',
     url: 'https://agendity.co/referral',
-    images: [{ url: '/og-referral.png', width: 1200, height: 630, alt: 'Agendity — Programa de Referidos' }],
+    images: [{ url: '/og-referral.jpg', width: 1200, height: 630, alt: 'Agendity — Programa de Referidos' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Gana dinero refiriendo negocios — Agendity',
     description: 'Refiere negocios y gana el 10% de cada suscripción. Comisiones recurrentes.',
-    images: ['/og-referral.png'],
+    images: ['/og-referral.jpg'],
   },
 };
 

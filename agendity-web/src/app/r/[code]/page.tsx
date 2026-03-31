@@ -13,13 +13,13 @@ export const metadata: Metadata = {
     title: 'Agendity — Plataforma de gestión para negocios de servicios',
     description:
       'Administra citas, empleados y pagos. Tus clientes reservan online 24/7. 7 días gratis.',
-    images: [{ url: 'https://www.agendity.co/og-referral.png', width: 1200, height: 630, alt: 'Agendity' }],
+    images: [{ url: 'https://www.agendity.co/og-referral.jpg', width: 1200, height: 630, alt: 'Agendity' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Agendity — Plataforma de gestión para negocios de servicios',
     description: 'Administra citas, empleados y pagos. Tus clientes reservan online 24/7.',
-    images: ['https://www.agendity.co/og-referral.png'],
+    images: ['https://www.agendity.co/og-referral.jpg'],
   },
 };
 
