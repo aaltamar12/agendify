@@ -13,6 +13,13 @@ body {
   color: #111827; /* gray-900 */
 }
 
+/* Prevent iOS zoom on input focus (requires font-size >= 16px) */
+@media screen and (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
 /* Custom scrollbar — violet theme */
 ::-webkit-scrollbar {
   width: 6px;
