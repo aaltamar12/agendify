@@ -30,7 +30,7 @@ export async function generateMetadata({
   searchParams: Promise<{ ref?: string }>;
 }): Promise<Metadata> {
   const { ref } = await searchParams;
-  const ogImage = ref ? '/og-referral.jpg' : '/og-image.png';
+  const ogImage = ref ? '/og-referral.jpg' : '/og';
 
   return {
     title: 'Agendity — Reservas online para tu negocio',
