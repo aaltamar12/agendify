@@ -24,8 +24,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     if (!business?.name) return {};
 
     const title = `${business.name} — Reserva tu cita online`;
-    const description = business.description
-      ? `${business.description.slice(0, 120)}. Reserva online en ${business.name}.`
+    const descText = (business.description || '').slice(0, 120).replace(/\.+$/, '');
+    const description = descText
+      ? `${descText}. Reserva online en ${business.name}.`
       : `Reserva tu cita en ${business.name}. Servicios, precios y disponibilidad online.`;
 
     const ogImageUrl = `${SITE_URL}/${slug}/og`;
