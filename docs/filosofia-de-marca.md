@@ -13,7 +13,7 @@ Agendity tiene dos caras según quién la mira:
 Agendity es un **portafolio de servicios profesionales** — una plataforma donde descubres profesionales, ves su trabajo, sus servicios y reservas en segundos. No es "una app de citas", es la vitrina digital del profesional que impulsa su marca.
 
 ### Para el negocio (quien paga)
-Agendity es una **plataforma de administración del negocio** — gestión completa de citas, empleados, pagos, clientes, reportes e inteligencia de negocio. Todo lo que necesitas para operar tu negocio de servicios desde un solo lugar.
+Agendity es una **plataforma de administración para negocios de servicios** — gestión completa de citas, empleados, pagos, clientes, reportes e inteligencia de negocio. Presencial o virtual: barberías, salones, consultorios, coaches, entrenadores, consultores y cualquier profesional que atienda por cita.
 
 ---
 
@@ -23,7 +23,7 @@ Agendity es una **plataforma de administración del negocio** — gestión compl
 > Encuentra a los mejores profesionales de tu ciudad, conoce sus servicios y reserva tu cita en segundos. Sin llamadas, sin WhatsApp, sin esperas.
 
 **Para negocios:**
-> Agendity es la plataforma que administra tu negocio de servicios: citas, empleados, pagos, clientes y reportes en un solo lugar. Deja de gestionar por WhatsApp y enfócate en lo que mejor haces.
+> Agendity es la plataforma que administra tu negocio de servicios — presencial o virtual. Citas, empleados, pagos, clientes y reportes en un solo lugar. Deja de gestionar por WhatsApp y enfócate en lo que mejor haces.
 
 **Para inversores:**
 > El mercado de servicios personales está fragmentado y atrapado en procesos manuales. Agendity es una plataforma de administración y visibilidad que conecta negocios de servicios con sus clientes. Para el negocio somos su sistema operativo; para el usuario final somos el portafolio donde descubre y reserva servicios profesionales.
@@ -36,7 +36,7 @@ Agendity es una **plataforma de administración del negocio** — gestión compl
 ## El problema que resolvemos
 
 ### Para el negocio
-Un barbero o esteticista promedio pierde hasta 5 horas a la semana gestionando citas por WhatsApp. No tiene control sobre sus ingresos, no sabe qué empleado rinde más, no puede proyectar su imagen profesional más allá de un chat desordenado. Su negocio depende de la memoria y el celular.
+Un profesional de servicios promedio pierde hasta 5 horas a la semana gestionando citas por WhatsApp. No tiene control sobre sus ingresos, no sabe qué empleado rinde más, no puede proyectar su imagen profesional más allá de un chat desordenado. Esto aplica igual para un barbero, una psicóloga, un coach o un entrenador personal — presencial o virtual.
 
 ### Para el usuario final
 El cliente quiere ver qué servicios ofrece un profesional, cuánto cuestan, y reservar sin tener que escribir por WhatsApp y esperar respuesta. Quiere una experiencia directa, visual y profesional.

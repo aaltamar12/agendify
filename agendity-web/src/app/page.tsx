@@ -24,7 +24,7 @@ import { LandingPricing } from '@/components/landing/landing-pricing';
 export const metadata: Metadata = {
   title: 'Agendity — Reservas online para tu negocio',
   description:
-    'Administra citas, empleados y pagos de tu barbería o salón. Tus clientes reservan online 24/7. 7 días gratis.',
+    'Administra citas, empleados y pagos de tu negocio de servicios. Presencial o virtual. Tus clientes reservan online 24/7. Gratis.',
   keywords: [
     'agenda de citas online',
     'reservas online barbería',
@@ -34,8 +34,10 @@ export const metadata: Metadata = {
     'gestión de citas Colombia',
     'reservar cita barbería Barranquilla',
     'plataforma reservas online gratis',
-    'app reservas negocios',
-    'agendar cita salón Barranquilla',
+    'agenda consultorios médicos',
+    'sistema citas psicólogo online',
+    'reservas entrenador personal',
+    'agenda para coaches y consultores',
   ],
   alternates: {
     canonical: 'https://agendity.co',
@@ -134,7 +136,7 @@ const FAQ = [
   },
   {
     question: '¿Qué tipo de negocios pueden usar Agendity?',
-    answer: 'Barberías, salones de belleza, spas, centros de estética, clínicas de uñas y cualquier negocio que trabaje con citas.',
+    answer: 'Cualquier negocio de servicios, presencial o virtual: barberías, salones de belleza, spas, centros de estética, clínicas de uñas, consultorios médicos, odontólogos, psicólogos, nutricionistas, coaches, fisioterapeutas, estudios de tatuaje, estudios de fotografía, entrenadores personales, tutores, consultores y más. Si tu negocio atiende por cita, Agendity es para ti.',
   },
   {
     question: '¿Puedo gestionar varios empleados?',
@@ -171,7 +173,7 @@ const jsonLd = [
     applicationCategory: 'BusinessApplication',
     operatingSystem: 'Web',
     description:
-      'Administra citas, empleados y pagos de tu barbería o salón. Tus clientes reservan online 24/7.',
+      'Administra citas, empleados y pagos de tu negocio de servicios. Presencial o virtual. Reservas online 24/7.',
     url: 'https://agendity.co',
     offers: {
       '@type': 'Offer',
@@ -264,7 +266,7 @@ export default function Home() {
             <span className="text-violet-600">para tu negocio</span>
           </h1>
           <p className="max-w-xl text-lg leading-relaxed text-gray-500 sm:text-xl">
-            Administra citas, empleados y pagos de tu barbería o salón.
+            Administra citas, empleados y pagos de tu negocio de servicios.
             Tus clientes reservan en segundos, tú te enfocas en lo que mejor haces.
           </p>
           <div className="flex flex-col gap-4 sm:flex-row">

@@ -15,8 +15,9 @@ Agendity tiene DOS posicionamientos según la audiencia:
 - Una plataforma donde descubres profesionales, ves servicios/precios, y reservas
 - NO es "una app de citas" — es la vitrina digital del profesional
 
-### Para el negocio (quien paga suscripción — barberías, salones, etc.)
-- Agendity es una **plataforma de administración del negocio**
+### Para el negocio (quien paga suscripción)
+- Agendity es una **plataforma de administración para negocios de servicios**
+- Presencial o virtual: barberías, salones, consultorios, coaches, entrenadores, consultores, psicólogos, fotógrafos, tutores, y más
 - Gestión completa: citas, empleados, pagos, clientes, reportes, metas
 - NO es "solo una agenda" — es el centro de operaciones del negocio
 
@@ -29,7 +30,7 @@ Eres el guardián de la identidad de Agendity. Debes asegurar coherencia en:
 
 ### Marca
 - **Nombre:** Agendity
-- **Mercado:** Negocios de servicios en Latinoamérica (barberías, salones, spas, etc.)
+- **Mercado:** Negocios de servicios presenciales y virtuales en Latinoamérica
 - **Tagline:** "Tu negocio, siempre organizado"
 - **Diferenciador:** Portafolio profesional para el cliente + administración completa para el negocio
 

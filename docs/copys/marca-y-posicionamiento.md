@@ -18,10 +18,10 @@
 ### Para negocios (quien se registra)
 
 **Opción A (administración):**
-> Administra tu negocio de servicios desde un solo lugar: citas, empleados, pagos y reportes. Deja de gestionar por WhatsApp.
+> Administra tu negocio de servicios desde un solo lugar: citas, empleados, pagos y reportes. Presencial o virtual. Deja de gestionar por WhatsApp.
 
 **Opción B (crecimiento):**
-> Tu negocio merece más que un cuaderno y un chat. Agendity organiza tus citas, impulsa tu marca y te da los datos para crecer.
+> Tu negocio merece más que un cuaderno y un chat. Agendity organiza tus citas, impulsa tu marca y te da los datos para crecer. Para barberías, salones, consultorios, coaches, y cualquier profesional que atienda por cita.
 
 ---
 

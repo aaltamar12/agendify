@@ -30,6 +30,18 @@ Cada página `/{slug}` genera sus keywords basándose en:
 - `{nombre del negocio} + Barranquilla`
 - `{tipo de negocio} + {ciudad}`
 
+## Keywords de servicios virtuales y profesionales
+
+| Keyword | Volumen est. | Página target |
+|---------|-------------|---------------|
+| agenda consultorios médicos | Medio | Landing `/` |
+| sistema citas psicólogo online | Bajo | Landing `/` |
+| reservas entrenador personal | Bajo | Landing `/` |
+| agenda para coaches y consultores | Bajo | Landing `/` |
+| sistema de citas odontólogo | Medio | Landing `/` |
+| agenda estudio de tatuajes | Bajo | Landing `/` |
+| citas nutricionista online | Bajo | Landing `/` |
+
 ## Long-tail (contenido futuro / blog)
 
 - "cómo administrar una barbería"
@@ -38,6 +50,9 @@ Cada página `/{slug}` genera sus keywords basándose en:
 - "mejores herramientas para salones de belleza"
 - "cómo reducir cancelaciones en barbería"
 - "cómo cobrar citas por adelantado"
+- "cómo dar consultas online como psicólogo"
+- "app para agendar citas de coaching"
+- "sistema de reservas para entrenador personal"
 
 ## Keyword mapping actual
 
