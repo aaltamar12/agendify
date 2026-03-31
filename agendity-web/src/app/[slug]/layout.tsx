@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://agendity.co';
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -24,25 +25,25 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       ? `${business.description.slice(0, 120)}. Reserva online en ${business.name}.`
       : `Reserva tu cita en ${business.name}. Servicios, precios y disponibilidad online.`;
 
+    const ogImageUrl = `${SITE_URL}/${slug}/og`;
+
     return {
       title,
       description,
       alternates: {
-        canonical: `https://agendity.co/${slug}`,
+        canonical: `${SITE_URL}/${slug}`,
       },
       openGraph: {
         title,
         description,
-        url: `https://agendity.co/${slug}`,
-        ...(business.cover_url && {
-          images: [{ url: business.cover_url, width: 1200, height: 630 }],
-        }),
+        url: `${SITE_URL}/${slug}`,
+        images: [{ url: ogImageUrl, width: 1200, height: 630, alt: business.name }],
       },
       twitter: {
         card: 'summary_large_image',
         title,
         description,
-        ...(business.cover_url && { images: [business.cover_url] }),
+        images: [ogImageUrl],
       },
     };
   } catch {
