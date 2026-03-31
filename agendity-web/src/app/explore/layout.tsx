@@ -12,12 +12,12 @@ export const metadata: Metadata = {
     'negocios cerca de mí',
   ],
   alternates: {
-    canonical: 'https://agendity.co/explore',
+    canonical: 'https://www.agendity.co/explore',
   },
   openGraph: {
     title: 'Explorar negocios — Agendity',
     description: 'Encuentra profesionales cerca de ti y reserva tu cita en segundos.',
-    url: 'https://agendity.co/explore',
+    url: 'https://www.agendity.co/explore',
   },
 };
 

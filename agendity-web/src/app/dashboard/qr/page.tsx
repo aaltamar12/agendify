@@ -7,7 +7,7 @@ import { Card, Button } from '@/components/ui';
 import { useCurrentBusiness } from '@/lib/hooks/use-business';
 import { Skeleton } from '@/components/ui';
 
-const PUBLIC_BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://agendity.com';
+const PUBLIC_BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://www.agendity.co';
 
 export default function QrPage() {
   const { data: business, isLoading } = useCurrentBusiness();

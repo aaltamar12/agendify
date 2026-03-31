@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://agendity.co';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.agendity.co';
 
 type Props = {
   params: Promise<{ slug: string }>;

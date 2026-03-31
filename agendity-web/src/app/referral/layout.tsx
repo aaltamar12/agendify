@@ -5,12 +5,12 @@ export const metadata: Metadata = {
   description:
     'Refiere negocios a Agendity y gana el 10% de cada suscripción. Sin límite de referidos, comisiones recurrentes.',
   alternates: {
-    canonical: 'https://agendity.co/referral',
+    canonical: 'https://www.agendity.co/referral',
   },
   openGraph: {
     title: 'Gana dinero refiriendo negocios — Agendity',
     description: 'Refiere negocios y gana el 10% de cada suscripción. Comisiones recurrentes.',
-    url: 'https://agendity.co/referral',
+    url: 'https://www.agendity.co/referral',
     images: [{ url: '/og-referral.jpg', width: 1200, height: 630, alt: 'Agendity — Programa de Referidos' }],
   },
   twitter: {

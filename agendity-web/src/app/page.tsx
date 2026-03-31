@@ -43,13 +43,13 @@ export const metadata: Metadata = {
     'agenda para coaches y consultores',
   ],
   alternates: {
-    canonical: 'https://agendity.co',
+    canonical: 'https://www.agendity.co',
   },
   openGraph: {
     title: 'Agendity — Reservas online para tu negocio',
     description:
       'Administra citas, empleados y pagos. Tus clientes reservan online 24/7. 7 días gratis.',
-    url: 'https://agendity.co',
+    url: 'https://www.agendity.co',
     images: [{ url: 'https://www.agendity.co/og-image.jpg', width: 1200, height: 630, alt: 'Agendity' }],
   },
   twitter: {
@@ -184,7 +184,7 @@ const jsonLd = [
     operatingSystem: 'Web',
     description:
       'Administra citas, empleados y pagos de tu negocio de servicios. Presencial o virtual. Reservas online 24/7.',
-    url: 'https://agendity.co',
+    url: 'https://www.agendity.co',
     offers: {
       '@type': 'Offer',
       price: '0',
@@ -214,7 +214,7 @@ const jsonLd = [
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'Agendity',
-    url: 'https://agendity.co',
+    url: 'https://www.agendity.co',
     sameAs: ['https://www.instagram.com/agendity.co'],
   },
 ];
