@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import AppProviders from "@/providers/app-providers";
 import "./globals.css";
 
@@ -91,6 +92,7 @@ export default function RootLayout({
     <html lang="es" className={inter.variable}>
       <body className="min-h-screen bg-gray-50 text-gray-900 antialiased" suppressHydrationWarning>
         <AppProviders>{children}</AppProviders>
+        <Analytics />
       </body>
     </html>
   );
