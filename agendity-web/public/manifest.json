@@ -1,7 +1,7 @@
 {
   "name": "Agendity",
   "short_name": "Agendity",
-  "description": "Plataforma de gesti\u00f3n de citas para barber\u00edas y salones",
+  "description": "Plataforma de administraci\u00f3n para negocios de servicios",
   "start_url": "/",
   "display": "standalone",
   "theme_color": "#7C3AED",
