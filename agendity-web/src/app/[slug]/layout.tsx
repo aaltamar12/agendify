@@ -18,7 +18,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
     if (!res.ok) return {};
 
-    const { data: business } = await res.json();
+    const json = await res.json();
+    const business = json.data;
+
+    if (!business?.name) return {};
 
     const title = `${business.name} — Reserva tu cita online`;
     const description = business.description
