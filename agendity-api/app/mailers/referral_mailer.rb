@@ -4,7 +4,7 @@
 class ReferralMailer < ApplicationMailer
   def welcome(referral_code)
     @referral_code = referral_code
-    @referral_link = "#{SiteConfig.get('app_url')}/register?ref=#{referral_code.code}"
+    @referral_link = "#{SiteConfig.get('app_url')}?ref=#{referral_code.code}"
     @dashboard_link = "#{SiteConfig.get('app_url')}/referral/dashboard?code=#{referral_code.code}"
     @conditions = "La comisión se genera cuando el negocio referido completa su periodo de prueba y se suscribe a cualquier plan de pago."
     @commission_percentage = referral_code.commission_percentage

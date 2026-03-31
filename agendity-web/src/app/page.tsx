@@ -18,8 +18,10 @@ import {
   Zap,
   Gift,
 } from 'lucide-react';
+import { Suspense } from 'react';
 import { Button } from '@/components/ui/button';
 import { LandingPricing } from '@/components/landing/landing-pricing';
+import { RegisterLink } from '@/components/landing/register-link';
 
 export const metadata: Metadata = {
   title: 'Agendity — Reservas online para tu negocio',
@@ -248,9 +250,9 @@ export default function Home() {
               <Link href="/login" className="hidden text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors sm:inline">
                 Iniciar sesión
               </Link>
-              <Link href="/register">
+              <Suspense><RegisterLink>
                 <Button size="sm">Empieza gratis</Button>
-              </Link>
+              </RegisterLink></Suspense>
             </div>
           </div>
         </nav>
@@ -270,12 +272,12 @@ export default function Home() {
             Tus clientes reservan en segundos, tú te enfocas en lo que mejor haces.
           </p>
           <div className="flex flex-col gap-4 sm:flex-row">
-            <Link href="/register">
+            <Suspense><RegisterLink>
               <Button size="lg">
                 Empieza gratis
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
-            </Link>
+            </RegisterLink></Suspense>
             <Link href="/explore">
               <Button variant="outline" size="lg">
                 Explorar negocios
@@ -354,12 +356,12 @@ export default function Home() {
                   </div>
 
                   <div className="flex flex-col gap-3 sm:flex-row">
-                    <Link href="/register">
+                    <Suspense><RegisterLink>
                       <Button size="lg" className="w-full sm:w-auto">
                         Registra tu negocio gratis
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>
-                    </Link>
+                    </RegisterLink></Suspense>
                   </div>
                   <p className="mt-3 text-xs text-gray-400">
                     7 días gratis. Sin tarjeta de crédito.
@@ -545,7 +547,7 @@ export default function Home() {
             <p className="mb-8 text-lg text-violet-200">
               Sin tarjeta de crédito. Sin compromisos. Cancela cuando quieras.
             </p>
-            <Link href="/register">
+            <Suspense><RegisterLink>
               <Button
                 size="lg"
                 className="bg-white text-violet-600 hover:bg-violet-50"
@@ -553,7 +555,7 @@ export default function Home() {
                 Crear cuenta gratis
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
-            </Link>
+            </RegisterLink></Suspense>
           </div>
         </section>
 
