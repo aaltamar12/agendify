@@ -10,14 +10,19 @@ const PUBLIC_ROUTES = [
   '/login',
   '/register',
   '/explore',
+  '/referral',
   '/forgot-password',
   '/reset-password',
+  '/terms',
+  '/privacy',
 ];
 
 // Prefixes for public dynamic routes
 const PUBLIC_PREFIXES = [
   '/explore',
   '/employee/register',  // Employee invitation registration
+  '/r/',                  // Referral redirect /r/CODE
+  '/referral',            // Referral program pages
 ];
 
 function isPublicRoute(pathname: string): boolean {
