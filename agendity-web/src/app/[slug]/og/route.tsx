@@ -33,7 +33,7 @@ export async function GET(
     });
     if (res.ok) {
       const json = await res.json();
-      business = json.data;
+      business = json.data?.business ?? json.data;
     }
   } catch {
     // fallback to generic

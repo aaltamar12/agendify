@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     if (!res.ok) return {};
 
     const json = await res.json();
-    const business = json.data;
+    const business = json.data?.business ?? json.data;
 
     if (!business?.name) return {};
 
