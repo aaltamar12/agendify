@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation';
 import type { Metadata } from 'next';
+import { ClientRedirect } from './client-redirect';
 
 type Props = {
   params: Promise<{ code: string }>;
@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description:
         'Administra citas, empleados y pagos. Tus clientes reservan online 24/7. 7 días gratis.',
       url: `https://www.agendity.co/r/${code}`,
-      images: [{ url: 'https://www.agendity.co/og-referral.png', width: 1200, height: 630, alt: 'Agendity — Programa de Referidos' }],
+      images: [{ url: 'https://www.agendity.co/og-referral.png', width: 1200, height: 630, alt: 'Agendity' }],
     },
     twitter: {
       card: 'summary_large_image',
@@ -30,5 +30,5 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ReferralRedirectPage({ params }: Props) {
   const { code } = await params;
-  redirect(`/?ref=${code}`);
+  return <ClientRedirect code={code} />;
 }
