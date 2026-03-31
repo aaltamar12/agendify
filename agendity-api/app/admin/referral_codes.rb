@@ -54,7 +54,7 @@ ActiveAdmin.register ReferralCode do
       row :updated_at
       row("Referral Link") do |rc|
         app_url = SiteConfig.get("app_url") || "https://app.agendity.com"
-        link = "#{app_url}?ref=#{rc.code}"
+        link = "#{app_url}/r/#{rc.code}"
         span link
       end
     end

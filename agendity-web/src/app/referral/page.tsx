@@ -71,7 +71,7 @@ export default function ReferralPage() {
   };
 
   const referralLink = result
-    ? `${typeof window !== 'undefined' ? window.location.origin : ''}?ref=${result.code}`
+    ? `${typeof window !== 'undefined' ? window.location.origin : ''}/r/${result.code}`
     : '';
 
   const handleCopy = async (text: string) => {

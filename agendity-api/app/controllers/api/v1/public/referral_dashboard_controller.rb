@@ -82,7 +82,7 @@ module Api
             },
             referrals: referral_data,
             disbursements: disbursements,
-            referral_link: "#{app_url}?ref=#{referral_code.code}",
+            referral_link: "#{app_url}/r/#{referral_code.code}",
             conditions: "La comisión se genera cuando el negocio referido completa su periodo de prueba y se suscribe a cualquier plan."
           })
         rescue ActiveRecord::RecordNotFound
